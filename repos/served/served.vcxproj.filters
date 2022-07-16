@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de origen">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Archivos de recursos">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="mux">
+      <UniqueIdentifier>{3ef08009-f2a8-49c3-8bf2-46cf9738aa36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{3eb2a331-9e34-4f6c-bf3b-baed07ffe1d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plugins">
+      <UniqueIdentifier>{30ec63a3-3271-4ac4-865e-4b450571b412}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="served\methods.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\methods_handler.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\multiplexer.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\parameters.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\plugins.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\request.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\request_error.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\request_parser.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\request_parser_impl.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\response.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\served.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\status.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\uri.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\version.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="served\mux\empty_matcher.hpp">
+      <Filter>mux</Filter>
+    </ClInclude>
+    <ClInclude Include="served\mux\matchers.hpp">
+      <Filter>mux</Filter>
+    </ClInclude>
+    <ClInclude Include="served\mux\regex_matcher.hpp">
+      <Filter>mux</Filter>
+    </ClInclude>
+    <ClInclude Include="served\mux\segment_matcher.hpp">
+      <Filter>mux</Filter>
+    </ClInclude>
+    <ClInclude Include="served\mux\static_matcher.hpp">
+      <Filter>mux</Filter>
+    </ClInclude>
+    <ClInclude Include="served\mux\variable_matcher.hpp">
+      <Filter>mux</Filter>
+    </ClInclude>
+    <ClInclude Include="served\net\connection.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="served\net\connection_manager.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="served\net\server.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="served\methods_handler.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\multiplexer.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\parameters.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\request.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\request_parser.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\request_parser_impl.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\response.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\status.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\uri.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="served\mux\regex_matcher.cpp">
+      <Filter>mux</Filter>
+    </ClCompile>
+    <ClCompile Include="served\mux\static_matcher.cpp">
+      <Filter>mux</Filter>
+    </ClCompile>
+    <ClCompile Include="served\mux\variable_matcher.cpp">
+      <Filter>mux</Filter>
+    </ClCompile>
+    <ClCompile Include="served\net\connection.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="served\net\connection_manager.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="served\net\server.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="served\plugins\access_log.cpp">
+      <Filter>plugins</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
