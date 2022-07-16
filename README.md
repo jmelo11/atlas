@@ -26,3 +26,5 @@ System variables:
   - `libpqxx-8.4.0 or newer`
 - nlohmann_json:
   - `nlohmann_json-3.9.0 or newer`
+- served:
+  - `a vs adapted version is saved in the repos folder`
