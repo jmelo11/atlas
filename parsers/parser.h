@@ -19,13 +19,14 @@
 #include <nlohmann/json.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 
-/*?*/
-#include <ql/quotes/simplequote.hpp>
-#include <ql/utilities/observablevalue.hpp>
 
 #include <map>
 #include <string>
 
+/*
+* Se debe reformular esta libreria por algo más simple
+* No es necesario que sea un "json" parser, ya que esa funcionalidad la utiliza solo el servidor
+*/
 namespace parsers {
 	namespace QL = QuantLib;
 	namespace ext = boost;

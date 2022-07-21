@@ -16,3 +16,6 @@
 /datamanager/~AutoRecover.datamanager.vcxproj
 /atlas/~AutoRecover.atlas.vcxproj
 /parsers/~AutoRecover.parsers.vcxproj
+/build
+/parsers/x64/Debug
+/curvemanager/x64/Debug

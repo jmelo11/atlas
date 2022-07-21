@@ -2,7 +2,7 @@
 
 #include "parser.h"
 
-namespace FTPSys {
+namespace parsers {
 	/*
 	* JSONParser
 	*/
