@@ -5,32 +5,46 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Archivos de encabezado">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="server">
+      <UniqueIdentifier>{2f1523fd-a167-4777-b856-175bf894ff50}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Archivos de recursos">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="database">
+      <UniqueIdentifier>{b7d6677a-d1ca-4e27-9335-ab3fad33ace6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="curvemanager">
+      <UniqueIdentifier>{8a7d58c5-788c-470d-a57f-27eff909605b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parser">
+      <UniqueIdentifier>{78a9e17a-e781-4c61-bc13-9d54fe762c19}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Archivos de origen</Filter>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="curvemanager\curvemanager.cpp">
+      <Filter>curvemanager</Filter>
     </ClCompile>
-    <ClCompile Include="curvemanager.cpp">
-      <Filter>Archivos de origen</Filter>
+    <ClCompile Include="curvemanager\curvestore.cpp">
+      <Filter>curvemanager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="curvemanager.hpp">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="curvemanager\configurations.hpp">
+      <Filter>curvemanager</Filter>
     </ClInclude>
-    <ClInclude Include="qlconfig.hpp">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="curvemanager\curvemanager.hpp">
+      <Filter>curvemanager</Filter>
     </ClInclude>
-    <ClInclude Include="configurations.hpp">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="curvemanager\qlconfig.hpp">
+      <Filter>curvemanager</Filter>
+    </ClInclude>
+    <ClInclude Include="database\database.hpp">
+      <Filter>database</Filter>
+    </ClInclude>
+    <ClInclude Include="parser\parser.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="curvemanager\curvestore.hpp">
+      <Filter>curvemanager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

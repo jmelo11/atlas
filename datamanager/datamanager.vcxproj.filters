@@ -21,8 +21,5 @@
     <ClCompile Include="datamanager.cpp">
       <Filter>main</Filter>
     </ClCompile>
-    <ClCompile Include="database.cpp">
-      <Filter>db</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

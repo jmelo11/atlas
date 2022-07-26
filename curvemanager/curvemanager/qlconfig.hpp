@@ -16,20 +16,26 @@
 #include <ql/handle.hpp>
 #include <ql/termstructures/yield/ratehelpers.hpp>
 #include <ql/termstructures/yield/bondhelpers.hpp>
+
 #include <ql/experimental/termstructures/basisswapratehelpers.hpp>
-#include <ql/experimental/termstructures/crosscurrencyratehelpers.hpp>
+#include <qle/termstructures/crossccyfixfloatswaphelper.hpp>
+#include <ql/termstructures/yield/oisratehelper.hpp>
 
 #include <ql/indexes/iborindex.hpp>
 #include <ql/indexes/all.hpp>
 
 #include <ql/time/calendars/all.hpp>
+#include <ql/currencies/all.hpp>
 
 namespace CurveManager {
+	
 	/*
 	* setting
 	*/
-	using Settings = QuantLib::Settings;
 	
+	using Settings = QuantLib::Settings;
+	using PeriodParser = QuantLib::PeriodParser;
+
 	/*
 	* Date and time
 	*/
@@ -44,14 +50,27 @@ namespace CurveManager {
 	using TimeUnit = QuantLib::TimeUnit;
 	using Frequency = QuantLib::Frequency;
 	using BusinessDayConvention = QuantLib::BusinessDayConvention;
-	
+
 	/*
 	* Calendar
 	*/
-
+	
+	using UnitedStates = QuantLib::UnitedStates;
 	using Chile = QuantLib::Chile;
 	using NullCalendar = QuantLib::NullCalendar;
+	using JoinCalendar = QuantLib::JointCalendar;
 	
+	/*
+	* Currencies 
+	*/
+	
+	using Currency = QuantLib::Currency;
+	using USDCurrency = QuantLib::USDCurrency;
+	using EURCurrency = QuantLib::EURCurrency;
+	using JPYCurrency = QuantLib::JPYCurrency;
+	using CLPCurrency = QuantLib::CLPCurrency;
+	using CLFCurrency = QuantLib::CLFCurrency;
+		
 	/*
 	* Rates
 	*/
@@ -88,9 +107,11 @@ namespace CurveManager {
 	template<typename T>
 	using Handle = QuantLib::Handle<T>;
 	using Quote = QuantLib::Quote;
+	using SimpleQuote = QuantLib::SimpleQuote;
 	using SwapIndex = QuantLib::SwapIndex;
 	using OvernightIndex = QuantLib::OvernightIndex;
 	using IborIndex = QuantLib::IborIndex;
+	
 	/*
 	* DataTypes
 	*/
@@ -104,12 +125,22 @@ namespace CurveManager {
 	//derivates
 	using SwapRateHelper = QuantLib::SwapRateHelper;
 	using FxSwapRateHelper = QuantLib::FxSwapRateHelper;
+	
+	using OISRateHelper = QuantLib::OISRateHelper;
+	
 	using IborIborBasisSwapRateHelper = QuantLib::IborIborBasisSwapRateHelper;
 	using OvernightIborBasisSwapRateHelper = QuantLib::OvernightIborBasisSwapRateHelper;
-	using ConstNotionalCrossCurrencyBasisSwapRateHelper = QuantLib::ConstNotionalCrossCurrencyBasisSwapRateHelper;
+	using CrossCcyFixFloatSwapHelper = QuantExt::CrossCcyFixFloatSwapHelper;
+	//using ConstNotionalCrossCurrencyBasisSwapRateHelper = QuantLib::ConstNotionalCrossCurrencyBasisSwapRateHelper;
 	
 	//fixed rate helpers
 	using DepositRateHelper = QuantLib::DepositRateHelper;
 	using FixedRateBondHelper = QuantLib::FixedRateBondHelper;
 	using CPIBondHelper = QuantLib::CPIBondHelper;
+
+	/*
+	* Instruments
+	*/
+	
+	using FixedRateBond = QuantLib::FixedRateBond;
 }

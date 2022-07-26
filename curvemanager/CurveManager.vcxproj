@@ -72,20 +72,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(QL_PATH);$(BOOST_PATH)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)$(QL_PATH)\lib;$(BOOST_PATH)\libs</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(QL_PATH);$(BOOST_PATH);$(QLE_PATH)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)$(QL_PATH)\lib;$(BOOST_PATH)\libs;$(QLE_PATH)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(QL_PATH);$(BOOST_PATH)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)$(QL_PATH)\lib;$(BOOST_PATH)\libs</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(QL_PATH);$(BOOST_PATH);$(QLE_PATH)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)$(QL_PATH)\lib;$(BOOST_PATH)\libs;$(QLE_PATH)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(QL_PATH);$(BOOST_PATH)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(BOOST_PATH)\libs;$(QL_PATH)\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(LIBPQXX_PATH)\$(Configuration)\include;$(QL_PATH);$(BOOST_PATH);$(QLE_PATH)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LIBPQXX_PATH)\$(Configuration)\lib;$(BOOST_PATH)\libs;$(QL_PATH)\lib;$(QLE_PATH)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(QL_PATH);$(BOOST_PATH)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)$(QL_PATH)\lib;$(BOOST_PATH)\libs</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(QL_PATH);$(BOOST_PATH);$(QLE_PATH)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)$(QL_PATH)\lib;$(BOOST_PATH)\libs;$(QLE_PATH)\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -128,7 +128,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>QuantLib-x64-mt-gd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pqxx.lib;libpq.lib;wsock32.lib;ws2_32.lib;QuantLib-x64-mt-gd.lib;QuantExt-x64-mt-gd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,13 +149,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="curvemanager.cpp" />
+    <ClCompile Include="curvemanager\curvemanager.cpp" />
+    <ClCompile Include="curvemanager\curvestore.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="curvemanager.hpp" />
-    <ClInclude Include="configurations.hpp" />
-    <ClInclude Include="qlconfig.hpp" />
+    <ClInclude Include="curvemanager\configurations.hpp" />
+    <ClInclude Include="curvemanager\curvemanager.hpp" />
+    <ClInclude Include="curvemanager\curvestore.hpp" />
+    <ClInclude Include="curvemanager\qlconfig.hpp" />
+    <ClInclude Include="database\database.hpp" />
+    <ClInclude Include="parser\parser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
