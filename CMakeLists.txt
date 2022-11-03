@@ -3,6 +3,8 @@ project(atlas VERSION 0.1.0)
 
 include(GNUInstallDirs) # despues de definir el proyecto
 set(CMAKE_CXX_STANDARD 20)
+set(BUILD_PYTHON OFF)
+set(BUILD_TESTS ON)
 # target is curvemanager, and use include a src folders
 
 file(
@@ -82,6 +84,10 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include
         DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-if(APPLE)
+if(BUILD_PYTHON)
+  add_subdirectory(python)
+endif()
+
+if(BUILD_TESTS)
   add_subdirectory(tests)
-endif(APPLE)
+endif()

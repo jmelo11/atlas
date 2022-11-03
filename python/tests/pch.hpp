@@ -1,0 +1,12 @@
+//
+// pch.h
+//
+
+#ifndef BB342051_C6D6_49FD_AD82_16B57AF5D2A3
+#define BB342051_C6D6_49FD_AD82_16B57AF5D2A3
+
+
+#include "gtest/gtest.h"
+
+
+#endif /* BB342051_C6D6_49FD_AD82_16B57AF5D2A3 */

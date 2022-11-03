@@ -9,6 +9,7 @@
 
 #include <atlas/curves/rateindex.hpp>
 #include <atlas/data/metadata.hpp>
+#include <stdexcept>
 #include <vector>
 
 namespace Atlas {
@@ -20,7 +21,7 @@ namespace Atlas {
         Leg(const std::vector<Date>& dates) : dates_(dates){};
 
         Leg(const std::vector<Date>& dates, const std::vector<double>& redemptions) : dates_(dates), redemptions_(redemptions) {
-            if (dates.size() - 1 != redemptions.size()) { throw std::runtime_error("Leg: dates must have remdemptions size+1") };
+            if (dates.size() - 1 != redemptions.size()) { throw std::runtime_error("Leg: dates must have remdemptions size+1"); };
 
             size_ = dates.size() - 1;
             interest_.reserve(size_);
@@ -89,6 +90,6 @@ namespace Atlas {
         std::vector<size_t> DFIdx_;
         std::vector<size_t> FWDIdx_;
     };
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* E4F7ED0C_A61A_41D1_8DF7_A0F52A7228B6 */
