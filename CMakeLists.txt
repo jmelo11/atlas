@@ -13,6 +13,7 @@ file(
   "src/*.cpp"
   "src/curves/*.cpp"
   "src/data/*.cpp"
+  "src/cashflows/*.cpp"
   "src/instruments/*.cpp"
   "src/multithreading/*.cpp")
 
@@ -23,6 +24,7 @@ file(
   "include/atlas/curves/*.hpp"
   "include/atlas/data/*.hpp"
   "include/atlas/instruments/*.hpp"
+  "include/atlas/cashflows/*.hpp"
   "include/atlas/model/*.hpp"
   "include/atlas/multithreading/*.hpp"
   "include/atlas/visitors/*.hpp"

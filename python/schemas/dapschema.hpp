@@ -3,7 +3,7 @@
 
 #include <qlp/schemas/commonschemas.hpp>
 #include <qlp/schemas/schema.hpp>
-#include <atlas/instruments/fixedrateinstruments.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
 
 namespace QuantLibParser {
     using namespace Atlas;
@@ -18,7 +18,7 @@ namespace QuantLibParser {
 
         base["properties"]["STARTDATE"] = dateSchema;
         base["properties"]["ENDDATE"]   = dateSchema;
-        base["properties"]["AMOUNT"]    = amountSchema;
+        base["properties"]["AMOUNT"]    = faceAmountSchema;
         base["properties"]["RATE"]      = baseRateSchema;
 
         mySchema_ = base;

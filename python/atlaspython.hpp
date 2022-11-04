@@ -1,7 +1,6 @@
 #ifndef FE2F213A_1675_4B40_B0AE_5F51E9404366
 #define FE2F213A_1675_4B40_B0AE_5F51E9404366
 
-#include <atlaspython/schemas/instrumentschemas.hpp>
 #include <nlohmann/json.hpp>
 
 #define ADDINDEX(myMap, name) myMap[#name] = name()

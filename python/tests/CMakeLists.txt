@@ -36,9 +36,10 @@ find_package(QuantLibParser REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLibParser::QuantLibParser)
 
 message(STATUS "Using this folder for test building: ${CMAKE_SOURCE_DIR}")
-target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
-                                                  "${CMAKE_SOURCE_DIR}/src")
 
-                                                  
+target_include_directories(
+  ${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
+                         "${CMAKE_SOURCE_DIR}/python" "${CMAKE_SOURCE_DIR}/src")
+
 target_link_libraries(${PROJECT_NAME}
                       PUBLIC "${CMAKE_SOURCE_DIR}/build/libAtlas.dylib")

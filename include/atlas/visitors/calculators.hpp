@@ -19,6 +19,7 @@ namespace Atlas {
         InterestCalculator(const MarketData& marketData) : marketData_(marketData) {}
 
         void visit(FloatingBullet& inst) override { forecast(inst.leg(), inst.spread()); }
+        
         void visit(FloatingCustomStructure& inst) override { forecast(inst.leg(), inst.spread()); }
 
         void visit(FixedCustomStructure& inst) override { calculateInterests(inst.leg(), inst.rate()); };
