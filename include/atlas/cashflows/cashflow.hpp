@@ -7,9 +7,10 @@ namespace Atlas {
 
     class Cashflow {
        public:
-        virtual double amount() const                             = 0;
-        virtual QuantLib::Date date() const                       = 0;
-        virtual bool hasOcurred(const QuantLib::Date& date) const = 0;
+        Cashflow(){};
+        virtual double amount() const { return 0; }
+        virtual QuantLib::Date date() const { return QuantLib::Date(); }
+        virtual bool hasOcurred(const QuantLib::Date& date) const { return false; }
     };
 }  // namespace Atlas
 

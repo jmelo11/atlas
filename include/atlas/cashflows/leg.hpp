@@ -9,9 +9,14 @@ namespace Atlas {
 
     class Leg {
        public:
-        Leg(std::vector<Cashflow> coupons, const std::string& discountCurve,
+        Leg(){};
+
+        Leg(std::vector<Cashflow> cashflows) : cashflows_(cashflows){};
+
+        Leg(std::vector<Cashflow> cashflows, const std::string& discountCurve,
             const std::string& forecastCurve)
-        : coupons_(coupons), discountCurve_(discountCurve), forecastCurve_(forecastCurve) {}
+        : cashflows_(cashflows), discountCurve_(discountCurve), forecastCurve_(forecastCurve) {}
+
         void discountCurve(const std::string& curve) { discountCurve_ = curve; }
 
         const std::string& discountCurve() const { return discountCurve_; }
@@ -19,14 +24,14 @@ namespace Atlas {
         void forecastCurve(const std::string& curve) { forecastCurve_ = curve; }
 
         const std::string& forecastCurve() const { return forecastCurve_; }
-
-        void addCoupon(Cashflow c) { coupons.push_back(c); }
-
+        
+        std::vector<Cashflow> cashflows() const { return cashflows_; }
+        
        private:
-        std::vector<Cashflow> coupons_;
+        std::vector<Cashflow> cashflows_;
         std::string discountCurve_ = "undefined";
         std::string forecastCurve_ = "undefined";
-    }
+    };
 
 }  // namespace Atlas
 

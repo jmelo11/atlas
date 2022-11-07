@@ -11,7 +11,7 @@ namespace Atlas {
         return amount_;
     }
 
-    bool Redemption::hasOcurred(const Date& date) const {
+    bool Redemption::hasOcurred(const QuantLib::Date& date) const {
         if (date > date_) return false;
         return true;
     }

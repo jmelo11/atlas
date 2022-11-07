@@ -7,6 +7,9 @@
 #ifndef C7EC2166_6C75_481E_8983_82B454069FCE
 #define C7EC2166_6C75_481E_8983_82B454069FCE
 
+#include <atlas/instruments/deposit.hpp>
+#include <atlas/instruments/fixedbulletproduct.hpp>
+
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/fixfloatswap.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
@@ -15,6 +18,9 @@ namespace Atlas {
 
     class Visitor {
        public:
+        virtual void visit(Deposit& inst)            = 0;
+        virtual void visit(FixedBulletProduct& inst) = 0;
+
         virtual void visit(FloatingBullet& inst)          = 0;
         virtual void visit(DAP& inst)                     = 0;
         virtual void visit(EqualPayment& inst)            = 0;
@@ -26,6 +32,9 @@ namespace Atlas {
 
     class ConstVisitor {
        public:
+        virtual void visit(const Deposit& inst) const            = 0;
+        virtual void visit(const FixedBulletProduct& inst) const = 0;
+
         virtual void visit(const DAP& inst) const                     = 0;
         virtual void visit(const EqualPayment& inst) const            = 0;
         virtual void visit(const FixedBullet& inst) const             = 0;

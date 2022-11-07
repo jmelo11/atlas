@@ -32,9 +32,12 @@ namespace Atlas {
 
         virtual double forwardDf(const Date& d1, const Date& d2);
 
-        virtual double forwardRate(double t1, double t2, Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual) const;
+        virtual double forwardRate(double t1, double t2, Compounding comp = Compounding::Simple,
+                                   Frequency freq = Frequency::Annual) const;
 
-        virtual double forwardRate(const Date& d1, const Date& d2, Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual) const;
+        virtual double forwardRate(const Date& d1, const Date& d2,
+                                   Compounding comp = Compounding::Simple,
+                                   Frequency freq   = Frequency::Annual) const;
         Date refDate() const { return refDate_; }
 
        protected:
@@ -45,10 +48,13 @@ namespace Atlas {
     template <class Interpolator = Linear>
     class ZeroRateCurve : public YieldCurve {
        public:
-        ZeroRateCurve(const std::vector<Date>& dates, const std::vector<double>& rates, const DayCounter& dayCounter = Actual360(),
-                      Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual, const Interpolator& interpolator = Interpolator())
+        ZeroRateCurve(const std::vector<Date>& dates, const std::vector<double>& rates,
+                      const DayCounter& dayCounter = Actual360(),
+                      Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual,
+                      const Interpolator& interpolator = Interpolator())
         : YieldCurve(dates[0], dayCounter), comp_(comp), freq_(freq) {
-            if (dates.size() != rates.size()) throw std::runtime_error("dates and rates size do not match");
+            if (dates.size() != rates.size())
+                throw std::runtime_error("dates and rates size do not match");
 
             std::vector<std::pair<Date, double>> nodes;
             for (size_t i = 0; i < dates.size(); i++) nodes.push_back({dates[i], rates[i]});
@@ -62,18 +68,21 @@ namespace Atlas {
                 nodeRates.push_back(node.second);
             }
 
-            for (const Date& date : nodeDates) times_.push_back(dayCounter.yearFraction(refDate_, date));
+            for (const Date& date : nodeDates)
+                times_.push_back(dayCounter.yearFraction(refDate_, date));
             rates_ = nodeRates;
 
             interpol_ = interpolator.interpolate(times_.begin(), times_.end(), rates_.begin());
             interpol_.enableExtrapolation();
         }
 
-        ZeroRateCurve(const Date& refDate, const std::vector<double>& times, const std::vector<double>& rates,
-                      const DayCounter& dayCounter = Actual360(), Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual,
+        ZeroRateCurve(const Date& refDate, const std::vector<double>& times,
+                      const std::vector<double>& rates, const DayCounter& dayCounter = Actual360(),
+                      Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual,
                       const Interpolator& interpolator = Interpolator())
         : YieldCurve(refDate, dayCounter), comp_(comp), freq_(freq) {
-            if (times.size() != rates.size()) throw std::runtime_error("dates and rates size do not match");
+            if (times.size() != rates.size())
+                throw std::runtime_error("dates and rates size do not match");
 
             std::vector<std::pair<double, double>> nodes;
             for (size_t i = 0; i < times.size(); i++) nodes.push_back({times[i], rates[i]});
@@ -108,10 +117,12 @@ namespace Atlas {
     template <class Interpolator = Linear>
     class DiscountCurve : public YieldCurve {
        public:
-        DiscountCurve(const std::vector<Date>& dates, const std::vector<double>& dfs, const DayCounter& dayCounter = Actual360(),
+        DiscountCurve(const std::vector<Date>& dates, const std::vector<double>& dfs,
+                      const DayCounter& dayCounter     = Actual360(),
                       const Interpolator& interpolator = Interpolator())
         : YieldCurve(dayCounter) {
-            if (dates.size() != dfs.size()) throw std::runtime_error("dates and dfs size do not match");
+            if (dates.size() != dfs.size())
+                throw std::runtime_error("dates and dfs size do not match");
 
             std::vector<std::pair<Date, double>> nodes;
             for (size_t i = 0; i < dates.size(); i++) nodes.push_back({dates[i], dfs[i]});
@@ -124,17 +135,20 @@ namespace Atlas {
                 nodeDFs.push_back(node.second);
             }
             refDate_ = nodeDates[0];
-            for (const Date& date : nodeDates) times_.push_back(dayCounter.yearFraction(refDate_, date));
+            for (const Date& date : nodeDates)
+                times_.push_back(dayCounter.yearFraction(refDate_, date));
 
             dfs_      = nodeDFs;
             interpol_ = interpolator.interpolate(times_.begin(), times_.end(), dfs_.begin());
             interpol_.enableExtrapolation();
         }
 
-        DiscountCurve(const Date& refDate, const std::vector<double>& times, const std::vector<double>& dfs,
-                      const DayCounter& dayCounter = Actual360(), const Interpolator& interpolator = Interpolator())
+        DiscountCurve(const Date& refDate, const std::vector<double>& times,
+                      const std::vector<double>& dfs, const DayCounter& dayCounter = Actual360(),
+                      const Interpolator& interpolator = Interpolator())
         : YieldCurve(refDate, dayCounter) {
-            if (times.size() != dfs.size()) throw std::runtime_error("times and dfs size do not match");
+            if (times.size() != dfs.size())
+                throw std::runtime_error("times and dfs size do not match");
 
             std::vector<std::pair<double, double>> nodes;
             for (size_t i = 0; i < times.size(); i++) nodes.push_back({times[i], dfs[i]});
@@ -163,6 +177,6 @@ namespace Atlas {
         std::vector<double> dfs_;
         Interpolation interpol_;
     };
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* D47BBB89_822D_4EF2_A7B1_3C262C68105A */

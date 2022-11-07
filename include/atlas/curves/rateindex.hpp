@@ -8,7 +8,6 @@
 #define A53B011D_D929_446B_92A0_CDFF70167D4D
 
 #include <ql/compounding.hpp>
-#include <ql/currencies/america.hpp>
 #include <ql/time/date.hpp>
 #include <ql/time/daycounters/actual360.hpp>
 #include <ql/time/frequency.hpp>
@@ -16,46 +15,55 @@
 
 namespace Atlas {
 
-    using namespace QuantLib;
-
     class RateIndex {
        public:
         RateIndex(){};
-        RateIndex(const std::string& name, const DayCounter& dayCounter, Frequency fixingFreq, const Currency& currency,
-                  Frequency rateFreq = Frequency::Annual, Compounding rateComp = Compounding::Simple)
-        : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateComp_(rateComp), currency_(currency){};
-        std::string name_      = "undefined";
-        DayCounter dayCounter_ = Actual360();
-        Frequency fixingFreq_  = Frequency::Semiannual;
-        Frequency rateFreq_    = Frequency::Annual;
-        Compounding rateComp_  = Compounding::Simple;
-        Currency currency_     = USDCurrency();
-        // fixings?
+
+        RateIndex(const std::string& name, QuantLib::DayCounter dayCounter,
+                  QuantLib::Frequency fixingFreq,
+                  QuantLib::Frequency rateFreq   = QuantLib::Frequency::Annual,
+                  QuantLib::Compounding rateComp = QuantLib::Compounding::Simple)
+        : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateComp_(rateComp){};
+
+        QuantLib::DayCounter dayCounter() const { return dayCounter_; }
+
+        QuantLib::Frequency rateFrequency() const { return rateFreq_; }
+
+        QuantLib::Compounding rateCompounding() const { return rateComp_; }
+
+        QuantLib::Frequency fixingFrequency() const { return fixingFreq_; }
+
+       private:
+        std::string name_                = "undefined";
+        QuantLib::DayCounter dayCounter_ = QuantLib::DayCounter();
+        QuantLib::Frequency fixingFreq_  = QuantLib::Frequency::NoFrequency;
+        QuantLib::Frequency rateFreq_    = QuantLib::Frequency::NoFrequency;
+        QuantLib::Compounding rateComp_  = QuantLib::Compounding::Simple;
     };
 
     class LIBOR3M : public RateIndex {
        public:
-        LIBOR3M() : RateIndex("LIBOR3M", Actual360(), Frequency::Quarterly, USDCurrency()) {}
+        LIBOR3M() : RateIndex("LIBOR3M", QuantLib::Actual360(), QuantLib::Frequency::Quarterly) {}
     };
     class LIBOR1M : public RateIndex {
        public:
-        LIBOR1M() : RateIndex("LIBOR1M", Actual360(), Frequency::Monthly, USDCurrency()) {}
+        LIBOR1M() : RateIndex("LIBOR1M", QuantLib::Actual360(), QuantLib::Frequency::Monthly) {}
     };
     class LIBOR6M : public RateIndex {
        public:
-        LIBOR6M() : RateIndex("LIBOR6M", Actual360(), Frequency::Semiannual, USDCurrency()) {}
+        LIBOR6M() : RateIndex("LIBOR6M", QuantLib::Actual360(), QuantLib::Frequency::Semiannual) {}
     };
 
     class LIBOR12M : public RateIndex {
        public:
-        LIBOR12M() : RateIndex("LIBOR12M", Actual360(), Frequency::Annual, USDCurrency()) {}
+        LIBOR12M() : RateIndex("LIBOR12M", QuantLib::Actual360(), QuantLib::Frequency::Annual) {}
     };
 
     class ICP : public RateIndex {
        public:
-        ICP() : RateIndex("ICP", Actual360(), Frequency::Semiannual, CLPCurrency()) {}
+        ICP() : RateIndex("ICP", QuantLib::Actual360(), QuantLib::Frequency::Semiannual) {}
     };
 
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* A53B011D_D929_446B_92A0_CDFF70167D4D */

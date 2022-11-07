@@ -11,7 +11,7 @@
 #include <ql/math/array.hpp>
 #include <ql/math/matrix.hpp>
 #include <ql/time/schedule.hpp>
-#include <atlas/instruments/instruments.hpp>
+#include <atlas/instruments/instrument.hpp>
 
 namespace Atlas {
 
@@ -25,7 +25,9 @@ namespace Atlas {
 
         const InterestRate& rate() const { return rate_; }
 
-        void rate(double r) { rate_ = InterestRate(r, rate_.dayCounter(), rate_.compounding(), rate_.frequency()); }
+        void rate(double r) {
+            rate_ = InterestRate(r, rate_.dayCounter(), rate_.compounding(), rate_.frequency());
+        }
 
         InterestRate& rate() { return rate_; }
 
@@ -47,7 +49,9 @@ namespace Atlas {
 
     class DAP : public FixedRateInstrument {
        public:
-        DAP(const Date& start, const Date& end, double faceAmount, const InterestRate& rate, MetaData& metaData) : FixedRateInstrument(rate) {
+        DAP(const Date& start, const Date& end, double faceAmount, const InterestRate& rate,
+            MetaData& metaData)
+        : FixedRateInstrument(rate) {
             faceAmount_ = faceAmount;
             leg_        = Leg({start, end}, {faceAmount_});
             leg_.metaData(metaData);
@@ -60,12 +64,15 @@ namespace Atlas {
         void accept(ConstVisitor& visitor) const override;
 
        private:
-        double accrual(const Date& a, const Date& b) { return (rate_.compoundFactor(a, b) - 1) * redemptions().back(); }
+        double accrual(const Date& a, const Date& b) {
+            return (rate_.compoundFactor(a, b) - 1) * redemptions().back();
+        }
     };
 
     class EqualPayment : public FixedRateInstrument {
        public:
-        EqualPayment(const Date& start, const Date& end, Frequency freq, double faceAmount, const InterestRate& rate, MetaData& metaData)
+        EqualPayment(const Date& start, const Date& end, Frequency freq, double faceAmount,
+                     const InterestRate& rate, MetaData& metaData)
         : FixedRateInstrument(rate) {
             faceAmount_       = faceAmount;
             Schedule schedule = MakeSchedule().from(start).to(end).withFrequency(freq);
@@ -88,7 +95,9 @@ namespace Atlas {
 
             Array factors(kN, 0), B(kN, 0), K;
 
-            for (size_t i = 1; i <= pN; i++) { factors[i - 1] = (rate_.compoundFactor(dates_.at(i - 1), dates_.at(i)) - 1); }
+            for (size_t i = 1; i <= pN; i++) {
+                factors[i - 1] = (rate_.compoundFactor(dates_.at(i - 1), dates_.at(i)) - 1);
+            }
 
             factors[kN - 1] = -1;
 
@@ -126,7 +135,8 @@ namespace Atlas {
 
     class FixedBullet : public FixedRateInstrument {
        public:
-        FixedBullet(const Date& start, const Date& end, Frequency freq, double faceAmount, const InterestRate& rate, MetaData& metaData)
+        FixedBullet(const Date& start, const Date& end, Frequency freq, double faceAmount,
+                    const InterestRate& rate, MetaData& metaData)
         : FixedRateInstrument(rate) {
             faceAmount_       = faceAmount;
             Schedule schedule = MakeSchedule().from(start).to(end).withFrequency(freq);
@@ -143,7 +153,8 @@ namespace Atlas {
 
     class FixedCustomStructure : public virtual FixedRateInstrument {
        public:
-        FixedCustomStructure(std::vector<Date>& dates, std::vector<double>& redemptions, const InterestRate& rate, MetaData& metaData)
+        FixedCustomStructure(std::vector<Date>& dates, std::vector<double>& redemptions,
+                             const InterestRate& rate, MetaData& metaData)
         : FixedRateInstrument(rate) {
             for (const auto r : redemptions) faceAmount_ += r;
             leg_ = Leg(dates, redemptions);
@@ -155,6 +166,6 @@ namespace Atlas {
         void accept(ConstVisitor& visitor) const override;
     };
 
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* F2836D9E_FF6A_4A2C_B2DC_E39B9CC0C9B4 */

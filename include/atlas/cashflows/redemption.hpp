@@ -13,12 +13,12 @@ namespace Atlas {
 
         double amount() const override;
 
-        bool hasOcurred(const Date& date) const override;
+        bool hasOcurred(const QuantLib::Date& date) const override;
 
        private:
         QuantLib::Date date_ = QuantLib::Date();
         double amount_       = 0;
-    }
+    };
 
 }  // namespace Atlas
 

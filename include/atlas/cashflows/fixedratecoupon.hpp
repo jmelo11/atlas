@@ -22,8 +22,6 @@ namespace Atlas {
 
         double amount() const override;
 
-       
-
        private:
         QuantLib::InterestRate rate_;
     };
