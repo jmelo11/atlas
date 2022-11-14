@@ -9,7 +9,6 @@
 
 #include <ql/interestrate.hpp>
 #include <ql/quantlib.hpp>
-#include <atlas/instruments/leg.hpp>
 #include <atlas/others/auxfuncs.hpp>
 #include <memory>
 #include <vector>
@@ -17,17 +16,16 @@
 using namespace QuantLib;
 
 struct CommonVars {
-    Date evalDate            = Date(1, Month::Jan, 2022);
-    Date startDate           = Date(1, Month::Jan, 2022);
-    Date endDate             = Date(1, Month::Jan, 2025);
-    DayCounter dayCounter    = Actual360();
-    double amount            = 100;
-    double spread            = 0;
-    double curveRate         = 0.03;
-    InterestRate rate        = InterestRate(0.03, dayCounter, Compounding::Simple, Frequency::Annual);
-    Frequency paymentFreq    = Frequency::Semiannual;
-    Schedule schedule        = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFreq);
-    Atlas::MetaData metaData = Atlas::MetaData();
+    Date evalDate         = Date(1, Month::Jan, 2022);
+    Date startDate        = Date(1, Month::Jan, 2022);
+    Date endDate          = Date(1, Month::Jan, 2025);
+    DayCounter dayCounter = Actual360();
+    double amount         = 100;
+    double spread         = 0;
+    double curveRate      = 0.03;
+    InterestRate rate     = InterestRate(0.03, dayCounter, Compounding::Simple, Frequency::Annual);
+    Frequency paymentFreq = Frequency::Semiannual;
+    Schedule schedule     = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFreq);
 };
 
 static CommonVars commonVars;

@@ -1,37 +1,47 @@
 
+#include <atlas/cashflows/fixedratecoupon.hpp>
+#include <atlas/cashflows/redemption.hpp>
 #include <atlas/instruments/fixedrateproduct.hpp>
-
+#include <atlas/visitors/visitor.hpp>
+#include <map>
 namespace Atlas {
-    FixedRateProduct::FixedRateProduct(std::vector<QuantLib::Date> dates,
-                                       std::vector<double> redemptions,
-                                       QuantLib::InterestRate rate) {
-        if (dates().size() != redemptions.size() + 1)
-            throw std::runtime_error("Dates (n) and redemptions (n-1) size must match.");
-    }
+    FixedRateProduct::FixedRateProduct(const QuantLib::Date& startDate,
+                                       const QuantLib::Date& endDate, const FixedRateLeg& leg)
+    : leg_(leg) {
+        startDate_ = startDate;
+        endDate_   = endDate;
+    };
 
-    void FixedRateProduct::accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-
-    void FixedRateProduct::accept(ConstVisitor& visitor) const {
-        visitor.visit(*this);
-    }
-
-    static std::vector<FixedRateCoupon> FixedRateProduct::calculateNotionals(
-        const std::vector<QuantLib::Date>& dates, const std::vector<Redemption>& redemptions,
-        const QuantLib::InterestRate& rate, double notional) {
-        std::vector<FixedRateCoupon> coupons;
-        for (size_t i = ; i < dates.size(); i++) {
-            FixedRateCoupon coupon(dates.at(i - 1), dates.at(i), notional, rate);
-            notional -= redemptions.at(i).amount();
+    void FixedRateProduct::calculateNotionals(const std::vector<QuantLib::Date>& dates,
+                                              const QuantLib::InterestRate& rate) {
+        std::map<QuantLib::Date, double> notionals;
+        double notional = 0.0;
+        for (const auto& redemption : leg_.redemptions()) {
+            notional += redemption.amount();
+            notionals[redemption.paymentDate()] = redemption.amount();
         }
-        return coupons;
+
+        for (size_t i = 0; i < dates.size() - 1; i++) {
+            FixedRateCoupon coupon(dates[i], dates[i + 1], notional, rate);
+            leg_.addCoupon(coupon);
+            if (notionals.find(dates[i + 1]) != notionals.end())
+                notional -= notionals[dates[i + 1]];
+        }
     }
 
-    static void FixedRateProduct::sortRedemptions(std::vector<Redemption>& redemptions) {
-        auto compare = [](const Redemption& r1, const Redemption& r2) {
-            return r1.date() > r2.date();
-        };
-        std::sort(redemptions.begin(), redemptions.end(), compare);
+    void FixedRateProduct::calculateFaceAmount() {
+        double faceAmount = 0.0;
+        for (const auto& redemption : leg_.redemptions()) { faceAmount += redemption.amount(); }
+        notional_ = faceAmount;
+    }
+
+    void FixedRateProduct::rate(QuantLib::InterestRate r) {
+        rate_ = r;
+        for (auto& coupon : leg_.coupons()) { coupon.rate(r); }
+    }
+
+    void FixedRateProduct::rate(double r) {
+        QuantLib::InterestRate tmpR(r, rate_.dayCounter(), rate_.compounding(), rate_.frequency());
+        rate(tmpR);
     }
 }  // namespace Atlas

@@ -15,6 +15,9 @@ file(
   "src/data/*.cpp"
   "src/cashflows/*.cpp"
   "src/instruments/*.cpp"
+  "src/instruments/fixedrate/*.cpp"
+  "src/visitors/*.cpp"
+  "src/instruments/floatingrate/*.cpp"
   "src/multithreading/*.cpp")
 
 file(
@@ -24,6 +27,8 @@ file(
   "include/atlas/curves/*.hpp"
   "include/atlas/data/*.hpp"
   "include/atlas/instruments/*.hpp"
+  "include/atlas/instruments/fixedrate/*.hpp"
+  "include/atlas/instruments/floatingrate/*.hpp"
   "include/atlas/cashflows/*.hpp"
   "include/atlas/model/*.hpp"
   "include/atlas/multithreading/*.hpp"

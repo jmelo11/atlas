@@ -9,12 +9,7 @@ namespace Atlas {
 
     class Coupon : public Cashflow {
        public:
-        Coupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional)
-        : startDate_(startDate), endDate_(endDate), notional_(notional) {}
-
-        int getDfIdx() const;
-
-        void setDfIndex(int idx) { dfIdx_ = idx; }
+        Coupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional);
 
         double notional() const;
 
@@ -29,15 +24,10 @@ namespace Atlas {
 
         QuantLib::Date endDate() const { return endDate_; }  // accrual end date?
 
-        QuantLib::Date date() const override;  // redundant? paymentDate?
-
-        bool hasOcurred(const QuantLib::Date& date) const override;
-
        private:
         QuantLib::Date startDate_ = QuantLib::Date();
         QuantLib::Date endDate_   = QuantLib::Date();
         double notional_          = 0;
-        size_t dfIdx_             = 0;  // 0 is reserved (0% DF)
     };
 
 }  // namespace Atlas

@@ -8,9 +8,28 @@ namespace Atlas {
     class Cashflow {
        public:
         Cashflow(){};
-        virtual double amount() const { return 0; }
-        virtual QuantLib::Date date() const { return QuantLib::Date(); }
-        virtual bool hasOcurred(const QuantLib::Date& date) const { return false; }
+        Cashflow(const QuantLib::Date& paymentDate, double amount)
+        : paymentDate_(paymentDate), amount_(amount){};
+
+        virtual double amount() const { return amount_; }
+
+        virtual QuantLib::Date paymentDate() const { return paymentDate_; }
+
+        virtual bool hasOcurred(const QuantLib::Date& date) const {
+            if (paymentDate() > date) return false;
+            return true;
+        }
+
+        size_t dfIdx() const { return dfIdx_; }
+
+        void dfIdx(size_t idx) { dfIdx_ = idx; }
+
+       protected:
+        double amount_              = 0;
+        QuantLib::Date paymentDate_ = QuantLib::Date();
+
+       private:
+        size_t dfIdx_ = 0;  // 0 is reserved (0% DF)
     };
 }  // namespace Atlas
 

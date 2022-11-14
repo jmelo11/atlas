@@ -3,6 +3,12 @@
 
 namespace Atlas {
 
+    FixedRateCoupon::FixedRateCoupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
+                                     double notional, const QuantLib::InterestRate& rate)
+    : Coupon(startDate, endDate, notional), rate_(rate) {
+        amount_ = accruedAmount(startDate, endDate);
+    };
+
     double FixedRateCoupon::accruedAmount(const QuantLib::Date& start,
                                           const QuantLib::Date& end) const {
         return notional() * (rate_.compoundFactor(start, end) - 1.0);
@@ -16,14 +22,9 @@ namespace Atlas {
         return rate_;
     }
 
-    void FixedRateCoupon::rate(QuantLib::InterestRate rate) {
-        rate_ = rate;
+    void FixedRateCoupon::rate(const QuantLib::InterestRate& rate) {
+        rate_   = rate;
+        amount_ = accruedAmount(startDate(), endDate());
     }
-
-    double FixedRateCoupon::amount() const {
-        return accruedAmount(startDate(), endDate());
-    }
-
-    
 
 }  // namespace Atlas

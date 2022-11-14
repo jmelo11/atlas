@@ -2,7 +2,7 @@
 #include <ql/time/daycounters/actual360.hpp>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/redemption.hpp>
-#include <atlas/instruments/deposit.hpp>
+#include <atlas/instruments/fixedrate/deposit.hpp>
 
 using namespace Atlas;
 
@@ -13,21 +13,22 @@ TEST(TestDeposit, Deposit) {
     QuantLib::InterestRate rate(0.03, QuantLib::Actual360(), QuantLib::Simple, QuantLib::Annual);
     Deposit prod(startDate, endDate, notional, rate);
 
-    const Leg& tmp = prod.constLeg(1);
+    const auto& leg         = prod.constLeg();
+    const auto& coupons     = leg.constCoupons();
+    const auto& redemptions = leg.constRedemptions();
 
-    EXPECT_EQ(tmp.discountCurve(), "undefined");
-    EXPECT_EQ(tmp.forecastCurve(), "undefined");
+    EXPECT_EQ(leg.discountCurve(), "undefined");
+    EXPECT_EQ(coupons.size(), 1);
+    EXPECT_EQ(redemptions.size(), 1);
 
-    for (const auto& cashflow : tmp.cashflows()) {
-        FixedRateCoupon* ptr = std::dynamic_pointer_cast<FixedRateCoupon>(cashflow);
-        if (ptr) {
-            double yf       = rate.dayCounter().yearFraction(startDate, endDate);
-            double interest = yf * notional * rate.rate();
-            EXPECT_FLOAT_EQ(interest, ptr->amount());
-        } else {
-            Redemption* tmpPtr = std::dynamic_pointer_cast<Redemption>(cashflow);
-            EXPECT_EQ(tmpPtr->amount(), notional);
-            EXPECT_EQ(tmpPtr->date(), endDate);
-        }
-    }
+    const auto& coupon = coupons[0];
+    EXPECT_EQ(coupon.amount(), notional * (rate.compoundFactor(startDate, endDate) - 1));
+    EXPECT_EQ(coupon.startDate(), startDate);
+    EXPECT_EQ(coupon.endDate(), endDate);
+    EXPECT_EQ(coupon.rate(), rate);
+
+    const auto& redemption = redemptions[0];
+
+    EXPECT_EQ(redemption.amount(), 100.0);
+    EXPECT_EQ(redemption.paymentDate(), endDate);
 }

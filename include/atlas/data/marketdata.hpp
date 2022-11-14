@@ -14,42 +14,38 @@
 #include <vector>
 
 namespace Atlas {
-
-    using namespace QuantLib;
-
     template <class A, class B, class C>
     using DoubleMap = std::unordered_map<A, std::unordered_map<B, C>>;
     /*
-     * dado que el indice indica la tasa ya calculada, solo se necesita guardar cada una en el vector
+     * dado que el indice indica la tasa ya calculada, solo se necesita guardar cada una en el
+     * vector
      */
     struct MarketRequest {
         struct Rate {
-            Date startDate_;
-            Date endDate_;
+            QuantLib::Date startDate_;
+            QuantLib::Date endDate_;
             std::string curve_;
-            Rate(const Date& startDate, const Date& endDate, const std::string& referenceCurve)
+            Rate(const std::string& referenceCurve, const QuantLib::Date& startDate, const QuantLib::Date& endDate)
             : startDate_(startDate), endDate_(endDate), curve_(referenceCurve) {}
         };
 
         struct DiscountFactor {
-            Date date_;
+            QuantLib::Date date_;
             std::string discountCurve_;
-            DiscountFactor(const Date& date, const std::string& discountCurve) : date_(date), discountCurve_(discountCurve) {}
+            DiscountFactor(const std::string& discountCurve, const QuantLib::Date& date)
+            : date_(date), discountCurve_(discountCurve) {}
         };
 
-        /*
-         * los factores de descuento solo necesitan la curva y la fecha a descontar
-         */
-        std::vector<std::tuple<std::string, Date>> dfs;
+        size_t discountFactorIdx() const { return dfs.size() - 1; }
+        size_t forwardRateIdx() const { return fwds.size() - 1; }
 
-        /*
-         * las tasas forward requieren fecha de inicio y termino
-         */
-        std::vector<std::tuple<std::string, Date, Date>> fwds;
+        std::vector<DiscountFactor> dfs;
+
+        std::vector<Rate> fwds;
     };
 
     struct MarketData {
-        Date refDate;
+        QuantLib::Date refDate;
         double numerarie = 1;
         std::vector<double> dfs;
         std::vector<double> fwds;
@@ -60,9 +56,9 @@ namespace Atlas {
     };
 
     struct HistoricalData {
-        DoubleMap<std::string, Date, double> fwds;
+        DoubleMap<std::string, QuantLib::Date, double> fwds;
     };
 
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* AFBFF92A_3FC8_47D1_8AA5_E29304D51829 */

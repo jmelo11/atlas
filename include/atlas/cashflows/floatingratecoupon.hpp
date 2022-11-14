@@ -3,35 +3,37 @@
 
 #include <atlas/cashflows/coupon.hpp>
 #include <atlas/curves/rateindex.hpp>
-#include <atlas/data/marketdata.hpp>
 
 namespace Atlas {
 
     class FloatingRateCoupon : public Coupon {
        public:
         FloatingRateCoupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
-                           double notional, double spread, RateIndex index);
+                           double notional, double spread, const RateIndex& index);
 
         double spread() const { return spread_; }
 
         void spread(double spread) { spread_ = spread; }
 
-        int fwdIdx() const { return fwdIdx_; }
+        size_t fwdIdx() const { return fwdIdx_; }
 
-        void fwdIdx(int idx) { fwdIdx_ = idx; }
+        void fwdIdx(size_t idx) { fwdIdx_ = idx; }
 
-        void fixRate(const MarketData& data) { fixing_ = data.fwds.at(fwdIdx()); }
+        void fixing(double value) {
+            fixing_ = value;
+            amount_ = accruedAmount(startDate(), endDate());
+        }
+
+        double fixing() const { return fixing_; }
 
         double accruedAmount(const QuantLib::Date& start, const QuantLib::Date& end) const override;
 
         QuantLib::DayCounter dayCounter() const override;
 
-        bool hasOcurred(const QuantLib::Date& date) const override;
-
        private:
         double fixing_;
         double spread_;  // ptr?
-        int fwdIdx_;     // add spread to forecasted fwd rate?
+        size_t fwdIdx_;  // add spread to forecasted fwd rate?
         RateIndex index_;
     };
 

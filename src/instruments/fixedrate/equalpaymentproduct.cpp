@@ -2,28 +2,23 @@
 #include <ql/math/array.hpp>
 #include <ql/math/matrix.hpp>
 #include <ql/time/schedule.hpp>
-#include <algorithm>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/redemption.hpp>
-#include <atlas/instruments/equalpaymentproduct.hpp>
+#include <atlas/instruments/fixedrate/equalpaymentproduct.hpp>
 #include <atlas/instruments/fixedrateproduct.hpp>
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    EqualPaymentProduct::EqualPaymentProduct(const QuantLib::Date& start, const QuantLib::Date& end,
+    EqualPaymentProduct::EqualPaymentProduct(const QuantLib::Date& startDate,
+                                             const QuantLib::Date& endDate,
                                              QuantLib::Frequency freq, double notional,
-                                             QuantLib::InterestRate rate) {
+                                             const QuantLib::InterestRate& rate)
+    : FixedRateProduct(startDate, endDate) {
         QuantLib::Schedule schedule =
-            QuantLib::MakeSchedule().from(start).to(end).withFrequency(freq);
-        std::vector<Redemption> redemptions =
-            FixedRateProduct::calculateRedemptions(schedule.dates(), rate, notional);
+            QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
-        std::vector<FixedRateCoupon> coupons = calculateNotionals(redemptions);
-        std::vector<Cashflow> cashflows;
-
-        cashflows.insert(cashflows().begin(), redemptions.begin(), redemptions.end());
-        cashflows.insert(cashflows().begin(), coupons.begin(), coupons.end());
-        legs_.push_back(Leg(cashflows));
+        calculateRedemptions(schedule.dates(), rate, notional);
+        calculateNotionals(schedule.dates(), rate);
     }
 
     void EqualPaymentProduct::accept(Visitor& visitor) {
@@ -34,12 +29,12 @@ namespace Atlas {
         visitor.visit(*this);
     }
 
-    std::vector<Redemption> EqualPaymentProduct::calculateRedemptions(
-        const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate,
-        double notional) const {
+    void EqualPaymentProduct::calculateRedemptions(const std::vector<QuantLib::Date>& dates,
+                                                   const QuantLib::InterestRate& rate,
+                                                   double notional) {
         size_t pN = dates.size() - 1;
         size_t kN = pN + 1;
-        Array factors(kN, 0), B(kN, 0), K;
+        QuantLib::Array factors(kN, 0), B(kN, 0), K;
 
         for (size_t i = 1; i <= pN; i++)
             factors[i - 1] = (rate.compoundFactor(dates.at(i - 1), dates.at(i)) - 1);
@@ -48,7 +43,7 @@ namespace Atlas {
 
         B = -notional * factors;
 
-        Matrix A(kN, kN, 0);
+        QuantLib::Matrix A(kN, kN, 0);
         for (size_t j = 0; j < kN; j++) {
             for (size_t i = 0; i < kN; i++) {
                 if (j == 0 && i < kN - 1) {
@@ -64,12 +59,10 @@ namespace Atlas {
         }
         // slow, multicore?
         K = inverse(A) * B;
-        std::vector<Cashflow> cashflows;
-        for (size_t i = 0; i < dates.size(); i++) {
-            Redemption redemption(K[i], dates[i]);
-            cashflows.push_back(redemption);
+        for (size_t i = 1; i < dates.size(); i++) {
+            Redemption redemption(dates[i], K[i]);
+            leg_.addRedemption(redemption);
         }
-        return cashflows;
     }
 
 }  // namespace Atlas

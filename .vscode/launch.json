@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "(lldb) Debug",
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "program": "${command:cmake.launchTargetPath}",
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        }
+    ],
+    "version": "2.0.0"
+}

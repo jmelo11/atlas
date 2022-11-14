@@ -9,8 +9,7 @@ namespace Atlas {
     class FixedRateCoupon : public Coupon {
        public:
         FixedRateCoupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
-                        double notional, QuantLib::InterestRate rate)
-        : Coupon(startDate, endDate, notional), rate_(rate){};
+                        double notional, const QuantLib::InterestRate& rate);
 
         QuantLib::DayCounter dayCounter() const override;
 
@@ -18,9 +17,7 @@ namespace Atlas {
 
         QuantLib::InterestRate rate() const;
 
-        void rate(QuantLib::InterestRate rate);
-
-        double amount() const override;
+        void rate(const QuantLib::InterestRate& rate);
 
        private:
         QuantLib::InterestRate rate_;

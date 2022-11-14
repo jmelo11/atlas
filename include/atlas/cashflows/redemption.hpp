@@ -7,17 +7,7 @@ namespace Atlas {
 
     class Redemption : public Cashflow {
        public:
-        Redemption(const QuantLib::Date& date, double amount) : date_(date), amount_(amount){};
-
-        QuantLib::Date date() const override;
-
-        double amount() const override;
-
-        bool hasOcurred(const QuantLib::Date& date) const override;
-
-       private:
-        QuantLib::Date date_ = QuantLib::Date();
-        double amount_       = 0;
+        Redemption(const QuantLib::Date& paymentDate, double amount);
     };
 
 }  // namespace Atlas

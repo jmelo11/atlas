@@ -14,12 +14,18 @@ namespace Atlas {
 
         virtual void accept(ConstVisitor& visitor) const = 0;
 
-        const Leg& constLeg(size_t i) const { return legs_.at(i); };
+        QuantLib::Date startDate() const { return startDate_; };
 
-        Leg& leg(size_t i) { return legs_[i]; };
+        QuantLib::Date endDate() const { return endDate_; };
+
+        size_t dfIdx() const { return dfIdx_; };
+
+        void dfIdx(size_t idx) { dfIdx_ = idx; };
 
        protected:
-        std::vector<Leg> legs_;
+        QuantLib::Date startDate_ = QuantLib::Date();
+        QuantLib::Date endDate_   = QuantLib::Date();
+        size_t dfIdx_             = 0;
     };
 }  // namespace Atlas
 
