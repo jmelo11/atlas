@@ -6,10 +6,13 @@
 #include <map>
 namespace Atlas {
     FixedRateProduct::FixedRateProduct(const QuantLib::Date& startDate,
-                                       const QuantLib::Date& endDate, const FixedRateLeg& leg)
-    : leg_(leg) {
+                                       const QuantLib::Date& endDate,
+                                       const QuantLib::InterestRate& rate, double notional,
+                                       const FixedRateLeg& leg)
+    : leg_(leg), rate_(rate) {
         startDate_ = startDate;
         endDate_   = endDate;
+        notional_  = notional;
     };
 
     void FixedRateProduct::calculateNotionals(const std::vector<QuantLib::Date>& dates,

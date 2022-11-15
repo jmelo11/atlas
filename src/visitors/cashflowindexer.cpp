@@ -3,18 +3,22 @@
 namespace Atlas {
 
     void CashflowIndexer::visit(Deposit& inst) {
+        indexStartDf(inst);
         useFixedLeg(inst.leg());
     }
 
     void CashflowIndexer::visit(FixedBulletProduct& inst) {
+        indexStartDf(inst);
         useFixedLeg(inst.leg());
     }
 
     void CashflowIndexer::visit(EqualPaymentProduct& inst) {
+        indexStartDf(inst);
         useFixedLeg(inst.leg());
     }
 
     void CashflowIndexer::visit(FloatingRateBulletProduct& inst) {
+        indexStartDf(inst);
         useFloatingLeg(inst.leg());
     }
 
@@ -50,7 +54,8 @@ namespace Atlas {
         for (auto& coupon : coupons) {
             dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, coupon.paymentDate()));
             coupon.dfIdx(dfs_.size() - 1);
-            fwds_.push_back(MarketRequest::Rate(forecastCurve, coupon.startDate(), coupon.endDate()));
+            fwds_.push_back(
+                MarketRequest::Rate(forecastCurve, coupon.startDate(), coupon.endDate()));
             coupon.fwdIdx(dfs_.size() - 1);
         }
 

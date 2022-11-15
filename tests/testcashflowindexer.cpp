@@ -18,10 +18,14 @@ TEST(TestCashflowIndexer, Visitors) {
     prod.accept(indexer);
     MarketRequest request;
     indexer.setRequest(request);
-    EXPECT_EQ(request.dfs.size(), 2);
+    EXPECT_EQ(request.dfs.size(), 3);  // coupon + redemption + start
     EXPECT_EQ(request.fwds.size(), 0);
 
     auto& tmp = request.dfs.at(0);
+    EXPECT_EQ(tmp.date_, startDate);
+    EXPECT_EQ(tmp.discountCurve_, "undefined");
+
+    tmp = request.dfs.at(1);
     EXPECT_EQ(tmp.date_, endDate);
     EXPECT_EQ(tmp.discountCurve_, "undefined");
 
@@ -36,10 +40,10 @@ TEST(TestCashflowIndexer, Visitors) {
     auto& leg     = prod2.leg();
     auto& coupons = leg.coupons();
 
-    EXPECT_EQ(request.dfs.size(), coupons.size() * 2);
+    EXPECT_EQ(request.dfs.size(), coupons.size() * 2+1);
     EXPECT_EQ(request.fwds.size(), 0);
     for (size_t i = 0; i < coupons.size(); ++i) {
         auto& coupon = coupons.at(i);
-        EXPECT_EQ(coupon.dfIdx(), i);
+        EXPECT_EQ(coupon.dfIdx(), i+1);
     }
 }

@@ -13,6 +13,7 @@ namespace Atlas {
     class FixedRateProduct : public Instrument {
        public:
         FixedRateProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
+                         const QuantLib::InterestRate& rate, double notional = 0.0,
                          const FixedRateLeg& leg = FixedRateLeg());
 
         const FixedRateLeg& constLeg() const { return leg_; };
@@ -21,8 +22,6 @@ namespace Atlas {
 
         void calculateNotionals(const std::vector<QuantLib::Date>& dates,
                                 const QuantLib::InterestRate& rate);
-
-        double notional() const { return notional_; };
 
         void rate(QuantLib::InterestRate rate);
 
@@ -35,7 +34,6 @@ namespace Atlas {
 
         FixedRateLeg leg_;
         QuantLib::InterestRate rate_;
-        double notional_ = 0.0;
     };
 }  // namespace Atlas
 

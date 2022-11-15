@@ -19,12 +19,12 @@ namespace Atlas {
         Model(){};
         Model(const MarketRequest& marketRequest) : marketRequest_(marketRequest) {}
 
-        virtual bool simulate(const std::vector<Date>& evalDates, Scenario& scenario) const = 0;
+        virtual void simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const = 0;
 
        protected:
         MarketRequest marketRequest_;
     };
 
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* CB4131F2_7926_4625_AEEC_DD73178CBD54 */

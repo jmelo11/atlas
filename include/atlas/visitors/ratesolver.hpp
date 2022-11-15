@@ -28,18 +28,36 @@ namespace Atlas {
             auto f = [&](double r) {
                 evalInst.rate(r);
                 calc.visit(evalInst);
+                double npv = calc.results();
+                double notional = inst.notional();
+                calc.clear();
+                return npv - notional * startDf;
+            };
+            value_ = solver_.solve(f, accuracy_, guess_, step_);
+        };
+
+        template <typename T>
+        void evalFloatingRateProd(const T& inst) const {
+            T evalInst(inst);
+            NPVCalculator calc(marketData_);
+            double startDf = marketData_.dfs.at(inst.dfIdx());
+
+            auto f = [&](double s) {
+                evalInst.spread(s);
+                calc.visit(evalInst);
                 return calc.results() - inst.notional() * startDf;
             };
             value_ = solver_.solve(f, accuracy_, guess_, step_);
         };
+
         void floatingLegParSpread(FloatingRateLeg& leg);
 
         const MarketData& marketData_;
         QuantLib::Brent solver_;
         mutable double value_ = 0.0;
-        double accuracy_      = 0;
-        double guess_         = 0;
-        double step_          = 0;
+        double guess_         = 0.0;
+        double accuracy_      = 0.0001;
+        double step_          = 0.0001;
     };
 }  // namespace Atlas
 

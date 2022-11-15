@@ -22,10 +22,13 @@ namespace Atlas {
 
         void dfIdx(size_t idx) { dfIdx_ = idx; };
 
+        double notional() const { return notional_; };
+
        protected:
         QuantLib::Date startDate_ = QuantLib::Date();
         QuantLib::Date endDate_   = QuantLib::Date();
         size_t dfIdx_             = 0;
+        double notional_          = 0.0;
     };
 }  // namespace Atlas
 

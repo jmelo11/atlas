@@ -8,7 +8,7 @@ namespace Atlas {
     FixedBulletProduct::FixedBulletProduct(const QuantLib::Date& startDate,
                                            const QuantLib::Date& endDate, QuantLib::Frequency freq,
                                            double notional, const QuantLib::InterestRate& rate)
-    : FixedRateProduct(startDate, endDate) {
+    : FixedRateProduct(startDate, endDate, rate, notional) {
         QuantLib::Schedule schedule =
             QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 

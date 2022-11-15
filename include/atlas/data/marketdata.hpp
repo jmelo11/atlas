@@ -20,12 +20,14 @@ namespace Atlas {
      * dado que el indice indica la tasa ya calculada, solo se necesita guardar cada una en el
      * vector
      */
+
     struct MarketRequest {
         struct Rate {
             QuantLib::Date startDate_;
             QuantLib::Date endDate_;
             std::string curve_;
-            Rate(const std::string& referenceCurve, const QuantLib::Date& startDate, const QuantLib::Date& endDate)
+            Rate(const std::string& referenceCurve, const QuantLib::Date& startDate,
+                 const QuantLib::Date& endDate)
             : startDate_(startDate), endDate_(endDate), curve_(referenceCurve) {}
         };
 

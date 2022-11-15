@@ -31,7 +31,7 @@ namespace Atlas {
          */
         template <typename T>
         void indexStartDf(T& inst) {
-            const std::string& discountCurve = inst.discountCurve();
+            const std::string& discountCurve = inst.constLeg().discountCurve();
             dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, inst.startDate())); // if QuantLib::Date()?
             inst.dfIdx(dfs_.size() - 1);
         }

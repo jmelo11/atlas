@@ -5,11 +5,11 @@
 
 namespace Atlas {
 
-    Deposit::Deposit(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double amount,
-                     const QuantLib::InterestRate& rate)
-    : FixedRateProduct(startDate, endDate) {
-        FixedRateCoupon coupon(startDate, endDate, amount, rate);  // interest coupon
-        Redemption redemption(endDate, amount);                    // notinal payment at the end
+    Deposit::Deposit(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
+                     double notional, const QuantLib::InterestRate& rate)
+    : FixedRateProduct(startDate, endDate, rate, notional) {
+        FixedRateCoupon coupon(startDate, endDate, notional, rate);  // interest coupon
+        Redemption redemption(endDate, notional);                    // notinal payment at the end
 
         leg_.addCoupon(coupon);
         leg_.addRedemption(redemption);
