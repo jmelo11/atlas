@@ -9,15 +9,14 @@ using namespace Atlas;
 TEST(TestFloatingRateBullet, FloatingRateProduct) {
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
-    QuantLib::Frequency freq = QuantLib::Frequency::Semiannual;
-    double notional          = 100;
-    double spread            = 0.01;
-    double fixing            = 0.03;
+    double notional = 100;
+    double spread   = 0.01;
+    double fixing   = 0.03;
     LIBOR6M index;
-    FloatingRateBulletProduct product(startDate, endDate, freq, notional, spread, index);
+    FloatingRateBulletProduct product(startDate, endDate, notional, spread, index);
 
     QuantLib::Schedule schedule =
-        QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+        QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
 
     auto& leg         = product.leg();
     auto& coupons     = leg.coupons();

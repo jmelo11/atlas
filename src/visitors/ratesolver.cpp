@@ -1,5 +1,5 @@
 
-#include <atlas/visitors/ratesolver.hpp>
+#include <atlas/visitors/parsolver.hpp>
 
 namespace Atlas {
 

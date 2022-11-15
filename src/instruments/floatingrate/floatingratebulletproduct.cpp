@@ -11,11 +11,12 @@
 namespace Atlas {
     FloatingRateBulletProduct::FloatingRateBulletProduct(const QuantLib::Date& startDate,
                                                          const QuantLib::Date& endDate,
-                                                         QuantLib::Frequency freq, double notional,
-                                                         double spread, RateIndex index)
+                                                         double notional, double spread,
+                                                         RateIndex index)
     : FloatingRateProduct(startDate, endDate) {
         QuantLib::Schedule schedule =
-            QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+            QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(
+                index.fixingFrequency());
 
         QuantLib::Date firstDate = QuantLib::Date();
         for (const auto& endDate : schedule.dates()) {
