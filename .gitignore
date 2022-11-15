@@ -1,21 +1,2 @@
-﻿################################################################################
-# Este archivo .gitignore ha sido creado automáticamente por Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs/atlas/v17
-/atlas/x64
-/x64
-/atlas/build/x64
-/testsuite/x64
-/.vs/atlas/FileContentIndex
-/datamanager/x64/Debug
-/datamanager/x64/Debug
-/datamanager/x64/Debug
-/datamanager/x64/Debug
-/testsuite/~AutoRecover.testsuite.vcxproj
-/datamanager/~AutoRecover.datamanager.vcxproj
-/atlas/~AutoRecover.atlas.vcxproj
-/parsers/~AutoRecover.parsers.vcxproj
 /build
-/parsers/x64/Debug
-/curvemanager/x64/Debug
+/python/notebooks

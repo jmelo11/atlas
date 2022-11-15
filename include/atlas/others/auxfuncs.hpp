@@ -1,0 +1,61 @@
+/*
+ * Created on Mon Oct 31 2022
+ *
+ * Author: Jose Melo
+ */
+
+#ifndef A1E6F5B0_6F4A_4460_9F42_A14B525D8447
+#define A1E6F5B0_6F4A_4460_9F42_A14B525D8447
+
+#include <atlas/curves/curve.hpp>
+#include <chrono>
+#include <iostream>
+#include <vector>
+
+namespace Atlas {
+
+    template <class Interp>
+    static ZeroRateCurve<Interp> buildFlatCurve(const Date& refDate, double rate) {
+        std::vector<Date> dates{refDate, refDate + Period(50, TimeUnit::Years)};
+        std::vector<double> rates(2, rate);
+        return ZeroRateCurve<Interp>(dates, rates);
+    }
+
+    class Timer {
+       public:
+        Timer() { startPoint = std::chrono::high_resolution_clock::now(); };
+        ~Timer() {
+            auto endPoint = std::chrono::high_resolution_clock::now();
+            auto start    = std::chrono::time_point_cast<std::chrono::milliseconds>(startPoint).time_since_epoch().count();
+            auto end      = std::chrono::time_point_cast<std::chrono::milliseconds>(endPoint).time_since_epoch().count();
+            std::cout << "Elapsed time: " << (end - start) << "ms \n";
+        };
+
+       private:
+        std::chrono::time_point<std::chrono::high_resolution_clock> startPoint;
+    };
+
+    template <class T>
+    static std::vector<std::vector<T>> sliceVector(const std::vector<T>& input, size_t n) {
+        std::vector<std::vector<T>> r;
+        size_t rSize = input.size();
+        size_t step  = rSize / n;
+        size_t i;
+        for (i = 0; i < rSize - n; i = i + n) {
+            std::vector<T> tmp(input.begin() + i, input.begin() + i + n);
+            r.push_back(tmp);
+        }
+        std::vector<T> tmp(input.begin() + i, input.end());
+        r.push_back(tmp);
+        return r;
+    }
+
+    static Date fastDateParser(const std::string& date) {
+        int day   = std::stoi(date.substr(0, 2));
+        int month = std::stoi(date.substr(2, 2));
+        int year  = std::stoi(date.substr(4, 4));
+        return Date(day, (Month)month, year);
+    }
+}  // namespace atlas
+
+#endif /* A1E6F5B0_6F4A_4460_9F42_A14B525D8447 */

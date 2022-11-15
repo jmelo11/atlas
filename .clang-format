@@ -1,0 +1,56 @@
+Language:        Cpp
+Standard:        c++20
+
+# General appearance:
+
+BasedOnStyle: Google 
+
+IndentWidth: 4
+ColumnLimit: 100
+NamespaceIndentation: All
+MaxEmptyLinesToKeep: 1
+FixNamespaceComments: true
+
+# Function declarations:
+
+BinPackParameters: true
+AllowShortFunctionsOnASingleLine: Inline
+AlwaysBreakTemplateDeclarations: true
+
+# T& x, not T &x:
+
+DerivePointerAlignment: false
+PointerAlignment: Left
+AllowShortBlocksOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
+AlignAfterOpenBracket: BlockIndent
+AlignAfterOpenBracket: true
+AlignConsecutiveAssignments: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+AllowAllParametersOfDeclarationOnNextLine: false
+SortIncludes: true
+IncludeBlocks: Merge
+IncludeCategories: 
+  - Regex:           '^"'
+    Priority:        1
+  - Regex:           '^<qlp/'
+    Priority:        2
+  - Regex:           '^<ql/'
+    Priority:        3
+  - Regex:           '^<qle/'
+    Priority:        4
+  - Regex:           '^<boost/'
+    Priority:        5
+  - Regex:           '^<'
+    Priority:        6
+
+# Other:
+
+AlignEscapedNewlines: Left
+BreakBeforeTernaryOperators: false
+ConstructorInitializerIndentWidth: 0
+SortUsingDeclarations: false
+IndentCaseLabels: true
+
+
