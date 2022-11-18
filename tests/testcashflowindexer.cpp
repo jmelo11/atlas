@@ -3,7 +3,7 @@
 
 using namespace Atlas;
 
-TEST(TestCashflowIndexer, Visitors) {
+TEST(CashflowIndexer, Deposit) {
     QuantLib::Date startDate(1, QuantLib::January, 2018);
     QuantLib::Date endDate(1, QuantLib::January, 2025);
     QuantLib::Frequency frequency   = QuantLib::Frequency::Annual;
@@ -28,22 +28,120 @@ TEST(TestCashflowIndexer, Visitors) {
     tmp = request.dfs.at(1);
     EXPECT_EQ(tmp.date_, endDate);
     EXPECT_EQ(tmp.discountCurve_, "undefined");
+}
 
-    // equal payment product
-    indexer.clear();
-    request.dfs.clear();
-    request.fwds.clear();
+TEST(CashflowIndexer, EqualPaymentProduct) {
+    QuantLib::Date startDate(1, QuantLib::January, 2018);
+    QuantLib::Date endDate(1, QuantLib::January, 2025);
+    QuantLib::Frequency frequency   = QuantLib::Frequency::Annual;
+    QuantLib::DayCounter dayCounter = QuantLib::Actual360();
+    double notional                 = 100;
+    QuantLib::InterestRate rate(0.05, dayCounter, QuantLib::Compounding::Simple,
+                                QuantLib::Frequency::Annual);
 
-    EqualPaymentProduct prod2(startDate, endDate, frequency, notional, rate);
-    prod2.accept(indexer);
+    CashflowIndexer indexer;
+    MarketRequest request;
+
+    EqualPaymentProduct prod(startDate, endDate, frequency, notional, rate);
+    prod.accept(indexer);
     indexer.setRequest(request);
-    auto& leg     = prod2.leg();
-    auto& coupons = leg.coupons();
+    auto& leg         = prod.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
 
-    EXPECT_EQ(request.dfs.size(), coupons.size() * 2+1);
+    EXPECT_EQ(request.dfs.size(), coupons.size() + redemptions.size() + 1);
     EXPECT_EQ(request.fwds.size(), 0);
-    for (size_t i = 0; i < coupons.size(); ++i) {
-        auto& coupon = coupons.at(i);
-        EXPECT_EQ(coupon.dfIdx(), i+1);
+
+    size_t dfCounter = 0;
+    EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+
+    for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
+        dfCounter++;
+        if (i < coupons.size()) {
+            EXPECT_EQ(coupons.at(i).dfIdx(), dfCounter);
+        } else {
+            EXPECT_EQ(redemptions.at(i - coupons.size()).dfIdx(), dfCounter);
+        }
+    }
+}
+
+TEST(CashflowIndexer, FloatingRateBulletProduct) {
+    QuantLib::Date startDate(1, QuantLib::January, 2020);
+    QuantLib::Date endDate(1, QuantLib::January, 2025);
+    double notional = 100.0;
+    double spread   = 0.0;
+
+    LIBOR12M index;
+    FloatingRateBulletProduct prod(startDate, endDate, notional, spread, index);
+
+    CashflowIndexer indexer;
+    MarketRequest request;
+
+    prod.accept(indexer);
+    indexer.setRequest(request);
+
+    auto& leg         = prod.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    EXPECT_EQ(request.dfs.size(), coupons.size() + redemptions.size() + 1);
+    EXPECT_EQ(request.fwds.size(), coupons.size());
+
+    size_t dfCounter  = 0;
+    size_t fwdCounter = 0;
+    EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+
+    for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
+        dfCounter++;
+        if (i < coupons.size()) {
+            EXPECT_EQ(coupons.at(i).dfIdx(), dfCounter);
+            EXPECT_EQ(coupons.at(i).fwdIdx(), fwdCounter);
+            fwdCounter++;
+        } else {
+            EXPECT_EQ(redemptions.at(i - coupons.size()).dfIdx(), dfCounter);
+        }
+    }
+}
+
+TEST(CashflowIndexer, MultipleProduct) {
+    QuantLib::Date startDate(1, QuantLib::January, 2020);
+    QuantLib::Date endDate(1, QuantLib::January, 2025);
+    double notional = 100.0;
+    double spread   = 0.0;
+
+    LIBOR12M index;
+    std::vector<FloatingRateBulletProduct> prods;
+
+    CashflowIndexer indexer;
+    MarketRequest request;
+
+    size_t numProds   = 10;
+    size_t dfCounter  = 0;
+    size_t fwdCounter = 0;
+
+    for (auto& prod : prods) {
+        prods.push_back(FloatingRateBulletProduct(startDate, endDate, notional, spread, index));
+        indexer.visit(prods.back());
+        indexer.setRequest(request);
+
+        auto& leg         = prod.leg();
+        auto& coupons     = leg.coupons();
+        auto& redemptions = leg.redemptions();
+
+        EXPECT_EQ(request.dfs.size(), coupons.size() + redemptions.size() + 1 + dfCounter);
+        EXPECT_EQ(request.fwds.size(), coupons.size() + fwdCounter);
+        EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+
+        for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
+            dfCounter++;
+            if (i < coupons.size()) {
+                EXPECT_EQ(coupons.at(i).dfIdx(), dfCounter);
+                EXPECT_EQ(coupons.at(i).fwdIdx(), fwdCounter);
+                fwdCounter++;
+            } else {
+                EXPECT_EQ(redemptions.at(i - coupons.size()).dfIdx(), dfCounter);
+            }
+        }
+        dfCounter++;  // for start date
     }
 }

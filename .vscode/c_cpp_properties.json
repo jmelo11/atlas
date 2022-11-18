@@ -3,11 +3,7 @@
         {
             "name": "Mac",
             "defines": [],
-            "includePath": [
-                "${workspaceFolder}/**",
-                "/Users/josemelo/Desktop/dev/**",
-                "/usr/local/include/**"
-            ],
+            "includePath": [],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
             ],

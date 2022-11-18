@@ -7,7 +7,6 @@
 #ifndef CB4131F2_7926_4625_AEEC_DD73178CBD54
 #define CB4131F2_7926_4625_AEEC_DD73178CBD54
 
-#include <atlas/curves/curve.hpp>
 #include <atlas/data/marketdata.hpp>
 
 namespace Atlas {

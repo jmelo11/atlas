@@ -13,7 +13,7 @@ namespace Atlas {
                                                          const QuantLib::Date& endDate,
                                                          double notional, double spread,
                                                          RateIndex index)
-    : FloatingRateProduct(startDate, endDate) {
+    : FloatingRateProduct(startDate, endDate, notional) {
         QuantLib::Schedule schedule =
             QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(
                 index.fixingFrequency());

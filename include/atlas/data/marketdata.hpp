@@ -7,7 +7,9 @@
 #ifndef AFBFF92A_3FC8_47D1_8AA5_E29304D51829
 #define AFBFF92A_3FC8_47D1_8AA5_E29304D51829
 
+#include <ql/compounding.hpp>
 #include <ql/time/date.hpp>
+#include <ql/time/daycounters/actual360.hpp>
 #include <map>
 #include <tuple>
 #include <unordered_map>
@@ -25,10 +27,22 @@ namespace Atlas {
         struct Rate {
             QuantLib::Date startDate_;
             QuantLib::Date endDate_;
+            QuantLib::DayCounter dayCounter_;
+            QuantLib::Compounding compounding_;
+            QuantLib::Frequency frequency_;
+
             std::string curve_;
             Rate(const std::string& referenceCurve, const QuantLib::Date& startDate,
-                 const QuantLib::Date& endDate)
-            : startDate_(startDate), endDate_(endDate), curve_(referenceCurve) {}
+                 const QuantLib::Date& endDate,
+                 const QuantLib::DayCounter& dayCounter   = QuantLib::Actual360(),
+                 const QuantLib::Compounding& compounding = QuantLib::Simple,
+                 const QuantLib::Frequency& frequency     = QuantLib::Annual)
+            : startDate_(startDate),
+              endDate_(endDate),
+              curve_(referenceCurve),
+              dayCounter_(dayCounter),
+              compounding_(compounding),
+              frequency_(frequency) {}
         };
 
         struct DiscountFactor {

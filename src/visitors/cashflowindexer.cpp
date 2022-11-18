@@ -54,9 +54,11 @@ namespace Atlas {
         for (auto& coupon : coupons) {
             dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, coupon.paymentDate()));
             coupon.dfIdx(dfs_.size() - 1);
+
+            const auto& index = coupon.index();
             fwds_.push_back(
-                MarketRequest::Rate(forecastCurve, coupon.startDate(), coupon.endDate()));
-            coupon.fwdIdx(dfs_.size() - 1);
+                MarketRequest::Rate(forecastCurve, coupon.startDate(), coupon.endDate(), index.dayCounter(), index.rateCompounding(), index.rateFrequency()));
+            coupon.fwdIdx(fwds_.size() - 1);
         }
 
         for (auto& redemption : redemptions) {

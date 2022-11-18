@@ -28,7 +28,7 @@ namespace Atlas {
             auto f = [&](double r) {
                 evalInst.rate(r);
                 calc.visit(evalInst);
-                double npv = calc.results();
+                double npv      = calc.results();
                 double notional = inst.notional();
                 calc.clear();
                 return npv - notional * startDf;
@@ -45,12 +45,13 @@ namespace Atlas {
             auto f = [&](double s) {
                 evalInst.spread(s);
                 calc.visit(evalInst);
-                return calc.results() - inst.notional() * startDf;
+                double npv      = calc.results();
+                double notional = inst.notional();
+                calc.clear();
+                return npv - notional * startDf;
             };
             value_ = solver_.solve(f, accuracy_, guess_, step_);
         };
-
-        void floatingLegParSpread(FloatingRateLeg& leg);
 
         const MarketData& marketData_;
         QuantLib::Brent solver_;

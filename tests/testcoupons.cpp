@@ -6,7 +6,7 @@
 
 using namespace Atlas;
 
-TEST(FixedCouponTests, Coupons) {
+TEST(Coupons, FixedCouponTests) {
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
     double notional = 100;
@@ -22,7 +22,7 @@ TEST(FixedCouponTests, Coupons) {
     EXPECT_FLOAT_EQ(yf * rate.rate() * notional, coupon.amount());
 }
 
-TEST(FloatingCouponTests, Coupon) {
+TEST(Coupons, FloatingCouponTests) {
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
     double notional = 100;

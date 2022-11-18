@@ -6,7 +6,7 @@
 
 using namespace Atlas;
 
-TEST(TestFloatingRateBullet, FloatingRateProduct) {
+TEST(Product, FloatingRateProduct) {
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
     double notional = 100;

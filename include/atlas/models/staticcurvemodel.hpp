@@ -7,12 +7,13 @@
 #ifndef DE0DE97B_4D3F_4EFB_8C7F_9D85C4CDE288
 #define DE0DE97B_4D3F_4EFB_8C7F_9D85C4CDE288
 
+#include <ql/termstructures/yieldtermstructure.hpp>
 #include <atlas/models/model.hpp>
 #include <unordered_map>
 
 namespace Atlas {
 
-    using CurveMap = std::unordered_map<std::string, std::unique_ptr<YieldCurve>>;
+    using CurveMap = std::unordered_map<std::string, std::unique_ptr<QuantLib::YieldTermStructure>>;
 
     class StaticCurveModel : public Model {
        public:
@@ -39,7 +40,7 @@ namespace Atlas {
         QuantLib::Date refDate_;
         const CurveMap& discountCurves_;
         const CurveMap& forecastCurves_;
-        DoubleMap<std::string, Date, double> historicalData_;
+        DoubleMap<std::string, QuantLib::Date, double> historicalData_;
     };
 }  // namespace Atlas
 

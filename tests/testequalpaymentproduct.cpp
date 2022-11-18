@@ -5,7 +5,7 @@
 
 using namespace Atlas;
 
-TEST(TestEqualPaymentProduct, EqualPaymentProduct) {
+TEST(Product, EqualPaymentProduct) {
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
     double notional          = 100;

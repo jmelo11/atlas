@@ -30,6 +30,8 @@ namespace Atlas {
 
         QuantLib::DayCounter dayCounter() const override;
 
+        const RateIndex& index() const { return index_; }
+        
        private:
         double fixing_;
         double spread_;  // ptr?

@@ -82,6 +82,9 @@
         "condition_variable": "cpp",
         "fstream": "cpp",
         "stack": "cpp",
-        "filesystem": "cpp"
-    }
+        "filesystem": "cpp",
+        "ranges": "cpp",
+        "span": "cpp"
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

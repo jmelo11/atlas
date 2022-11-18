@@ -5,13 +5,13 @@ include(GNUInstallDirs) # despues de definir el proyecto
 set(CMAKE_CXX_STANDARD 20)
 set(BUILD_PYTHON OFF)
 set(BUILD_TESTS ON)
+set(BUILD_BENCHMARK ON)
 # target is curvemanager, and use include a src folders
 
 file(
   GLOB
   SOURCES
   "src/*.cpp"
-  "src/curves/*.cpp"
   "src/data/*.cpp"
   "src/cashflows/*.cpp"
   "src/instruments/*.cpp"
@@ -98,4 +98,8 @@ endif()
 
 if(BUILD_TESTS)
   add_subdirectory(tests)
+endif()
+
+if(BUILD_BENCHMARK)
+  add_subdirectory(benchmark)
 endif()
