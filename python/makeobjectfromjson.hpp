@@ -10,7 +10,7 @@ using json = nlohmann::json;
 namespace AtlasPython {
 
     template <typename T>
-    inline T make(const json& params) {
+    inline T makeObjectFromJson(const json& params) {
         Schema<T> schema;
         auto result = schema.makeObj(params);
         if (result.has_value()) {

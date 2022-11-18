@@ -4,11 +4,10 @@ project(atlaspython VERSION 0.1.0)
 include(GNUInstallDirs) # despues de definir el proyecto
 set(CMAKE_CXX_STANDARD 20)
 set(BUILD_TESTS ON)
-# target is curvemanager, and use include a src folders
 
-file(GLOB SOURCES "*.cpp")
+file(GLOB SOURCES "*.cpp" "schemas/*.cpp")
 
-file(GLOB INCLUDES "*.hpp")
+file(GLOB INCLUDES "*.hpp" "schemas/*.hpp")
 
 find_package(pybind11 REQUIRED)
 

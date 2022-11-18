@@ -8,53 +8,50 @@
 
 using namespace Atlas;
 
-namespace AtlasPython {
-    namespace QuantLibParser {
+namespace QuantLibParser {
 
-        template <>
-        void Schema<Deposit>::initSchema() {
-            json base = R"({
+    template <>
+    void Schema<Deposit>::initSchema() {
+        json base = R"({
             "title": "Deposit Instrument Schema",
             "properties": {},
             "required": ["STARTDATE", "ENDDATE", "RATE"]
         })"_json;
 
-            base["properties"]["STARTDATE"] = dateSchema;
-            base["properties"]["ENDDATE"]   = dateSchema;
-            base["properties"]["NOTIONAL"]  = faceAmountSchema;
-            base["properties"]["RATE"]      = baseRateSchema;
+        base["properties"]["STARTDATE"] = dateSchema;
+        base["properties"]["ENDDATE"]   = dateSchema;
+        base["properties"]["NOTIONAL"]  = faceAmountSchema;
+        base["properties"]["RATE"]      = baseRateSchema;
 
-            mySchema_ = base;
+        mySchema_ = base;
+    };
+
+    template <>
+    void Schema<Deposit>::initDefaultValues() {
+        myDefaultValues_["NOTIONAL"] = 100;
+    };
+
+    template <>
+    std::optional<Deposit> Schema<Deposit>::makeObj(const json& params) {
+        auto f = [&]() {
+            json data                = setDefaultValues(params);
+            QuantLib::Date startDate = parser<QuantLib::Date> parse(data.at("STARTDATE"));
+            QuantLib::Date endDate   = parser<QuantLib::Date> parse(data.at("ENDDATE"));
+
+            const json& rateParams = data.at("RATE");
+            double r               = rateParams.at("VALUE");
+
+            QuantLib::DayCounter dayCounter   = parser<QuantLib::DayCounter> parse(rateParams.at("DAYCOUNTER"));
+            QuantLib::Compounding compounding = parser<QuantLib::Compounding> parse(rateParams.at("COMPOUNDING"));
+            QuantLib::Frequency frequency     = parser<QuantLib::Frequency> parse(rateParams.at("FREQUENCY"));
+            QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
+
+            double notional = data.at("NOTIONAL");
+
+            return std::make_optional<Deposit>(startDate, endDate, notional, rate);
         };
-
-        template <>
-        void Schema<Deposit>::initDefaultValues() {
-            myDefaultValues_["NOTIONAL"] = 100;
-        };
-
-        template <>
-        auto Schema<Deposit>::makeObj(const json& params) {
-            auto f = [&](const json& params) {
-                json data                = setDefaultValues(params);
-                QuantLib::Date startDate = parser<QuantLib::Date> parse(data.at("STARTDATE"));
-                QuantLib::Date endDate   = parser<QuantLib::Date> parse(data.at("ENDDATE"));
-
-                const json& rateParams = data.at("RATE");
-                double r               = rateParams.at("VALUE");
-
-                QuantLib::DayCounter dayCounter   = parser<QuantLib::DayCounter> parse(rateParams.at("DAYCOUNTER"));
-                QuantLib::Compounding compounding = parser<QuantLib::Compounding> parse(rateParams.at("COMPOUNDING"));
-                QuantLib::Frequency frequency     = parser<QuantLib::Frequency> parse(rateParams.at("FREQUENCY"));
-                QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
-
-                double notional = data.at("NOTIONAL");
-
-                return std::make_optional<Deposit>(startDate, endDate, notional, rate);
-            };
-            return isValid(params) ? f(params) : std::nullopt;
-        }
-    }  // namespace QuantLibParser
-
-}  // namespace AtlasPython
+        return isValid(params) ? f() : std::nullopt;
+    }
+}  // namespace QuantLibParser
 
 #endif /* AC7D969B_F3AA_445C_9566_77D45ED116A4 */
