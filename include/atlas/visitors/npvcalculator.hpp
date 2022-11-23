@@ -3,6 +3,7 @@
 
 #include <atlas/data/marketdata.hpp>
 #include <atlas/visitors/visitor.hpp>
+#include <iostream>
 
 namespace Atlas {
 
@@ -10,10 +11,15 @@ namespace Atlas {
        public:
         NPVCalculator(const MarketData& marketData) : marketData_(marketData){};
 
-        void clear() { npv_ = 0.0; nonSensNPV_ = 0.0; };
+        void clear() {
+            npv_        = 0.0;
+            nonSensNPV_ = 0.0;
+        };
+
         double results() const { return npv_ + nonSensNPV_; };
 
         double sensNPV() const { return npv_; };
+
         double nonSensNPV() const { return nonSensNPV_; };
 
         void visit(Deposit& inst) override;
@@ -26,9 +32,9 @@ namespace Atlas {
         void fixedLegNPV(const FixedRateLeg& leg);
         void floatingLegNPV(FloatingRateLeg& leg);
 
-        double npv_        = 0.0;
-        double nonSensNPV_ = 0.0;
-        const MarketData& marketData_;
+        double npv_                   = 0.0;
+        double nonSensNPV_            = 0.0;
+        const MarketData& marketData_ = MarketData();
     };
 }  // namespace Atlas
 

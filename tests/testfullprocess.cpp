@@ -1,17 +1,18 @@
 #include "pch.hpp"
-#include <atlas/curves/curve.hpp>
+#include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
 #include <atlas/visitors/cashflowindexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
 
 using namespace Atlas;
+namespace QL = QuantLib;
 
 TEST(FullProcess, TestProcess) {
-    QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
-    QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
+    QL::Date startDate(1, QL::Month::Aug, 2020);
+    QL::Date endDate(1, QL::Month::Aug, 2021);
     double notional = 100;
-    QuantLib::InterestRate rate(0.05, QuantLib::Actual360(), QuantLib::Simple, QuantLib::Annual);
+    QL::InterestRate rate(0.05, QL::Actual360(), QL::Simple, QL::Annual);
     Deposit prod(startDate, endDate, notional, rate);
 
     MarketRequest request;
@@ -20,16 +21,13 @@ TEST(FullProcess, TestProcess) {
     indexer.setRequest(request);
 
     // curve
-    std::vector<double> times = {0, 30};
-    std::vector<double> rates = {0.05, 0.05};
-    ZeroRateCurve<QuantLib::Linear> curve(startDate, times, rates);
-
+    double marketRate = 0.05;
     CurveMap discounts;
-    discounts["undefined"] = std::make_unique<ZeroRateCurve<QuantLib::Linear>>(curve);
-
+    discounts["undefined"] =
+        std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360(), QL::Simple, QL::Annual);
     StaticCurveModel model(request, discounts);
 
-    std::vector<QuantLib::Date> evalDates = {startDate};
+    std::vector<QL::Date> evalDates = {startDate};
     Scenario scenario;
     model.simulate(evalDates, scenario);
 

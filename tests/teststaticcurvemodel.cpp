@@ -1,14 +1,16 @@
 #include "pch.hpp"
+#include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
 #include <atlas/visitors/cashflowindexer.hpp>
 
 using namespace Atlas;
+namespace QL = QuantLib;
 
-TEST(DepositStaticCurveModel, Models) {
-    QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
-    QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
+TEST(StaticCurveModel, Deposit) {
+    QL::Date startDate(1, QL::Month::Aug, 2020);
+    QL::Date endDate(1, QL::Month::Aug, 2021);
     double notional = 100;
-    QuantLib::InterestRate rate(0.05, QuantLib::Actual360(), QuantLib::Simple, QuantLib::Annual);
+    QL::InterestRate rate(0.05, QL::Actual360(), QL::Simple, QL::Annual);
     Deposit prod(startDate, endDate, notional, rate);
 
     MarketRequest request;
@@ -17,16 +19,12 @@ TEST(DepositStaticCurveModel, Models) {
     indexer.setRequest(request);
 
     // curve
-    std::vector<double> times = {0, 30};
-    std::vector<double> rates = {0.05, 0.05};
-    ZeroRateCurve<QuantLib::Linear> curve(startDate, times, rates);
-
     CurveMap discounts;
-    discounts["undefined"] = std::make_unique<ZeroRateCurve<QuantLib::Linear>>(curve);
+    discounts["undefined"] = std::make_shared<QL::FlatForward>(startDate, rate, QL::Actual360(), QL::Simple, QL::Annual);
 
     StaticCurveModel model(request, discounts);
 
-    std::vector<QuantLib::Date> evalDates = {startDate};
+    std::vector<QL::Date> evalDates = {startDate};
     Scenario scenario;
     model.simulate(evalDates, scenario);
 
@@ -36,14 +34,14 @@ TEST(DepositStaticCurveModel, Models) {
     EXPECT_FLOAT_EQ(scenario[0].dfs[1], 1 / rate.compoundFactor(startDate, endDate));
 }
 
-TEST(FloatingBulletStaticCurveModel, Models) {
-    QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
-    QuantLib::Date endDate(1, QuantLib::Month::Aug, 2025);
+TEST(StaticCurveModel, FloatingRateBulletProduct) {
+    QL::Date startDate(1, QL::Month::Aug, 2020);
+    QL::Date endDate(1, QL::Month::Aug, 2025);
 
     double notional = 100;
     double spread   = 0.0;
 
-    LIBOR6M index;
+    LIBOR12M index;
     FloatingRateBulletProduct prod(startDate, endDate, notional, spread, index);
 
     MarketRequest request;
@@ -52,22 +50,18 @@ TEST(FloatingBulletStaticCurveModel, Models) {
     indexer.setRequest(request);
 
     // curve
-    std::vector<double> times = {0, 30};
-    std::vector<double> rates = {0.05, 0.05};
-    ZeroRateCurve<QuantLib::Linear> curve(startDate, times, rates);
-
+    double marketRate = 0.05;
     CurveMap discounts;
-    discounts["undefined"] = std::make_unique<ZeroRateCurve<QuantLib::Linear>>(curve);
-    CurveMap forwards;
-    forwards["undefined"] = std::make_unique<ZeroRateCurve<QuantLib::Linear>>(curve);
+    discounts["undefined"] = std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360());
 
-    StaticCurveModel model(request, discounts, forwards);
+    StaticCurveModel model(request, discounts);
+    model.addForecastCurve("undefined", std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360()));
 
-    std::vector<QuantLib::Date> evalDates = {startDate};
+    std::vector<QL::Date> evalDates = {startDate};
     Scenario scenario;
     model.simulate(evalDates, scenario);
 
     EXPECT_EQ(scenario.size(), 1);
     EXPECT_EQ(scenario[0].dfs.size(), 7);
-    EXPECT_EQ(scenario[0].fwds.size(), 10);
+    EXPECT_EQ(scenario[0].fwds.size(), 5);
 }

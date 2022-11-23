@@ -1,31 +1,21 @@
 #include "pch.hpp"
-#include <atlaspython.hpp>
-#include <fstream>
-#include <iostream>
+#include <makeobjectfromjson.hpp>
+#include <schemas/depositschema.hpp>
 
-using namespace atlaspythonwrapper;
+using namespace Atlas;
 
-json readJSONFile(std::string filePath) {
-    std::ifstream file(filePath);
-    std::ostringstream tmp;
-    tmp << file.rdbuf();
-    std::string s = tmp.str();
-    json data     = json::parse(s);
-    return data;
-}
+TEST(MakeObj, Deposit) {
+    json data = R"({
+        "STARTDATE": "01012022",
+        "ENDDATE": "01012023",
+        "NOTIONAL": 100,
+        "RATE": {
+            "VALUE": 0.01,
+            "DAYCOUNTER": "ACT360",
+            "COMPOUNDING": "SIMPLE",
+            "FREQUENCY": "ANNUAL"
+        }
+    })"_json;
 
-TEST(TestParRateEqualPayment, TestPython) {
-    json data   = readJSONFile("json/equalpayment.json");
-    double rate = pricer<EqualPayment, ParRateSolver>::defineAndCalculate(data);
-    EXPECT_EQ(true, true);
-}
-TEST(TestParRateFixedBullet, TestPython) {
-    json data   = readJSONFile("json/equalpayment.json");
-    double rate = pricer<FixedBullet, ParRateSolver>::defineAndCalculate(data);
-    EXPECT_EQ(true, true);
-}
-TEST(TestParSpreadFloatingBullet, TestPython) {
-    json data     = readJSONFile("json/floatingbullet.json");
-    double spread = pricer<FloatingBullet, ParSpreadSolver>::defineAndCalculate(data);
-    EXPECT_EQ(true, true);
+    EXPECT_NO_THROW(makeObjectFromJson<Deposit>(data));
 }

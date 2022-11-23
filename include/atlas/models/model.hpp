@@ -7,7 +7,6 @@
 #ifndef CB4131F2_7926_4625_AEEC_DD73178CBD54
 #define CB4131F2_7926_4625_AEEC_DD73178CBD54
 
-#include <atlas/curves/curve.hpp>
 #include <atlas/data/marketdata.hpp>
 
 namespace Atlas {
@@ -16,7 +15,8 @@ namespace Atlas {
 
     class Model {
        public:
-        Model(){};
+        virtual ~Model() = default;
+
         Model(const MarketRequest& marketRequest) : marketRequest_(marketRequest) {}
 
         virtual void simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const = 0;

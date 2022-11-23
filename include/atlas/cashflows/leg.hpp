@@ -15,6 +15,8 @@ namespace Atlas {
 
         Leg(std::vector<Redemption> redemptions) : redemptions_(redemptions){};
 
+        virtual ~Leg(){};
+
         void discountCurve(const std::string& curve) { discountCurve_ = curve; }
 
         const std::string& discountCurve() const { return discountCurve_; }
@@ -34,8 +36,7 @@ namespace Atlas {
        public:
         FixedRateLeg() : Leg(){};
 
-        FixedRateLeg(std::vector<FixedRateCoupon> coupons, std::vector<Redemption> redemptions)
-        : Leg(redemptions), coupons_(coupons){};
+        FixedRateLeg(std::vector<FixedRateCoupon> coupons, std::vector<Redemption> redemptions) : Leg(redemptions), coupons_(coupons){};
 
         std::vector<FixedRateCoupon>& coupons() { return coupons_; }
 
@@ -51,9 +52,7 @@ namespace Atlas {
        public:
         FloatingRateLeg() : Leg(){};
 
-        FloatingRateLeg(std::vector<FloatingRateCoupon> coupons,
-                        std::vector<Redemption> redemptions)
-        : Leg(redemptions), coupons_(coupons){};
+        FloatingRateLeg(std::vector<FloatingRateCoupon> coupons, std::vector<Redemption> redemptions) : Leg(redemptions), coupons_(coupons){};
 
         std::vector<FloatingRateCoupon>& coupons() { return coupons_; }
 

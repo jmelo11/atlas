@@ -16,6 +16,7 @@ namespace Atlas {
 
     class Visitor {
        public:
+        virtual ~Visitor()                                  = default;
         virtual void visit(Deposit& inst)                   = 0;
         virtual void visit(FixedBulletProduct& inst)        = 0;
         virtual void visit(EqualPaymentProduct& inst)       = 0;
@@ -24,6 +25,7 @@ namespace Atlas {
 
     class ConstVisitor {
        public:
+        virtual ~ConstVisitor()                                         = default;
         virtual void visit(const Deposit& inst) const                   = 0;
         virtual void visit(const FixedBulletProduct& inst) const        = 0;
         virtual void visit(const EqualPaymentProduct& inst) const       = 0;

@@ -1,34 +1,55 @@
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
-import os
-
 from pathlib import Path
-__version__ = "0.0.1"
+from sys import platform
 
-BASE_DIR = Path(__file__).absolute().parent.parent.resolve()
+__version__ = "1.0.0"
+
+BASE_DIR = Path(__file__).absolute().parent.resolve()
+
+if platform == "win32":
+    LIB_DIR = Path('C:/Users/bloomberg/Desktop/Desarrollo/builds')
+    folders = ['QuantLib', 'quantlibparser',
+               'nlohmann_json_schema_validator', 'nlohmann_json', 'pybind11', 'pybind11_json', 'Atlas']
+    include_dirs = [str(LIB_DIR / folder / 'include') for folder in folders]
+    include_dirs.append(str(LIB_DIR / 'boost'))
+    library_dirs = [str(LIB_DIR / folder / 'lib') for folder in folders]
+    libraries = ['QuantLib-x64-mt','QuantLibParser', 'nlohmann_json_schema_validator', 'Atlas']
+    extra_compile_args = ['-std=c++20']
+
+elif platform == "linux" or platform == "linux2":
+    LIB_DIR = Path('/usr/local')
+    include_dirs = [str(LIB_DIR / 'include')]
+    library_dirs = [str(LIB_DIR / 'lib')]
+    libraries = ['QuantLib', 'QuantLibParser','nlohmann_json_schema_validator','Atlas']
+    extra_compile_args = ['-std=c++20']
+
+else:
+    LIB_DIR = Path('/Users/josemelo/Desktop/dev/builds')
+    include_dirs = [str(LIB_DIR / 'include')]
+    include_dirs += ['/opt/homebrew/opt/boost/include']
+
+    library_dirs = [str(LIB_DIR / 'lib')]
+    library_dirs += ['/opt/homebrew/opt/boost/lib']
+
+    libraries = ['QuantLib', 'QuantLibParser', 'nlohmann_json_schema_validator','Atlas'] 
+    extra_compile_args = ['-std=c++20']
 
 ext_modules = [
-    Pybind11Extension("atlaspython",
-        ["module.cpp"],
-        include_dirs=[str(BASE_DIR / 'atlas'),                      
-                      os.environ['QL_PATH'],                  
-                      os.environ['BOOST_PATH'],
-                      str(BASE_DIR / 'packages/json/include'),
-                      str(BASE_DIR / 'packages/pybind11_json/include')],                  
-
-        library_dirs=[os.environ['QL_PATH'] + '/lib',                      
-                      os.environ['BOOST_PATH'] + '/libs',
-                      str(BASE_DIR / 'build/atlas/x64/Release'),],
-
-        libraries=['QuantLib-x64-mt','atlas'],
-        # Example: passing in the version to the compiled code
-        define_macros = [('VERSION_INFO', __version__)]       
-        ),
+    Pybind11Extension("atlas",
+                      ["module.cpp"],
+                      include_dirs=include_dirs,
+                      library_dirs=library_dirs,
+                      libraries=libraries,
+                      define_macros=[('VERSION_INFO', __version__)],
+                      extra_compile_args=extra_compile_args,
+                      language="c++20"
+                      ),
 ]
 
 setup(
-    name="atlaspython",
+    name="atlas",
     version=__version__,
     author="Itau",
     author_email="jose.melo@itau.cl",

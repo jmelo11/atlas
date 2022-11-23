@@ -8,8 +8,10 @@ namespace Atlas {
 
     class FloatingRateProduct : public Instrument {
        public:
-        FloatingRateProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
-                            double notional = 0.0, const FloatingRateLeg& leg = FloatingRateLeg());
+        FloatingRateProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional = 0.0,
+                            const FloatingRateLeg& leg = FloatingRateLeg());
+
+        virtual ~FloatingRateProduct(){};
 
         const FloatingRateLeg& constLeg() const { return leg_; };
 
@@ -19,6 +21,9 @@ namespace Atlas {
 
         void spread(double s);
 
+        void forecastCurve(const std::string& curve) { leg_.forecastCurve(curve); }
+
+        void discountCurve(const std::string& curve) { leg_.discountCurve(curve); }
        protected:
         FloatingRateLeg leg_;
         double spread_ = 0.0;
