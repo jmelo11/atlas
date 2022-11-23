@@ -20,7 +20,7 @@ TEST(StaticCurveModel, Deposit) {
 
     // curve
     CurveMap discounts;
-    discounts["undefined"] = std::make_unique<QL::FlatForward>(startDate, rate, QL::Actual360(), QL::Simple, QL::Annual);
+    discounts["undefined"] = std::make_shared<QL::FlatForward>(startDate, rate, QL::Actual360(), QL::Simple, QL::Annual);
 
     StaticCurveModel model(request, discounts);
 
@@ -52,13 +52,10 @@ TEST(StaticCurveModel, FloatingRateBulletProduct) {
     // curve
     double marketRate = 0.05;
     CurveMap discounts;
-    discounts["undefined"] =
-        std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360());
-    CurveMap forwards;
-    forwards["undefined"] =
-        std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360());
+    discounts["undefined"] = std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360());
 
-    StaticCurveModel model(request, discounts, forwards);
+    StaticCurveModel model(request, discounts);
+    model.addForecastCurve("undefined", std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360()));
 
     std::vector<QL::Date> evalDates = {startDate};
     Scenario scenario;

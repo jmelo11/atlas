@@ -11,14 +11,15 @@ namespace Atlas {
        public:
         Coupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional);
 
+        virtual ~Coupon(){};
+
         double notional() const;
 
         virtual QuantLib::DayCounter dayCounter() const = 0;
 
         double accruedPeriod(const QuantLib::Date& start, const QuantLib::Date& end) const;
 
-        virtual double accruedAmount(const QuantLib::Date& start,
-                                     const QuantLib::Date& end) const = 0;
+        virtual double accruedAmount(const QuantLib::Date& start, const QuantLib::Date& end) const = 0;
 
         QuantLib::Date startDate() const { return startDate_; }  // accrual start date?
 

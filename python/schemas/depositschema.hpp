@@ -35,15 +35,15 @@ namespace QuantLibParser {
     std::optional<Deposit> Schema<Deposit>::makeObj(const json& params) {
         auto f = [&]() {
             json data                = setDefaultValues(params);
-            QuantLib::Date startDate = parser<QuantLib::Date> parse(data.at("STARTDATE"));
-            QuantLib::Date endDate   = parser<QuantLib::Date> parse(data.at("ENDDATE"));
+            QuantLib::Date startDate = parse<QuantLib::Date>(data.at("STARTDATE"));
+            QuantLib::Date endDate   = parse<QuantLib::Date>(data.at("ENDDATE"));
 
             const json& rateParams = data.at("RATE");
             double r               = rateParams.at("VALUE");
 
-            QuantLib::DayCounter dayCounter   = parser<QuantLib::DayCounter> parse(rateParams.at("DAYCOUNTER"));
-            QuantLib::Compounding compounding = parser<QuantLib::Compounding> parse(rateParams.at("COMPOUNDING"));
-            QuantLib::Frequency frequency     = parser<QuantLib::Frequency> parse(rateParams.at("FREQUENCY"));
+            QuantLib::DayCounter dayCounter   = parse<QuantLib::DayCounter>(rateParams.at("DAYCOUNTER"));
+            QuantLib::Compounding compounding = parse<QuantLib::Compounding>(rateParams.at("COMPOUNDING"));
+            QuantLib::Frequency frequency     = parse<QuantLib::Frequency>(rateParams.at("FREQUENCY"));
             QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
 
             double notional = data.at("NOTIONAL");

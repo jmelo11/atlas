@@ -1,6 +1,7 @@
 #ifndef D15DC036_1DC7_46E3_81C5_EC9739FD7433
 #define D15DC036_1DC7_46E3_81C5_EC9739FD7433
 
+#include <qlp/parser.hpp>
 #include <qlp/schemas/commonschemas.hpp>
 #include <qlp/schemas/schema.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentproduct.hpp>
@@ -21,7 +22,7 @@ namespace QuantLibParser {
         base["properties"]["ENDDATE"]          = dateSchema;
         base["properties"]["PAYMENTFREQUENCY"] = frequencySchema;
         base["properties"]["RATE"]             = baseRateSchema;
-        base["properties"]["NOTIONAL"]         = amountSchema;
+        base["properties"]["NOTIONAL"]         = faceAmountSchema;
 
         mySchema_ = base;
     };
@@ -35,16 +36,16 @@ namespace QuantLibParser {
     std::optional<EqualPaymentProduct> Schema<EqualPaymentProduct>::makeObj(const json& params) {
         auto f = [&]() {
             json data                            = setDefaultValues(params);
-            QuantLib::Date startDate             = parser<QuantLib::Date> parse(data.at("STARTDATE"));
-            QuantLib::Date endDate               = parser<QuantLib::Date> parse(data.at("ENDDATE"));
-            QuantLib::Frequency paymentFrequency = parser<QuantLib::Frequency> parse(rateParams.at("PAYMENTFREQUENCY"));
+            QuantLib::Date startDate             = parse<QuantLib::Date>(data.at("STARTDATE"));
+            QuantLib::Date endDate               = parse<QuantLib::Date>(data.at("ENDDATE"));
+            QuantLib::Frequency paymentFrequency = parse<QuantLib::Frequency>(data.at("PAYMENTFREQUENCY"));
 
             const json& rateParams = data.at("RATE");
             double r               = rateParams.at("VALUE");
 
-            QuantLib::DayCounter dayCounter   = parser<QuantLib::DayCounter> parse(rateParams.at("DAYCOUNTER"));
-            QuantLib::Compounding compounding = parser<QuantLib::Compounding> parse(rateParams.at("COMPOUNDING"));
-            QuantLib::Frequency frequency     = parser<QuantLib::Frequency> parse(rateParams.at("FREQUENCY"));
+            QuantLib::DayCounter dayCounter   = parse<QuantLib::DayCounter>(rateParams.at("DAYCOUNTER"));
+            QuantLib::Compounding compounding = parse<QuantLib::Compounding>(rateParams.at("COMPOUNDING"));
+            QuantLib::Frequency frequency     = parse<QuantLib::Frequency>(rateParams.at("FREQUENCY"));
             QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
 
             double notional = data.at("NOTIONAL");

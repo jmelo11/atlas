@@ -1,2 +1,5 @@
 /build
+/python/build
+/python/atlas.egg-info
+/python/dist
 /python/notebooks

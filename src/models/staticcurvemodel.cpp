@@ -2,26 +2,19 @@
 
 namespace Atlas {
 
-    StaticCurveModel::StaticCurveModel(
-        const MarketRequest& marketRequest, const CurveMap& discountCurves,
-        const CurveMap& forecastCurves,
-        DoubleMap<std::string, QuantLib::Date, double> historicalData)
+    StaticCurveModel::StaticCurveModel(const MarketRequest& marketRequest, CurveMap discountCurves, CurveMap forecastCurves,
+                                       DoubleMap<std::string, QuantLib::Date, double> historicalData)
     : Model(marketRequest), discountCurves_(discountCurves), forecastCurves_(forecastCurves) {
         if (checkRefDates()) {
-            if (!discountCurves_.empty()) {
-                refDate_ = discountCurves_.begin()->second->referenceDate();
-            }
-            if (!forecastCurves_.empty()) {
-                refDate_ = forecastCurves_.begin()->second->referenceDate();
-            }
+            if (!discountCurves_.empty()) { refDate_ = discountCurves_.begin()->second->referenceDate(); }
+            if (!forecastCurves_.empty()) { refDate_ = forecastCurves_.begin()->second->referenceDate(); }
 
         } else {
             throw std::runtime_error("All curves reference date must be equal.");
         }
     };
 
-    void StaticCurveModel::simulate(const std::vector<QuantLib::Date>& evalDates,
-                                    Scenario& scenario) const {
+    void StaticCurveModel::simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const {
         for (const auto& evalDate : evalDates) {
             MarketData marketData;
             marketData.allocate(marketRequest_);
@@ -31,6 +24,13 @@ namespace Atlas {
             marketData.refDate = evalDate;
             scenario.push_back(marketData);
         }
+    }
+
+    MarketData StaticCurveModel::simulate() const {
+        std::vector<QuantLib::Date> dates = {refDate_};
+        Scenario scenario;
+        simulate(dates, scenario);
+        return scenario.front();
     }
 
     void StaticCurveModel::simulateDiscounts(MarketData& md) const {

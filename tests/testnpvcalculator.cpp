@@ -8,6 +8,42 @@ using namespace Atlas;
 namespace QL = QuantLib;
 
 TEST(NPVCalculator, Deposit) {
+    QL::Date startDate(29, QL::Aug, 2022);
+    QL::Date endDate(29, QL::Aug, 2023);
+    QL::Frequency freq = QL::Frequency::Semiannual;
+    double notional    = 100.0;
+    double rate        = 0.03;
+
+    QL::InterestRate interestRate(rate, QL::Actual360(), QL::Simple, QL::Annual);
+
+    EqualPaymentProduct inst(startDate, endDate, freq, notional, interestRate);
+    auto& leg         = inst.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    MarketData marketData;
+
+    inst.dfIdx(0);
+    marketData.dfs.push_back(1);
+
+    for (auto& coupon : coupons) {
+        double df = 1 / interestRate.compoundFactor(startDate, coupon.paymentDate());
+        marketData.dfs.push_back(df);
+        coupon.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    for (auto& redemption : redemptions) {
+        double df = 1 / interestRate.compoundFactor(startDate, redemption.paymentDate());
+        marketData.dfs.push_back(df);
+        redemption.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    NPVCalculator visitor(marketData);
+    inst.accept(visitor);
+    EXPECT_NEAR(visitor.results(), 100.0111, 0.0001);
+}
+
+TEST(NPVCalculator, EqualPaymentProduct) {
     MarketData marketData;
     marketData.dfs  = {0.99, 0.98, 0.97, 0.96, 0.95};
     marketData.fwds = {0.01, 0.02, 0.03, 0.04, 0.05};
@@ -47,8 +83,7 @@ TEST(NPVCalculator, FloatingRateBulletProduct) {
 
     FloatingRateBulletProduct prod(startDate, endDate, notional, spread, index);
 
-    QL::Schedule schedule =
-        QL::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+    QL::Schedule schedule = QL::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
 
     auto& dates = schedule.dates();
     MarketData marketData;

@@ -69,6 +69,42 @@ TEST(ParSolver, FixedBulletProduct) {
     EXPECT_NEAR(solver.results(), rate, 0.0001);
 }
 
+TEST(ParSolver, EqualPaymentProduct) {
+    QL::Date startDate(29, QL::Aug, 2022);
+    QL::Date endDate(29, QL::Aug, 2023);
+    QL::Frequency freq = QL::Frequency::Semiannual;
+    double notional    = 100.0;
+    double rate        = 0.03;
+
+    QL::InterestRate interestRate(rate, QL::Actual360(), QL::Simple, QL::Annual);
+
+    EqualPaymentProduct inst(startDate, endDate, freq, notional, interestRate);
+    auto& leg         = inst.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    MarketData marketData;
+
+    inst.dfIdx(0);
+    marketData.dfs.push_back(1);
+
+    for (auto& coupon : coupons) {
+        double df = 1 / interestRate.compoundFactor(startDate, coupon.paymentDate());
+        marketData.dfs.push_back(df);
+        coupon.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    for (auto& redemption : redemptions) {
+        double df = 1 / interestRate.compoundFactor(startDate, redemption.paymentDate());
+        marketData.dfs.push_back(df);
+        redemption.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    ParSolver solver(marketData);
+    inst.accept(solver);
+    EXPECT_NEAR(solver.results(), rate, 0.001);
+}
+
 TEST(ParSolver, FloatingBulletProduct) {
     QL::Date startDate(17, QL::Month::November, 2022);
     QL::Date endDate(17, QL::Month::November, 2027);
@@ -80,8 +116,7 @@ TEST(ParSolver, FloatingBulletProduct) {
 
     FloatingRateBulletProduct prod(startDate, endDate, notional, spread, index);
 
-    QL::Schedule schedule =
-        QL::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+    QL::Schedule schedule = QL::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
 
     auto& dates = schedule.dates();
     MarketData marketData;

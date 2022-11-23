@@ -24,6 +24,7 @@ namespace Atlas {
 
         double notional() const { return notional_; };
 
+        
        protected:
         QuantLib::Date startDate_ = QuantLib::Date();
         QuantLib::Date endDate_   = QuantLib::Date();

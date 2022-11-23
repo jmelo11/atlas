@@ -20,6 +20,12 @@ TEST(Coupons, FixedCouponTests) {
     double yf = rate.dayCounter().yearFraction(startDate, endDate);
     EXPECT_FLOAT_EQ(yf * rate.rate() * notional, coupon.accruedAmount(startDate, endDate));
     EXPECT_FLOAT_EQ(yf * rate.rate() * notional, coupon.amount());
+
+    QuantLib::InterestRate rate2(0.05, QuantLib::Actual360(), QuantLib::Simple, QuantLib::Annual);
+    coupon.rate(rate2);
+
+    EXPECT_FLOAT_EQ(yf * rate2.rate() * notional, coupon.amount());
+    EXPECT_FLOAT_EQ(yf * rate2.rate() * notional, coupon.accruedAmount(startDate, endDate));
 }
 
 TEST(Coupons, FloatingCouponTests) {
@@ -41,4 +47,8 @@ TEST(Coupons, FloatingCouponTests) {
 
     double yf = index.dayCounter().yearFraction(startDate, endDate);
     EXPECT_FLOAT_EQ(yf * (fixing + spread) * notional, coupon.accruedAmount(startDate, endDate));
+
+    double spread2 = 0.02;
+    coupon.spread(spread2);
+    EXPECT_FLOAT_EQ(yf * (fixing + spread2) * notional, coupon.accruedAmount(startDate, endDate));    
 }

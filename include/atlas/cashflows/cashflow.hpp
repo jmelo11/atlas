@@ -8,8 +8,10 @@ namespace Atlas {
     class Cashflow {
        public:
         Cashflow(){};
-        Cashflow(const QuantLib::Date& paymentDate, double amount)
-        : paymentDate_(paymentDate), amount_(amount){};
+
+        Cashflow(const QuantLib::Date& paymentDate, double amount) : amount_(amount), paymentDate_(paymentDate){};
+
+        virtual ~Cashflow(){};
 
         virtual double amount() const { return amount_; }
 

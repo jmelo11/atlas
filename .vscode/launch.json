@@ -11,6 +11,18 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb"
+        },
+        {
+            "name": "(lldb) Python Debug",
+            "type": "lldb",
+            "request": "launch",
+            "args": [
+                "${file}"
+            ],
+            "program": "/opt/homebrew/bin/python3",
+            "console": "integratedTerminal",
+            "stopOnEntry": true,
+            "cwd": "${fileDirname}",
         }
     ],
     "version": "2.0.0"

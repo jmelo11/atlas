@@ -12,22 +12,24 @@ namespace Atlas {
     // general porpuse class
     class FixedRateProduct : public Instrument {
        public:
-        FixedRateProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
-                         const QuantLib::InterestRate& rate, double notional = 0.0,
+        FixedRateProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, const QuantLib::InterestRate& rate, double notional = 0.0,
                          const FixedRateLeg& leg = FixedRateLeg());
+
+        virtual ~FixedRateProduct(){};
 
         const FixedRateLeg& constLeg() const { return leg_; };
 
         FixedRateLeg& leg() { return leg_; };
 
-        void calculateNotionals(const std::vector<QuantLib::Date>& dates,
-                                const QuantLib::InterestRate& rate);
+        void calculateNotionals(const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate);
 
         void rate(QuantLib::InterestRate rate);
 
         void rate(double rate);
 
         QuantLib::InterestRate rate() const { return rate_; };
+
+        void discountCurve(const std::string& curve) { leg_.discountCurve(curve); }
 
        protected:
         void calculateFaceAmount();

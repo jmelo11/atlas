@@ -5,6 +5,8 @@
 #include <atlas/visitors/npvcalculator.hpp>
 
 namespace Atlas {
+
+
     class ParSolver : public ConstVisitor {
        public:
         ParSolver(const MarketData& marketData) : marketData_(marketData){};
