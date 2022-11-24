@@ -13,10 +13,9 @@ library_dirs = []
 libraries = []
 if platform == "win32":
     LIB_DIR = Path('C:/Users/bloomberg/Desktop/Desarrollo/builds')
-    include_dirs += [str(LIB_DIR / 'include')]
+    include_dirs += [str(LIB_DIR / 'include'), str(LIB_DIR / 'boost')]
     library_dirs += [str(LIB_DIR / 'lib')]
 
-    include_dirs += [str(LIB_DIR / 'boost')]
     libraries += ['QuantLib-x64-mt', 'QuantLibParser',
                   'nlohmann_json_schema_validator', 'Atlas']
 

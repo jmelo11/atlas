@@ -9,6 +9,7 @@
 #include "makeobjectfromjson.hpp"
 #include "schemas/depositschema.hpp"
 #include "schemas/equalpaymentschema.hpp"
+#include "schemas/fixedbulletschema.hpp"
 
 // data
 #include <atlas/data/marketdata.hpp>
@@ -42,6 +43,9 @@ PYBIND11_MODULE(Atlas, m) {
     // market data
     py::class_<MarketRequest>(m, "MarketRequest").def(py::init<>());
     py::class_<MarketData>(m, "MarketData").def(py::init<>()).def_readwrite("dfs", &MarketData::dfs).def_readwrite("fwds", &MarketData::fwds);
+
+    // makers
+    m.def("makeFlatForwardCurve", &makeObjectFromJson<QuantLib::FlatForward>);
 
     // cashflows
     py::class_<Redemption>(m, "Redemption")
@@ -82,7 +86,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def("isValid", &QLP::Schema<Deposit>::isValid)
         .def("validate", &QLP::Schema<Deposit>::validate)
         .def("addRequired", &QLP::Schema<Deposit>::addRequired)
-        .def("removeRequired", &QLP::Schema<Deposit>::removeRequired);
+        .def("removeRequired", &QLP::Schema<Deposit>::removeRequired)
+        .def("makeObj", &QLP::Schema<Deposit>::makeObj);
 
     // equalpaymentproduct
     py::class_<EqualPaymentProduct>(m, "EqualPaymentProduct")

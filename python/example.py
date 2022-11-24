@@ -1,4 +1,4 @@
-import atlas
+import Atlas
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 def buildProd():
     equalPaymentProdData = {
         "STARTDATE": "29082020",
-        "ENDDATE": "29082040",
+        "ENDDATE": "29082026",
         "NOTIONAL": 100,
         "PAYMENTFREQUENCY": "MONTHLY",
         "RATE": {
@@ -18,7 +18,7 @@ def buildProd():
         }
     }
 
-    schema = atlas.EqualPaymentProductSchema()
+    schema = Atlas.EqualPaymentProductSchema()
     equalPaymentProd = schema.makeObj(equalPaymentProdData)
     return equalPaymentProd
 
@@ -32,7 +32,8 @@ def buildCurve():
         "ENABLEEXTRAPOLATION": True,
         "RATE": 0.03
     }
-    curve = atlas.makeFlatForwardCurve(curveData)
+
+    curve = Atlas.makeFlatForwardCurve(curveData)
     return curve
 
 
@@ -54,10 +55,10 @@ def profilerTest():
             "DAYCOUNTER": "THIRTY360"
         }
     }
+    schema = Atlas.DepositSchema()
+    deposit = schema.makeObj(depositData)
 
-    deposit = atlas.makeDeposit(depositData)
-
-    equalPaymentProd = {
+    equalPaymentProdData = {
         "STARTDATE": "29082022",
         "ENDDATE": "17082023",
         "NOTIONAL": 100,
@@ -70,13 +71,14 @@ def profilerTest():
         }
     }
 
-    equalPayment = atlas.makeEqualPaymentProduct(equalPaymentProd)
+    schema = Atlas.EqualPaymentProductSchema()
+    equalPaymentProd = schema.makeObj(equalPaymentProdData)
 
-    profiler = atlas.CashflowProfiler()
+    profiler = Atlas.CashflowProfiler()
 
     # visit instruments
     profiler.visit(deposit)
-    profiler.visit(equalPayment)
+    profiler.visit(equalPaymentProd)
 
     # check results
     interests = profiler.interests()
@@ -91,16 +93,16 @@ def solverTest():
     equalPaymentProd, curve = buildItems()
 
     # index cashflows for model / create request
-    indexer = atlas.CashflowIndexer()
+    indexer = Atlas.CashflowIndexer()
     indexer.visit(equalPaymentProd)
-    request = atlas.MarketRequest()
+    request = Atlas.MarketRequest()
     indexer.setRequest(request)
 
-    model = atlas.StaticCurveModel(request)
+    model = Atlas.StaticCurveModel(request)
     model.addDiscountCurve("undefined", curve)
     marketData = model.simulate()
 
-    parSolver = atlas.ParSolver(marketData)
+    parSolver = Atlas.ParSolver(marketData)
 
     parSolver.visit(equalPaymentProd)
     print("Rate:\t", parSolver.results())
@@ -110,17 +112,17 @@ def npvTest():
     equalPaymentProd, curve = buildItems()
 
     # index cashflows for model / create request
-    indexer = atlas.CashflowIndexer()
+    indexer = Atlas.CashflowIndexer()
     indexer.visit(equalPaymentProd)
 
-    request = atlas.MarketRequest()
+    request = Atlas.MarketRequest()
     indexer.setRequest(request)
 
-    model = atlas.StaticCurveModel(request)
+    model = Atlas.StaticCurveModel(request)
     model.addDiscountCurve("undefined", curve)
     marketData = model.simulate()
 
-    npvCacl = atlas.NPVCalculator(marketData)
+    npvCacl = Atlas.NPVCalculator(marketData)
     npvCacl.visit(equalPaymentProd)
     print("NPV:\t", npvCacl.results())
 
@@ -131,17 +133,17 @@ def multiSolverTime():
     for i in range(0, 1000):
         prods.append(buildProd())
         # index cashflows for model / create request
-        indexer = atlas.CashflowIndexer()
+        indexer = Atlas.CashflowIndexer()
         indexer.visit(prods[-1])
 
-    request = atlas.MarketRequest()
+    request = Atlas.MarketRequest()
     indexer.setRequest(request)
 
-    model = atlas.StaticCurveModel(request)
+    model = Atlas.StaticCurveModel(request)
     model.addDiscountCurve("undefined", curve)
     marketData = model.simulate()
 
-    parSolver = atlas.ParSolver(marketData)
+    parSolver = Atlas.ParSolver(marketData)
     start = time.time()
     for prod in prods:
         parSolver.visit(prod)
@@ -157,22 +159,22 @@ def secuentialMultiNPVTime():
     for i in range(0, 1000):
         prods.append(buildProd())
         # index cashflows for model / create request
-        indexer = atlas.CashflowIndexer()
+        indexer = Atlas.CashflowIndexer()
         indexer.visit(prods[-1])
     end = time.time()
     print("Build Time:\t", end - start)
 
-    request = atlas.MarketRequest()
+    request = Atlas.MarketRequest()
     start = time.time()
     indexer.setRequest(request)
     end = time.time()
     print("Set Request Time:\t", end - start)
 
-    model = atlas.StaticCurveModel(request)
+    model = Atlas.StaticCurveModel(request)
     model.addDiscountCurve("undefined", curve)
     marketData = model.simulate()
 
-    npvCacl = atlas.NPVCalculator(marketData)
+    npvCacl = Atlas.NPVCalculator(marketData)
     start = time.time()
     for prod in prods:
         npvCacl.visit(prod)
@@ -197,8 +199,8 @@ def parallelMultiNPVTime():
 
 if __name__ == '__main__':
     profilerTest()
-    solverTest()
-    npvTest()
-    multiSolverTime()
-    secuentialMultiNPVTime()
-    parallelMultiNPVTime()
+    # solverTest()
+    # npvTest()
+    # multiSolverTime()
+    # secuentialMultiNPVTime()
+    # parallelMultiNPVTime()
