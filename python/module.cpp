@@ -31,8 +31,8 @@ namespace py  = pybind11;
 namespace QLP = QuantLibParser;
 using json    = nlohmann::json;
 
-PYBIND11_MODULE(atlas, m) {
-    m.doc() = "atlas";  // optional module docstring
+PYBIND11_MODULE(Atlas, m) {
+    m.doc() = "Atlas";  // optional module docstring
 
     // curves
     py::class_<QuantLib::YieldTermStructure, std::shared_ptr<QuantLib::YieldTermStructure>>(m, "YieldTermStructure");

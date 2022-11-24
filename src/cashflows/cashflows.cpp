@@ -1,7 +1,7 @@
 
 #include <atlas/cashflows/cashflows.hpp>
 #include <atlas/cashflows/redemption.hpp>
-
+#include <algorithm>
 namespace Atlas {
 
     void Cashflows::sortRedemptions(std::vector<Redemption>& redemptions) {

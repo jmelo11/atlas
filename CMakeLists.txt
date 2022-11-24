@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(atlas VERSION 0.1.0)
+project(Atlas VERSION 0.1.0)
 
 include(GNUInstallDirs) # despues de definir el proyecto
 set(CMAKE_CXX_STANDARD 20)
 set(BUILD_PYTHON OFF)
 set(BUILD_TESTS ON)
-set(BUILD_BENCHMARK ON)
+set(BUILD_BENCHMARK OFF)
 # target is curvemanager, and use include a src folders
 
 file(
@@ -37,20 +37,20 @@ file(
   "include/atlas/others/*.hpp")
 
 if(MSVC)
-  add_library(atlas STATIC ${INCLUDES} ${SOURCES})
+  add_library(${PROJECT_NAME} STATIC ${INCLUDES} ${SOURCES})
 else()
-  add_library(atlas SHARED ${INCLUDES} ${SOURCES})
+  add_library(${PROJECT_NAME} SHARED ${INCLUDES} ${SOURCES})
 endif(MSVC)
 
 target_include_directories(
-  atlas PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                $<INSTALL_INTERFACE:include>)
 
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
 
-target_link_libraries(atlas PUBLIC QuantLib::QuantLib)
-target_link_libraries(atlas PUBLIC Boost::boost)
+target_link_libraries(${PROJECT_NAME}  PUBLIC QuantLib::QuantLib)
+target_link_libraries(${PROJECT_NAME}  PUBLIC Boost::boost)
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
@@ -70,7 +70,7 @@ set(INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}")
 
 # export targets to be used with find_package
 install(
-  TARGETS atlas
+  TARGETS ${PROJECT_NAME} 
   EXPORT ${PROJECT_NAME}_Targets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
