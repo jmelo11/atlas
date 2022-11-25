@@ -33,25 +33,25 @@ namespace QuantLibParser {
     };
 
     template <>
-    std::optional<EqualPaymentProduct> Schema<EqualPaymentProduct>::makeObj(const json& params) {
-        auto f = [&]() {
-            json data                            = setDefaultValues(params);
-            QuantLib::Date startDate             = parse<QuantLib::Date>(data.at("STARTDATE"));
-            QuantLib::Date endDate               = parse<QuantLib::Date>(data.at("ENDDATE"));
-            QuantLib::Frequency paymentFrequency = parse<QuantLib::Frequency>(data.at("PAYMENTFREQUENCY"));
+    template <>
+    EqualPaymentProduct Schema<EqualPaymentProduct>::makeObj(const json& params) {
+        json data = setDefaultValues(params);
+        validate(data);
 
-            const json& rateParams = data.at("RATE");
-            double r               = rateParams.at("VALUE");
+        QuantLib::Date startDate             = parse<QuantLib::Date>(data.at("STARTDATE"));
+        QuantLib::Date endDate               = parse<QuantLib::Date>(data.at("ENDDATE"));
+        QuantLib::Frequency paymentFrequency = parse<QuantLib::Frequency>(data.at("PAYMENTFREQUENCY"));
 
-            QuantLib::DayCounter dayCounter   = parse<QuantLib::DayCounter>(rateParams.at("DAYCOUNTER"));
-            QuantLib::Compounding compounding = parse<QuantLib::Compounding>(rateParams.at("COMPOUNDING"));
-            QuantLib::Frequency frequency     = parse<QuantLib::Frequency>(rateParams.at("FREQUENCY"));
-            QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
+        const json& rateParams = data.at("RATE");
+        double r               = rateParams.at("VALUE");
 
-            double notional = data.at("NOTIONAL");
-            return std::make_optional<EqualPaymentProduct>(startDate, endDate, paymentFrequency, notional, rate);
-        };
-        return isValid(params) ? f() : std::nullopt;
+        QuantLib::DayCounter dayCounter   = parse<QuantLib::DayCounter>(rateParams.at("DAYCOUNTER"));
+        QuantLib::Compounding compounding = parse<QuantLib::Compounding>(rateParams.at("COMPOUNDING"));
+        QuantLib::Frequency frequency     = parse<QuantLib::Frequency>(rateParams.at("FREQUENCY"));
+        QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
+
+        double notional = data.at("NOTIONAL");
+        return EqualPaymentProduct(startDate, endDate, paymentFrequency, notional, rate);
     };
 }  // namespace QuantLibParser
 

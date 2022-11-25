@@ -46,6 +46,7 @@ PYBIND11_MODULE(Atlas, m) {
 
     // makers
     m.def("makeFlatForwardCurve", &makeObjectFromJson<QuantLib::FlatForward>);
+    m.def("makeDiscountCurve", &makeObjectFromJson<QuantLib::DiscountCurve>);
 
     // cashflows
     py::class_<Redemption>(m, "Redemption")
@@ -87,7 +88,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("validate", &QLP::Schema<Deposit>::validate)
         .def("addRequired", &QLP::Schema<Deposit>::addRequired)
         .def("removeRequired", &QLP::Schema<Deposit>::removeRequired)
-        .def("makeObj", &QLP::Schema<Deposit>::makeObj);
+        .def("makeObj", &QLP::Schema<Deposit>::makeObj<>);
 
     // equalpaymentproduct
     py::class_<EqualPaymentProduct>(m, "EqualPaymentProduct")
@@ -102,7 +103,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("validate", &QLP::Schema<EqualPaymentProduct>::validate)
         .def("addRequired", &QLP::Schema<EqualPaymentProduct>::addRequired)
         .def("removeRequired", &QLP::Schema<EqualPaymentProduct>::removeRequired)
-        .def("makeObj", &QLP::Schema<EqualPaymentProduct>::makeObj);
+        .def("makeObj", &QLP::Schema<EqualPaymentProduct>::makeObj<>);
 
     // fixedbulletproduct
     py::class_<FixedBulletProduct>(m, "FixedBulletProduct")
@@ -117,7 +118,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("validate", &QLP::Schema<FixedBulletProduct>::validate)
         .def("addRequired", &QLP::Schema<FixedBulletProduct>::addRequired)
         .def("removeRequired", &QLP::Schema<FixedBulletProduct>::removeRequired)
-        .def("makeObj", &QLP::Schema<FixedBulletProduct>::makeObj);
+        .def("makeObj", &QLP::Schema<FixedBulletProduct>::makeObj<>);
 
     // models
     py::class_<StaticCurveModel>(m, "StaticCurveModel")
@@ -139,22 +140,22 @@ PYBIND11_MODULE(Atlas, m) {
         .def("visit", py::overload_cast<const EqualPaymentProduct&>(&CashflowProfiler::visit, py::const_))
         .def("interests",
              [](const CashflowProfiler& self) {
-                 const auto& interests = self.interests();
-                 json result           = {{"DATES", json::array()}, {"VALUES", json::array()}};
-                 for (auto& interest : interests) {
-                     result["DATES"].push_back(QLP::parseDate(interest.first));
-                     result["VALUES"].push_back(interest.second);
-                 }
+                 const auto& cashflows = self.interests();
+                 json result           = json::array();
+                 for (auto& cashflow : cashflows) {
+                     json tmp = {{"DATE", QLP::parseDate(cashflow.first)}, {"VALUE", cashflow.second}};
+                     result.push_back(tmp);
+                 };
                  return result;
              })
         .def("redemptions",
              [](const CashflowProfiler& self) {
-                 const auto& redemptions = self.redemptions();
-                 json result             = {{"DATES", json::array()}, {"VALUES", json::array()}};
-                 for (auto& redemption : redemptions) {
-                     result["DATES"].push_back(QLP::parseDate(redemption.first));
-                     result["VALUES"].push_back(redemption.second);
-                 }
+                 const auto& cashflows = self.redemptions();
+                 json result           = json::array();
+                 for (auto& cashflow : cashflows) {
+                     json tmp = {{"DATE", QLP::parseDate(cashflow.first)}, {"VALUE", cashflow.second}};
+                     result.push_back(tmp);
+                 };
                  return result;
              })
         .def("clear", &CashflowProfiler::clear);

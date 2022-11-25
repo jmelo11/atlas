@@ -33,26 +33,26 @@ namespace QuantLibParser {
     };
 
     template <>
-    std::optional<FixedBulletProduct> Schema<FixedBulletProduct>::makeObj(const json& params) {
-        auto f = [&]() {
-            json data                            = setDefaultValues(params);
-            QuantLib::Date startDate             = parse<QuantLib::Date>(data.at("STARTDATE"));
-            QuantLib::Date endDate               = parse<QuantLib::Date>(data.at("ENDDATE"));
-            QuantLib::Frequency paymentFrequency = parse<QuantLib::Frequency>(data.at("PAYMENTFREQUENCY"));
+    template <>
+    FixedBulletProduct Schema<FixedBulletProduct>::makeObj(const json& params) {
+        json data = setDefaultValues(params);
+        validate(data);
+        QuantLib::Date startDate             = parse<QuantLib::Date>(data.at("STARTDATE"));
+        QuantLib::Date endDate               = parse<QuantLib::Date>(data.at("ENDDATE"));
+        QuantLib::Frequency paymentFrequency = parse<QuantLib::Frequency>(data.at("PAYMENTFREQUENCY"));
 
-            const json& rateParams = data.at("RATE");
-            double r               = rateParams.at("VALUE");
+        const json& rateParams = data.at("RATE");
+        double r               = rateParams.at("VALUE");
 
-            QuantLib::DayCounter dayCounter   = parse<QuantLib::DayCounter>(rateParams.at("DAYCOUNTER"));
-            QuantLib::Compounding compounding = parse<QuantLib::Compounding>(rateParams.at("COMPOUNDING"));
-            QuantLib::Frequency frequency     = parse<QuantLib::Frequency>(rateParams.at("FREQUENCY"));
-            QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
+        QuantLib::DayCounter dayCounter   = parse<QuantLib::DayCounter>(rateParams.at("DAYCOUNTER"));
+        QuantLib::Compounding compounding = parse<QuantLib::Compounding>(rateParams.at("COMPOUNDING"));
+        QuantLib::Frequency frequency     = parse<QuantLib::Frequency>(rateParams.at("FREQUENCY"));
+        QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
 
-            double notional = data.at("NOTIONAL");
-            return std::make_optional<FixedBulletProduct>(startDate, endDate, paymentFrequency, notional, rate);
-        };
-        return isValid(params) ? f() : std::nullopt;
-    }
+        double notional = data.at("NOTIONAL");
+        return FixedBulletProduct(startDate, endDate, paymentFrequency, notional, rate);
+    };
+
 }  // namespace QuantLibParser
 
 #endif /* A396A604_3AC7_4553_AB8C_69317DD21C43 */
