@@ -2,17 +2,17 @@
 #include <ql/time/daycounters/actual360.hpp>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/redemption.hpp>
-#include <atlas/instruments/fixedrate/fixedbulletproduct.hpp>
+#include <atlas/instruments/fixedrate/fixedratebulletproduct.hpp>
 
 using namespace Atlas;
 
-TEST(Product, FixedBulletProduct) {
+TEST(Product, FixedRateBulletProduct) {
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
     double notional          = 100;
     QuantLib::Frequency freq = QuantLib::Frequency::Semiannual;
     QuantLib::InterestRate rate(0.03, QuantLib::Actual360(), QuantLib::Simple, QuantLib::Annual);
-    FixedBulletProduct prod(startDate, endDate, freq, notional, rate);
+    FixedRateBulletProduct prod(startDate, endDate, freq, notional, rate);
 
     const auto& leg         = prod.constLeg();
     const auto& coupons     = leg.constCoupons();

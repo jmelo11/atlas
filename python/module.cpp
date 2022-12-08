@@ -7,10 +7,13 @@
 
 // python module
 #include "makeobjectfromjson.hpp"
+#include "schemas/customfixedrateschema.hpp"
+#include "schemas/customfloatingrateschema.hpp"
 #include "schemas/depositschema.hpp"
 #include "schemas/equalpaymentschema.hpp"
-#include "schemas/fixedbulletschema.hpp"
-
+#include "schemas/fixedratebulletschema.hpp"
+#include "schemas/floatingratebulletschema.hpp"
+#include "schemas/rateindexschema.hpp"
 // data
 #include <atlas/data/marketdata.hpp>
 
@@ -31,6 +34,47 @@
 namespace py  = pybind11;
 namespace QLP = QuantLibParser;
 using json    = nlohmann::json;
+
+#define Product(name)                                                               \
+    py::class_<name>(m, #name)                                                      \
+        .def("accept", py::overload_cast<Visitor&>(&name::accept))                  \
+        .def("accept", py::overload_cast<ConstVisitor&>(&name::accept, py::const_)) \
+        .def("discountCurve", &name::discountCurve)                                 \
+        .def("leg", &name::leg)
+
+#define FixedProduct(name) Product(name).def("rate", py::overload_cast<double>(&name::rate))
+
+#define FloatingProduct(name) Product(name).def("spread", py::overload_cast<double>(&name::spread)).def("forecastCurve", &name::forecastCurve)
+
+#define VisitProducts(name)                                                     \
+    def("visit", py::overload_cast<FloatingRateBulletProduct&>(&name::visit))   \
+        .def("visit", py::overload_cast<EqualPaymentProduct&>(&name::visit))    \
+        .def("visit", py::overload_cast<FixedRateBulletProduct&>(&name::visit)) \
+        .def("visit", py::overload_cast<Deposit&>(&name::visit))                \
+        .def("visit", py::overload_cast<CustomFixedRateProduct&>(&name::visit)) \
+        .def("visit", py::overload_cast<CustomFloatingRateProduct&>(&name::visit))
+
+#define ConstVisitProducts(name)                                                                  \
+    def("visit", py::overload_cast<const FloatingRateBulletProduct&>(&name::visit, py::const_))   \
+        .def("visit", py::overload_cast<const EqualPaymentProduct&>(&name::visit, py::const_))    \
+        .def("visit", py::overload_cast<const FixedRateBulletProduct&>(&name::visit, py::const_)) \
+        .def("visit", py::overload_cast<const Deposit&>(&name::visit, py::const_))                \
+        .def("visit", py::overload_cast<const CustomFixedRateProduct&>(&name::visit, py::const_)) \
+        .def("visit", py::overload_cast<const CustomFloatingRateProduct&>(&name::visit, py::const_))
+
+#define SchemaWithoutMaker(name)                                           \
+    py::class_<QLP::Schema<name>>(m, #name "Schema")                       \
+        .def(py::init<>())                                                 \
+        .def("validate", &QLP::Schema<name>::validate)                     \
+        .def("isValid", &QLP::Schema<name>::isValid)                       \
+        .def("schema", &QLP::Schema<name>::schema)                         \
+        .def("addDefaultValue", &QLP::Schema<name>::addDefaultValue)       \
+        .def("removeDefaultValue", &QLP::Schema<name>::removeDefaultValue) \
+        .def("schema", &QLP::Schema<name>::schema)                         \
+        .def("addRequired", &QLP::Schema<name>::addRequired)               \
+        .def("removeRequired", &QLP::Schema<name>::removeRequired)
+
+#define SchemaWithMaker(name) SchemaWithoutMaker(name).def("makeObj", &QLP::Schema<name>::makeObj<>)
 
 PYBIND11_MODULE(Atlas, m) {
     m.doc() = "Atlas";  // optional module docstring
@@ -76,49 +120,28 @@ PYBIND11_MODULE(Atlas, m) {
 
     // instruments
     // deposit
-    py::class_<Deposit>(m, "Deposit")
-        .def("accept", py::overload_cast<Visitor&>(&Deposit::accept))
-        .def("accept", py::overload_cast<ConstVisitor&>(&Deposit::accept, py::const_))
-        .def("discountCurve", &Deposit::discountCurve)
-        .def("leg", &Deposit::leg);
-
-    py::class_<QLP::Schema<Deposit>>(m, "DepositSchema")
-        .def(py::init<>())
-        .def("isValid", &QLP::Schema<Deposit>::isValid)
-        .def("validate", &QLP::Schema<Deposit>::validate)
-        .def("addRequired", &QLP::Schema<Deposit>::addRequired)
-        .def("removeRequired", &QLP::Schema<Deposit>::removeRequired)
-        .def("makeObj", &QLP::Schema<Deposit>::makeObj<>);
+    FixedProduct(Deposit);
+    SchemaWithMaker(Deposit);
 
     // equalpaymentproduct
-    py::class_<EqualPaymentProduct>(m, "EqualPaymentProduct")
-        .def("accept", py::overload_cast<Visitor&>(&EqualPaymentProduct::accept))
-        .def("accept", py::overload_cast<ConstVisitor&>(&EqualPaymentProduct::accept, py::const_))
-        .def("discountCurve", &EqualPaymentProduct::discountCurve)
-        .def("leg", &EqualPaymentProduct::leg);
+    FixedProduct(EqualPaymentProduct);
+    SchemaWithMaker(EqualPaymentProduct);
 
-    py::class_<QLP::Schema<EqualPaymentProduct>>(m, "EqualPaymentProductSchema")
-        .def(py::init<>())
-        .def("isValid", &QLP::Schema<EqualPaymentProduct>::isValid)
-        .def("validate", &QLP::Schema<EqualPaymentProduct>::validate)
-        .def("addRequired", &QLP::Schema<EqualPaymentProduct>::addRequired)
-        .def("removeRequired", &QLP::Schema<EqualPaymentProduct>::removeRequired)
-        .def("makeObj", &QLP::Schema<EqualPaymentProduct>::makeObj<>);
+    // fixedratebulletproduct
+    FixedProduct(FixedRateBulletProduct);
+    SchemaWithMaker(FixedRateBulletProduct);
 
-    // fixedbulletproduct
-    py::class_<FixedBulletProduct>(m, "FixedBulletProduct")
-        .def("accept", py::overload_cast<Visitor&>(&FixedBulletProduct::accept))
-        .def("accept", py::overload_cast<ConstVisitor&>(&FixedBulletProduct::accept, py::const_))
-        .def("discountCurve", &FixedBulletProduct::discountCurve)
-        .def("leg", &FixedBulletProduct::leg);
+    // floatingbulletproduct
+    FloatingProduct(FloatingRateBulletProduct);
+    SchemaWithMaker(FloatingRateBulletProduct);
 
-    py::class_<QLP::Schema<FixedBulletProduct>>(m, "FixedBulletProductSchema")
-        .def(py::init<>())
-        .def("isValid", &QLP::Schema<FixedBulletProduct>::isValid)
-        .def("validate", &QLP::Schema<FixedBulletProduct>::validate)
-        .def("addRequired", &QLP::Schema<FixedBulletProduct>::addRequired)
-        .def("removeRequired", &QLP::Schema<FixedBulletProduct>::removeRequired)
-        .def("makeObj", &QLP::Schema<FixedBulletProduct>::makeObj<>);
+    // customfloatingrateproduct
+    FloatingProduct(CustomFloatingRateProduct);
+    SchemaWithMaker(CustomFloatingRateProduct);
+
+    // customfixedproduct
+    FixedProduct(CustomFixedRateProduct);
+    SchemaWithMaker(CustomFixedRateProduct);
 
     // models
     py::class_<StaticCurveModel>(m, "StaticCurveModel")
@@ -130,14 +153,11 @@ PYBIND11_MODULE(Atlas, m) {
     // visitors
     py::class_<CashflowIndexer>(m, "CashflowIndexer")
         .def(py::init<>())
-        .def("visit", py::overload_cast<Deposit&>(&CashflowIndexer::visit))
-        .def("visit", py::overload_cast<EqualPaymentProduct&>(&CashflowIndexer::visit))
-        .def("setRequest", &CashflowIndexer::setRequest);
+        .def("setRequest", &CashflowIndexer::setRequest)
+        .VisitProducts(CashflowIndexer);
 
     py::class_<CashflowProfiler>(m, "CashflowProfiler")
         .def(py::init<>())
-        .def("visit", py::overload_cast<const Deposit&>(&CashflowProfiler::visit, py::const_))
-        .def("visit", py::overload_cast<const EqualPaymentProduct&>(&CashflowProfiler::visit, py::const_))
         .def("interests",
              [](const CashflowProfiler& self) {
                  const auto& cashflows = self.interests();
@@ -158,19 +178,19 @@ PYBIND11_MODULE(Atlas, m) {
                  };
                  return result;
              })
-        .def("clear", &CashflowProfiler::clear);
+        .def("clear", &CashflowProfiler::clear)
+        .ConstVisitProducts(CashflowProfiler);
 
     py::class_<NPVCalculator>(m, "NPVCalculator")
         .def(py::init<const MarketData&>())
-        .def("visit", py::overload_cast<Deposit&>(&NPVCalculator::visit))
-        .def("visit", py::overload_cast<EqualPaymentProduct&>(&NPVCalculator::visit))
         .def("results", &NPVCalculator::results)
-        .def("clear", &NPVCalculator::clear);
+        .def("clear", &NPVCalculator::clear)
+        .VisitProducts(NPVCalculator);
 
     py::class_<ParSolver>(m, "ParSolver")
         .def(py::init<const MarketData&>())
-        .def("visit", py::overload_cast<const Deposit&>(&ParSolver::visit, py::const_))
-        .def("visit", py::overload_cast<const EqualPaymentProduct&>(&ParSolver::visit, py::const_))
         .def("results", &ParSolver::results)
-        .def("clear", &ParSolver::clear);
+        .def("clear", &ParSolver::clear)
+        .ConstVisitProducts(ParSolver);
+    ;
 }

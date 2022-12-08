@@ -3,10 +3,9 @@
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    FloatingRateProduct::FloatingRateProduct(const QuantLib::Date& startDate,
-                                             const QuantLib::Date& endDate, double notional,
+    FloatingRateProduct::FloatingRateProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional, double spread,
                                              const FloatingRateLeg& leg)
-    : leg_(leg) {
+    : leg_(leg), spread_(spread) {
         startDate_ = startDate;
         endDate_   = endDate;
         notional_  = notional;

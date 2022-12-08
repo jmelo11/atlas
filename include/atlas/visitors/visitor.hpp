@@ -7,9 +7,11 @@
 #ifndef C7EC2166_6C75_481E_8983_82B454069FCE
 #define C7EC2166_6C75_481E_8983_82B454069FCE
 
+#include <atlas/instruments/fixedrate/customfixedrateproduct.hpp>
 #include <atlas/instruments/fixedrate/deposit.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentproduct.hpp>
-#include <atlas/instruments/fixedrate/fixedbulletproduct.hpp>
+#include <atlas/instruments/fixedrate/fixedratebulletproduct.hpp>
+#include <atlas/instruments/floatingrate/customfloatingrateproduct.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletproduct.hpp>
 
 namespace Atlas {
@@ -18,18 +20,22 @@ namespace Atlas {
        public:
         virtual ~Visitor()                                  = default;
         virtual void visit(Deposit& inst)                   = 0;
-        virtual void visit(FixedBulletProduct& inst)        = 0;
+        virtual void visit(FixedRateBulletProduct& inst)    = 0;
         virtual void visit(EqualPaymentProduct& inst)       = 0;
         virtual void visit(FloatingRateBulletProduct& inst) = 0;
+        virtual void visit(CustomFixedRateProduct& inst)    = 0;
+        virtual void visit(CustomFloatingRateProduct& inst) = 0;
     };
 
     class ConstVisitor {
        public:
         virtual ~ConstVisitor()                                         = default;
         virtual void visit(const Deposit& inst) const                   = 0;
-        virtual void visit(const FixedBulletProduct& inst) const        = 0;
+        virtual void visit(const FixedRateBulletProduct& inst) const    = 0;
         virtual void visit(const EqualPaymentProduct& inst) const       = 0;
         virtual void visit(const FloatingRateBulletProduct& inst) const = 0;
+        virtual void visit(const CustomFixedRateProduct& inst) const    = 0;
+        virtual void visit(const CustomFloatingRateProduct& inst) const = 0;
     };
 }  // namespace Atlas
 

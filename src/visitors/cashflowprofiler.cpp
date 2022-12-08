@@ -6,7 +6,7 @@ namespace Atlas {
         agreggate(inst.constLeg());
     }
 
-    void CashflowProfiler::visit(const FixedBulletProduct& inst) const {
+    void CashflowProfiler::visit(const FixedRateBulletProduct& inst) const {
         agreggate(inst.constLeg());
     }
 
@@ -15,6 +15,14 @@ namespace Atlas {
     }
 
     void CashflowProfiler::visit(const FloatingRateBulletProduct& inst) const {
+        agreggate(inst.constLeg());
+    }
+
+    void CashflowProfiler::visit(const CustomFixedRateProduct& inst) const {
+        agreggate(inst.constLeg());
+    }
+
+    void CashflowProfiler::visit(const CustomFloatingRateProduct& inst) const {
         agreggate(inst.constLeg());
     }
 

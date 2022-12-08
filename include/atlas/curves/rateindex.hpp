@@ -19,11 +19,11 @@ namespace Atlas {
        public:
         RateIndex(){};
 
-        RateIndex(const std::string& name, QuantLib::DayCounter dayCounter,
-                  QuantLib::Frequency fixingFreq,
-                  QuantLib::Frequency rateFreq   = QuantLib::Frequency::Annual,
-                  QuantLib::Compounding rateComp = QuantLib::Compounding::Simple)
+        RateIndex(const std::string& name, QuantLib::DayCounter dayCounter, QuantLib::Frequency fixingFreq,
+                  QuantLib::Frequency rateFreq = QuantLib::Frequency::Annual, QuantLib::Compounding rateComp = QuantLib::Compounding::Simple)
         : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateComp_(rateComp){};
+
+        const std::string& name() const { return name_; }
 
         QuantLib::DayCounter dayCounter() const { return dayCounter_; }
 

@@ -4,18 +4,18 @@
 #include <qlp/parser.hpp>
 #include <qlp/schemas/commonschemas.hpp>
 #include <qlp/schemas/schema.hpp>
-#include <atlas/instruments/fixedrate/fixedbulletproduct.hpp>
+#include <atlas/instruments/fixedrate/fixedratebulletproduct.hpp>
 
 using namespace Atlas;
 
 namespace QuantLibParser {
 
     template <>
-    void Schema<FixedBulletProduct>::initSchema() {
+    void Schema<FixedRateBulletProduct>::initSchema() {
         json base = R"({
             "title": "Fixed Bullet Instrument Schema",
             "properties": {},
-            "required": ["STARTDATE", "ENDDATE", "PAYMENTFREQUENCY", "NOTIONAL"]
+            "required": ["STARTDATE", "ENDDATE", "PAYMENTFREQUENCY", "NOTIONAL", "RATE"]
         })"_json;
 
         base["properties"]["STARTDATE"]        = dateSchema;
@@ -28,13 +28,13 @@ namespace QuantLibParser {
     };
 
     template <>
-    void Schema<FixedBulletProduct>::initDefaultValues() {
+    void Schema<FixedRateBulletProduct>::initDefaultValues() {
         myDefaultValues_["NOTIONAL"] = 100;
     };
 
     template <>
     template <>
-    FixedBulletProduct Schema<FixedBulletProduct>::makeObj(const json& params) {
+    FixedRateBulletProduct Schema<FixedRateBulletProduct>::makeObj(const json& params) {
         json data = setDefaultValues(params);
         validate(data);
         QuantLib::Date startDate             = parse<QuantLib::Date>(data.at("STARTDATE"));
@@ -50,7 +50,7 @@ namespace QuantLibParser {
         QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
 
         double notional = data.at("NOTIONAL");
-        return FixedBulletProduct(startDate, endDate, paymentFrequency, notional, rate);
+        return FixedRateBulletProduct(startDate, endDate, paymentFrequency, notional, rate);
     };
 
 }  // namespace QuantLibParser

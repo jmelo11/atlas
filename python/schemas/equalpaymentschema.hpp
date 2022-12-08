@@ -14,8 +14,10 @@ namespace QuantLibParser {
     void Schema<EqualPaymentProduct>::initSchema() {
         json base = R"({
             "title": "Equal Payment Instrument Schema",
-            "properties": {},
-            "required": ["STARTDATE", "ENDDATE", "PAYMENTFREQUENCY", "RATE" ]
+            "properties": {
+                "RECALCULATENOTIONALS": {"type": "boolean"}
+            },
+            "required": ["STARTDATE", "ENDDATE", "PAYMENTFREQUENCY", "RATE"]
         })"_json;
 
         base["properties"]["STARTDATE"]        = dateSchema;
@@ -29,7 +31,8 @@ namespace QuantLibParser {
 
     template <>
     void Schema<EqualPaymentProduct>::initDefaultValues() {
-        myDefaultValues_["NOTIONAL"] = 100;
+        myDefaultValues_["NOTIONAL"]             = 100;
+        myDefaultValues_["RECALCULATENOTIONALS"] = true;
     };
 
     template <>
@@ -50,8 +53,9 @@ namespace QuantLibParser {
         QuantLib::Frequency frequency     = parse<QuantLib::Frequency>(rateParams.at("FREQUENCY"));
         QuantLib::InterestRate rate(r, dayCounter, compounding, frequency);
 
-        double notional = data.at("NOTIONAL");
-        return EqualPaymentProduct(startDate, endDate, paymentFrequency, notional, rate);
+        double notional           = data.at("NOTIONAL");
+        bool recalcNotionals = data.at("RECALCULATENOTIONALS");
+        return EqualPaymentProduct(startDate, endDate, paymentFrequency, notional, rate, recalcNotionals);
     };
 }  // namespace QuantLibParser
 

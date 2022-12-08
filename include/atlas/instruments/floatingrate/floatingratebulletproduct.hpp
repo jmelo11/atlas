@@ -10,7 +10,7 @@ namespace Atlas {
     class FloatingRateBulletProduct : public FloatingRateProduct {
        public:
         FloatingRateBulletProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
-                                  double notional, double spread, RateIndex index);
+                                  double notional, double spread, const RateIndex& index);
 
         void accept(Visitor& visitor) override;
 

@@ -19,6 +19,7 @@ namespace QuantLibParser {
         })"_json;
 
         base["properties"]["STARTDATE"] = dateSchema;
+        base["properties"]["TENOR"]      = tenorSchema;
         base["properties"]["ENDDATE"]   = dateSchema;
         base["properties"]["NOTIONAL"]  = faceAmountSchema;
         base["properties"]["RATE"]      = baseRateSchema;

@@ -3,18 +3,19 @@
 #include <ql/time/schedule.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
+#include <numeric>
 
 using namespace Atlas;
 namespace QL = QuantLib;
 
-TEST(NPVCalculator, Deposit) {
+TEST(NPVCalculator, EqualPaymentProduct) {
     QL::Date startDate(29, QL::Aug, 2022);
     QL::Date endDate(29, QL::Aug, 2023);
     QL::Frequency freq = QL::Frequency::Semiannual;
     double notional    = 100.0;
     double rate        = 0.03;
 
-    QL::InterestRate interestRate(rate, QL::Actual360(), QL::Simple, QL::Annual);
+    QL::InterestRate interestRate(rate, QL::Actual360(), QL::Compounded, QL::Annual);
 
     EqualPaymentProduct inst(startDate, endDate, freq, notional, interestRate);
     auto& leg         = inst.leg();
@@ -40,10 +41,10 @@ TEST(NPVCalculator, Deposit) {
 
     NPVCalculator visitor(marketData);
     inst.accept(visitor);
-    EXPECT_NEAR(visitor.results(), 100.0111, 0.0001);
+    EXPECT_NEAR(visitor.results(), 100, 0.0001);
 }
 
-TEST(NPVCalculator, EqualPaymentProduct) {
+TEST(NPVCalculator, Deposit) {
     MarketData marketData;
     marketData.dfs  = {0.99, 0.98, 0.97, 0.96, 0.95};
     marketData.fwds = {0.01, 0.02, 0.03, 0.04, 0.05};
@@ -70,6 +71,47 @@ TEST(NPVCalculator, EqualPaymentProduct) {
         EXPECT_FLOAT_EQ(npv, amount * marketData.dfs.at(i));
         visitor.clear();
     }
+}
+
+TEST(NPVCalculator, CustomFixedRateProduct) {
+    QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
+    QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
+
+    QuantLib::Frequency freq    = QuantLib::Frequency::Semiannual;
+    QuantLib::Schedule schedule = QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+
+    QuantLib::DayCounter dayCounter = QuantLib::Actual360();
+
+    double rate = 0.03;
+    QL::InterestRate interestRate(rate, QL::Actual360(), QL::Compounded, QL::Annual);
+
+    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
+    auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    CustomFixedRateProduct inst(schedule.dates(), redemptionAmounts, interestRate);
+    auto& leg         = inst.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    MarketData marketData;
+
+    inst.dfIdx(0);
+    marketData.dfs.push_back(1);
+
+    for (auto& coupon : coupons) {
+        double df = 1 / interestRate.compoundFactor(startDate, coupon.paymentDate());
+        marketData.dfs.push_back(df);
+        coupon.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    for (auto& redemption : redemptions) {
+        double df = 1 / interestRate.compoundFactor(startDate, redemption.paymentDate());
+        marketData.dfs.push_back(df);
+        redemption.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    NPVCalculator visitor(marketData);
+    inst.accept(visitor);
+    EXPECT_NEAR(visitor.results(), 100, 0.0001);
 }
 
 TEST(NPVCalculator, FloatingRateBulletProduct) {
