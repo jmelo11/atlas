@@ -19,7 +19,7 @@ TEST(ParSolver, Deposit) {
     Deposit deposit(startDate, endDate, notional, interestRate);
 
     MarketData marketData;
-    deposit.dfIdx(0);
+    deposit.leg().dfIdx(0);
     deposit.leg().coupons().at(0).dfIdx(1);
     deposit.leg().redemptions().at(0).dfIdx(1);
 
@@ -56,7 +56,7 @@ TEST(ParSolver, FixedBulletProduct) {
 
     MarketData marketData;
 
-    inst.dfIdx(0);
+    leg.dfIdx(0);
     marketData.dfs.push_back(1);
 
     for (auto& coupon : coupons) {
@@ -103,7 +103,7 @@ TEST(ParSolver, CustomFixedRateProduct) {
 
     MarketData marketData;
 
-    inst.dfIdx(0);
+    leg.dfIdx(0);
     marketData.dfs.push_back(1);
 
     for (auto& coupon : coupons) {
@@ -129,6 +129,53 @@ TEST(ParSolver, CustomFixedRateProduct) {
     EXPECT_NEAR(npvCalculator.results(), notional, 0.0001);
 }
 
+TEST(ParSolver, CustomFloatingRateProduct) {
+    QL::Date startDate(17, QL::Month::November, 2022);
+    QL::Date endDate(17, QL::Month::November, 2027);
+
+    double spread = 0.0;
+
+    LIBOR6M index;
+    QL::Schedule schedule = QL::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+
+    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
+    auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    CustomFloatingRateProduct prod(schedule.dates(), redemptionAmounts, spread, index);
+
+    // setup market data
+    auto& dates = schedule.dates();
+    MarketData marketData;
+    double marketRate = 0.03;
+    QL::InterestRate rate(marketRate, QL::Actual360(), QL::Simple, QL::Annual);
+
+    auto& leg         = prod.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    leg.dfIdx(0);
+    marketData.dfs.push_back(1);
+    // setup indexes
+    for (size_t i = 1; i < dates.size(); ++i) {
+        double df  = rate.discountFactor(dates.at(0), dates.at(i));
+        double fwd = rate.equivalentRate(rate.dayCounter(), rate.compounding(), rate.frequency(), dates.at(i - 1), dates.at(i));
+        marketData.dfs.push_back(df);
+        marketData.fwds.push_back(fwd);
+        coupons.at(i - 1).dfIdx(marketData.dfs.size() - 1);
+        redemptions.at(i - 1).dfIdx(marketData.dfs.size() - 1);
+        coupons.at(i - 1).fwdIdx(marketData.fwds.size() - 1);
+    }
+
+    ParSolver solver(marketData);
+    prod.accept(solver);
+    EXPECT_NEAR(solver.results(), -0.001239, 0.0001);
+
+    spread = solver.results();
+    prod.spread(spread);
+    NPVCalculator npvCalculator(marketData);
+    prod.accept(npvCalculator);
+    EXPECT_NEAR(npvCalculator.results(), notional, 0.0001);
+}
+
 TEST(ParSolver, EqualPaymentProduct) {
     QL::Date startDate(29, QL::Aug, 2022);
     QL::Date endDate(29, QL::Aug, 2023);
@@ -145,7 +192,7 @@ TEST(ParSolver, EqualPaymentProduct) {
 
     MarketData marketData;
 
-    inst.dfIdx(0);
+    leg.dfIdx(0);
     marketData.dfs.push_back(1);
 
     for (auto& coupon : coupons) {
@@ -194,7 +241,7 @@ TEST(ParSolver, FloatingBulletProduct) {
     auto& redemptions = leg.redemptions();
 
     marketData.dfs.push_back(1);
-    prod.dfIdx(0);
+    leg.dfIdx(0);
     for (size_t i = 1; i < dates.size(); ++i) {
         double df = rate.discountFactor(dates.at(0), dates.at(i));
         marketData.dfs.push_back(df);

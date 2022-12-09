@@ -24,11 +24,11 @@ namespace Atlas {
         /*
          * agrega, adem�s del df de cada cupon,  el primer factor de descuento
          */
-        template <typename T>
-        void indexStartDf(T& inst) {
-            const std::string& discountCurve = inst.constLeg().discountCurve();
-            dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, inst.startDate()));  // if QuantLib::Date()?
-            inst.dfIdx(dfs_.size() - 1);
+
+        void indexStartDf(Leg& leg) {
+            const std::string& discountCurve = leg.discountCurve();
+            dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, leg.startDate())); 
+            leg.dfIdx(dfs_.size() - 1);
         }
 
         void useFixedLeg(FixedRateLeg& leg);

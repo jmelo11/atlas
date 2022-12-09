@@ -24,7 +24,7 @@ TEST(NPVCalculator, EqualPaymentProduct) {
 
     MarketData marketData;
 
-    inst.dfIdx(0);
+    leg.dfIdx(0);
     marketData.dfs.push_back(1);
 
     for (auto& coupon : coupons) {
@@ -94,7 +94,7 @@ TEST(NPVCalculator, CustomFixedRateProduct) {
 
     MarketData marketData;
 
-    inst.dfIdx(0);
+    leg.dfIdx(0);
     marketData.dfs.push_back(1);
 
     for (auto& coupon : coupons) {
@@ -153,5 +153,51 @@ TEST(NPVCalculator, FloatingRateBulletProduct) {
     double sensNPV    = visitor.sensNPV();
 
     EXPECT_NEAR(npv, 100'857.41597, 0.0001);
+    EXPECT_FLOAT_EQ(nonSensNPV + sensNPV, npv);
+}
+
+TEST(NPVCalculator, CustomFloatingRateProduct) {
+    // build product
+    QL::Date startDate(17, QL::Month::November, 2022);
+    QL::Date endDate(17, QL::Month::November, 2027);
+
+    double spread = 0.0;
+
+    LIBOR6M index;
+    QL::Schedule schedule = QL::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+
+    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
+    auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    CustomFloatingRateProduct prod(schedule.dates(), redemptionAmounts, spread, index);
+
+    // setup market data
+    auto& dates = schedule.dates();
+    MarketData marketData;
+    double marketRate = 0.03;
+    QL::InterestRate rate(marketRate, QL::Actual360(), QL::Simple, QL::Annual);
+
+    auto& leg         = prod.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    // setup indexes
+    for (size_t i = 1; i < dates.size(); ++i) {
+        double df  = rate.discountFactor(dates.at(0), dates.at(i));
+        double fwd = rate.equivalentRate(rate.dayCounter(), rate.compounding(), rate.frequency(), dates.at(i - 1), dates.at(i));
+        marketData.dfs.push_back(df);
+        marketData.fwds.push_back(fwd);
+        coupons.at(i - 1).dfIdx(marketData.dfs.size() - 1);
+        redemptions.at(i - 1).dfIdx(marketData.dfs.size() - 1);
+        coupons.at(i - 1).fwdIdx(marketData.fwds.size() - 1);
+    }
+
+    NPVCalculator visitor(marketData);
+    prod.accept(visitor);
+    double npv = visitor.results();
+
+    double nonSensNPV = visitor.nonSensNPV();
+    double sensNPV    = visitor.sensNPV();
+
+    EXPECT_NEAR(npv, 501.630356, 0.0001);
     EXPECT_FLOAT_EQ(nonSensNPV + sensNPV, npv);
 }

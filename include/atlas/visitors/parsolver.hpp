@@ -27,7 +27,7 @@ namespace Atlas {
         void evalFixedRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator calc(marketData_);
-            double startDf = marketData_.dfs.at(inst.dfIdx());
+            double startDf = marketData_.dfs.at(inst.constLeg().dfIdx());
 
             auto f = [&](double r) {
                 evalInst.rate(r);
@@ -44,7 +44,7 @@ namespace Atlas {
         void evalFloatingRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator calc(marketData_);
-            double startDf = marketData_.dfs.at(inst.dfIdx());
+            double startDf = marketData_.dfs.at(inst.constLeg().dfIdx());
 
             auto f = [&](double s) {
                 evalInst.spread(s);

@@ -25,6 +25,7 @@ TEST(Products, CustomFloatingRateProduct) {
     auto& redemptions = leg.redemptions();
 
     EXPECT_EQ(leg.discountCurve(), "undefined");
+    EXPECT_EQ(leg.forecastCurve(), index.name());
 
     EXPECT_EQ(coupons.size(), 2);
     EXPECT_EQ(redemptions.size(), 2);

@@ -1,5 +1,6 @@
 #include <atlas/instruments/fixedrate/customfixedrateproduct.hpp>
 #include <atlas/visitors/visitor.hpp>
+#include <numeric>
 
 namespace Atlas {
     CustomFixedRateProduct::CustomFixedRateProduct(std::vector<QuantLib::Date> dates, std::vector<double> redemptions,
@@ -9,7 +10,7 @@ namespace Atlas {
             Redemption redemption(dates.at(i + 1), redemptions.at(i));
             leg_.addRedemption(redemption);
         }
-        calculateFaceAmount();
+        notional_ = std::reduce(redemptions.begin(), redemptions.end());
         calculateNotionals(dates, rate);
     };
 

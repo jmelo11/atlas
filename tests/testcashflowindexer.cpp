@@ -52,7 +52,7 @@ TEST(CashflowIndexer, EqualPaymentProduct) {
     EXPECT_EQ(request.fwds.size(), 0);
 
     size_t dfCounter = 0;
-    EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+    EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
 
     for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
         dfCounter++;
@@ -75,7 +75,7 @@ TEST(CashflowIndexer, CustomFixedRateProduct) {
     QuantLib::InterestRate rate(0.03, dayCounter, QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
 
     std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
-    //auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    // auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
     CustomFixedRateProduct prod(schedule.dates(), redemptionAmounts, rate);
 
     CashflowIndexer indexer;
@@ -91,7 +91,7 @@ TEST(CashflowIndexer, CustomFixedRateProduct) {
     EXPECT_EQ(request.fwds.size(), 0);
 
     size_t dfCounter = 0;
-    EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+    EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
 
     for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
         dfCounter++;
@@ -127,7 +127,7 @@ TEST(CashflowIndexer, FloatingRateBulletProduct) {
 
     size_t dfCounter  = 0;
     size_t fwdCounter = 0;
-    EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+    EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
 
     for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
         dfCounter++;
@@ -168,7 +168,7 @@ TEST(CashflowIndexer, MultipleProduct) {
 
         EXPECT_EQ(request.dfs.size(), coupons.size() + redemptions.size() + 1 + dfCounter);
         EXPECT_EQ(request.fwds.size(), coupons.size() + fwdCounter);
-        EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+        EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
 
         for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
             dfCounter++;

@@ -55,7 +55,7 @@ TEST(StaticCurveModel, FloatingRateBulletProduct) {
     discounts["undefined"] = std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360());
 
     StaticCurveModel model(request, discounts);
-    model.addForecastCurve("undefined", std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360()));
+    model.addForecastCurve(index.name(), std::make_unique<QL::FlatForward>(startDate, marketRate, QL::Actual360()));
 
     std::vector<QL::Date> evalDates = {startDate};
     Scenario scenario;

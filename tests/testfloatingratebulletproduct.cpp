@@ -15,12 +15,14 @@ TEST(Product, FloatingRateProduct) {
     LIBOR6M index;
     FloatingRateBulletProduct product(startDate, endDate, notional, spread, index);
 
-    QuantLib::Schedule schedule =
-        QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+    QuantLib::Schedule schedule = QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
 
     auto& leg         = product.leg();
     auto& coupons     = leg.coupons();
     const auto& dates = schedule.dates();
+
+    EXPECT_EQ(leg.discountCurve(), "undefined");
+    EXPECT_EQ(leg.forecastCurve(), index.name());
 
     for (size_t i = 0; i < coupons.size(); ++i) {
         coupons[i].fwdIdx(i);

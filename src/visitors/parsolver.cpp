@@ -12,9 +12,10 @@ namespace Atlas {
     };
 
     void ParSolver::visit(const EqualPaymentProduct& inst) const {
-        double startDf                              = marketData_.dfs.at(inst.dfIdx());
+        const auto& leg                             = inst.constLeg();
+        const std::vector<FixedRateCoupon>& coupons = leg.constCoupons();
+        double startDf                              = marketData_.dfs.at(leg.dfIdx());
         QuantLib::InterestRate prodRate             = inst.rate();
-        const std::vector<FixedRateCoupon>& coupons = inst.constLeg().constCoupons();
         double dfSum                                = 0;
         for (const auto& coupon : coupons) dfSum += marketData_.dfs.at(coupon.dfIdx());
         double payment = startDf / dfSum;
