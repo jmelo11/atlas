@@ -4,7 +4,7 @@ project(Atlas VERSION 0.1.0)
 include(GNUInstallDirs) # despues de definir el proyecto
 set(CMAKE_CXX_STANDARD 20)
 set(BUILD_PYTHON OFF)
-set(BUILD_TESTS ON)
+set(BUILD_TESTS OFF)
 set(BUILD_BENCHMARK OFF)
 # target is curvemanager, and use include a src folders
 

@@ -7,6 +7,7 @@
 #ifndef B8588DDE_92DC_4785_90CF_D5F3D16C8013
 #define B8588DDE_92DC_4785_90CF_D5F3D16C8013
 
+#include <condition_variable>
 #include <mutex>
 #include <queue>
 
