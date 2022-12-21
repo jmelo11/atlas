@@ -25,10 +25,11 @@ namespace Atlas {
             double totalRedemption = 0;
             for (const auto& coupon : coupons)
                 totalRedemption += payment - (tmpRate.compoundFactor(coupon.startDate(), coupon.endDate()) - 1) * (1 - totalRedemption);
-            return startDf - totalRedemption;
+            return 1 - totalRedemption;
         };
 
         value_ = solver_.solve(f, accuracy_, guess_, step_);
+        //evalFixedRateProd(inst);
     };
 
     void ParSolver::visit(const FloatingRateBulletProduct& inst) const {
