@@ -1,4 +1,5 @@
 #include "pch.hpp"
+#include <ql/time/schedule.hpp>
 #include <atlas/visitors/cashflowindexer.hpp>
 
 using namespace Atlas;
@@ -9,8 +10,7 @@ TEST(CashflowIndexer, Deposit) {
     QuantLib::Frequency frequency   = QuantLib::Frequency::Annual;
     QuantLib::DayCounter dayCounter = QuantLib::Actual360();
     double notional                 = 100;
-    QuantLib::InterestRate rate(0.05, dayCounter, QuantLib::Compounding::Simple,
-                                QuantLib::Frequency::Annual);
+    QuantLib::InterestRate rate(0.05, dayCounter, QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
 
     // deposit
     Deposit prod(startDate, endDate, notional, rate);
@@ -36,8 +36,7 @@ TEST(CashflowIndexer, EqualPaymentProduct) {
     QuantLib::Frequency frequency   = QuantLib::Frequency::Annual;
     QuantLib::DayCounter dayCounter = QuantLib::Actual360();
     double notional                 = 100;
-    QuantLib::InterestRate rate(0.05, dayCounter, QuantLib::Compounding::Simple,
-                                QuantLib::Frequency::Annual);
+    QuantLib::InterestRate rate(0.05, dayCounter, QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
 
     CashflowIndexer indexer;
     MarketRequest request;
@@ -53,7 +52,46 @@ TEST(CashflowIndexer, EqualPaymentProduct) {
     EXPECT_EQ(request.fwds.size(), 0);
 
     size_t dfCounter = 0;
-    EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+    EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
+
+    for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
+        dfCounter++;
+        if (i < coupons.size()) {
+            EXPECT_EQ(coupons.at(i).dfIdx(), dfCounter);
+        } else {
+            EXPECT_EQ(redemptions.at(i - coupons.size()).dfIdx(), dfCounter);
+        }
+    }
+}
+
+TEST(CashflowIndexer, CustomFixedRateProduct) {
+    QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
+    QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
+
+    QuantLib::Frequency freq    = QuantLib::Frequency::Semiannual;
+    QuantLib::Schedule schedule = QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+
+    QuantLib::DayCounter dayCounter = QuantLib::Actual360();
+    QuantLib::InterestRate rate(0.03, dayCounter, QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
+
+    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
+    // auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    CustomFixedRateProduct prod(schedule.dates(), redemptionAmounts, rate);
+
+    CashflowIndexer indexer;
+    MarketRequest request;
+
+    prod.accept(indexer);
+    indexer.setRequest(request);
+    auto& leg         = prod.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    EXPECT_EQ(request.dfs.size(), coupons.size() + redemptions.size() + 1);
+    EXPECT_EQ(request.fwds.size(), 0);
+
+    size_t dfCounter = 0;
+    EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
 
     for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
         dfCounter++;
@@ -89,7 +127,7 @@ TEST(CashflowIndexer, FloatingRateBulletProduct) {
 
     size_t dfCounter  = 0;
     size_t fwdCounter = 0;
-    EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+    EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
 
     for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
         dfCounter++;
@@ -130,7 +168,7 @@ TEST(CashflowIndexer, MultipleProduct) {
 
         EXPECT_EQ(request.dfs.size(), coupons.size() + redemptions.size() + 1 + dfCounter);
         EXPECT_EQ(request.fwds.size(), coupons.size() + fwdCounter);
-        EXPECT_EQ(prod.dfIdx(), dfCounter);  // first slot is reserved for start date
+        EXPECT_EQ(leg.dfIdx(), dfCounter);  // first slot is reserved for start date
 
         for (size_t i = 0; i < coupons.size() + redemptions.size(); ++i) {
             dfCounter++;

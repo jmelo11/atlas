@@ -1,4 +1,5 @@
 #include "pch.hpp"
+#include <ql/time/schedule.hpp>
 #include <atlas/visitors/cashflowprofiler.hpp>
 #include <atlas/visitors/forwardrateforecaster.hpp>
 
@@ -31,6 +32,33 @@ TEST(CashflowProfiler, EqualPaymentProduct) {
     QuantLib::Frequency freq = QuantLib::Frequency::Semiannual;
     QuantLib::InterestRate rate(0.03, QuantLib::Actual360(), QuantLib::Simple, QuantLib::Annual);
     EqualPaymentProduct prod(startDate, endDate, freq, notional, rate);
+
+    CashflowProfiler profiler;
+    profiler.visit(prod);
+
+    const auto& interestProfile   = profiler.interests();
+    const auto& redemptionProfile = profiler.redemptions();
+
+    const auto& coupons     = prod.leg().coupons();
+    const auto& redemptions = prod.leg().redemptions();
+
+    for (const auto& coupon : coupons) { EXPECT_EQ(interestProfile.at(coupon.paymentDate()), coupon.amount()); }
+    for (const auto& redemption : redemptions) { EXPECT_EQ(redemptionProfile.at(redemption.paymentDate()), redemption.amount()); }
+}
+
+TEST(CashflowProfiler, CustomFixedRateProduct) {
+    QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
+    QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
+
+    QuantLib::Frequency freq    = QuantLib::Frequency::Semiannual;
+    QuantLib::Schedule schedule = QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+
+    QuantLib::DayCounter dayCounter = QuantLib::Actual360();
+    QuantLib::InterestRate rate(0.03, dayCounter, QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
+
+    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
+    // auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    CustomFixedRateProduct prod(schedule.dates(), redemptionAmounts, rate);
 
     CashflowProfiler profiler;
     profiler.visit(prod);
@@ -85,7 +113,7 @@ TEST(CashflowProfiler, FloatingRateBulletProduct) {
         EXPECT_EQ(interestProfile2.at(coupon.paymentDate()), coupon.amount());
         EXPECT_NE(interestProfile.at(coupon.paymentDate()), interestProfile2.at(coupon.paymentDate()));
     }
-    
+
     for (const auto& redemption : redemptions) {
         EXPECT_EQ(redemptionProfile2.at(redemption.paymentDate()), redemption.amount());
         EXPECT_EQ(redemptionProfile.at(redemption.paymentDate()), redemptionProfile2.at(redemption.paymentDate()));

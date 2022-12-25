@@ -23,9 +23,9 @@ namespace Atlas {
 
         void calculateNotionals(const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate);
 
-        void rate(QuantLib::InterestRate rate);
+        virtual void rate(const QuantLib::InterestRate& rate);
 
-        void rate(double rate);
+        virtual void rate(double rate);
 
         QuantLib::InterestRate rate() const { return rate_; };
 

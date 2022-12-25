@@ -6,13 +6,19 @@ namespace Atlas {
 
     void ForwardRateForecaster::visit(Deposit& inst) {}
 
-    void ForwardRateForecaster::visit(FixedBulletProduct& inst) {}
+    void ForwardRateForecaster::visit(FixedRateBulletProduct& inst) {}
 
     void ForwardRateForecaster::visit(EqualPaymentProduct& inst) {}
 
     void ForwardRateForecaster::visit(FloatingRateBulletProduct& inst) {
         fixFloatingCoupons(inst.leg());
     }
+
+    void ForwardRateForecaster::visit(CustomFloatingRateProduct& inst) {
+        fixFloatingCoupons(inst.leg());
+    }
+
+    void ForwardRateForecaster::visit(CustomFixedRateProduct& inst) {}
 
     void ForwardRateForecaster::fixFloatingCoupons(FloatingRateLeg& leg) {
         auto f = [&](auto& coupon) {

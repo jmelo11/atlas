@@ -9,16 +9,15 @@
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    EqualPaymentProduct::EqualPaymentProduct(const QuantLib::Date& startDate,
-                                             const QuantLib::Date& endDate,
-                                             QuantLib::Frequency freq, double notional,
-                                             const QuantLib::InterestRate& rate)
-    : FixedRateProduct(startDate, endDate, rate, notional) {
-        QuantLib::Schedule schedule =
-            QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+    EqualPaymentProduct::EqualPaymentProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, QuantLib::Frequency freq,
+                                             double notional, const QuantLib::InterestRate& rate, bool recalcNotionals)
+    : FixedRateProduct(startDate, endDate, rate, notional), recalcNotionals_(recalcNotionals) {
+        QuantLib::Schedule schedule = QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
-        calculateRedemptions(schedule.dates(), rate, notional);
-        calculateNotionals(schedule.dates(), rate);
+        dates_ = schedule.dates();
+
+        calculateRedemptions(dates_, rate, notional);
+        calculateNotionals(dates_, rate);
     }
 
     void EqualPaymentProduct::accept(Visitor& visitor) {
@@ -29,15 +28,42 @@ namespace Atlas {
         visitor.visit(*this);
     }
 
-    void EqualPaymentProduct::calculateRedemptions(const std::vector<QuantLib::Date>& dates,
-                                                   const QuantLib::InterestRate& rate,
-                                                   double notional) {
+    void EqualPaymentProduct::rate(const QuantLib::InterestRate& r) {
+        rate_ = r;
+        if (recalcNotionals_) {
+            std::vector<size_t> redemptionIdxs;
+            std::vector<size_t> couponIdxs;
+            auto& redemptions = leg_.redemptions();
+            auto& coupons     = leg_.coupons();
+            size_t nCoupons   = coupons.size();
+            for (size_t i = 0; i < nCoupons; ++i) {
+                redemptionIdxs.push_back(redemptions.at(i).dfIdx());
+                couponIdxs.push_back(coupons.at(i).dfIdx());
+            }
+            redemptions.clear();
+            coupons.clear();
+            calculateRedemptions(dates_, rate_, notional_);
+            calculateNotionals(dates_, rate_);
+            for (size_t i = 0; i < nCoupons; ++i) {
+                redemptions.at(i).dfIdx(redemptionIdxs.at(i));
+                coupons.at(i).dfIdx(couponIdxs.at(i));
+            }
+        } else {
+            for (auto& coupon : leg_.coupons()) { coupon.rate(rate_); }
+        }
+    }
+
+    void EqualPaymentProduct::rate(double r) {
+        QuantLib::InterestRate tmpR(r, rate_.dayCounter(), rate_.compounding(), rate_.frequency());
+        rate(tmpR);
+    }
+
+    void EqualPaymentProduct::calculateRedemptions(const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate, double notional) {
         size_t pN = dates.size() - 1;
         size_t kN = pN + 1;
         QuantLib::Array factors(kN, 0), B(kN, 0), K;
 
-        for (size_t i = 1; i <= pN; i++)
-            factors[i - 1] = (rate.compoundFactor(dates.at(i - 1), dates.at(i)) - 1);
+        for (size_t i = 1; i <= pN; i++) factors[i - 1] = (rate.compoundFactor(dates.at(i - 1), dates.at(i)) - 1);
 
         factors[kN - 1] = -1;
 

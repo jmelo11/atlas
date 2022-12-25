@@ -3,22 +3,32 @@
 namespace Atlas {
 
     void CashflowIndexer::visit(Deposit& inst) {
-        indexStartDf(inst);
+        indexStartDf(inst.leg());
         useFixedLeg(inst.leg());
     }
 
-    void CashflowIndexer::visit(FixedBulletProduct& inst) {
-        indexStartDf(inst);
+    void CashflowIndexer::visit(FixedRateBulletProduct& inst) {
+        indexStartDf(inst.leg());
         useFixedLeg(inst.leg());
     }
 
     void CashflowIndexer::visit(EqualPaymentProduct& inst) {
-        indexStartDf(inst);
+        indexStartDf(inst.leg());
+        useFixedLeg(inst.leg());
+    }
+
+    void CashflowIndexer::visit(CustomFixedRateProduct& inst) {
+        indexStartDf(inst.leg());
         useFixedLeg(inst.leg());
     }
 
     void CashflowIndexer::visit(FloatingRateBulletProduct& inst) {
-        indexStartDf(inst);
+        indexStartDf(inst.leg());
+        useFloatingLeg(inst.leg());
+    }
+
+    void CashflowIndexer::visit(CustomFloatingRateProduct& inst) {
+        indexStartDf(inst.leg());
         useFloatingLeg(inst.leg());
     }
 

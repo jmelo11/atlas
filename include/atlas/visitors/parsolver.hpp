@@ -6,26 +6,28 @@
 
 namespace Atlas {
 
-
     class ParSolver : public ConstVisitor {
        public:
-        ParSolver(const MarketData& marketData) : marketData_(marketData){};
+        ParSolver(const MarketData& marketData, double guess = 0.0, double accuracy = 0.00001, double step = 0.00001)
+        : marketData_(marketData), guess_(guess), accuracy_(accuracy), step_(step){};
 
         void clear() { value_ = 0.0; };
 
         double results() const { return value_; };
 
         void visit(const Deposit& inst) const override;
-        void visit(const FixedBulletProduct& inst) const override;
+        void visit(const FixedRateBulletProduct& inst) const override;
         void visit(const EqualPaymentProduct& inst) const override;
         void visit(const FloatingRateBulletProduct& inst) const override;
+        void visit(const CustomFixedRateProduct& inst) const override;
+        void visit(const CustomFloatingRateProduct& inst) const override;
 
        private:
         template <typename T>
         void evalFixedRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator calc(marketData_);
-            double startDf = marketData_.dfs.at(inst.dfIdx());
+            double startDf = marketData_.dfs.at(inst.constLeg().dfIdx());
 
             auto f = [&](double r) {
                 evalInst.rate(r);
@@ -42,7 +44,7 @@ namespace Atlas {
         void evalFloatingRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator calc(marketData_);
-            double startDf = marketData_.dfs.at(inst.dfIdx());
+            double startDf = marketData_.dfs.at(inst.constLeg().dfIdx());
 
             auto f = [&](double s) {
                 evalInst.spread(s);
@@ -58,9 +60,9 @@ namespace Atlas {
         const MarketData& marketData_;
         QuantLib::Brent solver_;
         mutable double value_ = 0.0;
-        double guess_         = 0.0;
-        double accuracy_      = 0.0001;
-        double step_          = 0.0001;
+        double guess_;
+        double accuracy_;
+        double step_;
     };
 }  // namespace Atlas
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(
-  atlastest
+  AtlasTest
   VERSION 1.0.0
   LANGUAGES CXX)
 
@@ -35,8 +35,15 @@ find_package(QuantLib REQUIRED)
 message(STATUS "Using this folder for test building: ${CMAKE_SOURCE_DIR}")
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
                                                   "${CMAKE_SOURCE_DIR}/src")
+
+if(MSVC)
+message(STATUS "MSVC: Looking for lib in folder ${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Atlas.lib")
 target_link_libraries(${PROJECT_NAME}
-                      PUBLIC "${CMAKE_SOURCE_DIR}/build/libatlas.dylib")
+                      PUBLIC "${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}/Atlas.lib")
+else()
+target_link_libraries(${PROJECT_NAME}
+                      PUBLIC "${CMAKE_SOURCE_DIR}/build/libAtlas.dylib")
+endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)

@@ -10,9 +10,7 @@ inline T makeObjectFromJson(const json& params) {
     QuantLibParser::Schema<T> schema;
     schema.validate(params);
     json finalParams = schema.setDefaultValues(params);
-    auto result      = schema.makeObj(finalParams);
-    return result.value();
+    return schema.makeObj(finalParams);
 };
-
 
 #endif /* A7732A1B_652A_459D_BD38_7519ADFA7C1E */

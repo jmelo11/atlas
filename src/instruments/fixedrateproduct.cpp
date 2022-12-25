@@ -14,7 +14,7 @@ namespace Atlas {
         endDate_   = endDate;
         notional_  = notional;
     };
-
+    
     void FixedRateProduct::calculateNotionals(const std::vector<QuantLib::Date>& dates,
                                               const QuantLib::InterestRate& rate) {
         std::map<QuantLib::Date, double> notionals;
@@ -38,7 +38,7 @@ namespace Atlas {
         notional_ = faceAmount;
     }
 
-    void FixedRateProduct::rate(QuantLib::InterestRate r) {
+    void FixedRateProduct::rate(const QuantLib::InterestRate& r) {
         rate_ = r;
         for (auto& coupon : leg_.coupons()) { coupon.rate(r); }
     }

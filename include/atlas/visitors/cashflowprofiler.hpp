@@ -14,9 +14,11 @@ namespace Atlas {
         CashflowProfiler(){};
 
         void visit(const Deposit& inst) const override;
-        void visit(const FixedBulletProduct& inst) const override;
+        void visit(const FixedRateBulletProduct& inst) const override;
         void visit(const EqualPaymentProduct& inst) const override;
         void visit(const FloatingRateBulletProduct& inst) const override;
+        void visit(const CustomFixedRateProduct& inst) const override;
+        void visit(const CustomFloatingRateProduct& inst) const override;
 
         void clear() {
             redemptions_.clear();

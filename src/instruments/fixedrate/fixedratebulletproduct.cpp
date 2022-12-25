@@ -1,11 +1,11 @@
 #include <ql/time/schedule.hpp>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/redemption.hpp>
-#include <atlas/instruments/fixedrate/fixedbulletproduct.hpp>
+#include <atlas/instruments/fixedrate/fixedratebulletproduct.hpp>
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    FixedBulletProduct::FixedBulletProduct(const QuantLib::Date& startDate,
+    FixedRateBulletProduct::FixedRateBulletProduct(const QuantLib::Date& startDate,
                                            const QuantLib::Date& endDate, QuantLib::Frequency freq,
                                            double notional, const QuantLib::InterestRate& rate)
     : FixedRateProduct(startDate, endDate, rate, notional) {
@@ -25,11 +25,11 @@ namespace Atlas {
         leg_.addRedemption(redemption);
     }
 
-    void FixedBulletProduct::accept(Visitor& visitor) {
+    void FixedRateBulletProduct::accept(Visitor& visitor) {
         visitor.visit(*this);
     }
 
-    void FixedBulletProduct::accept(ConstVisitor& visitor) const {
+    void FixedRateBulletProduct::accept(ConstVisitor& visitor) const {
         visitor.visit(*this);
     }
 

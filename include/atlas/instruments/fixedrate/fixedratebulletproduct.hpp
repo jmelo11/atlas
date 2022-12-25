@@ -5,11 +5,10 @@
 #include <atlas/instruments/fixedrateproduct.hpp>
 
 namespace Atlas {
-    class FixedBulletProduct : public FixedRateProduct {
+    class FixedRateBulletProduct : public FixedRateProduct {
        public:
-        FixedBulletProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
-                           QuantLib::Frequency freq, double notional,
-                           const QuantLib::InterestRate& rate);
+        FixedRateBulletProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, QuantLib::Frequency freq, double notional,
+                               const QuantLib::InterestRate& rate);
 
         void accept(Visitor& visitor) override;
 

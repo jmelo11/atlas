@@ -8,6 +8,7 @@
 #define C35B7E8D_253B_4C4B_B4AD_4ECF13926073
 
 #include <atlas/data/concurrentqueue.hpp>
+#include <functional>
 #include <future>
 #include <thread>
 
@@ -88,7 +89,7 @@ namespace Atlas {
                 myQueue.interrupt();
 
                 //	Wait for them all to join
-                for_each(myThreads.begin(), myThreads.end(), mem_fn(&std::thread::join));
+                for_each(myThreads.begin(), myThreads.end(), std::mem_fn(&std::thread::join));
 
                 //  Clear all threads
                 myThreads.clear();
@@ -144,6 +145,6 @@ namespace Atlas {
             return b;
         }
     };
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* C35B7E8D_253B_4C4B_B4AD_4ECF13926073 */
