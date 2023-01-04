@@ -25,7 +25,7 @@
 #include <atlas/visitors/cashflowprofiler.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
-#include <atlas/visitors/yieldsenscalculator.hpp>
+#include <atlas/visitors/durationcalculator.hpp>
 
 // pybind11
 #include <pybind11/pybind11.h>
@@ -194,16 +194,11 @@ PYBIND11_MODULE(Atlas, m) {
         .def("clear", &ParSolver::clear)
         .ConstVisitProducts(ParSolver);
 
-    py::class_<YieldSensCalculator>(m, "YieldSensCalculator")
-        .def(py::init([](const std::string& refDate, const json& rate, const MarketData& marketData) {
-            QLP::Schema<QuantLib::InterestRate> rateSchema;
-            QuantLib::InterestRate rate_ = rateSchema.makeObj(rate);
+    py::class_<DurationCalculator>(m, "YieldSensCalculator")
+        .def(py::init([](const std::string& refDate, const MarketData& marketData) {            
             QuantLib::Date refDate_      = QLP::parse<QuantLib::Date>(refDate);
-            return YieldSensCalculator(rate_, refDate_, marketData);
+            return DurationCalculator(refDate_, marketData);
         }))
-        .def("duration", &YieldSensCalculator::duration)
-        .def("convetivy", &YieldSensCalculator::convexity)
-        .def("basisPointValue", &YieldSensCalculator::basisPointValue)
-        .def("clear", &YieldSensCalculator::clear)
-        .ConstVisitProducts(YieldSensCalculator);
+        .def("results", &DurationCalculator::results)
+        .ConstVisitProducts(DurationCalculator);
 }
