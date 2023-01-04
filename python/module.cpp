@@ -23,9 +23,9 @@
 // visitors
 #include <atlas/visitors/cashflowindexer.hpp>
 #include <atlas/visitors/cashflowprofiler.hpp>
+#include <atlas/visitors/durationcalculator.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
-#include <atlas/visitors/durationcalculator.hpp>
 
 // pybind11
 #include <pybind11/pybind11.h>
@@ -194,11 +194,10 @@ PYBIND11_MODULE(Atlas, m) {
         .def("clear", &ParSolver::clear)
         .ConstVisitProducts(ParSolver);
 
-    py::class_<DurationCalculator>(m, "YieldSensCalculator")
-        .def(py::init([](const std::string& refDate, const MarketData& marketData) {            
-            QuantLib::Date refDate_      = QLP::parse<QuantLib::Date>(refDate);
-            return DurationCalculator(refDate_, marketData);
-        }))
+    py::class_<DurationCalculator>(m, "DurationCalculator")
+        .def(py::init<const MarketData&>())
         .def("results", &DurationCalculator::results)
+        .def("clear", &DurationCalculator::clear)
+
         .ConstVisitProducts(DurationCalculator);
 }

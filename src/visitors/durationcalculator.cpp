@@ -1,11 +1,10 @@
 #include <atlas/models/staticyieldmodel.hpp>
-#include <atlas/visitors/forwardrateforecaster.hpp>
 #include <atlas/visitors/durationcalculator.hpp>
+#include <atlas/visitors/forwardrateforecaster.hpp>
 
 namespace Atlas {
 
-    DurationCalculator::DurationCalculator(const QuantLib::Date& refDate, const MarketData& marketData, double delta)
-    : refDate_(refDate), marketData_(marketData), delta_(delta){};
+    DurationCalculator::DurationCalculator(const MarketData& marketData, double delta) : marketData_(marketData), delta_(delta){};
 
     void DurationCalculator::visit(const Deposit& inst) const {
         calculateFixedProductSens(inst);

@@ -11,7 +11,7 @@
 namespace Atlas {
     class DurationCalculator : public ConstVisitor {
        public:
-        DurationCalculator(const QuantLib::Date& refDate, const MarketData& marketData = MarketData(), double delta = 0.0001);
+        DurationCalculator(const MarketData& marketData = MarketData(), double delta = 0.0001);
 
         double results() const { return results_; }
 
@@ -31,12 +31,13 @@ namespace Atlas {
             NPVCalculator npvCacl(marketData_);
             npvCacl.visit(tmpProd);
             double npv = npvCacl.results();
-            auto rate  = tmpProd.rate();
+            npvCacl.clear();
+            auto rate = tmpProd.rate();
             tmpProd.rate(rate.rate() + delta_);
             npvCacl.visit(tmpProd);
             double npv_ = npvCacl.results();
 
-            results_ = (npv - npv_)/delta_;
+            results_ = (npv_ - npv) / npv / delta_;
         };
 
         template <typename T>
@@ -45,17 +46,16 @@ namespace Atlas {
             NPVCalculator npvCacl(marketData_);
             npvCacl.visit(tmpProd);
             double npv = npvCacl.results();
+            npvCacl.clear();
             tmpProd.spread(tmpProd.spread() + delta_);
             npvCacl.visit(tmpProd);
             double npv_ = npvCacl.results();
 
-            results_ = (npv - npv_)/delta_;
+            results_ = (npv_ - npv) / npv / delta_;
         };
 
         double delta_;
-        const QuantLib::Date& refDate_;
         const MarketData& marketData_;
-
         mutable double results_ = 0.0;
     };
 
