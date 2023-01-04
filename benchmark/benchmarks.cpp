@@ -5,10 +5,18 @@
 #include <atlas/visitors/cashflowindexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <nanobench.h>
+#include <atlas/aad/aad.hpp>
 
 using namespace Atlas;
 
+
+
 void benchmarkTest() {
+
+    double yield = 0.03;
+    QuantLib::InterestRate(yield, QuantLib::Actual360(), QuantLib::Compounded, QuantLib::Annual);
+
+
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2025);
 

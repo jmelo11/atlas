@@ -34,9 +34,9 @@ namespace Atlas {
         void fixedLegNPV(const FixedRateLeg& leg);
         void floatingLegNPV(FloatingRateLeg& leg);
 
-        double npv_                   = 0.0;
-        double nonSensNPV_            = 0.0;
-        const MarketData& marketData_ = MarketData();
+        double npv_        = 0.0;
+        double nonSensNPV_ = 0.0;
+        const MarketData& marketData_;
     };
 }  // namespace Atlas
 
