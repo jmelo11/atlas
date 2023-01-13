@@ -11,7 +11,18 @@ using namespace Atlas;
 namespace QuantLibParser {
 
     static std::unordered_map<std::string, RateIndex> IndexMap = {
-        {"LIBOR1M", LIBOR1M()}, {"LIBOR3M", LIBOR3M()}, {"LIBOR6M", LIBOR6M()}, {"LIBOR12M", LIBOR12M()}, {"ICP", ICP()},
+        {"LIBOR1M", LIBOR1M()}, 
+        {"LIBOR3M", LIBOR3M()}, 
+        {"LIBOR6M", LIBOR6M()}, 
+        {"LIBOR12M", LIBOR12M()}, 
+        {"ICP1M", ICP1M()},
+        {"ICP3M", ICP1M()},
+        {"ICP6M", ICP1M()},
+        {"ICP12M", ICP1M()},
+        {"TERMSOFR1M", TERMSOFR1M()},
+        {"TERMSOFR3M", TERMSOFR3M()},
+        {"TERMSOFR6M", TERMSOFR6M()},
+        {"TERMSOFR12M", TERMSOFR12M()},
     };
 
     template <>
