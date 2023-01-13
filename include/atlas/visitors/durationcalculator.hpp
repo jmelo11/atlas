@@ -32,6 +32,7 @@ namespace Atlas {
             npvCacl.visit(tmpProd);
             double npv = npvCacl.results();
             npvCacl.clear();
+            
             auto rate = tmpProd.rate();
             tmpProd.rate(rate.rate() + delta_);
             npvCacl.visit(tmpProd);

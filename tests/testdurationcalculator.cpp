@@ -11,7 +11,7 @@ TEST(DurationCalculator, Deposit) {
     double delta    = 0.0001;
     double rate     = 0.03;
 
-    QL::InterestRate yield(rate, QL::Actual360(), QL::Compounded, QL::Annual);
+    QL::InterestRate yield(rate, QL::Actual360(), QL::Simple, QL::Annual);
     Deposit deposit(startDate, endDate, notional, yield);
 
     MarketData marketData;
