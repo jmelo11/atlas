@@ -11,6 +11,10 @@ namespace Atlas {
         evalFixedRateProd(inst);
     };
 
+    void ParSolver::visit(const FixedRateEqualRedemptionProduct& inst) const {
+        evalFixedRateProd(inst);
+    };
+
     void ParSolver::visit(const EqualPaymentProduct& inst) const {
         const auto& leg                             = inst.constLeg();
         const std::vector<FixedRateCoupon>& coupons = leg.constCoupons();
@@ -33,6 +37,10 @@ namespace Atlas {
     };
 
     void ParSolver::visit(const FloatingRateBulletProduct& inst) const {
+        evalFloatingRateProd(inst);
+    };
+
+    void ParSolver::visit(const FloatingRateEqualRedemptionProduct& inst) const {
         evalFloatingRateProd(inst);
     };
 

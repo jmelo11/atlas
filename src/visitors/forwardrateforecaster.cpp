@@ -10,7 +10,13 @@ namespace Atlas {
 
     void ForwardRateForecaster::visit(EqualPaymentProduct& inst) {}
 
+    void ForwardRateForecaster::visit(FixedRateEqualRedemptionProduct& inst) {}
+
     void ForwardRateForecaster::visit(FloatingRateBulletProduct& inst) {
+        fixFloatingCoupons(inst.leg());
+    }
+
+    void ForwardRateForecaster::visit(FloatingRateEqualRedemptionProduct& inst) {
         fixFloatingCoupons(inst.leg());
     }
 

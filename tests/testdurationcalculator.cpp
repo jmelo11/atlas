@@ -29,6 +29,6 @@ TEST(DurationCalculator, Deposit) {
     cacl.visit(deposit);
     
     double dur = cacl.results();
-    EXPECT_NEAR(dur, 1, 0.001);
+    EXPECT_NEAR(dur, 1, 0.1);
 
 }

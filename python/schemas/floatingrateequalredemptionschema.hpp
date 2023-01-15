@@ -1,20 +1,20 @@
-#ifndef DFD30E0D_2007_447D_86BA_E5673BA94852
-#define DFD30E0D_2007_447D_86BA_E5673BA94852
+#ifndef FF7B27CE_6FD7_42FD_B377_81B662B1D570
+#define FF7B27CE_6FD7_42FD_B377_81B662B1D570
 
 #include "rateindexschema.hpp"
 #include <qlp/parser.hpp>
 #include <qlp/schemas/commonschemas.hpp>
 #include <qlp/schemas/schema.hpp>
-#include <atlas/instruments/floatingrate/floatingratebulletproduct.hpp>
+#include <atlas/instruments/floatingrate/floatingrateequalredemptionproduct.hpp>
 
 using namespace Atlas;
 
 namespace QuantLibParser {
 
     template <>
-    void Schema<FloatingRateBulletProduct>::initSchema() {
+    void Schema<FloatingRateEqualRedemptionProduct>::initSchema() {
         json base = R"({
-            "title": "Floating rate bullet product schema",
+            "title": "Floating rate equal redemption product schema",
             "properties": {},
             "required": ["STARTDATE", "ENDDATE", "SPREAD", "INDEX"]
         })"_json;
@@ -31,13 +31,13 @@ namespace QuantLibParser {
     };
 
     template <>
-    void Schema<FloatingRateBulletProduct>::initDefaultValues() {
+    void Schema<FloatingRateEqualRedemptionProduct>::initDefaultValues() {
         myDefaultValues_["NOTIONAL"] = 100;
     };
 
     template <>
     template <>
-    FloatingRateBulletProduct Schema<FloatingRateBulletProduct>::makeObj(const json& params) {
+    FloatingRateEqualRedemptionProduct Schema<FloatingRateEqualRedemptionProduct>::makeObj(const json& params) {
         json data = setDefaultValues(params);
         validate(data);
         QuantLib::Date startDate = parse<QuantLib::Date>(data.at("STARTDATE"));
@@ -47,9 +47,9 @@ namespace QuantLibParser {
 
         Schema<RateIndex> indexSchema;
         auto index = indexSchema.makeObj(data.at("INDEX"));
-        return FloatingRateBulletProduct(startDate, endDate, notional, spread, index);
+        return FloatingRateEqualRedemptionProduct(startDate, endDate, notional, spread, index);
     };
 
 }  // namespace QuantLibParser
 
-#endif /* DFD30E0D_2007_447D_86BA_E5673BA94852 */
+#endif /* FF7B27CE_6FD7_42FD_B377_81B662B1D570 */

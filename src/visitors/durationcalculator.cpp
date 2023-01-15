@@ -18,7 +18,15 @@ namespace Atlas {
         calculateFixedProductSens(inst);
     };
 
+    void DurationCalculator::visit(const FixedRateEqualRedemptionProduct& inst) const {
+        calculateFixedProductSens(inst);
+    };
+
     void DurationCalculator::visit(const FloatingRateBulletProduct& inst) const {
+        calculateFloatingProductSens(inst);
+    };
+
+    void DurationCalculator::visit(const FloatingRateEqualRedemptionProduct& inst) const {
         calculateFloatingProductSens(inst);
     };
 

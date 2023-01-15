@@ -17,7 +17,17 @@ namespace Atlas {
         redemptionsNPV(inst.leg());
     };
 
+    void NPVCalculator::visit(FixedRateEqualRedemptionProduct& inst) {
+        fixedLegNPV(inst.leg());
+        redemptionsNPV(inst.leg());
+    };
+
     void NPVCalculator::visit(FloatingRateBulletProduct& inst) {
+        floatingLegNPV(inst.leg());
+        redemptionsNPV(inst.leg());
+    };
+
+    void NPVCalculator::visit(FloatingRateEqualRedemptionProduct& inst) {
         floatingLegNPV(inst.leg());
         redemptionsNPV(inst.leg());
     };
