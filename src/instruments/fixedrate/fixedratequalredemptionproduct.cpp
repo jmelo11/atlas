@@ -16,9 +16,10 @@ namespace Atlas {
         for (size_t i = 0; i < redemptions.size(); ++i) {
             FixedRateCoupon coupon(dates.at(i), dates.at(i + 1), outstanding, rate);
             leg_.addCoupon(coupon);
+            
             Redemption redemption(dates.at(i + 1), redemptions.at(i));
             leg_.addRedemption(redemption);
-            double outstanding = notional - redemptions.at(i);
+            outstanding -= redemptions.at(i);
         }
     }
 

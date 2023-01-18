@@ -59,16 +59,6 @@ namespace Atlas {
         LIBOR12M() : RateIndex("LIBOR12M", QuantLib::Actual360(), QuantLib::Frequency::Annual) {}
     };
 
-    class ICP6M : public RateIndex {
-       public:
-        ICP6M() : RateIndex("ICP6M", QuantLib::Actual360(), QuantLib::Frequency::Semiannual) {}
-    };
-
-    class ICP12M : public RateIndex {
-       public:
-        ICP12M() : RateIndex("ICP12M", QuantLib::Actual360(), QuantLib::Frequency::Annual) {}
-    };
-
     class ICP1M : public RateIndex {
        public:
         ICP1M() : RateIndex("ICP1M", QuantLib::Actual360(), QuantLib::Frequency::Monthly) {}
@@ -77,6 +67,16 @@ namespace Atlas {
     class ICP3M : public RateIndex {
        public:
         ICP3M() : RateIndex("ICP3M", QuantLib::Actual360(), QuantLib::Frequency::Quarterly) {}
+    };
+
+    class ICP6M : public RateIndex {
+       public:
+        ICP6M() : RateIndex("ICP6M", QuantLib::Actual360(), QuantLib::Frequency::Semiannual) {}
+    };
+
+    class ICP12M : public RateIndex {
+       public:
+        ICP12M() : RateIndex("ICP12M", QuantLib::Actual360(), QuantLib::Frequency::Annual) {}
     };
 
     class TERMSOFR1M : public RateIndex {

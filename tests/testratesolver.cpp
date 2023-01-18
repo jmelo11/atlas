@@ -218,6 +218,48 @@ TEST(ParSolver, EqualPaymentProduct) {
     EXPECT_NEAR(npvCalculator.results(), notional, 0.0001);
 }
 
+TEST(ParSolver, FixedRateEqualRedemptionProduct) {
+    QL::Date startDate(29, QL::Aug, 2022);
+    QL::Date endDate(29, QL::Aug, 2023);
+    QL::Frequency freq = QL::Frequency::Semiannual;
+    double notional    = 100'000;
+    double rate        = 0.05;
+
+    QL::InterestRate interestRate(rate, QL::Actual360(), QL::Simple, QL::Annual);
+
+    FixedRateEqualRedemptionProduct inst(startDate, endDate, freq, notional, interestRate);
+    auto& leg         = inst.leg();
+    auto& coupons     = leg.coupons();
+    auto& redemptions = leg.redemptions();
+
+    MarketData marketData;
+
+    leg.dfIdx(0);
+    marketData.dfs.push_back(1);
+
+    for (auto& coupon : coupons) {
+        double df = 1 / interestRate.compoundFactor(startDate, coupon.paymentDate());
+        marketData.dfs.push_back(df);
+        coupon.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    for (auto& redemption : redemptions) {
+        double df = 1 / interestRate.compoundFactor(startDate, redemption.paymentDate());
+        marketData.dfs.push_back(df);
+        redemption.dfIdx(marketData.dfs.size() - 1);
+    }
+
+    ParSolver solver(marketData);
+    inst.accept(solver);
+    EXPECT_NEAR(solver.results(), rate, 0.001);
+
+    rate = solver.results();
+    inst.rate(rate);
+    NPVCalculator npvCalculator(marketData);
+    inst.accept(npvCalculator);
+    EXPECT_NEAR(npvCalculator.results(), notional, 0.0001);
+}
+
 TEST(ParSolver, FloatingBulletProduct) {
     QL::Date startDate(17, QL::Month::November, 2022);
     QL::Date endDate(17, QL::Month::November, 2027);

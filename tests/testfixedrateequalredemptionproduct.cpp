@@ -10,7 +10,7 @@ TEST(Product, FixedRateEqualRedemptionProduct) {
     QuantLib::Date startDate(1, QuantLib::Month::Aug, 2020);
     QuantLib::Date endDate(1, QuantLib::Month::Aug, 2021);
     double notional          = 100;
-    QuantLib::Frequency freq = QuantLib::Frequency::Semiannual;
+    QuantLib::Frequency freq = QuantLib::Frequency::Monthly;
     QuantLib::InterestRate rate(0.03, QuantLib::Actual360(), QuantLib::Simple, QuantLib::Annual);
     FixedRateEqualRedemptionProduct prod(startDate, endDate, freq, notional, rate);
 
@@ -20,13 +20,16 @@ TEST(Product, FixedRateEqualRedemptionProduct) {
 
     EXPECT_EQ(leg.discountCurve(), "undefined");
 
-    EXPECT_EQ(coupons.size(), 2);
-    EXPECT_EQ(redemptions.size(), 2);
+    EXPECT_EQ(coupons.size(), 12);
+    EXPECT_EQ(redemptions.size(), 12);
 
-    for (const auto& coupon : coupons) {
-        EXPECT_EQ(coupon.amount(),
-                  notional * (rate.compoundFactor(coupon.startDate(), coupon.endDate()) - 1));
+    double outstanding = notional;
+    for (size_t i = 0; i < coupons.size(); ++i) {
+        auto& coupon = coupons[i];
+        auto& redemption = redemptions[i];
+        EXPECT_NEAR(coupon.amount(), outstanding * (rate.compoundFactor(coupon.startDate(), coupon.endDate()) - 1), 0.001);
+        EXPECT_NEAR(redemption.amount(), notional / 12, 0.001);
+        outstanding -= redemptions[i].amount();
     }
-    for (const auto& redemption : redemptions) { EXPECT_EQ(redemption.amount(), notional / 2); }
+    
 }
-
