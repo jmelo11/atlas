@@ -17,12 +17,22 @@ namespace Atlas {
         useFixedLeg(inst.leg());
     }
 
+    void CashflowIndexer::visit(FixedRateEqualRedemptionProduct& inst) {
+        indexStartDf(inst.leg());
+        useFixedLeg(inst.leg());
+    }
+
     void CashflowIndexer::visit(CustomFixedRateProduct& inst) {
         indexStartDf(inst.leg());
         useFixedLeg(inst.leg());
     }
 
     void CashflowIndexer::visit(FloatingRateBulletProduct& inst) {
+        indexStartDf(inst.leg());
+        useFloatingLeg(inst.leg());
+    }
+
+    void CashflowIndexer::visit(FloatingRateEqualRedemptionProduct& inst) {
         indexStartDf(inst.leg());
         useFloatingLeg(inst.leg());
     }

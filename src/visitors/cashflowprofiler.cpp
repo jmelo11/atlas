@@ -14,7 +14,15 @@ namespace Atlas {
         agreggate(inst.constLeg());
     }
 
+    void CashflowProfiler::visit(const FixedRateEqualRedemptionProduct& inst) const {
+        agreggate(inst.constLeg());
+    }
+
     void CashflowProfiler::visit(const FloatingRateBulletProduct& inst) const {
+        agreggate(inst.constLeg());
+    }
+
+    void CashflowProfiler::visit(const FloatingRateEqualRedemptionProduct& inst) const {
         agreggate(inst.constLeg());
     }
 

@@ -5,6 +5,8 @@ namespace Atlas {
     StaticYieldModel::StaticYieldModel(const MarketRequest& marketRequest, const QuantLib::InterestRate& yield, const QuantLib::Date& refDate)
     : Model(marketRequest), yield_(yield), refDate_(refDate) {}
 
+    StaticYieldModel::StaticYieldModel(const MarketRequest& marketRequest, const QuantLib::Date& refDate) : Model(marketRequest), refDate_(refDate) {}
+
     void StaticYieldModel::simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const {
         for (const auto& evalDate : evalDates) {
             MarketData marketData;
@@ -22,7 +24,7 @@ namespace Atlas {
             const auto& date = request.date_;
             double df;
             if (refDate < date) {
-                df = yield_.discountFactor(refDate_, date);
+                df = yield_.discountFactor(refDate, date);
             } else if (refDate == date) {
                 df = 1;
             } else {

@@ -12,9 +12,12 @@ namespace Atlas {
         void visit(Deposit& inst) override;
         void visit(FixedRateBulletProduct& inst) override;
         void visit(EqualPaymentProduct& inst) override;
+        void visit(FixedRateEqualRedemptionProduct& inst) override;        
         void visit(FloatingRateBulletProduct& inst) override;
+        void visit(FloatingRateEqualRedemptionProduct& inst) override;
         void visit(CustomFixedRateProduct& inst) override;
         void visit(CustomFloatingRateProduct& inst) override;
+
 
         void setRequest(MarketRequest& request);
 

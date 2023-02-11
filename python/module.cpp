@@ -7,13 +7,8 @@
 
 // python module
 #include "makeobjectfromjson.hpp"
-#include "schemas/customfixedrateschema.hpp"
-#include "schemas/customfloatingrateschema.hpp"
-#include "schemas/depositschema.hpp"
-#include "schemas/equalpaymentschema.hpp"
-#include "schemas/fixedratebulletschema.hpp"
-#include "schemas/floatingratebulletschema.hpp"
-#include "schemas/rateindexschema.hpp"
+#include "schemas/all.hpp"
+
 // data
 #include <atlas/data/marketdata.hpp>
 
@@ -23,6 +18,7 @@
 // visitors
 #include <atlas/visitors/cashflowindexer.hpp>
 #include <atlas/visitors/cashflowprofiler.hpp>
+#include <atlas/visitors/durationcalculator.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
 
@@ -46,21 +42,25 @@ using json    = nlohmann::json;
 
 #define FloatingProduct(name) Product(name).def("spread", py::overload_cast<double>(&name::spread)).def("forecastCurve", &name::forecastCurve)
 
-#define VisitProducts(name)                                                     \
-    def("visit", py::overload_cast<FloatingRateBulletProduct&>(&name::visit))   \
-        .def("visit", py::overload_cast<EqualPaymentProduct&>(&name::visit))    \
-        .def("visit", py::overload_cast<FixedRateBulletProduct&>(&name::visit)) \
-        .def("visit", py::overload_cast<Deposit&>(&name::visit))                \
-        .def("visit", py::overload_cast<CustomFixedRateProduct&>(&name::visit)) \
-        .def("visit", py::overload_cast<CustomFloatingRateProduct&>(&name::visit))
+#define VisitProducts(name)                                                              \
+    def("visit", py::overload_cast<FloatingRateBulletProduct&>(&name::visit))            \
+        .def("visit", py::overload_cast<EqualPaymentProduct&>(&name::visit))             \
+        .def("visit", py::overload_cast<FixedRateBulletProduct&>(&name::visit))          \
+        .def("visit", py::overload_cast<Deposit&>(&name::visit))                         \
+        .def("visit", py::overload_cast<CustomFixedRateProduct&>(&name::visit))          \
+        .def("visit", py::overload_cast<CustomFloatingRateProduct&>(&name::visit))       \
+        .def("visit", py::overload_cast<FixedRateEqualRedemptionProduct&>(&name::visit)) \
+        .def("visit", py::overload_cast<FloatingRateEqualRedemptionProduct&>(&name::visit))
 
-#define ConstVisitProducts(name)                                                                  \
-    def("visit", py::overload_cast<const FloatingRateBulletProduct&>(&name::visit, py::const_))   \
-        .def("visit", py::overload_cast<const EqualPaymentProduct&>(&name::visit, py::const_))    \
-        .def("visit", py::overload_cast<const FixedRateBulletProduct&>(&name::visit, py::const_)) \
-        .def("visit", py::overload_cast<const Deposit&>(&name::visit, py::const_))                \
-        .def("visit", py::overload_cast<const CustomFixedRateProduct&>(&name::visit, py::const_)) \
-        .def("visit", py::overload_cast<const CustomFloatingRateProduct&>(&name::visit, py::const_))
+#define ConstVisitProducts(name)                                                                           \
+    def("visit", py::overload_cast<const FloatingRateBulletProduct&>(&name::visit, py::const_))            \
+        .def("visit", py::overload_cast<const EqualPaymentProduct&>(&name::visit, py::const_))             \
+        .def("visit", py::overload_cast<const FixedRateBulletProduct&>(&name::visit, py::const_))          \
+        .def("visit", py::overload_cast<const Deposit&>(&name::visit, py::const_))                         \
+        .def("visit", py::overload_cast<const CustomFixedRateProduct&>(&name::visit, py::const_))          \
+        .def("visit", py::overload_cast<const CustomFloatingRateProduct&>(&name::visit, py::const_))       \
+        .def("visit", py::overload_cast<const FixedRateEqualRedemptionProduct&>(&name::visit, py::const_)) \
+        .def("visit", py::overload_cast<const FloatingRateEqualRedemptionProduct&>(&name::visit, py::const_))
 
 #define SchemaWithoutMaker(name)                                           \
     py::class_<QLP::Schema<name>>(m, #name "Schema")                       \
@@ -143,6 +143,14 @@ PYBIND11_MODULE(Atlas, m) {
     FixedProduct(CustomFixedRateProduct);
     SchemaWithMaker(CustomFixedRateProduct);
 
+    // fixedrateequalredemptionproduct
+    FixedProduct(FixedRateEqualRedemptionProduct);
+    SchemaWithMaker(FixedRateEqualRedemptionProduct);
+
+    // floatingrateequalredemptionproduct
+    FloatingProduct(FloatingRateEqualRedemptionProduct);
+    SchemaWithMaker(FloatingRateEqualRedemptionProduct);
+
     // models
     py::class_<StaticCurveModel>(m, "StaticCurveModel")
         .def(py::init<const MarketRequest&>())
@@ -192,5 +200,11 @@ PYBIND11_MODULE(Atlas, m) {
         .def("results", &ParSolver::results)
         .def("clear", &ParSolver::clear)
         .ConstVisitProducts(ParSolver);
-    ;
+
+    py::class_<DurationCalculator>(m, "DurationCalculator")
+        .def(py::init<const MarketData&>())
+        .def("results", &DurationCalculator::results)
+        .def("clear", &DurationCalculator::clear)
+
+        .ConstVisitProducts(DurationCalculator);
 }

@@ -9,7 +9,13 @@ namespace Atlas {
        public:
         StaticYieldModel(const MarketRequest& marketRequest, const QuantLib::InterestRate& yield, const QuantLib::Date& refDate = QuantLib::Date());
 
+        StaticYieldModel(const MarketRequest& marketRequest, const QuantLib::Date& refDate = QuantLib::Date());
+
         void simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const override;
+
+        void yield(const QuantLib::InterestRate& y) { yield_ = y; };
+
+        QuantLib::InterestRate yield() const { return yield_; };
 
         MarketData simulate() const;
 
