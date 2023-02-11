@@ -1,26 +1,44 @@
 #ifndef A246223F_01CB_4480_9953_6D8FAC75CE3D
 #define A246223F_01CB_4480_9953_6D8FAC75CE3D
 
-#include <ql/interestrate.hpp>
+#include <atlas/atlasconfig.hpp>
 #include <atlas/cashflows/coupon.hpp>
 
 namespace Atlas {
 
+    /***
+     * Fixed rate coupon class
+    */
     class FixedRateCoupon : public Coupon {
        public:
-        FixedRateCoupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
-                        double notional, const QuantLib::InterestRate& rate);
 
-        QuantLib::DayCounter dayCounter() const override;
+        /***
+         * Constructor
+         * @param startDate The start date of the coupon
+         * @param endDate The end date of the coupon
+         * @param notional The notional amount of the coupon
+         * @param rate The interest rate of the coupon
+        */
+        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate);
 
-        double accruedAmount(const QuantLib::Date& start, const QuantLib::Date& end) const override;
+        DayCounter dayCounter() const override;
+        
+        double accruedAmount(const Date& start, const Date& end) const override;
 
-        QuantLib::InterestRate rate() const;
+        /***
+         * Gets the interest rate of the coupon
+         * @return The interest rate of the coupon
+        */
+        InterestRate rate() const;
 
-        void rate(const QuantLib::InterestRate& rate);
+        /***
+         * Sets the interest rate of the coupon
+         * @param rate The interest rate of the coupon
+        */
+        void rate(const InterestRate& rate);
 
        private:
-        QuantLib::InterestRate rate_;
+        InterestRate rate_;
     };
 
 }  // namespace Atlas

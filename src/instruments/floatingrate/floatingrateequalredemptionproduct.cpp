@@ -6,10 +6,10 @@
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    FloatingRateEqualRedemptionProduct::FloatingRateEqualRedemptionProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate,
+    FloatingRateEqualRedemptionProduct::FloatingRateEqualRedemptionProduct(const Date& startDate, const Date& endDate,
                                                                            double notional, double spread, const RateIndex& index)
     : FloatingRateProduct(startDate, endDate, notional, spread) {
-        QuantLib::Schedule schedule = QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+        Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
         const auto& dates           = schedule.dates();
         std::vector<double> redemptions(schedule.size() - 1, notional / (schedule.size() - 1));
         

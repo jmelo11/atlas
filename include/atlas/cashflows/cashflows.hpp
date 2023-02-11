@@ -4,9 +4,11 @@
 #include <vector>
 
 namespace Atlas {
-    
-    class Redemption;
 
+    /**
+     * This file should be removed (or moved to a different location)
+     */
+    class Redemption;
     class Cashflows {
        public:
         static void sortRedemptions(std::vector<Redemption>& redemptions);

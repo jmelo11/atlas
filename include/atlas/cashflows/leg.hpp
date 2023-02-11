@@ -4,12 +4,13 @@
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/floatingratecoupon.hpp>
 #include <atlas/cashflows/redemption.hpp>
+
 #include <memory>
 #include <string>
 #include <vector>
 namespace Atlas {
 
-    class Leg {
+    class Leg : public Indexable {
        public:
         Leg(){};
 
@@ -27,14 +28,10 @@ namespace Atlas {
 
         void addRedemption(Redemption& redemption) { redemptions_.push_back(redemption); }
 
-        void dfIdx(size_t idx) { dfIdx_ = idx; }
-
-        size_t dfIdx() const { return dfIdx_; }
-
-        QuantLib::Date startDate() const { return startDate_; }
+        Date startDate() const { return startDate_; }
 
        protected:
-        QuantLib::Date startDate_ = QuantLib::Date();
+        Date startDate_ = Date();
 
        private:
         std::vector<Redemption> redemptions_;
@@ -56,7 +53,7 @@ namespace Atlas {
 
         void addCoupon(FixedRateCoupon& coupon) {
             coupons_.push_back(coupon);
-            if (startDate() == QuantLib::Date() || startDate() > coupon.startDate()) { startDate_ = coupon.startDate(); }
+            if (startDate() == Date() || startDate() > coupon.startDate()) { startDate_ = coupon.startDate(); }
         }
 
        private:
@@ -77,7 +74,7 @@ namespace Atlas {
 
         void addCoupon(FloatingRateCoupon& coupon) {
             coupons_.push_back(coupon);
-            if (startDate() == QuantLib::Date() || startDate() > coupon.startDate()) { startDate_ = coupon.startDate(); }
+            if (startDate() == Date() || startDate() > coupon.startDate()) { startDate_ = coupon.startDate(); }
         }
 
         void forecastCurve(const std::string& curve) { forecastCurve_ = curve; }

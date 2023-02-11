@@ -2,36 +2,51 @@
 #define FB3CE86C_B207_47DE_B110_DA337769FAF4
 
 #include <ql/time/date.hpp>
+#include <atlas/atlasconfig.hpp>
+#include <atlas/basictypes/indexable.hpp>
 
 namespace Atlas {
 
-    class Cashflow {
-       public:
-        Cashflow(){};
+    class Cashflow : public Indexable {
+       public:    
 
-        Cashflow(const QuantLib::Date& paymentDate, double amount) : amount_(amount), paymentDate_(paymentDate){};
+        Cashflow() = default;
+
+        /***
+         * Constructor        
+         * @param paymentDate The payment date of the cashflow
+         * @param amount The amount of the cashflow         
+        */
+        Cashflow(const Date& paymentDate, double amount) : amount_(amount), paymentDate_(paymentDate){};
 
         virtual ~Cashflow(){};
 
+        /***
+         * Gets the amount of the cashflow
+         * @return The amount (total payment) of the cashflow
+         */
         virtual double amount() const { return amount_; }
 
-        virtual QuantLib::Date paymentDate() const { return paymentDate_; }
+        /***
+         * Gets the payment date of the cashflow
+         * @return The payment date of the cashflow
+         */
+        virtual Date paymentDate() const { return paymentDate_; }
 
-        virtual bool hasOcurred(const QuantLib::Date& date) const {
+        /***
+         * Checks if the cashflow has occurred (is alive)
+         * @param date The date of evaluation
+         * @return True if the cashflow has occurred, false otherwise
+         */
+        virtual bool hasOcurred(const Date& date) const {
             if (paymentDate() > date) return false;
             return true;
         }
 
-        size_t dfIdx() const { return dfIdx_; }
-
-        void dfIdx(size_t idx) { dfIdx_ = idx; }
-
        protected:
-        double amount_              = 0;
-        QuantLib::Date paymentDate_ = QuantLib::Date();
+        double amount_    = 0;
+        Date paymentDate_ = Date();
 
-       private:
-        size_t dfIdx_ = 0;  // 0 is reserved (0% DF)
     };
 }  // namespace Atlas
 

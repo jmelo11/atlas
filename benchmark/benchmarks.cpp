@@ -9,8 +9,6 @@
 
 using namespace Atlas;
 
-
-
 void benchmarkTest() {
 
     double yield = 0.03;

@@ -1,34 +1,73 @@
 #ifndef F0428475_403A_468B_857D_F05E5154A814
 #define F0428475_403A_468B_857D_F05E5154A814
 
-#include <ql/interestrate.hpp>
-#include <ql/time/daycounter.hpp>
+#include <atlas/atlasconfig.hpp>
 #include <atlas/cashflows/cashflow.hpp>
 
 namespace Atlas {
 
+    /***
+     * Coupon class
+     *
+     * A coupon is a cashflow that is paid periodically, and is based on a notional amount.
+     */
     class Coupon : public Cashflow {
        public:
-        Coupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional);
+        /***
+         * Constructor
+         *
+         * @param startDate The start date of the coupon
+         * @param endDate The end date of the coupon
+         * @param notional The notional amount of the coupon
+         */
+        Coupon(const Date& startDate, const Date& endDate, double notional);
 
         virtual ~Coupon(){};
 
+        /***
+         * Get the notional amount of the coupon
+         * @return The notional amount of the coupon
+         */
         double notional() const;
 
-        virtual QuantLib::DayCounter dayCounter() const = 0;
+        /***
+         * Gets the day counter of the coupon
+         * @return The day counter of the coupon
+         */
+        virtual DayCounter dayCounter() const = 0;
 
-        double accruedPeriod(const QuantLib::Date& start, const QuantLib::Date& end) const;
+        /***
+         * Gets the accrued period of the coupon
+         * @param start The start date of the coupon
+         * @param end The end date of the coupon
+         * @return The accrued period of the coupon
+         */
+        double accruedPeriod(const Date& start, const Date& end) const;
 
-        virtual double accruedAmount(const QuantLib::Date& start, const QuantLib::Date& end) const = 0;
+        /***
+         * Gets the accrued amount of the coupon
+         * @param start The start date of the coupon
+         * @param end The end date of the coupon
+         * @return The accrued amount of the coupon
+         */
+        virtual double accruedAmount(const Date& start, const Date& end) const = 0;
 
-        QuantLib::Date startDate() const { return startDate_; }  // accrual start date?
+        /***
+         * Gets the accrual start date of the coupon
+         * @return The accrual start date of the coupon
+         */
+        Date startDate() const { return startDate_; }
 
-        QuantLib::Date endDate() const { return endDate_; }  // accrual end date?
+        /***
+         * Gets the accrual end date of the coupon
+         * @return The accrual end date of the coupon
+         */
+        Date endDate() const { return endDate_; }
 
        private:
-        QuantLib::Date startDate_ = QuantLib::Date();
-        QuantLib::Date endDate_   = QuantLib::Date();
-        double notional_          = 0;
+        Date startDate_  = Date();
+        Date endDate_    = Date();
+        double notional_ = 0;
     };
 
 }  // namespace Atlas

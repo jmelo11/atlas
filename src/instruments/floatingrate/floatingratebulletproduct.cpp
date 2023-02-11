@@ -9,14 +9,14 @@
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    FloatingRateBulletProduct::FloatingRateBulletProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional,
-                                                         double spread, const RateIndex& index)
+    FloatingRateBulletProduct::FloatingRateBulletProduct(const Date& startDate, const Date& endDate, double notional, double spread,
+                                                         const RateIndex& index)
     : FloatingRateProduct(startDate, endDate, notional, spread) {
-        QuantLib::Schedule schedule = QuantLib::MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+        Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
 
-        QuantLib::Date firstDate = QuantLib::Date();
+        Date firstDate = Date();
         for (const auto& endDate : schedule.dates()) {
-            if (firstDate != QuantLib::Date()) {
+            if (firstDate != Date()) {
                 FloatingRateCoupon coupon(firstDate, endDate, notional, spread, index);
                 leg_.addCoupon(coupon);
             }

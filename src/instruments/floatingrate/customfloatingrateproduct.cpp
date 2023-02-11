@@ -3,7 +3,7 @@
 #include <numeric>
 
 namespace Atlas {
-    CustomFloatingRateProduct::CustomFloatingRateProduct(std::vector<QuantLib::Date> dates, std::vector<double> redemptions, double spread,
+    CustomFloatingRateProduct::CustomFloatingRateProduct(std::vector<Date> dates, std::vector<double> redemptions, double spread,
                                                          const RateIndex& index)
     : FloatingRateProduct(dates.front(), dates.back(), 0, spread) {
         notional_ = std::reduce(redemptions.begin(), redemptions.end());

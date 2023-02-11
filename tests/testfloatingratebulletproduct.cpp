@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include <ql/time/schedule.hpp>
-#include <atlas/curves/rateindex.hpp>
+#include <atlas/basictypes/rateindex.hpp>
 #include <atlas/data/marketdata.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletproduct.hpp>
 

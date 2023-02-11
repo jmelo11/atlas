@@ -1,51 +1,144 @@
 #ifndef C5139B34_BABA_4D42_B2D5_CD375677E6A8
 #define C5139B34_BABA_4D42_B2D5_CD375677E6A8
 
+#include <atlas/basictypes/rateindex.hpp>
 #include <atlas/cashflows/coupon.hpp>
-#include <atlas/curves/rateindex.hpp>
 
 namespace Atlas {
 
+    /***
+     * Floating rate coupon class
+     */
     class FloatingRateCoupon : public Coupon {
        public:
-        FloatingRateCoupon(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional, double spread, const RateIndex& index);
+        /***
+         * Constructor
+         * @param startDate The start date of the coupon
+         * @param endDate The end date of the coupon
+         * @param notional The notional amount of the coupon
+         * @param spread The spread of the coupon
+         * @param index The rate index of the coupon
+         */
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, double spread, const RateIndex& index);
 
+        /***
+         * @return The spread of the coupon
+         */
         double spread() const { return spread_; }
 
+        /***
+         * Sets the spread of the coupon
+         * @param spread The spread of the coupon
+         */
         void spread(double spread) {
             spread_ = spread;
             amount_ = accruedAmount(startDate(), endDate());
         }
 
-        size_t fwdIdx() const { return fwdIdx_; }
-
-        void fwdIdx(size_t idx) { fwdIdx_ = idx; }
-
+        /***
+         * Sets the base fixing of the coupon and calculates the accrued amount
+         * @param value The fixing of the coupon
+         */
         void fixing(double value) {
             fixing_ = value;
-            amount_ = accruedAmount(startDate(), endDate());
+            amount_ = accruedAmount(startDate(), endDate());  // should be lazy?
         }
 
+        /***
+         * @return The fixing of the coupon
+         */
         double fixing() const { return fixing_; }
 
-        double accruedAmount(const QuantLib::Date& start, const QuantLib::Date& end) const override;
+        double accruedAmount(const Date& start, const Date& end) const override;
 
-        QuantLib::DayCounter dayCounter() const override;
+        DayCounter dayCounter() const override;
 
+        /***
+         * @return The rate index of the coupon
+         */
         const RateIndex& index() const { return index_; }
 
+        /***
+         * Checks if the coupon is still floating
+         * @return True if the coupon is still floating
+         */
         bool isFloating() const { return isFloating_; }
 
+        /***
+         * Sets the coupon to fixed coupon
+         */
         void fix() { isFloating_ = false; }
 
        private:
         double fixing_   = 0.0;
         double spread_   = 0.0;
-        size_t fwdIdx_   = 0;
-        bool isFloating_ = true;
+        bool isFloating_ = true;  // 1 byte, might cause padding
         RateIndex index_;
     };
 
+    /***
+     * This class attemps to remove RateIndex from FloatingRateCoupon as a member variable, using a pointer instead to the IndexStore and an index
+     * size_t to retrieve the RateIndex from the IndexStore. This is to avoid the need to copy the RateIndex object when copying the
+     * FloatingRateCoupon object.
+     *
+     * Also removed the isFloating_ member variable, with the idea that models should handle the fixing status.
+     */
+    class FloatingRateCoupon2 : public Coupon {
+       public:
+        /***
+         * Constructor
+         * @param startDate The start date of the coupon
+         * @param endDate The end date of the coupon
+         * @param notional The notional amount of the coupon
+         * @param spread The spread of the coupon
+         * @param index Pointer to the rate index of the coupon
+         */
+        FloatingRateCoupon2(const Date& startDate, const Date& endDate, double notional, double spread,
+                            std::shared_ptr<RateIndex> index)  // two parameters for the same thing
+        : Coupon(startDate, endDate, notional), spread_(spread), index_(index){};
+
+        /***
+         * @return The spread of the coupon
+         */
+        double spread() const { return spread_; }
+
+        /***
+         * Sets the spread of the coupon
+         * @param spread The spread of the coupon
+         */
+        void spread(double spread) {
+            spread_ = spread;
+            amount_ = accruedAmount(startDate(), endDate());
+        }
+
+        /***
+         * Sets the base fixing of the coupon and calculates the accrued amount
+         * @param value The fixing of the coupon
+         */
+        void fixing(double value) {
+            fixing_ = value;
+            amount_ = accruedAmount(startDate(), endDate());  // should be lazy?
+        }
+
+        /***
+         * @return The fixing of the coupon
+         */
+        double fixing() const { return fixing_; }
+
+        double accruedAmount(const Date& start, const Date& end) const override;
+
+        DayCounter dayCounter() const override;
+
+        /***
+         * @return The rate index of the coupon
+         */
+        const RateIndex& index() const { return *index_; }
+
+       private:
+        double fixing_ = 0.0;
+        double spread_ = 0.0;
+        std::shared_ptr<RateIndex> index_;
+    };
 }  // namespace Atlas
 
 #endif /* C5139B34_BABA_4D42_B2D5_CD375677E6A8 */

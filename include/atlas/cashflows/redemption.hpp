@@ -5,6 +5,8 @@
 
 namespace Atlas {
 
+    // doesnt make sense to have a redemption class, since it is just a cashflow?
+
     class Redemption : public Cashflow {
        public:
         Redemption(const QuantLib::Date& paymentDate, double amount);
