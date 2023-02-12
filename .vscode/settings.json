@@ -84,7 +84,19 @@
         "stack": "cpp",
         "filesystem": "cpp",
         "ranges": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "regex": "cpp",
+        "codecvt": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "*.tcc": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "memory_resource": "cpp",
+        "source_location": "cpp",
+        "utility": "cpp",
+        "stop_token": "cpp",
+        "cinttypes": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

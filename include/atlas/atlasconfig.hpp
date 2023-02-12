@@ -34,6 +34,8 @@ namespace Atlas {
     using InterestRate          = QuantLib::InterestRate;
     using Schedule              = QuantLib::Schedule;
     using MakeSchedule          = QuantLib::MakeSchedule;
+    using Month                 = QuantLib::Month;
+
     // QuantLib day counters, to be replaced with our own day counters
 
     using Actual360      = QuantLib::Actual360;

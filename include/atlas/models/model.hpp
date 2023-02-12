@@ -19,7 +19,7 @@ namespace Atlas {
 
         Model(const MarketRequest& marketRequest) : marketRequest_(marketRequest) {}
 
-        virtual void simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const = 0;
+        virtual void simulate(const std::vector<Date>& evalDates, Scenario& scenario) const = 0;
 
        protected:
         MarketRequest marketRequest_;

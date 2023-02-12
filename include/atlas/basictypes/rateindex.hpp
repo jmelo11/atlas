@@ -57,37 +57,6 @@ namespace Atlas {
     };
 
     /***
-     * A store for rate indexes. Based on the flyweight pattern.
-     */
-    class RateIndexStore {
-       public:
-        /***
-         * Create a new rate index store.
-         */
-        RateIndexStore() {}
-
-        /***
-         * Add a new index to the store and return its id.
-         * @param index The index to add.
-         * @return The id of the index.
-         */
-        size_t addIndex(const RateIndex& index) {
-            indexes_.push_back(index);
-            return indexes_.size() - 1;
-        }
-
-        /***
-         * Get the index with the given id.
-         * @param indexId The id of the index.
-         * @return The index.
-         */
-        RateIndex& getIndex(size_t indexId) { return indexes_[indexId]; }
-
-       private:
-        std::vector<RateIndex> indexes_;
-    };
-
-    /***
      * Common rate indexes.
      */
     class LIBOR3M : public RateIndex {
