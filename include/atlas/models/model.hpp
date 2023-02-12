@@ -8,6 +8,7 @@
 #define CB4131F2_7926_4625_AEEC_DD73178CBD54
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/atlasconfig.hpp>
 
 namespace Atlas {
 
