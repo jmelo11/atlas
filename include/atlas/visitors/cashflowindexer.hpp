@@ -12,12 +12,11 @@ namespace Atlas {
         void visit(Deposit& inst) override;
         void visit(FixedRateBulletProduct& inst) override;
         void visit(EqualPaymentProduct& inst) override;
-        void visit(FixedRateEqualRedemptionProduct& inst) override;        
+        void visit(FixedRateEqualRedemptionProduct& inst) override;
         void visit(FloatingRateBulletProduct& inst) override;
         void visit(FloatingRateEqualRedemptionProduct& inst) override;
         void visit(CustomFixedRateProduct& inst) override;
         void visit(CustomFloatingRateProduct& inst) override;
-
 
         void setRequest(MarketRequest& request);
 
@@ -25,12 +24,12 @@ namespace Atlas {
 
        private:
         /*
-         * agrega, adem�s del df de cada cupon,  el primer factor de descuento
+         * agrega, ademas del df de cada cupon, el primer factor de descuento
          */
 
         void indexStartDf(Leg& leg) {
             const std::string& discountCurve = leg.discountCurve();
-            dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, leg.startDate())); 
+            dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, leg.startDate()));
             leg.dfIdx(dfs_.size() - 1);
         }
 

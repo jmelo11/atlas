@@ -6,17 +6,18 @@
 #include <atlas/basictypes/indexable.hpp>
 
 namespace Atlas {
+    class Cashflow;
+    typedef Cashflow Redemption2;
 
     class Cashflow : public Indexable {
-       public:    
-
+       public:
         Cashflow() = default;
 
         /***
-         * Constructor        
+         * Constructor
          * @param paymentDate The payment date of the cashflow
-         * @param amount The amount of the cashflow         
-        */
+         * @param amount The amount of the cashflow
+         */
         Cashflow(const Date& paymentDate, double amount) : amount_(amount), paymentDate_(paymentDate){};
 
         virtual ~Cashflow(){};
@@ -43,11 +44,24 @@ namespace Atlas {
             return true;
         }
 
+        /***
+         * Gets the discount curve index
+         * @return The discount curve index
+         */
+        size_t discountCurveIdx() const { return discountCurveIdx_; }
+
+        /***
+         * Sets the discount curve index
+         * @param idx The discount curve index
+         */
+        void discountCurveIdx(size_t idx) { discountCurveIdx_ = idx; }
+
        protected:
         double amount_    = 0;
         Date paymentDate_ = Date();
-
+        size_t discountCurveIdx_;
     };
+
 }  // namespace Atlas
 
 #endif /* FB3CE86C_B207_47DE_B110_DA337769FAF4 */

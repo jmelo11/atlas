@@ -31,28 +31,6 @@ namespace Atlas {
         double notional() const;
 
         /***
-         * Gets the day counter of the coupon
-         * @return The day counter of the coupon
-         */
-        virtual DayCounter dayCounter() const = 0;
-
-        /***
-         * Gets the accrued period of the coupon
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
-         * @return The accrued period of the coupon
-         */
-        double accruedPeriod(const Date& start, const Date& end) const;
-
-        /***
-         * Gets the accrued amount of the coupon
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
-         * @return The accrued amount of the coupon
-         */
-        virtual double accruedAmount(const Date& start, const Date& end) const = 0;
-
-        /***
          * Gets the accrual start date of the coupon
          * @return The accrual start date of the coupon
          */
@@ -68,7 +46,7 @@ namespace Atlas {
         Date startDate_  = Date();
         Date endDate_    = Date();
         double notional_ = 0;
-    };
+    };    
 
 }  // namespace Atlas
 

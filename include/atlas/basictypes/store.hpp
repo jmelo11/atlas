@@ -9,7 +9,7 @@ namespace Atlas {
     class Store {
        public:
         /***
-         * Create a new rate index store.
+         * Create a new object store.
          */
         Store() {}
 
@@ -18,9 +18,9 @@ namespace Atlas {
          * @param index The index to add.
          * @return The id of the index.
          */
-        size_t addItem(const T& index) {
-            indexes_.push_back(index);
-            return indexes_.size() - 1;
+        size_t addItem(const T& item) {
+            items_.push_back(item);
+            return items_.size() - 1;
         }
 
         /***
@@ -28,10 +28,10 @@ namespace Atlas {
          * @param indexId The id of the index.
          * @return The index.
          */
-        T& getItem(size_t indexId) { return indexes_[indexId]; }
+        T& getItem(size_t id) { return items_[id]; }
 
        private:
-        std::vector<T> indexes_;
+        std::vector<T> items_;
     };
 }  // namespace Atlas
 

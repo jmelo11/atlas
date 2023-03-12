@@ -4,8 +4,9 @@ project(Atlas VERSION 0.1.0)
 include(GNUInstallDirs) # despues de definir el proyecto
 set(CMAKE_CXX_STANDARD 20)
 set(BUILD_PYTHON OFF)
-set(BUILD_TESTS ON)
-set(BUILD_BENCHMARK ON)
+set(BUILD_TESTS OFF)
+set(BUILD_BENCHMARK OFF)
+set(BUILD_IDEA ON)
 # target is curvemanager, and use include a src folders
 
 file(
@@ -105,4 +106,8 @@ endif()
 
 if(BUILD_BENCHMARK)
   add_subdirectory(benchmark)
+endif()
+
+if(BUILD_IDEA)
+  add_subdirectory(idea)
 endif()

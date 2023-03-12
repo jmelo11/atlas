@@ -1,7 +1,7 @@
 #ifndef EA6DF8D1_F778_4FBF_9CDE_CD72C677D078
 #define EA6DF8D1_F778_4FBF_9CDE_CD72C677D078
 
-#include <atlas/cashflows/leg.hpp>
+#include <atlas/cashflows/legs/floatingrateleg.hpp>
 #include <atlas/instruments/instrument.hpp>
 
 namespace Atlas {

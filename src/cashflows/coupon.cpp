@@ -11,8 +11,5 @@ namespace Atlas {
         return notional_;
     }
 
-    double Coupon::accruedPeriod(const Date& start, const Date& end) const {
-        return dayCounter().yearFraction(start, end);
-    }
 
 }  // namespace Atlas

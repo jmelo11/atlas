@@ -25,4 +25,8 @@ namespace Atlas {
         amount_ = accruedAmount(startDate(), endDate());
     }
 
+    double FixedRateCoupon::accruedPeriod(const Date& start, const Date& end) const {
+        return dayCounter().yearFraction(start, end);
+    }
+
 }  // namespace Atlas

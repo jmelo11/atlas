@@ -66,14 +66,7 @@ namespace Atlas {
             dfs_.push_back({discountCurve, paymentDate});
             redemption.dfIdx(dfs_.size() - 1);
         };
-        // for (auto& coupon : coupons) {
-        //     dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, coupon.paymentDate()));
-        //     coupon.dfIdx(dfs_.size() - 1);
-        // }
-        // for (auto& redemption : redemptions) {
-        //     dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, redemption.paymentDate()));
-        //     redemption.dfIdx(dfs_.size() - 1);
-        // }
+     
         std::for_each(coupons.begin(), coupons.end(), f);
         std::for_each(redemptions.begin(), redemptions.end(), g);
     }
@@ -100,21 +93,6 @@ namespace Atlas {
             dfs_.push_back({discountCurve, paymentDate});
             redemption.dfIdx(dfs_.size() - 1);
         };
-
-        // for (auto& coupon : coupons) {
-        //     dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, coupon.paymentDate()));
-        //     coupon.dfIdx(dfs_.size() - 1);
-
-        //     const auto& index = coupon.index();
-        //     fwds_.push_back(MarketRequest::Rate(forecastCurve, coupon.startDate(), coupon.endDate(), index.dayCounter(), index.rateCompounding(),
-        //                                         index.rateFrequency()));
-        //     coupon.fwdIdx(fwds_.size() - 1);
-        // }
-
-        // for (auto& redemption : redemptions) {
-        //     dfs_.push_back(MarketRequest::DiscountFactor(discountCurve, redemption.paymentDate()));
-        //     redemption.dfIdx(dfs_.size() - 1);
-        // }
         std::for_each(coupons.begin(), coupons.end(), f);
         std::for_each(redemptions.begin(), redemptions.end(), g);
     }

@@ -52,6 +52,7 @@ namespace Atlas {
         nonSensNPV_ += npv;
     };
 
+    // missing numeraires
     void NPVCalculator::fixedLegNPV(const FixedRateLeg& leg) {
         double npv = 0.0;
         double df  = 0.0;

@@ -43,7 +43,7 @@ void bechmarkFixedRateCoupons() {
     ankerl::nanobench::Bench().title("Fixed Rate Coupon Creation and Iteration");
 
     // parameters
-    size_t numCoupons = 1000000;
+    size_t numCoupons = 100000;
     Date startDate(1, Month::Aug, 2020);
     Date endDate(1, Month::September, 2020);
     double notional = 100;

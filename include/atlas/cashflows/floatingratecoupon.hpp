@@ -49,9 +49,9 @@ namespace Atlas {
          */
         double fixing() const { return fixing_; }
 
-        double accruedAmount(const Date& start, const Date& end) const override;
+        double accruedAmount(const Date& start, const Date& end) const;
 
-        DayCounter dayCounter() const override;
+        DayCounter dayCounter() const;
 
         /***
          * @return The rate index of the coupon
@@ -83,6 +83,7 @@ namespace Atlas {
      *
      * Also removed the isFloating_ member variable, with the idea that models should handle the fixing status.
      */
+
     class FloatingRateCoupon2 : public Coupon {
        public:
         /***
@@ -93,9 +94,8 @@ namespace Atlas {
          * @param spread The spread of the coupon
          * @param index Pointer to the rate index of the coupon
          */
-        FloatingRateCoupon2(const Date& startDate, const Date& endDate, double notional, double spread,
-                            std::shared_ptr<RateIndex> index)  // two parameters for the same thing
-        : Coupon(startDate, endDate, notional), spread_(spread), index_(index){};
+        FloatingRateCoupon2(const Date& startDate, const Date& endDate, double notional, double spread)  // two parameters for the same thing
+        : Coupon(startDate, endDate, notional), spread_(spread){};
 
         /***
          * @return The spread of the coupon
@@ -106,38 +106,25 @@ namespace Atlas {
          * Sets the spread of the coupon
          * @param spread The spread of the coupon
          */
-        void spread(double spread) {
-            spread_ = spread;
-            amount_ = accruedAmount(startDate(), endDate());
-        }
+        void spread(double spread) { spread_ = spread; }
 
         /***
-         * Sets the base fixing of the coupon and calculates the accrued amount
-         * @param value The fixing of the coupon
+         * Sets amount of the coupon since it is not calculated by the coupon itself
          */
-        void fixing(double value) {
-            fixing_ = value;
-            amount_ = accruedAmount(startDate(), endDate());  // should be lazy?
-        }
+        void amount(double amount) { amount_ = amount; }
 
-        /***
-         * @return The fixing of the coupon
-         */
-        double fixing() const { return fixing_; }
+        void indexIdx(size_t indexIdx) { indexIdx_ = indexIdx; }
 
-        double accruedAmount(const Date& start, const Date& end) const override;
+        size_t indexIdx() const { return indexIdx_; }
 
-        DayCounter dayCounter() const override;
+        void forecastCurveIdx(size_t forecastCurveIdx) { forecastCurveIdx_ = forecastCurveIdx; }
 
-        /***
-         * @return The rate index of the coupon
-         */
-        const RateIndex& index() const { return *index_; }
+        size_t forecastCurveIdx() const { return forecastCurveIdx_; }
 
        private:
-        double fixing_ = 0.0;
         double spread_ = 0.0;
-        std::shared_ptr<RateIndex> index_;
+        size_t indexIdx_;
+        size_t forecastCurveIdx_;
     };
 }  // namespace Atlas
 

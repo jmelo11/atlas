@@ -4,7 +4,7 @@
 namespace Atlas {
 
     /***
-     * @brief Base class for all classes that can be indexed. It's used to store the index of the object in the indexable container.     
+     * @brief Base class for all classes that can be indexed. It's used to store the indexes of variables needed for pricing (market values)
      */
     class Indexable {
        public:
@@ -18,9 +18,9 @@ namespace Atlas {
 
         size_t ccyIdx() const { return idx_[2]; }
         void ccyIdx(size_t idx) { idx_[2] = idx; }
-
+                
        private:
-        size_t idx_[3]; // 24 bytes
+        size_t idx_[3]; // 0: discount factor index, 1: forward index, 2: currency index, 3: index index, 4: discount curve index
     };
 
 }  // namespace Atlas

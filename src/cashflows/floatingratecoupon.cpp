@@ -13,13 +13,6 @@ namespace Atlas {
         return index_.dayCounter();
     }
 
-    double FloatingRateCoupon2::accruedAmount(const Date& start, const Date& end) const {
-        InterestRate rate(fixing_ + spread_, index().dayCounter(), index().rateCompounding(), index().rateFrequency());
-        return (rate.compoundFactor(start, end) - 1) * notional();
-    };
 
-    DayCounter FloatingRateCoupon2::dayCounter() const {
-        return index().dayCounter();
-    }
 
 }  // namespace Atlas

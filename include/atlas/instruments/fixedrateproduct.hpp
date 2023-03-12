@@ -2,7 +2,7 @@
 #define A8BC3BBB_99D6_41C4_9EEB_436877D8DA6D
 
 #include <ql/interestrate.hpp>
-#include <atlas/cashflows/leg.hpp>
+#include <atlas/cashflows/legs/fixedrateleg.hpp>
 #include <atlas/instruments/instrument.hpp>
 
 namespace Atlas {
