@@ -1,4 +1,4 @@
-# Atlas: Libreria Financiera #
+# Atlas: Libreria Financiera (alpha version)
 
 El objetivo de esta libreria es convertirse en una alternativa real a las herramientas que ya existen en el mercado, diferenciandose en performance, simplicidad y scope. En cuanto a esto, podemos mencionar:
 
@@ -24,9 +24,9 @@ Algunas caracteristicas tecnicas que se buscan incorporar por defecto son:
 
 - [ ] Estructura basica de las clases (en desarrollo)
 - [ ] Diferenciacion automatica
-- [ ] Valorizaciòn (NPV)
-- [ ] Calculo sensibilidad productos (duracion)
-- [ ] Calculo tasas par
+- [x] Valorizacion (NPV)
+- [x] Calculo sensibilidad productos (duracion)
+- [x] Calculo tasas par
 
 ### Instrumentos
 
@@ -40,7 +40,7 @@ Algunas caracteristicas tecnicas que se buscan incorporar por defecto son:
 
 ### Otros de mercado
 
-- [] Curvas (con AAD)
+- [ ] Curvas (con AAD)
 
 ## Como compilar el proyecto 
 
@@ -52,8 +52,8 @@ Para poder compilar el proyecto es necesario tener una version de Boost y QuantL
 
 Tambien, es necesario contar con CMAKE. A continuacion se presenta un script de ejemplo para poder compilar:
  
-'''
+```
     mkdir build && cd build
     cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<your/quantlib/install/path>' -DBoost_INCLUDE_DIR='<your/boost/path>'
     cmake --build . --target INSTALL --config Release
-'''
+```
