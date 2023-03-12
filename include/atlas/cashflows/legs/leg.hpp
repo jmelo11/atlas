@@ -37,41 +37,67 @@ namespace Atlas {
         size_t dfIdx_              = 0;  // this should be changed for the numeraire
     };
 
-    /***
-     * Leg2 is a new version of Leg that uses Redemption2 instead of Redemption.
+    /**
+     * @class Leg2
+     * @brief Represents a leg of a financial instrument, containing a vector of Redemption2 objects
      */
     class Leg2 {
        public:
+        /**
+         * @brief Default constructor
+         */
         Leg2(){};
 
-        // copy coupons?
+        /**
+         * @brief Constructor that initializes a Leg2 object with a vector of Redemption2 objects
+         * @param redemptions The vector of Redemption2 objects
+         * @param sort Flag indicating whether to sort the redemptions by payment date
+         */
         Leg2(std::vector<Redemption2> redemptions, bool sort = false) : redemptions_(redemptions) {
             if (sort) sortCashflows(redemptions_);
         };
 
+        /**
+         * @brief Default destructor
+         */
         virtual ~Leg2(){};
 
+        /**
+         * @brief Returns a reference to the vector of Redemption2 objects contained in the Leg2 object
+         * @return Reference to the vector of Redemption2 objects
+         */
         std::vector<Redemption2>& redemptions() { return redemptions_; }
 
+        /**
+         * @brief Returns a constant reference to the vector of Redemption2 objects contained in the Leg2 object
+         * @return Constant reference to the vector of Redemption2 objects
+         */
         const std::vector<Redemption2>& constRedemptions() const { return redemptions_; }
 
+        /**
+         * @brief Adds a Redemption2 object to the vector of redemptions contained in the Leg2 object
+         * @param redemption Redemption2 object to be added
+         */
         void addRedemption(Redemption2& redemption) { redemptions_.push_back(redemption); }
 
+        /**
+         * @brief Sorts the redemptions in the vector by payment date
+         */
         void sortRedemptions() { sortCashflows(redemptions_); }
 
        protected:
+        /**
+         * @brief Template method that sorts a vector of cashflows by payment date
+         * @tparam C Type of the cashflows to be sorted
+         * @param cashflows The vector of cashflows to be sorted
+         */
         template <typename C>
         void sortCashflows(std::vector<C>& cashflows) {
             auto f = [](const C& lhs, const C& rhs) { return lhs.paymentDate() < rhs.paymentDate(); };
             std::sort(cashflows.begin(), cashflows.end(), f);
         }
 
-        template <typename C>
-        void setDiscountCurveIdx(std::vector<C>& cashflows, size_t curveIdx) {
-            for (auto& c : cashflows) { c.discountCurveIdx(curveIdx); }
-        }
-
-        std::vector<Redemption2> redemptions_;
+        std::vector<Redemption2> redemptions_;  // Vector of Redemption2 objects contained in the Leg2 object
     };
 }  // namespace Atlas
 

@@ -1,7 +1,7 @@
 #ifndef C5139B34_BABA_4D42_B2D5_CD375677E6A8
 #define C5139B34_BABA_4D42_B2D5_CD375677E6A8
 
-#include <atlas/basictypes/rateindex.hpp>
+#include <atlas/rates/rateindex.hpp>
 #include <atlas/cashflows/coupon.hpp>
 
 namespace Atlas {
@@ -113,17 +113,12 @@ namespace Atlas {
          */
         void amount(double amount) { amount_ = amount; }
 
-        void indexIdx(size_t indexIdx) { indexIdx_ = indexIdx; }
-
-        size_t indexIdx() const { return indexIdx_; }
-
         void forecastCurveIdx(size_t forecastCurveIdx) { forecastCurveIdx_ = forecastCurveIdx; }
 
         size_t forecastCurveIdx() const { return forecastCurveIdx_; }
 
        private:
-        double spread_ = 0.0;
-        size_t indexIdx_;
+        double spread_ = 0.0;   
         size_t forecastCurveIdx_;
     };
 }  // namespace Atlas

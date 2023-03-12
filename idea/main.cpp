@@ -19,7 +19,7 @@ int main() {
 
     FloatingRateCoupon2 coupon(startDate, endDate, 100, 0.0);
 
-    coupon.indexIdx(indexPos);
+    coupon.forecastCurveIdx(indexPos);
 
     std::vector<FloatingRateCoupon2> coupons;
     coupons.push_back(coupon);

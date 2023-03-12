@@ -49,7 +49,7 @@ namespace Atlas {
             sortCashflows(coupons_);
         }
 
-        void discountCurve(size_t idx) {
+        void discountCurveIdx(size_t idx) {
             for (auto& coupon : coupons_) { coupon.discountCurveIdx(idx); }
             for (auto& redemptions_ : redemptions_) { redemptions_.discountCurveIdx(idx); }
         }
