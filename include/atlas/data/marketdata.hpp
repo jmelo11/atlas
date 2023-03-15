@@ -58,8 +58,8 @@ namespace Atlas {
     };
 
     struct MarketData {
+        double numerarie = 1; // under no arbitrage context its ok, but in general it should be a vector?
         QuantLib::Date refDate;
-        double numerarie = 1;
         std::vector<double> dfs;
         std::vector<double> fwds;
 
