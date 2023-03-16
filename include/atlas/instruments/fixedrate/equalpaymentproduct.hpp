@@ -10,46 +10,46 @@ namespace Atlas {
 
     class EqualPaymentProduct : public FixedRateProduct {
        public:
-        EqualPaymentProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, QuantLib::Frequency freq, double notional,
-                            const QuantLib::InterestRate& rate, bool recalcNotionals = false);
+        EqualPaymentProduct(const Date& startDate, const Date& endDate, Frequency freq, double notional,
+                            const InterestRate& rate, bool recalcNotionals = false);
 
         void accept(Visitor& visitor) override;
 
         void accept(ConstVisitor& visitor) const override;
 
-        void rate(const QuantLib::InterestRate& rate) override;
+        void rate(const InterestRate& rate) override;
 
         void rate(double rate) override;
 
-        QuantLib::InterestRate rate() const { return rate_; };
+        InterestRate rate() const { return rate_; };
 
        private:
-        void calculateRedemptions(const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate, double nominal);
+        void calculateRedemptions(const std::vector<Date>& dates, const InterestRate& rate, double nominal);
 
         bool recalcNotionals_;
-        std::vector<QuantLib::Date> dates_;
+        std::vector<Date> dates_;
     };
 
      class EqualPaymentInstrument : public FixedRateInstrument {
        public:
-        EqualPaymentInstrument(const QuantLib::Date& startDate, const QuantLib::Date& endDate, QuantLib::Frequency freq, double notional,
-                            const QuantLib::InterestRate& rate, bool recalcNotionals = false);
+        EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
+                            const InterestRate& rate, bool recalcNotionals = false);
 
         void accept(Visitor& visitor) override;
 
         void accept(ConstVisitor& visitor) const override;
 
-        void rate(const QuantLib::InterestRate& rate) override;
+        void rate(const InterestRate& rate) override;
 
         void rate(double rate) override;
 
-        QuantLib::InterestRate rate() const { return rate_; };
+        InterestRate rate() const { return rate_; };
 
        private:
-        void calculateRedemptions(const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate, double nominal);
+        void calculateRedemptions(const std::vector<Date>& dates, const InterestRate& rate, double nominal);
 
         bool recalcNotionals_;
-        std::vector<QuantLib::Date> dates_;
+        std::vector<Date> dates_;
     };
 
 }  // namespace Atlas

@@ -12,7 +12,7 @@ namespace Atlas {
     // general porpuse class
     class FixedRateProduct : public Instrument {
        public:
-        FixedRateProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, const QuantLib::InterestRate& rate, double notional = 0.0,
+        FixedRateProduct(const Date& startDate, const Date& endDate, const InterestRate& rate, double notional = 0.0,
                          const FixedRateLeg& leg = FixedRateLeg());
 
         virtual ~FixedRateProduct(){};
@@ -21,13 +21,13 @@ namespace Atlas {
 
         FixedRateLeg& leg() { return leg_; };
 
-        void calculateNotionals(const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate);
+        void calculateNotionals(const std::vector<Date>& dates, const InterestRate& rate);
 
-        virtual void rate(const QuantLib::InterestRate& rate);
+        virtual void rate(const InterestRate& rate);
 
         virtual void rate(double rate);
 
-        QuantLib::InterestRate rate() const { return rate_; };
+        InterestRate rate() const { return rate_; };
 
         void discountCurve(const std::string& curve) { leg_.discountCurve(curve); }
 
@@ -35,12 +35,12 @@ namespace Atlas {
         void calculateFaceAmount();
 
         FixedRateLeg leg_;
-        QuantLib::InterestRate rate_;
+        InterestRate rate_;
     };
 
     class FixedRateInstrument : public Instrument {
        public:
-        FixedRateInstrument(const QuantLib::Date& startDate, const QuantLib::Date& endDate, const QuantLib::InterestRate& rate, double notional = 0.0,
+        FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate& rate, double notional = 0.0,
                             const FixedRateLeg2& leg = FixedRateLeg2());
 
         virtual ~FixedRateInstrument(){};
@@ -49,13 +49,13 @@ namespace Atlas {
 
         FixedRateLeg2& leg() { return leg_; };
 
-        void calculateNotionals(const std::vector<QuantLib::Date>& dates, const QuantLib::InterestRate& rate);
+        void calculateNotionals(const std::vector<Date>& dates, const InterestRate& rate);
 
-        virtual void rate(const QuantLib::InterestRate& rate);
+        virtual void rate(const InterestRate& rate);
 
         virtual void rate(double rate);
 
-        QuantLib::InterestRate rate() const { return rate_; };
+        InterestRate rate() const { return rate_; };
 
         void discountCurveIdx(size_t idx) { leg_.discountCurveIdx(idx); }
 
@@ -67,7 +67,8 @@ namespace Atlas {
         void calculateFaceAmount();
 
         FixedRateLeg2 leg_;
-        QuantLib::InterestRate rate_;
+        Cashflow disbursement_;
+        InterestRate rate_;
     };
 }  // namespace Atlas
 

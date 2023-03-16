@@ -7,8 +7,8 @@
 namespace Atlas {
     class FixedRateBulletProduct : public FixedRateProduct {
        public:
-        FixedRateBulletProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, QuantLib::Frequency freq, double notional,
-                               const QuantLib::InterestRate& rate);
+        FixedRateBulletProduct(const Date& startDate, const Date& endDate, Frequency freq, double notional,
+                               const InterestRate& rate);
 
         void accept(Visitor& visitor) override;
 

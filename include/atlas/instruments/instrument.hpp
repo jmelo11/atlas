@@ -14,15 +14,15 @@ namespace Atlas {
 
         virtual void accept(ConstVisitor& visitor) const = 0;
 
-        QuantLib::Date startDate() const { return startDate_; };
+        Date startDate() const { return startDate_; };
 
-        QuantLib::Date endDate() const { return endDate_; };
+        Date endDate() const { return endDate_; };
 
         double notional() const { return notional_; };
 
        protected:
-        QuantLib::Date startDate_ = QuantLib::Date();
-        QuantLib::Date endDate_   = QuantLib::Date();
+        Date startDate_ = Date();
+        Date endDate_   = Date();
         double notional_          = 0.0;
     };
 }  // namespace Atlas

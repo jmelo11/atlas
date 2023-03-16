@@ -42,6 +42,7 @@ namespace Atlas {
         useFloatingLeg(inst.leg());
     }
 
+    
     void CashflowIndexer::setRequest(MarketRequest& request) {
         auto& dfs  = request.dfs;
         auto& fwds = request.fwds;
@@ -66,7 +67,7 @@ namespace Atlas {
             dfs_.push_back({discountCurve, paymentDate});
             redemption.dfIdx(dfs_.size() - 1);
         };
-     
+
         std::for_each(coupons.begin(), coupons.end(), f);
         std::for_each(redemptions.begin(), redemptions.end(), g);
     }

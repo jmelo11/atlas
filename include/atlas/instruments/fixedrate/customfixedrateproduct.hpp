@@ -6,7 +6,7 @@
 namespace Atlas {
     class CustomFixedRateProduct : public FixedRateProduct {
        public:
-        CustomFixedRateProduct(std::vector<QuantLib::Date> dates, std::vector<double> redemptions, const QuantLib::InterestRate& rate);
+        CustomFixedRateProduct(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate& rate);
 
         void accept(Visitor& visitor) override;
 

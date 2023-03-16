@@ -141,6 +141,30 @@ TEST(CashflowIndexer, FloatingRateBulletProduct) {
     }
 }
 
+TEST(CashflowIndexer, FixedRateInstrument) {
+
+    Date startDate(1, Month::January, 2020);
+    Date endDate(1, Month::January, 2025);
+    Frequency freq    = Frequency::Semiannual;
+    Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+    Date firstDate = Date();
+    double notional = 100;
+    InterestRate rate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    FixedRateLeg2 leg;
+    for (const auto& lastDate : schedule.dates()) {
+        if (firstDate != Date()) {
+            FixedRateCoupon coupon(firstDate, lastDate, notional, rate);
+            leg.addCoupon(coupon);
+        }
+        firstDate = lastDate;
+    }
+
+    Redemption2 redemption(schedule.endDate(), notional);
+    leg.addRedemption(redemption);
+
+    FixedRateInstrument prod(startDate, endDate, rate, notional, leg);
+}
+
 TEST(CashflowIndexer, MultipleProduct) {
     QuantLib::Date startDate(1, QuantLib::January, 2020);
     QuantLib::Date endDate(1, QuantLib::January, 2025);

@@ -7,8 +7,8 @@
 namespace Atlas {
     class Deposit : public FixedRateProduct {
        public:
-        Deposit(const QuantLib::Date& startDate, const QuantLib::Date& endDate, double notional,
-                const QuantLib::InterestRate& rate);
+        Deposit(const Date& startDate, const Date& endDate, double notional,
+                const InterestRate& rate);
 
         void accept(Visitor& visitor) override;
 

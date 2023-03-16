@@ -6,8 +6,8 @@
 namespace Atlas {
     class FixedRateEqualRedemptionProduct : public FixedRateProduct {
        public:
-        FixedRateEqualRedemptionProduct(const QuantLib::Date& startDate, const QuantLib::Date& endDate, QuantLib::Frequency freq, double notional,
-                                        const QuantLib::InterestRate& rate);
+        FixedRateEqualRedemptionProduct(const Date& startDate, const Date& endDate, Frequency freq, double notional,
+                                        const InterestRate& rate);
 
         void accept(Visitor& visitor) override;
 
