@@ -17,24 +17,18 @@ namespace Atlas {
 
         void clear() { results_ = 0.0; }
 
-        void visit(const Deposit& inst) const override;
-        void visit(const FixedRateBulletProduct& inst) const override;
-        void visit(const EqualPaymentProduct& inst) const override;
-        void visit(const FixedRateEqualRedemptionProduct& inst) const override;
-        void visit(const FloatingRateBulletProduct& inst) const override;
-        void visit(const FloatingRateEqualRedemptionProduct& inst) const override;
-        void visit(const CustomFixedRateProduct& inst) const override;
-        void visit(const CustomFloatingRateProduct& inst) const override;
+        void visit(const FloatingRateInstrument& inst) const override;
+        void visit(const FixedRateInstrument& inst) const override;
 
        private:
         template <typename T>
-        void calculateFixedProductSens(const T& inst) const {
+        void fixedInstSens(const T& inst) const {
             T tmpProd = inst;
             NPVCalculator npvCacl(marketData_);
             npvCacl.visit(tmpProd);
             double npv = npvCacl.results();
             npvCacl.clear();
-            
+
             auto rate = tmpProd.rate();
             tmpProd.rate(rate.rate() + delta_);
             npvCacl.visit(tmpProd);
@@ -44,7 +38,7 @@ namespace Atlas {
         };
 
         template <typename T>
-        void calculateFloatingProductSens(const T& inst) const {
+        void floatingInstSens(const T& inst) const {
             T tmpProd = inst;
             NPVCalculator npvCacl(marketData_);
             npvCacl.visit(tmpProd);

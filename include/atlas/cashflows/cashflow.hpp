@@ -7,7 +7,7 @@
 
 namespace Atlas {
     class Cashflow;
-    typedef Cashflow Redemption2;
+    typedef Cashflow Redemption;
 
     class Cashflow : public Indexable {
        public:

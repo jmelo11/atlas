@@ -2,6 +2,7 @@
 #define D897AD55_2529_41AF_98E6_ECC9CA3FF5CB
 
 #include <ql/math/solvers1d/brent.hpp>
+#include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 
 namespace Atlas {
@@ -15,21 +16,16 @@ namespace Atlas {
 
         double results() const { return value_; };
 
-        void visit(const Deposit& inst) const override;
-        void visit(const FixedRateBulletProduct& inst) const override;
-        void visit(const EqualPaymentProduct& inst) const override;
-        void visit(const FixedRateEqualRedemptionProduct& inst) const override;
-        void visit(const FloatingRateBulletProduct& inst) const override;
-        void visit(const FloatingRateEqualRedemptionProduct& inst) const override;
-        void visit(const CustomFixedRateProduct& inst) const override;
-        void visit(const CustomFloatingRateProduct& inst) const override;
+        void visit(const FloatingRateInstrument& inst) const override;
+        void visit(const FixedRateInstrument& inst) const override;
+        void visit(const EqualPaymentInstrument& inst) const;
 
        private:
         template <typename T>
         void evalFixedRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator calc(marketData_);
-            double startDf = marketData_.dfs.at(inst.constLeg().dfIdx());
+            double startDf = marketData_.dfs.at(inst.disbursement().dfIdx());
 
             auto f = [&](double r) {
                 evalInst.rate(r);
@@ -46,7 +42,7 @@ namespace Atlas {
         void evalFloatingRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator calc(marketData_);
-            double startDf = marketData_.dfs.at(inst.constLeg().dfIdx());
+            double startDf = marketData_.dfs.at(inst.disbursement().dfIdx());
 
             auto f = [&](double s) {
                 evalInst.spread(s);

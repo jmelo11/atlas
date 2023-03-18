@@ -5,33 +5,13 @@
 #include <atlas/cashflows/legs/leg.hpp>
 
 namespace Atlas {
+
     class FixedRateLeg : public Leg {
        public:
         FixedRateLeg() : Leg(){};
 
-        FixedRateLeg(std::vector<FixedRateCoupon> coupons, std::vector<Redemption> redemptions) : Leg(redemptions), coupons_(coupons) {
-            startDate_ = coupons_.at(0).startDate();
-        };
-
-        std::vector<FixedRateCoupon>& coupons() { return coupons_; }
-
-        const std::vector<FixedRateCoupon>& constCoupons() const { return coupons_; }
-
-        void addCoupon(FixedRateCoupon& coupon) {
-            coupons_.push_back(coupon);
-            if (startDate() == Date() || startDate() > coupon.startDate()) { startDate_ = coupon.startDate(); }
-        }
-
-       private:
-        std::vector<FixedRateCoupon> coupons_;
-    };
-
-    class FixedRateLeg2 : public Leg2 {
-       public:
-        FixedRateLeg2() : Leg2(){};
-
-        FixedRateLeg2(std::vector<FixedRateCoupon> coupons, std::vector<Redemption2> redemptions, bool sort = false)
-        : Leg2(redemptions, sort), coupons_(coupons) {
+        FixedRateLeg(std::vector<FixedRateCoupon> coupons, std::vector<Redemption> redemptions, bool sort = false)
+        : Leg(redemptions, sort), coupons_(coupons) {
             if (sort) sortCashflows(coupons_);
         };
 

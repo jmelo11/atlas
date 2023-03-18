@@ -7,101 +7,89 @@
 #ifndef AFBFF92A_3FC8_47D1_8AA5_E29304D51829
 #define AFBFF92A_3FC8_47D1_8AA5_E29304D51829
 
-#include <ql/compounding.hpp>
-#include <ql/time/date.hpp>
-#include <ql/time/daycounters/actual360.hpp>
 #include <atlas/atlasconfig.hpp>
-#include <map>
 #include <tuple>
-#include <unordered_map>
 #include <vector>
 
 namespace Atlas {
-    template <class A, class B, class C>
-    using DoubleMap = std::unordered_map<A, std::unordered_map<B, C>>;
-    /*
-     * dado que el indice indica la tasa ya calculada, solo se necesita guardar cada una en el
-     * vector
-     */
 
     struct MarketRequest {
+        /**
+         * @brief A struct representing a rate request.
+         */
         struct Rate {
-            Date startDate_;
-            Date endDate_;
-            DayCounter dayCounter_;
-            Compounding compounding_;
-            Frequency frequency_;
+            Date startDate_;          /**< The start date of the rate request. */
+            Date endDate_;            /**< The end date of the rate request. */
+            DayCounter dayCounter_;   /**< The day counter used to calculate the rate. */
+            Compounding compounding_; /**< The compounding frequency used to calculate the rate. */
+            Frequency frequency_;     /**< The frequency of the rate. */
+            size_t curve_;            /**< The index of the curve used to calculate the rate. */
 
-            std::string curve_;
-            Rate(const std::string& referenceCurve, const Date& startDate, const Date& endDate, const DayCounter& dayCounter = Actual360(),
+            /**
+             * @brief Constructs a Rate object with the specified parameters.
+             * @param curve The index of the curve used to calculate the rate.
+             * @param startDate The start date of the rate request.
+             * @param endDate The end date of the rate request.
+             * @param dayCounter The day counter used to calculate the rate. Default is Actual360.
+             * @param compounding The compounding frequency used to calculate the rate. Default is Compounding::Simple.
+             * @param frequency The frequency of the rate. Default is Frequency::Annual.
+             */
+            Rate(const size_t& curve, const Date& startDate, const Date& endDate, const DayCounter& dayCounter = Actual360(),
                  const Compounding& compounding = Compounding::Simple, const Frequency& frequency = Frequency::Annual)
-            : startDate_(startDate),
-              endDate_(endDate),
-              dayCounter_(dayCounter),
-              compounding_(compounding),
-              frequency_(frequency),
-              curve_(referenceCurve){};
+            : startDate_(startDate), endDate_(endDate), dayCounter_(dayCounter), compounding_(compounding), frequency_(frequency), curve_(curve){};
         };
 
+        /**
+         * @brief A struct representing a discount factor request.
+         */
         struct DiscountFactor {
-            Date date_;
-            std::string discountCurve_;
-            DiscountFactor(const std::string& discountCurve, const Date& date) : date_(date), discountCurve_(discountCurve) {}
+            Date date_;    /**< The date of the discount factor request. */
+            size_t curve_; /**< The index of the curve used to calculate the discount factor. */
+
+            /**
+             * @brief Constructs a DiscountFactor object with the specified parameters.
+             * @param curve The index of the curve used to calculate the discount factor.
+             * @param date The date of the discount factor request.
+             */
+            DiscountFactor(size_t curve, const Date& date) : date_(date), curve_(curve) {}
         };
 
+        /**
+         * @brief Returns the index of the most recently added discount factor.
+         * @return The index of the most recently added discount factor.
+         */
         size_t discountFactorIdx() const { return dfs.size() - 1; }
+
+        /**
+         * @brief Returns the index of the most recently added forward rate.
+         * @return The index of the most recently added forward rate.
+         */
         size_t forwardRateIdx() const { return fwds.size() - 1; }
 
-        std::vector<DiscountFactor> dfs;
-
-        std::vector<Rate> fwds;
+        std::vector<DiscountFactor> dfs; /**< A vector of discount factor requests. */
+        std::vector<Rate> fwds;          /**< A vector of forward rate requests. */
     };
 
-    struct MarketRequest2 {
-        struct Rate {
-            Date startDate_;
-            Date endDate_;
-            DayCounter dayCounter_;
-            Compounding compounding_;
-            Frequency frequency_;
-            size_t curve_;
-            Rate(const size_t& referenceCurve, const Date& startDate, const Date& endDate, const DayCounter& dayCounter = Actual360(),
-                 const Compounding& compounding = Compounding::Simple, const Frequency& frequency = Frequency::Annual)
-            : startDate_(startDate),
-              endDate_(endDate),
-              dayCounter_(dayCounter),
-              compounding_(compounding),
-              frequency_(frequency),
-              curve_(referenceCurve){};
-        };
-
-        struct DiscountFactor {
-            Date date_;
-            size_t discountCurve_;
-            DiscountFactor(size_t discountCurve, const Date& date) : date_(date), discountCurve_(discountCurve) {}
-        };
-
-        size_t discountFactorIdx() const { return dfs.size() - 1; }
-        size_t forwardRateIdx() const { return fwds.size() - 1; }
-
-        std::vector<DiscountFactor> dfs;
-
-        std::vector<Rate> fwds;
-    };
-
+    /**
+     * @brief A struct representing market data used for financial calculations.
+     */
     struct MarketData {
-        double numerarie = 1;  // under no arbitrage context its ok, but in general it should be a vector?
-        Date refDate;
-        std::vector<double> dfs;
-        std::vector<double> fwds;
+        Date refDate;              ///< The reference date for the market data.
+        double numerarie = 1;      ///< The numerarie used in financial calculations.
+        std::vector<double> dfs;   ///< The vector of discount factors.
+        std::vector<double> fwds;  ///< The vector of forward rates.
 
+        /**
+         * @brief Allocates memory for the discount factors and forward rates according to the given market request.
+         *
+         * @param marketRequest The market request for which to allocate memory.
+         */
         void allocate(const MarketRequest& marketRequest);
 
+        /**
+         * @brief Initializes the discount factors and forward rates to 1.
+         */
         void initialize();
-    };
-
-    struct HistoricalData {
-        DoubleMap<std::string, Date, double> fwds;
     };
 
 }  // namespace Atlas

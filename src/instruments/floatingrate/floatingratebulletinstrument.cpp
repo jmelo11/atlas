@@ -3,21 +3,20 @@
 
 #include <ql/time/schedule.hpp>
 #include <atlas/cashflows/floatingratecoupon.hpp>
-#include <atlas/cashflows/redemption.hpp>
 #include <atlas/curves/rateindex.hpp>
-#include <atlas/instruments/floatingrate/floatingratebulletproduct.hpp>
+#include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    FloatingRateBulletProduct::FloatingRateBulletProduct(const Date& startDate, const Date& endDate, double notional, double spread,
-                                                         const RateIndex& index)
-    : FloatingRateProduct(startDate, endDate, notional, spread) {
+    FloatingRateBulletInstrument::FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, double spread,
+                                                         const RateIndexConfiguration& index)
+    : FloatingRateInstrument(startDate, endDate, notional, spread) {
         Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
 
         Date firstDate = Date();
         for (const auto& endDate : schedule.dates()) {
             if (firstDate != Date()) {
-                FloatingRateCoupon coupon(firstDate, endDate, notional, spread, index);
+                FloatingRateCoupon coupon(firstDate, endDate, notional, spread);
                 leg_.addCoupon(coupon);
             }
             firstDate = endDate;
@@ -26,15 +25,6 @@ namespace Atlas {
         Redemption redemption(schedule.endDate(), notional);
         leg_.addRedemption(redemption);
 
-        forecastCurve(index.name());
-    }
-
-    void FloatingRateBulletProduct::accept(Visitor& visitor) {
-        visitor.visit(*this);
-    }
-
-    void FloatingRateBulletProduct::accept(ConstVisitor& visitor) const {
-        visitor.visit(*this);
     }
 
 }  // namespace Atlas

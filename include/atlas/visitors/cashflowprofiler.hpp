@@ -7,20 +7,14 @@
 
 namespace Atlas {
 
-    using Profile = std::map<QuantLib::Date, double>;
+    using Profile = std::map<Date, double>;
 
     class CashflowProfiler : public ConstVisitor {
        public:
         CashflowProfiler(){};
 
-        void visit(const Deposit& inst) const override;
-        void visit(const FixedRateBulletProduct& inst) const override;
-        void visit(const EqualPaymentProduct& inst) const override;
-        void visit(const FixedRateEqualRedemptionProduct& inst) const override;
-        void visit(const FloatingRateBulletProduct& inst) const override;
-        void visit(const FloatingRateEqualRedemptionProduct& inst) const override;
-        void visit(const CustomFixedRateProduct& inst) const override;
-        void visit(const CustomFloatingRateProduct& inst) const override;
+        void visit(const FixedRateInstrument& inst) const override;
+        void visit(const FloatingRateInstrument& inst) const override;
 
         void clear() {
             redemptions_.clear();

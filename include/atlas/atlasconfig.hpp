@@ -3,6 +3,7 @@
 
 #include <ql/compounding.hpp>
 #include <ql/interestrate.hpp>
+#include <ql/termstructures/yield/discountcurve.hpp>
 #include <ql/time/businessdayconvention.hpp>
 #include <ql/time/calendar.hpp>
 #include <ql/time/date.hpp>
@@ -42,6 +43,7 @@ namespace Atlas {
     using Actual365Fixed = QuantLib::Actual365Fixed;
     using Thirty360      = QuantLib::Thirty360;
 
+    using DiscountCurve = QuantLib::DiscountCurve;
 }  // namespace Atlas
 
 #endif /* AC3D1435_E543_466D_8A3E_A4DD7B9D5E8D */

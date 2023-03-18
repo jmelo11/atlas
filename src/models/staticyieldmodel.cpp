@@ -2,12 +2,12 @@
 
 namespace Atlas {
 
-    StaticYieldModel::StaticYieldModel(const MarketRequest& marketRequest, const QuantLib::InterestRate& yield, const QuantLib::Date& refDate)
+    StaticYieldModel::StaticYieldModel(const MarketRequest& marketRequest, const InterestRate& yield, const Date& refDate)
     : Model(marketRequest), yield_(yield), refDate_(refDate) {}
 
-    StaticYieldModel::StaticYieldModel(const MarketRequest& marketRequest, const QuantLib::Date& refDate) : Model(marketRequest), refDate_(refDate) {}
+    StaticYieldModel::StaticYieldModel(const MarketRequest& marketRequest, const Date& refDate) : Model(marketRequest), refDate_(refDate) {}
 
-    void StaticYieldModel::simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const {
+    void StaticYieldModel::simulate(const std::vector<Date>& evalDates, Scenario& scenario) const {
         for (const auto& evalDate : evalDates) {
             MarketData marketData;
             marketData.allocate(marketRequest_);
@@ -19,7 +19,7 @@ namespace Atlas {
         }
     }
 
-    void StaticYieldModel::simulateDiscounts(const QuantLib::Date& refDate, MarketData& md) const {
+    void StaticYieldModel::simulateDiscounts(const Date& refDate, MarketData& md) const {
         for (auto& request : marketRequest_.dfs) {
             const auto& date = request.date_;
             double df;
@@ -34,7 +34,7 @@ namespace Atlas {
         }
     }
 
-    void StaticYieldModel::simulateForwards(const QuantLib::Date& refDate, MarketData& md) const {
+    void StaticYieldModel::simulateForwards(const Date& refDate, MarketData& md) const {
         for (auto& request : marketRequest_.fwds) {
             const auto& startDate = request.startDate_;
             const auto& endDate   = request.endDate_;
@@ -53,7 +53,7 @@ namespace Atlas {
     }
 
     MarketData StaticYieldModel::simulate() const {
-        std::vector<QuantLib::Date> dates = {refDate_};
+        std::vector<Date> dates = {refDate_};
         Scenario scenario;
         simulate(dates, scenario);
         return scenario.front();

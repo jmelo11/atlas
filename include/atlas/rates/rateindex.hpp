@@ -7,34 +7,44 @@
 namespace Atlas {
 
     /***
-     * A rate index.
+     * @brief Configuration for a rate index.
      */
-    class RateIndex {
+    class RateIndexConfiguration {
        public:
-        RateIndex() = default;
+        RateIndexConfiguration() = default;
 
-        /***
-         * Create a new rate index.
-         * @param name The name of the index.
-         * @param dayCounter The day counter used to calculate the accrued amount.
-         * @param fixingFreq The frequency of fixing.
-         * @param rateFreq The frequency of the rate.
-         * @param rateComp The compounding of the rate.
-         * @param fixingHistory The history of fixing values.
-         */
-        RateIndex(const std::string& name, DayCounter dayCounter, Frequency fixingFreq, Frequency rateFreq = Frequency::Annual,
-                  Compounding rateComp = Compounding::Simple, std::map<Date, double> fixingHistory = std::map<Date, double>())
-        : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateComp_(rateComp), fixingHistory_(fixingHistory){};
+        RateIndexConfiguration(std::string name, DayCounter dayCounter, Frequency fixingFreq, Frequency rateFreq, Compounding rateComp)
+        : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateFreq_(rateFreq), rateComp_(rateComp){};
 
-        const std::string& name() const { return name_; }
+        std::string name() const { return name_; }
 
         DayCounter dayCounter() const { return dayCounter_; }
+
+        Frequency fixingFrequency() const { return fixingFreq_; }
 
         Frequency rateFrequency() const { return rateFreq_; }
 
         Compounding rateCompounding() const { return rateComp_; }
 
-        Frequency fixingFrequency() const { return fixingFreq_; }
+       private:
+        std::string name_      = "undefined";
+        DayCounter dayCounter_ = DayCounter();
+        Frequency fixingFreq_  = Frequency::NoFrequency;
+        Frequency rateFreq_    = Frequency::NoFrequency;
+        Compounding rateComp_  = Compounding::Simple;
+    };
+
+    /***
+     * @brief A rate index.
+     */
+    class RateIndex {
+       public:
+        RateIndex() = default;
+
+        RateIndex(RateIndexConfiguration config, std::map<Date, double> fixingHistory = std::map<Date, double>())
+        : config_(config), fixingHistory_(fixingHistory){};
+
+        RateIndexConfiguration config() const { return config_; }
 
         void addFixing(const Date& date, double value) { fixingHistory_[date] = value; }  // how does it work with simulations?
 
@@ -48,56 +58,8 @@ namespace Atlas {
         }
 
        private:
-        std::string name_      = "undefined";
-        DayCounter dayCounter_ = DayCounter();
-        Frequency fixingFreq_  = Frequency::NoFrequency;
-        Frequency rateFreq_    = Frequency::NoFrequency;
-        Compounding rateComp_  = Compounding::Simple;
+        RateIndexConfiguration config_;
         std::map<Date, double> fixingHistory_;
-    };
-
-    /***
-     * Common rate indexes.
-     */
-    class LIBOR3M : public RateIndex {
-       public:
-        LIBOR3M() : RateIndex("LIBOR3M", Actual360(), Frequency::Quarterly) {}
-    };
-    class LIBOR1M : public RateIndex {
-       public:
-        LIBOR1M() : RateIndex("LIBOR1M", Actual360(), Frequency::Monthly) {}
-    };
-    class LIBOR6M : public RateIndex {
-       public:
-        LIBOR6M() : RateIndex("LIBOR6M", Actual360(), Frequency::Semiannual) {}
-    };
-    class LIBOR12M : public RateIndex {
-       public:
-        LIBOR12M() : RateIndex("LIBOR12M", Actual360(), Frequency::Annual) {}
-    };
-    class ICP : public RateIndex {
-       public:
-        ICP() : RateIndex("ICP", Actual360(), Frequency::Daily) {}
-    };
-    class SOFR : public RateIndex {
-       public:
-        SOFR() : RateIndex("SOFR", Actual360(), Frequency::Daily) {}
-    };
-    class TERMSOFR1M : public RateIndex {
-       public:
-        TERMSOFR1M() : RateIndex("TERMSOFR1M", Actual360(), Frequency::Monthly) {}
-    };
-    class TERMSOFR3M : public RateIndex {
-       public:
-        TERMSOFR3M() : RateIndex("TERMSOFR3M", Actual360(), Frequency::Quarterly) {}
-    };
-    class TERMSOFR6M : public RateIndex {
-       public:
-        TERMSOFR6M() : RateIndex("TERMSOFR6M", Actual360(), Frequency::Semiannual) {}
-    };
-    class TERMSOFR12M : public RateIndex {
-       public:
-        TERMSOFR12M() : RateIndex("TERMSOFR12M", Actual360(), Frequency::Annual) {}
     };
 
 }  // namespace Atlas

@@ -2,17 +2,8 @@
 
 namespace Atlas {
 
-    StaticCurveModel::StaticCurveModel(const MarketRequest& marketRequest, CurveMap discountCurves, CurveMap forecastCurves,
-                                       DoubleMap<std::string, QuantLib::Date, double> historicalData)
-    : Model(marketRequest), discountCurves_(discountCurves), forecastCurves_(forecastCurves) {
-        if (checkRefDates()) {
-            if (!discountCurves_.empty()) { refDate_ = discountCurves_.begin()->second->referenceDate(); }
-            if (!forecastCurves_.empty()) { refDate_ = forecastCurves_.begin()->second->referenceDate(); }
-
-        } else {
-            throw std::runtime_error("All curves reference date must be equal.");
-        }
-    };
+    StaticCurveModel::StaticCurveModel(const MarketRequest& marketRequest, const CurveStore& curveStore)
+    : Model(marketRequest), curveStore_(curveStore){};
 
     void StaticCurveModel::simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const {
         for (const auto& evalDate : evalDates) {
@@ -20,7 +11,8 @@ namespace Atlas {
             marketData.allocate(marketRequest_);
 
             simulateDiscounts(marketData);
-            if (!forecastCurves_.empty()) { simulateForwards(marketData); }
+            simulateForwards(marketData);
+
             marketData.refDate = evalDate;
             scenario.push_back(marketData);
         }
@@ -35,12 +27,14 @@ namespace Atlas {
 
     void StaticCurveModel::simulateDiscounts(MarketData& md) const {
         for (auto& request : marketRequest_.dfs) {
-            const auto& curve = discountCurves_.at(request.discountCurve_);
-            const auto& date  = request.date_;
+            size_t idx              = request.curve_;
+            const Date& date        = request.date_;
+            const YieldCurve& curve = curveStore_.at(idx);
+
             double df;
-            if (curve->referenceDate() < date) {
-                df = curve->discount(date);
-            } else if (curve->referenceDate() == date) {
+            if (curve.referenceDate() < date) {
+                df = curve.discount(date);
+            } else if (curve.referenceDate() == date) {
                 df = 1;
             } else {
                 df = 0;
@@ -50,42 +44,23 @@ namespace Atlas {
     }
 
     void StaticCurveModel::simulateForwards(MarketData& md) const {
-        for (auto& rateRequest : marketRequest_.fwds) {
-            const auto& curve       = forecastCurves_.at(rateRequest.curve_);
-            const auto& startDate   = rateRequest.startDate_;
-            const auto& endDate     = rateRequest.endDate_;
-            const auto& dayCounter  = rateRequest.dayCounter_;
-            const auto& compounding = rateRequest.compounding_;
-            const auto& frequency   = rateRequest.frequency_;
+        for (auto& request : marketRequest_.fwds) {
+            size_t idx            = request.curve_;
+            const Date& startDate = request.startDate_;
+            const Date& endDate   = request.endDate_;
 
-            double fwd = 0;
-            if (curve->referenceDate() <= startDate) {
-                fwd = curve->forwardRate(startDate, endDate, dayCounter, compounding).rate();
+            const YieldCurve& curve                   = curveStore_.at(idx);
+            const RateIndexConfiguration& indexConfig = curve.index()->config();
+
+            double fwd;
+            if (curve.referenceDate() <= startDate) {
+                fwd = curve.forwardRate(startDate, endDate, indexConfig.dayCounter(), indexConfig.rateCompounding(), indexConfig.rateFrequency())
+                          .rate();
             } else {
-                fwd = historicalData_.at(rateRequest.curve_).at(startDate);
+                fwd = curve.index()->getFixing(startDate);
             }
             md.fwds.push_back(fwd);
         }
     };
-
-    bool StaticCurveModel::checkRefDates() {
-        if (!discountCurves_.empty()) {
-            auto it          = discountCurves_.begin();
-            QuantLib::Date a = it->second->referenceDate();
-            for (auto& [k, v] : discountCurves_) {
-                QuantLib::Date b = v->referenceDate();
-                if (a != b) { return false; }
-            }
-        }
-        if (!forecastCurves_.empty()) {
-            auto it          = forecastCurves_.begin();
-            QuantLib::Date a = it->second->referenceDate();
-            for (auto& [k, v] : forecastCurves_) {
-                QuantLib::Date b = v->referenceDate();
-                if (a != b) { return false; }
-            }
-        }
-        return true;
-    }
 
 }  // namespace Atlas

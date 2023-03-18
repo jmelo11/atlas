@@ -2,42 +2,12 @@
 
 namespace Atlas {
 
-    void NPVCalculator::visit(Deposit& inst) {
+    void NPVCalculator::visit(FixedRateInstrument& inst) {
         fixedLegNPV(inst.leg());
         redemptionsNPV(inst.leg());
     };
 
-    void NPVCalculator::visit(FixedRateBulletProduct& inst) {
-        fixedLegNPV(inst.leg());
-        redemptionsNPV(inst.leg());
-    };
-
-    void NPVCalculator::visit(EqualPaymentProduct& inst) {
-        fixedLegNPV(inst.leg());
-        redemptionsNPV(inst.leg());
-    };
-
-    void NPVCalculator::visit(FixedRateEqualRedemptionProduct& inst) {
-        fixedLegNPV(inst.leg());
-        redemptionsNPV(inst.leg());
-    };
-
-    void NPVCalculator::visit(FloatingRateBulletProduct& inst) {
-        floatingLegNPV(inst.leg());
-        redemptionsNPV(inst.leg());
-    };
-
-    void NPVCalculator::visit(FloatingRateEqualRedemptionProduct& inst) {
-        floatingLegNPV(inst.leg());
-        redemptionsNPV(inst.leg());
-    };
-
-    void NPVCalculator::visit(CustomFixedRateProduct& inst) {
-        fixedLegNPV(inst.leg());
-        redemptionsNPV(inst.leg());
-    };
-
-    void NPVCalculator::visit(CustomFloatingRateProduct& inst) {
+    void NPVCalculator::visit(FloatingRateInstrument& inst) {
         floatingLegNPV(inst.leg());
         redemptionsNPV(inst.leg());
     };
@@ -70,7 +40,7 @@ namespace Atlas {
         for (auto& coupon : leg.coupons()) {
             df  = marketData_.dfs.at(coupon.dfIdx());
             fwd = marketData_.fwds.at(coupon.fwdIdx());
-            coupon.fixing(fwd);
+            coupon.fixing(fwd); // ?
             npv += coupon.amount() * df;
         }
         npv_ += npv;

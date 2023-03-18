@@ -2,6 +2,7 @@
 #define C9383CFF_FA55_4061_A633_C8B6F16B0878
 
 #include <atlas/atlasconfig.hpp>
+#include <atlas/rates/rateindex.hpp>
 
 namespace Atlas {
     /**

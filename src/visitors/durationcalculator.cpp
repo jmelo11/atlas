@@ -6,36 +6,12 @@ namespace Atlas {
 
     DurationCalculator::DurationCalculator(const MarketData& marketData, double delta) : marketData_(marketData), delta_(delta){};
 
-    void DurationCalculator::visit(const Deposit& inst) const {
-        calculateFixedProductSens(inst);
+    void DurationCalculator::visit(const FixedRateInstrument& inst) const {
+        fixedInstSens(inst);
     };
 
-    void DurationCalculator::visit(const FixedRateBulletProduct& inst) const {
-        calculateFixedProductSens(inst);
-    };
-
-    void DurationCalculator::visit(const EqualPaymentProduct& inst) const {
-        calculateFixedProductSens(inst);
-    };
-
-    void DurationCalculator::visit(const FixedRateEqualRedemptionProduct& inst) const {
-        calculateFixedProductSens(inst);
-    };
-
-    void DurationCalculator::visit(const FloatingRateBulletProduct& inst) const {
-        calculateFloatingProductSens(inst);
-    };
-
-    void DurationCalculator::visit(const FloatingRateEqualRedemptionProduct& inst) const {
-        calculateFloatingProductSens(inst);
-    };
-
-    void DurationCalculator::visit(const CustomFloatingRateProduct& inst) const {
-        calculateFloatingProductSens(inst);
-    };
-
-    void DurationCalculator::visit(const CustomFixedRateProduct& inst) const {
-        calculateFixedProductSens(inst);
+    void DurationCalculator::visit(const FloatingRateInstrument& inst) const {
+        floatingInstSens(inst);
     };
 
 }  // namespace Atlas

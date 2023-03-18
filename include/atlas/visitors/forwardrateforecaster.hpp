@@ -9,17 +9,10 @@ namespace Atlas {
        public:
         ForwardRateForecaster(const MarketData& marketData) : marketData_(marketData){};
 
-        void visit(Deposit& inst) override;
-        void visit(FixedRateBulletProduct& inst) override;
-        void visit(EqualPaymentProduct& inst) override;
-        void visit(FixedRateEqualRedemptionProduct& inst) override;
-        void visit(FloatingRateBulletProduct& inst) override;
-        void visit(FloatingRateEqualRedemptionProduct& inst) override;
-        void visit(CustomFixedRateProduct& inst) override;
-        void visit(CustomFloatingRateProduct& inst) override;
+        void visit(FloatingRateInstrument& inst) override;
 
        private:
-        void fixFloatingCoupons(FloatingRateLeg& leg);
+        void fixFloatingCoupon(FloatingRateCoupon& coupon);
         const MarketData& marketData_;
     };
 }  // namespace Atlas

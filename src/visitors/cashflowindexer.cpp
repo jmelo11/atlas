@@ -2,47 +2,28 @@
 
 namespace Atlas {
 
-    void CashflowIndexer::visit(Deposit& inst) {
-        indexStartDf(inst.leg());
-        useFixedLeg(inst.leg());
+    void CashflowIndexer::visit(FloatingRateInstrument& inst) {
+        auto& leg         = inst.leg();
+        auto& coupons     = leg.coupons();
+        auto& redemptions = leg.redemptions();
+
+        for (auto& coupon : coupons) {
+            indexCashflow(coupon);
+            indexFloatingCoupon(coupon);
+        }
+
+        for (auto& redemption : redemptions) { indexCashflow(redemption); }
     }
 
-    void CashflowIndexer::visit(FixedRateBulletProduct& inst) {
-        indexStartDf(inst.leg());
-        useFixedLeg(inst.leg());
+    void CashflowIndexer::visit(FixedRateInstrument& inst) {
+        auto& leg         = inst.leg();
+        auto& coupons     = leg.coupons();
+        auto& redemptions = leg.redemptions();
+
+        for (auto& coupon : coupons) { indexCashflow(coupon); }
+        for (auto& redemption : redemptions) { indexCashflow(redemption); }
     }
 
-    void CashflowIndexer::visit(EqualPaymentProduct& inst) {
-        indexStartDf(inst.leg());
-        useFixedLeg(inst.leg());
-    }
-
-    void CashflowIndexer::visit(FixedRateEqualRedemptionProduct& inst) {
-        indexStartDf(inst.leg());
-        useFixedLeg(inst.leg());
-    }
-
-    void CashflowIndexer::visit(CustomFixedRateProduct& inst) {
-        indexStartDf(inst.leg());
-        useFixedLeg(inst.leg());
-    }
-
-    void CashflowIndexer::visit(FloatingRateBulletProduct& inst) {
-        indexStartDf(inst.leg());
-        useFloatingLeg(inst.leg());
-    }
-
-    void CashflowIndexer::visit(FloatingRateEqualRedemptionProduct& inst) {
-        indexStartDf(inst.leg());
-        useFloatingLeg(inst.leg());
-    }
-
-    void CashflowIndexer::visit(CustomFloatingRateProduct& inst) {
-        indexStartDf(inst.leg());
-        useFloatingLeg(inst.leg());
-    }
-
-    
     void CashflowIndexer::setRequest(MarketRequest& request) {
         auto& dfs  = request.dfs;
         auto& fwds = request.fwds;
@@ -50,52 +31,17 @@ namespace Atlas {
         fwds.insert(fwds.end(), fwds_.begin(), fwds_.end());
     }
 
-    void CashflowIndexer::useFixedLeg(FixedRateLeg& leg) {
-        auto& coupons     = leg.coupons();
-        auto& redemptions = leg.redemptions();
-
-        const std::string& discountCurve = leg.discountCurve();
-
-        auto f = [&](auto& coupon) {
-            const auto& paymentDate = coupon.paymentDate();
-            dfs_.push_back({discountCurve, paymentDate});
-            coupon.dfIdx(dfs_.size() - 1);
-        };
-
-        auto g = [&](auto& redemption) {
-            const auto& paymentDate = redemption.paymentDate();
-            dfs_.push_back({discountCurve, paymentDate});
-            redemption.dfIdx(dfs_.size() - 1);
-        };
-
-        std::for_each(coupons.begin(), coupons.end(), f);
-        std::for_each(redemptions.begin(), redemptions.end(), g);
+    void CashflowIndexer::indexCashflow(Cashflow& cashflow) {
+        size_t idx              = cashflow.dfIdx();
+        const auto& paymentDate = cashflow.paymentDate();
+        dfs_.push_back({idx, paymentDate});
+        cashflow.dfIdx(dfs_.size() - 1);
     }
 
-    void CashflowIndexer::useFloatingLeg(FloatingRateLeg& leg) {
-        auto& coupons     = leg.coupons();
-        auto& redemptions = leg.redemptions();
-
-        const std::string& discountCurve = leg.discountCurve();
-        const std::string& forecastCurve = leg.forecastCurve();
-
-        auto f = [&](auto& coupon) {
-            const auto& paymentDate = coupon.paymentDate();
-            dfs_.push_back({discountCurve, paymentDate});
-            coupon.dfIdx(dfs_.size() - 1);
-
-            const auto& index = coupon.index();
-            fwds_.push_back(
-                {forecastCurve, coupon.startDate(), coupon.endDate(), index.dayCounter(), index.rateCompounding(), index.rateFrequency()});
-            coupon.fwdIdx(fwds_.size() - 1);
-        };
-        auto g = [&](auto& redemption) {
-            const auto& paymentDate = redemption.paymentDate();
-            dfs_.push_back({discountCurve, paymentDate});
-            redemption.dfIdx(dfs_.size() - 1);
-        };
-        std::for_each(coupons.begin(), coupons.end(), f);
-        std::for_each(redemptions.begin(), redemptions.end(), g);
+    void CashflowIndexer::indexFloatingCoupon(FloatingRateCoupon& coupon) {
+        size_t fwdIdx = coupon.fwdIdx();
+        fwds_.push_back({fwdIdx, coupon.startDate(), coupon.endDate()});
+        coupon.fwdIdx(fwds_.size() - 1);
     }
 
     void CashflowIndexer::clear() {
