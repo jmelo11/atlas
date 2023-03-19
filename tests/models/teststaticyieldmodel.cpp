@@ -1,4 +1,4 @@
-#include "pch.hpp"
+#include "../pch.hpp"
 #include <atlas/models/staticyieldmodel.hpp>
 #include <atlas/visitors/cashflowindexer.hpp>
 
@@ -7,10 +7,10 @@ namespace QL = QuantLib;
 
 
 TEST(StaticYieldModel, Deposit) {
-    QL::Date startDate(1, QL::Month::Aug, 2020);
-    QL::Date endDate(1, QL::Month::Aug, 2021);
+    Date startDate(1, Month::Aug, 2020);
+    Date endDate(1, Month::Aug, 2021);
     double notional = 100;
-    QL::InterestRate rate(0.05, QL::Actual360(), QL::Simple, QL::Annual);
+    InterestRate rate(0.05, Actual360(), Simple, Annual);
     Deposit prod(startDate, endDate, notional, rate);
 
     MarketRequest request;
@@ -20,7 +20,7 @@ TEST(StaticYieldModel, Deposit) {
 
     StaticYieldModel model(request, rate);
 
-    std::vector<QL::Date> evalDates = {startDate};
+    std::vector<Date> evalDates = {startDate};
     Scenario scenario;
     model.simulate(evalDates, scenario);
 

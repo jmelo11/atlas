@@ -3,8 +3,7 @@
 #include <numeric>
 
 namespace Atlas {
-    CustomFloatingRateInstrument::CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread,
-                                                               const RateIndexConfiguration& index)
+    CustomFloatingRateInstrument::CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread)
     : FloatingRateInstrument(dates.front(), dates.back(), 0, spread) {
         notional_          = std::reduce(redemptions.begin(), redemptions.end());
         double outstanding = notional_;

@@ -6,8 +6,7 @@
 namespace Atlas {
     class CustomFloatingRateInstrument : public FloatingRateInstrument {
        public:
-        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread,
-                                     const RateIndexConfiguration& index = RateIndexConfiguration());
+        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread);
     };
 }  // namespace Atlas
 

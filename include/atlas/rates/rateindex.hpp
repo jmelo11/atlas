@@ -13,7 +13,8 @@ namespace Atlas {
        public:
         RateIndexConfiguration() = default;
 
-        RateIndexConfiguration(std::string name, DayCounter dayCounter, Frequency fixingFreq, Frequency rateFreq, Compounding rateComp)
+        RateIndexConfiguration(std::string name, Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
+                               Compounding rateComp = Compounding::Simple)
         : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateFreq_(rateFreq), rateComp_(rateComp){};
 
         std::string name() const { return name_; }
