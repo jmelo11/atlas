@@ -6,7 +6,8 @@
 
 TEST(Instrument, FloatingRateBulletInstrument) {
     FloatingInstrumentVars vars;
-    FloatingRateBulletInstrument inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.config);
-    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.config.fixingFrequency());
+    auto index = vars.store_.at("TEST")->index();
+    FloatingRateBulletInstrument inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
+    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(index.fixingFrequency());
     testStructure(inst, schedule, PaymentStructure::BulletOrZero);
 }

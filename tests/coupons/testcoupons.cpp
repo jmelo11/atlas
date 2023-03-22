@@ -1,8 +1,9 @@
 #include "../pch.hpp"
-#include <ql/time/daycounters/actual360.hpp>
+#include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/floatingratecoupon.hpp>
 #include <atlas/curves/rateindex.hpp>
+#include <atlas/rates/curvecontextstore.hpp>
 
 using namespace Atlas;
 
@@ -11,6 +12,13 @@ struct FixedCouponVars {
     Date endDate      = Date(1, Month::Aug, 2021);
     double notional   = 100;
     InterestRate rate = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+
+    CurveContextStore store_;
+    FixedCouponVars() {
+        auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
+        auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", std::move(curve), std::move(index));
+    };
 };
 
 struct FloatingCouponVars {
@@ -18,12 +26,18 @@ struct FloatingCouponVars {
     Date endDate    = Date(1, Month::Aug, 2021);
     double notional = 100;
     double spread   = 0.01;
-    size_t index    = 0;
+
+    CurveContextStore store_;
+    FloatingCouponVars() {
+        auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
+        auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", std::move(curve), std::move(index));
+    };
 };
 
 TEST(Coupons, FixedRateCoupon) {
     FixedCouponVars vars;
-    FixedRateCoupon coupon(vars.startDate, vars.endDate, vars.notional, vars.rate);
+    FixedRateCoupon coupon(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.store_.at("TEST"));
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
@@ -42,7 +56,7 @@ TEST(Coupons, FixedRateCoupon) {
 
 TEST(Coupons, FloatingRateCoupon) {
     FloatingCouponVars vars;
-    FloatingRateCoupon coupon(vars.startDate, vars.endDate, vars.notional, vars.spread);
+    FloatingRateCoupon coupon(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());

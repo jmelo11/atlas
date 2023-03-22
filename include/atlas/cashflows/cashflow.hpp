@@ -4,6 +4,7 @@
 #include <ql/time/date.hpp>
 #include <atlas/atlasconfig.hpp>
 #include <atlas/basictypes/indexable.hpp>
+#include <atlas/rates/curvecontext.hpp>
 
 namespace Atlas {
     class Cashflow;
@@ -11,14 +12,14 @@ namespace Atlas {
 
     class Cashflow : public Indexable {
        public:
-        Cashflow() = default;
-
+        Cashflow(std::shared_ptr<CurveContext> discountCurveContext = nullptr) : discountCurveContext_(discountCurveContext){};
         /***
          * Constructor
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, double amount) : amount_(amount), paymentDate_(paymentDate){};
+        Cashflow(const Date& paymentDate, double amount, std::shared_ptr<CurveContext> discountCurveContext = nullptr)
+        : amount_(amount), paymentDate_(paymentDate), discountCurveContext_(discountCurveContext){};
 
         virtual ~Cashflow(){};
 
@@ -48,18 +49,18 @@ namespace Atlas {
          * Gets the discount curve index
          * @return The discount curve index
          */
-        size_t discountCurveIdx() const { return discountCurveIdx_; }
+        std::shared_ptr<CurveContext> discountCurveContext() const { return discountCurveContext_; }
 
         /***
-         * Sets the discount curve index
-         * @param idx The discount curve index
+         * Sets the discount curve context
+         * @param context The discount curve context
          */
-        void discountCurveIdx(size_t idx) { discountCurveIdx_ = idx; }
+        void discountCurveContext(std::shared_ptr<CurveContext> context) { discountCurveContext_ = context; }
 
        protected:
         double amount_    = 0;
         Date paymentDate_ = Date();
-        size_t discountCurveIdx_;
+        std::shared_ptr<CurveContext> discountCurveContext_;
     };
 
 }  // namespace Atlas

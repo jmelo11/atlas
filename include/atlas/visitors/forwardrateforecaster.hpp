@@ -12,7 +12,6 @@ namespace Atlas {
         void visit(FloatingRateInstrument& inst) override;
 
        private:
-        void fixFloatingCoupon(FloatingRateCoupon& coupon);
         const MarketData& marketData_;
     };
 }  // namespace Atlas

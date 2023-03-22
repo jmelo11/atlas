@@ -19,6 +19,7 @@ file(
   "src/instruments/fixedrate/*.cpp"
   "src/visitors/*.cpp"
   "src/models/*.cpp"
+  "src/rates/*.cpp"
   "src/instruments/floatingrate/*.cpp"
   "src/multithreading/*.cpp")
 
@@ -35,6 +36,7 @@ file(
   "include/atlas/models/*.hpp"
   "include/atlas/multithreading/*.hpp"
   "include/atlas/visitors/*.hpp"
+  "include/atlas/rates/*.hpp"
   "include/atlas/others/*.hpp")
 
 if(MSVC)

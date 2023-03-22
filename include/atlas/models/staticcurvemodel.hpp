@@ -8,16 +8,15 @@
 #define DE0DE97B_4D3F_4EFB_8C7F_9D85C4CDE288
 
 #include <atlas/models/model.hpp>
-#include <atlas/rates/yieldcurve.hpp>
+#include <atlas/rates/curvecontextstore.hpp>
 #include <map>
 
 namespace Atlas {
 
-    using CurveStore = std::vector<YieldCurve>;
 
     class StaticCurveModel : public Model {
        public:
-        StaticCurveModel(const MarketRequest& marketRequest, const CurveStore& curveStore);
+        StaticCurveModel(const MarketRequest& marketRequest, const CurveContextStore& curveStore);
 
         void setRequest(const MarketRequest& request) { marketRequest_ = request; };
 
@@ -33,7 +32,7 @@ namespace Atlas {
         bool checkRefDates();
 
         Date refDate_;
-        const CurveStore& curveStore_;
+        const CurveContextStore& curveStore_;
     };
 }  // namespace Atlas
 

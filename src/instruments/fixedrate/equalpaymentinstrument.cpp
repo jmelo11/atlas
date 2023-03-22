@@ -9,19 +9,29 @@
 namespace Atlas {
 
     EqualPaymentInstrument::EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                                   const InterestRate& rate, bool recalcNotionals)
+                                                   const InterestRate& rate, bool recalcNotionals, std::shared_ptr<CurveContext> discountCurveContext)
     : FixedRateInstrument(startDate, endDate, rate, notional), recalcNotionals_(recalcNotionals) {
         Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
         dates_ = schedule.dates();
 
+        // calculate redemptions for a equal payment structure
         calculateRedemptions(dates_, rate, notional);
+
+        // calculate each corresponding notional
         calculateNotionals(dates_, rate);
+
+        // sets the discount curve context for the leg
+        leg_.discountCurveContext(discountCurveContext);
+
+        // sets the disbursement cashflow
+        disbursement_ = Cashflow(startDate, -notional, discountCurveContext);
     }
 
     void EqualPaymentInstrument::rate(const InterestRate& r) {
         rate_ = r;
         if (recalcNotionals_) {
+            const auto& context = leg_.discountCurveContext();
             std::vector<size_t> redemptionIdxs;
             std::vector<size_t> couponIdxs;
             auto& redemptions = leg_.redemptions();
@@ -39,6 +49,7 @@ namespace Atlas {
                 redemptions.at(i).dfIdx(redemptionIdxs.at(i));
                 coupons.at(i).dfIdx(couponIdxs.at(i));
             }
+            leg_.discountCurveContext(context);
         } else {
             for (auto& coupon : leg_.coupons()) { coupon.rate(rate_); }
         }

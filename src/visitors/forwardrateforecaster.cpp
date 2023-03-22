@@ -6,12 +6,10 @@ namespace Atlas {
 
     void ForwardRateForecaster::visit(FloatingRateInstrument& inst) {
         auto& leg = inst.leg();
-        for (auto& coupon : leg.coupons()) { fixFloatingCoupon(coupon); }
-    }
-
-    void ForwardRateForecaster::fixFloatingCoupon(FloatingRateCoupon& coupon) {
-        double fwd = marketData_.fwds.at(coupon.fwdIdx());
-        coupon.fixing(fwd);
+        for (auto& coupon : leg.coupons()) {
+            double fwd = marketData_.fwds.at(coupon.fwdIdx());
+            coupon.fixing(fwd);
+        }
     }
 
 }  // namespace Atlas

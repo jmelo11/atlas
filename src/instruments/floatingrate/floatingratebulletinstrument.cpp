@@ -9,22 +9,24 @@
 
 namespace Atlas {
     FloatingRateBulletInstrument::FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, double spread,
-                                                         const RateIndexConfiguration& index)
+                                                               std::shared_ptr<CurveContext> forecastCurveContext,
+                                                               std::shared_ptr<CurveContext> discountCurveContext)
     : FloatingRateInstrument(startDate, endDate, notional, spread) {
+        const auto& index = forecastCurveContext->index();
         Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
-
         Date firstDate = Date();
         for (const auto& endDate : schedule.dates()) {
             if (firstDate != Date()) {
-                FloatingRateCoupon coupon(firstDate, endDate, notional, spread);
+                FloatingRateCoupon coupon(firstDate, endDate, notional, spread, forecastCurveContext, discountCurveContext);
                 leg_.addCoupon(coupon);
             }
             firstDate = endDate;
         }
 
-        Redemption redemption(schedule.endDate(), notional);
+        Redemption redemption(schedule.endDate(), notional, discountCurveContext);
         leg_.addRedemption(redemption);
 
+        disbursement_ = Cashflow(startDate, -notional, discountCurveContext);
     }
 
 }  // namespace Atlas

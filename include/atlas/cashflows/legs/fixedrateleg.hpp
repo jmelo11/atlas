@@ -29,10 +29,12 @@ namespace Atlas {
             sortCashflows(coupons_);
         }
 
-        void discountCurveIdx(size_t idx) {
-            for (auto& coupon : coupons_) { coupon.discountCurveIdx(idx); }
-            for (auto& redemptions_ : redemptions_) { redemptions_.discountCurveIdx(idx); }
+        void discountCurveContext(std::shared_ptr<CurveContext> context) {
+            setDiscountCurveContext(coupons_, context);
+            setDiscountCurveContext(redemptions_, context);
         }
+
+        std::shared_ptr<CurveContext> discountCurveContext() const { return coupons_.front().discountCurveContext(); }
 
        private:
         std::vector<FixedRateCoupon> coupons_;

@@ -32,15 +32,17 @@ namespace Atlas {
     }
 
     void CashflowIndexer::indexCashflow(Cashflow& cashflow) {
-        size_t idx              = cashflow.dfIdx();
+        if (cashflow.discountCurveContext() == nullptr) { throw std::runtime_error("Cashflow does not have a discount curve context."); }
+        size_t curveIdx         = cashflow.discountCurveContext()->idx();
         const auto& paymentDate = cashflow.paymentDate();
-        dfs_.push_back({idx, paymentDate});
+        dfs_.push_back({curveIdx, paymentDate});
         cashflow.dfIdx(dfs_.size() - 1);
     }
 
     void CashflowIndexer::indexFloatingCoupon(FloatingRateCoupon& coupon) {
-        size_t fwdIdx = coupon.fwdIdx();
-        fwds_.push_back({fwdIdx, coupon.startDate(), coupon.endDate()});
+        if (coupon.forecastCurveContext() == nullptr) { throw std::runtime_error("Floating rate coupon does not have a forecast curve context."); }
+        size_t curveIdx = coupon.forecastCurveContext()->idx();
+        fwds_.push_back({curveIdx, coupon.startDate(), coupon.endDate()});
         coupon.fwdIdx(fwds_.size() - 1);
     }
 

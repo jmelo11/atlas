@@ -1,8 +1,10 @@
 #ifndef A48CDCC5_BB81_4A85_AA59_E7D536EFAC4B
 #define A48CDCC5_BB81_4A85_AA59_E7D536EFAC4B
 
+#include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/rates/curvecontextstore.hpp>
 
 using namespace Atlas;
 
@@ -14,15 +16,26 @@ struct FixedInstrumentVars {
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
     InterestRate rate          = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    CurveContextStore store_;
+    FixedInstrumentVars() {
+        auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
+        auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", std::move(curve), std::move(index));
+    };
 };
 
 struct FloatingInstrumentVars {
-    Date startDate                = Date(1, Month::Aug, 2020);
-    Date endDate                  = Date(1, Month::Aug, 2021);
-    Frequency paymentFrequency    = Frequency::Semiannual;
-    double notional               = 100;
-    double spread                 = 0.01;
-    RateIndexConfiguration config = RateIndexConfiguration("test", Frequency::Semiannual);
+    Date startDate             = Date(1, Month::Aug, 2020);
+    Date endDate               = Date(1, Month::Aug, 2021);
+    Frequency paymentFrequency = Frequency::Semiannual;
+    double notional            = 100;
+    double spread              = 0.01;
+    CurveContextStore store_;
+    FloatingInstrumentVars() {
+        auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
+        auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", std::move(curve), std::move(index));
+    };
 };
 
 template <class T>

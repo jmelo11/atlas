@@ -18,30 +18,8 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param rate The interest rate of the coupon
          */
-        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate);
-
-        /***
-         * Gets the day counter of the coupon
-         * @return The day counter of the coupon
-         */
-
-        DayCounter dayCounter() const;
-
-        /***
-         * Gets the accrued period of the coupon
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
-         * @return The accrued period of the coupon
-         */
-        double accruedPeriod(const Date& start, const Date& end) const;
-
-        /***
-         * Gets the accrued amount of the coupon
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
-         * @return The accrued amount of the coupon
-         */
-        double accruedAmount(const Date& start, const Date& end) const;
+        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate,
+                        std::shared_ptr<CurveContext> discountCurveContext = nullptr);
 
         /***
          * Gets the interest rate of the coupon
@@ -54,6 +32,28 @@ namespace Atlas {
          * @param rate The interest rate of the coupon
          */
         void rate(const InterestRate& rate);
+
+        /***
+         * Gets the day counter of the coupon
+         * @return The day counter of the coupon
+         */
+        DayCounter dayCounter() const override;
+
+        /***
+         * Gets the accrued period of the coupon
+         * @param start The start date of the coupon
+         * @param end The end date of the coupon
+         * @return The accrued period of the coupon
+         */
+        double accruedPeriod(const Date& start, const Date& end) const override;
+
+        /***
+         * Gets the accrued amount of the coupon
+         * @param start The start date of the coupon
+         * @param end The end date of the coupon
+         * @return The accrued amount of the coupon
+         */
+        double accruedAmount(const Date& start, const Date& end) const override;
 
        private:
         InterestRate rate_;

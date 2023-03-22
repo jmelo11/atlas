@@ -1,6 +1,7 @@
 #ifndef FCBEE32E_AB43_4796_A9DB_9E6108A27EF5
 #define FCBEE32E_AB43_4796_A9DB_9E6108A27EF5
 
+#include <atlas/cashflows/cashflow.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -61,10 +62,16 @@ namespace Atlas {
          * @tparam C Type of the cashflows to be sorted
          * @param cashflows The vector of cashflows to be sorted
          */
+
         template <typename C>
         void sortCashflows(std::vector<C>& cashflows) {
             auto f = [](const C& lhs, const C& rhs) { return lhs.paymentDate() < rhs.paymentDate(); };
             std::sort(cashflows.begin(), cashflows.end(), f);
+        }
+
+        template <typename C>
+        void setDiscountCurveContext(std::vector<C>& cashflows, std::shared_ptr<CurveContext> context) {
+            for (auto& cashflow : cashflows) { cashflow.discountCurveContext(context); }
         }
 
         std::vector<Redemption> redemptions_;  // Vector of Redemption objects contained in the Leg object

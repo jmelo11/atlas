@@ -6,10 +6,25 @@
 
 namespace Atlas {
 
+    /**
+     * @brief An class for equalk payment instruments.
+     *
+     */
     class EqualPaymentInstrument : public FixedRateInstrument {
        public:
+        /**
+         * @brief Construct a new Equal Payment Instrument object
+         *
+         * @param startDate start date of the instrument
+         * @param endDate end date of the instrument
+         * @param freq payment frequency of the instrument
+         * @param notional notional of the instrument
+         * @param rate rate of the instrument
+         * @param recalcNotionals recalculate notionals based on the given rate
+         * @param discountCurveContext discount curve context of the instrument
+         */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate& rate,
-                               bool recalcNotionals = false);
+                               bool recalcNotionals = false, std::shared_ptr<CurveContext> discountCurveContext = nullptr);
 
         void rate(const InterestRate& rate) override;
 

@@ -8,10 +8,9 @@ namespace Atlas {
     FixedRateInstrument::FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate& rate, double notional,
                                              const FixedRateLeg& leg)
     : leg_(leg), rate_(rate) {
-        startDate_    = startDate;
-        endDate_      = endDate;
-        notional_     = notional;
-        disbursement_ = Cashflow(startDate_, -notional_);
+        startDate_ = startDate;
+        endDate_   = endDate;
+        notional_  = notional;
     };
 
     void FixedRateInstrument::calculateNotionals(const std::vector<Date>& dates, const InterestRate& rate) {
@@ -21,21 +20,12 @@ namespace Atlas {
             notional += redemption.amount();
             notionals[redemption.paymentDate()] = redemption.amount();
         }
-
+        notional_ = notional;
         for (size_t i = 0; i < dates.size() - 1; i++) {
             FixedRateCoupon coupon(dates[i], dates[i + 1], notional, rate);
             leg_.addCoupon(coupon);
             if (notionals.find(dates[i + 1]) != notionals.end()) notional -= notionals[dates[i + 1]];
         }
-
-        disbursement_ = Cashflow(startDate_, -notional_);
-    }
-
-    void FixedRateInstrument::calculateFaceAmount() {
-        double faceAmount = 0.0;
-        for (const auto& redemption : leg_.redemptions()) { faceAmount += redemption.amount(); }
-        notional_ = faceAmount;
-        disbursement_ = Cashflow(startDate_, -notional_);
     }
 
     void FixedRateInstrument::rate(const InterestRate& r) {

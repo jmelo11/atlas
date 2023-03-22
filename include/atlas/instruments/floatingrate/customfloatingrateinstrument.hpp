@@ -4,9 +4,24 @@
 #include <atlas/instruments/floatingrateinstrument.hpp>
 
 namespace Atlas {
+    /**
+     * @brief A class for custom floating rate instruments.
+     *
+     */
     class CustomFloatingRateInstrument : public FloatingRateInstrument {
        public:
-        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread);
+        /**
+         * @brief Construct a new Custom Floating Rate Instrument object
+         *
+         * @param dates  dates of payment for the instrument, starting with the start date of the first coupon
+         * @param redemptions redemption amounts for the instrument
+         * @param spread spread of the instrument
+         * @param forecastCurveContext forecast curve context of the instrument
+         * @param discountCurveContext discount curve context of the instrument
+         */
+        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread,
+                                     std::shared_ptr<CurveContext> forecastCurveContext = nullptr,
+                                     std::shared_ptr<CurveContext> discountCurveContext = nullptr);
     };
 }  // namespace Atlas
 

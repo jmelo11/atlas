@@ -7,25 +7,60 @@
 namespace Atlas {
 
     /***
-     * @brief Configuration for a rate index.
+     * @brief A rate index.
      */
-    class RateIndexConfiguration {
+    class RateIndex {
        public:
-        RateIndexConfiguration() = default;
+        RateIndex();
 
-        RateIndexConfiguration(std::string name, Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
-                               Compounding rateComp = Compounding::Simple)
-        : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateFreq_(rateFreq), rateComp_(rateComp){};
+        /***
+         * @brief Constructs a rate index.
+         * @param name The name of the rate index.
+         * @param fixingFreq The fixing frequency.
+         * @param dayCounter The day counter.
+         * @param rateFreq The rate frequency.
+         * @param rateComp The rate compounding.
+         */
+        RateIndex(const std::string& name, Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
+                  Compounding rateComp = Compounding::Simple);
 
-        std::string name() const { return name_; }
+        /***
+         * @brief Returns the name of the rate index.
+         */
+        const std::string& name() const;
 
-        DayCounter dayCounter() const { return dayCounter_; }
+        /***
+         * @brief Returns the day counter.
+         */
+        const DayCounter& dayCounter() const;
 
-        Frequency fixingFrequency() const { return fixingFreq_; }
+        /***
+         * @brief Returns the fixing frequency.
+         */
+        Frequency fixingFrequency() const;
 
-        Frequency rateFrequency() const { return rateFreq_; }
+        /***
+         * @brief Returns the rate frequency.
+         */
+        Frequency rateFrequency() const;
 
-        Compounding rateCompounding() const { return rateComp_; }
+        /***
+         * @brief Returns the rate compounding.
+         */
+        Compounding rateCompounding() const;
+
+        /***
+         * @brief Adds a fixing to the history.
+         * @param date The date of the fixing.
+         * @param value The value of the fixing.
+         */
+        void addFixing(const Date& date, double value);
+
+        /***
+         * @brief Returns the fixing for a given date.
+         * @param date The date of the fixing.
+         */
+        double getFixing(const Date& date) const;
 
        private:
         std::string name_      = "undefined";
@@ -33,33 +68,6 @@ namespace Atlas {
         Frequency fixingFreq_  = Frequency::NoFrequency;
         Frequency rateFreq_    = Frequency::NoFrequency;
         Compounding rateComp_  = Compounding::Simple;
-    };
-
-    /***
-     * @brief A rate index.
-     */
-    class RateIndex {
-       public:
-        RateIndex() = default;
-
-        RateIndex(RateIndexConfiguration config, std::map<Date, double> fixingHistory = std::map<Date, double>())
-        : config_(config), fixingHistory_(fixingHistory){};
-
-        RateIndexConfiguration config() const { return config_; }
-
-        void addFixing(const Date& date, double value) { fixingHistory_[date] = value; }  // how does it work with simulations?
-
-        double getFixing(const Date& date) const {
-            auto it = fixingHistory_.find(date);
-            if (it != fixingHistory_.end()) { return it->second; }
-            {
-                std::string msg = "No fixing found for date";
-                throw std::runtime_error(msg);
-            }
-        }
-
-       private:
-        RateIndexConfiguration config_;
         std::map<Date, double> fixingHistory_;
     };
 

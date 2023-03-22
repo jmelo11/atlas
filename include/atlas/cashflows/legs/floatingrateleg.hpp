@@ -57,23 +57,13 @@ namespace Atlas {
             sortCashflows(coupons_);
         }
 
-        /**
-         * @brief Sets the discount curve index for the leg's cashflows and coupons.
-         *
-         * @param idx size_t representing the index of the discount curve.
-         */
-        void discountCurveIdx(size_t idx) {
-            for (auto& coupon : coupons_) { coupon.discountCurveIdx(idx); }
-            for (auto& redemptions_ : redemptions_) { redemptions_.discountCurveIdx(idx); }
+        void discountCurveContext(std::shared_ptr<CurveContext> discountCurveContext) {
+            setDiscountCurveContext(coupons_, discountCurveContext);
+            setDiscountCurveContext(redemptions_, discountCurveContext);
         }
 
-        /**
-         * @brief Sets the forecast curve index for the leg's coupons.
-         *
-         * @param idx size_t representing the index of the forecast curve.
-         */
-        void forecastCurveIdx(size_t idx) {
-            for (auto& coupon : coupons_) { coupon.forecastCurveIdx(idx); }
+        void forecastCurveContext(std::shared_ptr<CurveContext> forecastCurveContext) {
+            for (auto& coupon : coupons_) { coupon.forecastCurveContext(forecastCurveContext); }
         }
 
        private:

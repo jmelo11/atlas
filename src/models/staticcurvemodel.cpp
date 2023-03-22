@@ -1,8 +1,9 @@
 #include <atlas/models/staticcurvemodel.hpp>
+#include <atlas/rates/rateindex.hpp>
 
 namespace Atlas {
 
-    StaticCurveModel::StaticCurveModel(const MarketRequest& marketRequest, const CurveStore& curveStore)
+    StaticCurveModel::StaticCurveModel(const MarketRequest& marketRequest, const CurveContextStore& curveStore)
     : Model(marketRequest), curveStore_(curveStore){};
 
     void StaticCurveModel::simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const {
@@ -27,9 +28,10 @@ namespace Atlas {
 
     void StaticCurveModel::simulateDiscounts(MarketData& md) const {
         for (auto& request : marketRequest_.dfs) {
-            size_t idx              = request.curve_;
-            const Date& date        = request.date_;
-            const YieldCurve& curve = curveStore_.at(idx);
+            size_t idx               = request.curve_;
+            const Date& date         = request.date_;
+            const auto& curveContext = curveStore_.at(idx);
+            const auto& curve        = curveContext->curve();
 
             double df;
             if (curve.referenceDate() < date) {
@@ -49,15 +51,15 @@ namespace Atlas {
             const Date& startDate = request.startDate_;
             const Date& endDate   = request.endDate_;
 
-            const YieldCurve& curve                   = curveStore_.at(idx);
-            const RateIndexConfiguration& indexConfig = curve.index()->config();
+            const auto& curveContext = curveStore_.at(idx);
+            const auto& curve        = curveContext->curve();
+            const auto& index        = curveContext->index();
 
             double fwd;
             if (curve.referenceDate() <= startDate) {
-                fwd = curve.forwardRate(startDate, endDate, indexConfig.dayCounter(), indexConfig.rateCompounding(), indexConfig.rateFrequency())
-                          .rate();
+                fwd = curve.forwardRate(startDate, endDate, index.dayCounter(), index.rateCompounding(), index.rateFrequency()).rate();
             } else {
-                fwd = curve.index()->getFixing(startDate);
+                fwd = index.getFixing(startDate);
             }
             md.fwds.push_back(fwd);
         }

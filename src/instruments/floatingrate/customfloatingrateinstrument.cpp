@@ -3,18 +3,22 @@
 #include <numeric>
 
 namespace Atlas {
-    CustomFloatingRateInstrument::CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread)
+    CustomFloatingRateInstrument::CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread,
+                                                               std::shared_ptr<CurveContext> forecastCurveContext,
+                                                               std::shared_ptr<CurveContext> discountCurveContext)
     : FloatingRateInstrument(dates.front(), dates.back(), 0, spread) {
         notional_          = std::reduce(redemptions.begin(), redemptions.end());
         double outstanding = notional_;
         for (size_t i = 0; i < redemptions.size(); i++) {
-            Redemption redemption(dates.at(i + 1), redemptions.at(i));
+            Redemption redemption(dates.at(i + 1), redemptions.at(i), discountCurveContext);
             leg_.addRedemption(redemption);
 
-            FloatingRateCoupon coupon(dates.at(i), dates.at(i + 1), outstanding, spread);
+            FloatingRateCoupon coupon(dates.at(i), dates.at(i + 1), outstanding, spread, forecastCurveContext, discountCurveContext);
             leg_.addCoupon(coupon);
             outstanding -= redemptions.at(i);
-        }        
+        }
+
+        disbursement_ = Cashflow(dates.front(), -notional_, discountCurveContext);
     };
 
 }  // namespace Atlas
