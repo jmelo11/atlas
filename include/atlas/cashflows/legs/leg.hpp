@@ -37,24 +37,24 @@ namespace Atlas {
          * @brief Returns a reference to the vector of Redemption objects contained in the Leg object
          * @return Reference to the vector of Redemption objects
          */
-        std::vector<Redemption>& redemptions() { return redemptions_; }
+        inline std::vector<Redemption>& redemptions() { return redemptions_; }
 
         /**
          * @brief Returns a constant reference to the vector of Redemption objects contained in the Leg object
          * @return Constant reference to the vector of Redemption objects
          */
-        const std::vector<Redemption>& constRedemptions() const { return redemptions_; }
+        inline const std::vector<Redemption>& constRedemptions() const { return redemptions_; }
 
         /**
          * @brief Adds a Redemption object to the vector of redemptions contained in the Leg object
          * @param redemption Redemption object to be added
          */
-        void addRedemption(Redemption& redemption) { redemptions_.push_back(redemption); }
+        inline void addRedemption(Redemption& redemption) { redemptions_.push_back(redemption); }
 
         /**
          * @brief Sorts the redemptions in the vector by payment date
          */
-        void sortRedemptions() { sortCashflows(redemptions_); }
+        inline void sortRedemptions() { sortCashflows(redemptions_); }
 
        protected:
         /**
@@ -70,7 +70,7 @@ namespace Atlas {
         }
 
         template <typename C>
-        void setDiscountCurveContext(std::vector<C>& cashflows, std::shared_ptr<CurveContext> context) {
+        void setDiscountCurveContext(std::vector<C>& cashflows, const CurveContext& context) {
             for (auto& cashflow : cashflows) { cashflow.discountCurveContext(context); }
         }
 

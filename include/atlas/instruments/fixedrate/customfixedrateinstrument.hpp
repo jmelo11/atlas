@@ -18,8 +18,17 @@ namespace Atlas {
          * @param rate rate of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
+        CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate& rate);
+        /**
+         * @brief Construct a new Custom Fixed Rate Instrument object
+         *
+         * @param dates dates of payment for the instrument, starting with the start date of the first coupon
+         * @param redemptions redemption amounts for the instrument
+         * @param rate rate of the instrument
+         * @param discountCurveContext discount curve context of the instrument
+         */
         CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate& rate,
-                                  std::shared_ptr<CurveContext> discountCurveContext = nullptr);
+                                  const CurveContext& discountCurveContext);
     };
 }  // namespace Atlas
 

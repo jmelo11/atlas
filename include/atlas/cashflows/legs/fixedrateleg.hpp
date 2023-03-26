@@ -15,26 +15,24 @@ namespace Atlas {
             if (sort) sortCashflows(coupons_);
         };
 
-        std::vector<FixedRateCoupon>& coupons() { return coupons_; }
+        inline std::vector<FixedRateCoupon>& coupons() { return coupons_; }
 
-        const std::vector<FixedRateCoupon>& constCoupons() const { return coupons_; }
+        inline const std::vector<FixedRateCoupon>& constCoupons() const { return coupons_; }
 
-        void addCoupon(FixedRateCoupon& coupon, bool sort = false) {
+        inline void addCoupon(FixedRateCoupon& coupon, bool sort = false) {
             coupons_.push_back(coupon);
             if (sort) sortCashflows(coupons_);
         }
 
-        void sort() {
+        inline void sort() {
             sortCashflows(redemptions_);
             sortCashflows(coupons_);
         }
 
-        void discountCurveContext(std::shared_ptr<CurveContext> context) {
+        inline void discountCurveContext(const CurveContext& context) {
             setDiscountCurveContext(coupons_, context);
             setDiscountCurveContext(redemptions_, context);
         }
-
-        std::shared_ptr<CurveContext> discountCurveContext() const { return coupons_.front().discountCurveContext(); }
 
        private:
         std::vector<FixedRateCoupon> coupons_;

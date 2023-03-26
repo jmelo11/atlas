@@ -3,8 +3,7 @@
 
 namespace Atlas {
 
-    StaticCurveModel::StaticCurveModel(const MarketRequest& marketRequest, const CurveContextStore& curveStore)
-    : Model(marketRequest), curveStore_(curveStore){};
+    StaticCurveModel::StaticCurveModel(const MarketRequest& marketRequest) : Model(marketRequest), curveStore_(CurveContextStore::instance()){};
 
     void StaticCurveModel::simulate(const std::vector<QuantLib::Date>& evalDates, Scenario& scenario) const {
         for (const auto& evalDate : evalDates) {
@@ -19,8 +18,8 @@ namespace Atlas {
         }
     }
 
-    MarketData StaticCurveModel::simulate() const {
-        std::vector<QuantLib::Date> dates = {refDate_};
+    MarketData StaticCurveModel::simulate(const Date& refDate) const {
+        std::vector<QuantLib::Date> dates = {refDate};
         Scenario scenario;
         simulate(dates, scenario);
         return scenario.front();
@@ -28,10 +27,10 @@ namespace Atlas {
 
     void StaticCurveModel::simulateDiscounts(MarketData& md) const {
         for (auto& request : marketRequest_.dfs) {
-            size_t idx               = request.curve_;
-            const Date& date         = request.date_;
-            const auto& curveContext = curveStore_.at(idx);
-            const auto& curve        = curveContext->curve();
+            size_t idx                                = request.curve_;
+            const Date& date                          = request.date_;
+            const CurveContext& curveContext          = curveStore_.at(idx);
+            const QuantLib::YieldTermStructure& curve = curveContext.curve();
 
             double df;
             if (curve.referenceDate() < date) {
@@ -52,8 +51,8 @@ namespace Atlas {
             const Date& endDate   = request.endDate_;
 
             const auto& curveContext = curveStore_.at(idx);
-            const auto& curve        = curveContext->curve();
-            const auto& index        = curveContext->index();
+            const auto& curve        = curveContext.curve();
+            const auto& index        = curveContext.index();
 
             double fwd;
             if (curve.referenceDate() <= startDate) {

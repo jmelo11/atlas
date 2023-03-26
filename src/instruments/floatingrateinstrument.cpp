@@ -23,4 +23,6 @@ namespace Atlas {
     void FloatingRateInstrument::accept(ConstVisitor& visitor) const {
         visitor.visit(*this);
     }
+
+  
 }  // namespace Atlas

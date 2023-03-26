@@ -24,7 +24,20 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate& rate,
-                               bool recalcNotionals = false, std::shared_ptr<CurveContext> discountCurveContext = nullptr);
+                               bool recalcNotionals = false);
+        /**
+         * @brief Construct a new Equal Payment Instrument object
+         *
+         * @param startDate start date of the instrument
+         * @param endDate end date of the instrument
+         * @param freq payment frequency of the instrument
+         * @param notional notional of the instrument
+         * @param rate rate of the instrument
+         * @param recalcNotionals recalculate notionals based on the given rate
+         * @param discountCurveContext discount curve context of the instrument
+         */
+        EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate& rate,
+                               const CurveContext& discountCurveContext, bool recalcNotionals = false);
 
         void rate(const InterestRate& rate) override;
 

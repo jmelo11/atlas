@@ -18,6 +18,7 @@ namespace Atlas {
         void clear() { results_ = 0.0; }
 
         void visit(const FloatingRateInstrument& inst) const override;
+
         void visit(const FixedRateInstrument& inst) const override;
 
        private:

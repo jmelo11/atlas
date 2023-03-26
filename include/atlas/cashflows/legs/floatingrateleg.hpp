@@ -31,12 +31,12 @@ namespace Atlas {
         /**
          * @brief Returns a reference to the vector of coupons in the leg.
          */
-        std::vector<FloatingRateCoupon>& coupons() { return coupons_; }
+        inline std::vector<FloatingRateCoupon>& coupons() { return coupons_; }
 
         /**
          * @brief Returns a const reference to the vector of coupons in the leg.
          */
-        const std::vector<FloatingRateCoupon>& constCoupons() const { return coupons_; }
+        inline const std::vector<FloatingRateCoupon>& constCoupons() const { return coupons_; }
 
         /**
          * @brief Adds a coupon to the leg.
@@ -44,7 +44,7 @@ namespace Atlas {
          * @param coupon a reference to a FloatingRateCoupon object representing the coupon to be added.
          * @param sort boolean indicating whether the cashflows should be sorted by date.
          */
-        void addCoupon(FloatingRateCoupon& coupon, bool sort = false) {
+        inline void addCoupon(FloatingRateCoupon& coupon, bool sort = false) {
             coupons_.push_back(coupon);
             if (sort) sortCashflows(coupons_);
         }
@@ -52,17 +52,17 @@ namespace Atlas {
         /**
          * @brief Sorts the cashflows in the leg by date.
          */
-        void sort() {
+        inline void sort() {
             sortCashflows(redemptions_);
             sortCashflows(coupons_);
         }
 
-        void discountCurveContext(std::shared_ptr<CurveContext> discountCurveContext) {
+        inline void discountCurveContext(const CurveContext& discountCurveContext) {
             setDiscountCurveContext(coupons_, discountCurveContext);
             setDiscountCurveContext(redemptions_, discountCurveContext);
         }
 
-        void forecastCurveContext(std::shared_ptr<CurveContext> forecastCurveContext) {
+        inline void forecastCurveContext(const CurveContext& forecastCurveContext) {
             for (auto& coupon : coupons_) { coupon.forecastCurveContext(forecastCurveContext); }
         }
 

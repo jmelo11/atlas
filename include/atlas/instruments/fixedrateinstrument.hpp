@@ -39,7 +39,7 @@ namespace Atlas {
          *
          * @return FixedRateLeg&
          */
-        FixedRateLeg& leg() { return leg_; };
+        inline FixedRateLeg& leg() { return leg_; };
 
         /**
          * @brief calculates the instrument's notional based on the given redemptions
@@ -75,14 +75,7 @@ namespace Atlas {
          *
          * @param context
          */
-        void discountCurveContex(std::shared_ptr<CurveContext> context) { leg_.discountCurveContext(context); }
-
-        /**
-         * @brief Returns the discount curve context of the instrument.
-         *
-         * @return std::shared_ptr<CurveContext>
-         */
-        std::shared_ptr<CurveContext> discountCurveContext() const { return leg_.discountCurveContext(); }
+        inline void discountCurveContex(const CurveContext& context) { leg_.discountCurveContext(context); }
 
         /**
          * @brief accepts a visitor.
@@ -103,14 +96,14 @@ namespace Atlas {
          *
          * @return Cashflow
          */
-        Cashflow disbursement() const { return disbursement_; };
+        inline Cashflow disbursement() const { return disbursement_; };
 
         /**
          * @brief Sets the disbursement of the instrument.
          *
          * @param disbursement Cashflow to be set
          */
-        void disbursement(const Cashflow& disbursement) { disbursement_ = disbursement; }
+        inline void disbursement(const Cashflow& disbursement) { disbursement_ = disbursement; }
 
        protected:
         void calculateFaceAmount();

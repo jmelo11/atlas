@@ -11,7 +11,16 @@ namespace Atlas {
      */
     class FixedRateCoupon : public Coupon {
        public:
-        /***
+        /**
+         * Constructor
+         * @param startDate The start date of the coupon
+         * @param endDate The end date of the coupon
+         * @param notional The notional amount of the coupon
+         * @param rate The interest rate of the coupon
+         */
+        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate);
+
+        /**
          * Constructor
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
@@ -19,7 +28,7 @@ namespace Atlas {
          * @param rate The interest rate of the coupon
          */
         FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate,
-                        std::shared_ptr<CurveContext> discountCurveContext = nullptr);
+                        const CurveContext& discountCurveContext);
 
         /***
          * Gets the interest rate of the coupon

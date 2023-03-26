@@ -12,55 +12,75 @@ namespace Atlas {
 
     class Cashflow : public Indexable {
        public:
-        Cashflow(std::shared_ptr<CurveContext> discountCurveContext = nullptr) : discountCurveContext_(discountCurveContext){};
-        /***
+        Cashflow() = default;
+
+        Cashflow(const CurveContext& discountCurveContext) : discountContextIdx_(discountCurveContext.idx()), hasDiscountContext_(true){};
+
+        /**
          * Constructor
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, double amount, std::shared_ptr<CurveContext> discountCurveContext = nullptr)
-        : amount_(amount), paymentDate_(paymentDate), discountCurveContext_(discountCurveContext){};
+        Cashflow(const Date& paymentDate, double amount) : amount_(amount), paymentDate_(paymentDate){};
+
+        /**
+         * Constructor
+         * @param paymentDate The payment date of the cashflow
+         * @param amount The amount of the cashflow
+         */
+        Cashflow(const Date& paymentDate, double amount, const CurveContext& discountCurveContext)
+        : amount_(amount), paymentDate_(paymentDate), discountContextIdx_(discountCurveContext.idx()), hasDiscountContext_(true){};
 
         virtual ~Cashflow(){};
 
-        /***
+        /**
          * Gets the amount of the cashflow
          * @return The amount (total payment) of the cashflow
          */
-        virtual double amount() const { return amount_; }
+        inline virtual double amount() const { return amount_; }
 
-        /***
+        /**
          * Gets the payment date of the cashflow
          * @return The payment date of the cashflow
          */
-        virtual Date paymentDate() const { return paymentDate_; }
+        inline virtual Date paymentDate() const { return paymentDate_; }
 
-        /***
+        /**
          * Checks if the cashflow has occurred (is alive)
          * @param date The date of evaluation
          * @return True if the cashflow has occurred, false otherwise
          */
-        virtual bool hasOcurred(const Date& date) const {
+        inline virtual bool hasOcurred(const Date& date) const {
             if (paymentDate() > date) return false;
             return true;
         }
 
-        /***
-         * Gets the discount curve index
-         * @return The discount curve index
-         */
-        std::shared_ptr<CurveContext> discountCurveContext() const { return discountCurveContext_; }
-
-        /***
+        /**
          * Sets the discount curve context
          * @param context The discount curve context
          */
-        void discountCurveContext(std::shared_ptr<CurveContext> context) { discountCurveContext_ = context; }
+        inline void discountCurveContext(const CurveContext& context) {
+            discountContextIdx_ = context.idx();
+            hasDiscountContext_ = true;
+        }
+
+        /**
+         * @brief Checks if the cashflow has a discount curve context
+         * @return True if the cashflow has a discount curve context, false otherwise
+         */
+        inline bool hasDiscountContext() const { return hasDiscountContext_; }
+
+        /**
+         * @brief Gets the discount curve context
+         * @return The discount curve context
+         */
+        inline size_t discountContextIdx() const { return discountContextIdx_; }
 
        protected:
         double amount_    = 0;
         Date paymentDate_ = Date();
-        std::shared_ptr<CurveContext> discountCurveContext_;
+        size_t discountContextIdx_;
+        bool hasDiscountContext_ = false;
     };
 
 }  // namespace Atlas

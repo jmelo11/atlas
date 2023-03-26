@@ -5,7 +5,7 @@ include(GNUInstallDirs) # despues de definir el proyecto
 set(CMAKE_CXX_STANDARD 20)
 set(BUILD_PYTHON OFF)
 set(BUILD_TESTS ON)
-set(BUILD_BENCHMARK OFF)
+set(BUILD_BENCHMARK ON)
 set(BUILD_IDEA ON)
 # target is curvemanager, and use include a src folders
 

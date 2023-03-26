@@ -23,6 +23,7 @@ namespace Atlas {
         double nonSensNPV() const { return nonSensNPV_; };
 
         void visit(FixedRateInstrument& inst) override;
+
         void visit(FloatingRateInstrument& inst) override;
 
        private:

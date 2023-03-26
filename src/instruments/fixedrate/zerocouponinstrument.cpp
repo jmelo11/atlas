@@ -4,16 +4,22 @@
 
 namespace Atlas {
 
-    ZeroCouponInstrument::ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate,
-                                               std::shared_ptr<CurveContext> discountCurveContext)
+    ZeroCouponInstrument::ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate)
     : FixedRateInstrument(startDate, endDate, rate, notional) {
-        FixedRateCoupon coupon(startDate, endDate, notional, rate, discountCurveContext);  // interest coupon
-        Redemption redemption(endDate, notional, discountCurveContext);                    // notinal payment at the end
+        FixedRateCoupon coupon(startDate, endDate, notional, rate);  // interest coupon
+        Redemption redemption(endDate, notional);                    // notinal payment at the end
 
         leg_.addCoupon(coupon);
         leg_.addRedemption(redemption);
 
-        disbursement_ = Cashflow(startDate, -notional, discountCurveContext);
+        disbursement_ = Cashflow(startDate, -notional);
+    }
+
+    ZeroCouponInstrument::ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate,
+                                               const CurveContext& discountCurveContext)
+    : ZeroCouponInstrument(startDate, endDate, notional, rate) {
+        leg().discountCurveContext(discountCurveContext);
+        disbursement_.discountCurveContext(discountCurveContext);
     }
 
 }  // namespace Atlas

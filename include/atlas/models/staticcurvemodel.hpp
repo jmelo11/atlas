@@ -13,16 +13,15 @@
 
 namespace Atlas {
 
-
     class StaticCurveModel : public Model {
        public:
-        StaticCurveModel(const MarketRequest& marketRequest, const CurveContextStore& curveStore);
+        StaticCurveModel(const MarketRequest& marketRequest);
 
         void setRequest(const MarketRequest& request) { marketRequest_ = request; };
 
         void simulate(const std::vector<Date>& evalDates, Scenario& scenario) const override;
 
-        MarketData simulate() const;
+        MarketData simulate(const Date& refDate) const;
 
        private:
         void simulateDiscounts(MarketData& md) const;
@@ -31,7 +30,6 @@ namespace Atlas {
 
         bool checkRefDates();
 
-        Date refDate_;
         const CurveContextStore& curveStore_;
     };
 }  // namespace Atlas

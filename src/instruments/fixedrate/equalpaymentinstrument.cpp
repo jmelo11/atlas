@@ -9,7 +9,7 @@
 namespace Atlas {
 
     EqualPaymentInstrument::EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                                   const InterestRate& rate, bool recalcNotionals, std::shared_ptr<CurveContext> discountCurveContext)
+                                                   const InterestRate& rate, bool recalcNotionals)
     : FixedRateInstrument(startDate, endDate, rate, notional), recalcNotionals_(recalcNotionals) {
         Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
@@ -20,18 +20,19 @@ namespace Atlas {
 
         // calculate each corresponding notional
         calculateNotionals(dates_, rate);
+        disbursement_ = Cashflow(startDate, -notional);
+    }
 
-        // sets the discount curve context for the leg
-        leg_.discountCurveContext(discountCurveContext);
-
-        // sets the disbursement cashflow
-        disbursement_ = Cashflow(startDate, -notional, discountCurveContext);
+    EqualPaymentInstrument::EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
+                                                   const InterestRate& rate, const CurveContext& discountCurveContext, bool recalcNotionals)
+    : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, recalcNotionals) {
+        leg().discountCurveContext(discountCurveContext);
+        disbursement_.discountCurveContext(discountCurveContext);
     }
 
     void EqualPaymentInstrument::rate(const InterestRate& r) {
         rate_ = r;
         if (recalcNotionals_) {
-            const auto& context = leg_.discountCurveContext();
             std::vector<size_t> redemptionIdxs;
             std::vector<size_t> couponIdxs;
             auto& redemptions = leg_.redemptions();
@@ -49,7 +50,6 @@ namespace Atlas {
                 redemptions.at(i).dfIdx(redemptionIdxs.at(i));
                 coupons.at(i).dfIdx(couponIdxs.at(i));
             }
-            leg_.discountCurveContext(context);
         } else {
             for (auto& coupon : leg_.coupons()) { coupon.rate(rate_); }
         }

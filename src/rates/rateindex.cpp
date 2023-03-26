@@ -41,4 +41,10 @@ namespace Atlas {
         }
     };
 
+    std::unique_ptr<RateIndex> RateIndex::copy() const {
+        auto copy = std::make_unique<RateIndex>(name_, fixingFreq_, dayCounter_, rateFreq_, rateComp_);
+        copy->fixingHistory_ = fixingHistory_;
+        return copy;
+    };
+
 }  // namespace Atlas

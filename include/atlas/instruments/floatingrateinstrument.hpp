@@ -59,14 +59,14 @@ namespace Atlas {
          *
          * @param context
          */
-        void discountCurveContex(std::shared_ptr<CurveContext> context) { leg_.discountCurveContext(context); }
+        void discountCurveContex(const CurveContext& context) { leg_.discountCurveContext(context); }
 
         /**
          * @brief Sets the forecast curve context of the instrument.
          *
          * @param context
          */
-        void forecastCurveContext(std::shared_ptr<CurveContext> context) { leg_.forecastCurveContext(context); }
+        void forecastCurveContext(const CurveContext& context) { leg_.forecastCurveContext(context); }
 
         /**
          * @brief  Accepts a visitor.

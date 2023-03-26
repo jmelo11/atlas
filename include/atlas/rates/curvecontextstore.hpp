@@ -8,39 +8,44 @@ namespace Atlas {
 
     /**
      * @class CurveContextStore
-     * @brief A store for curve contexts.
+     * @brief Singleton class with thread local storage that stores all the curve contexts.
      */
     class CurveContextStore {
        public:
-        CurveContextStore() = default;
+        /**
+         * @brief Returns the instance of the store.
+         * @return The instance of the store.
+         */
+        static CurveContextStore& instance();
 
-        /***
-         * @brief Creates a curve context and adds it to the store.
+        /**
+         * @brief Creates a copy of curve context and adds it to the store.
          * @param contextName The name of the context.
          * @param curve The yield term structure.
          * @param index The rate index used as the underlying interest rate.
          */
-        void createCurveContext(const std::string& contextName, std::unique_ptr<QuantLib::YieldTermStructure> curve,
-                                std::unique_ptr<RateIndex> index);
+        void createCurveContext(const std::string& contextName, const CurveStrategy& curve, const RateIndex& index);
 
-        /***
-         * @brief Returns the curve context with the given name.
+        /**
+         * @brief Returns the thread local version of the curve context with the given name.
          * @param contextName The name of the context.
          * @return The curve context.
          */
+        const CurveContext& at(const std::string& contextName) const;
 
-        std::shared_ptr<CurveContext> at(const std::string& contextName) const;
-
-        /***
-         * @brief Returns the curve context at the given index.
+        /**
+         * @brief Returns a thread local versoin of curve context at the given index.
          * @param idx The index of the context.
          * @return The curve context.
          */
-        std::shared_ptr<CurveContext> at(size_t idx) const;
+        const CurveContext& at(size_t idx) const;
 
        private:
-        std::map<std::string, size_t> nameToIdx_;
-        std::vector<std::shared_ptr<CurveContext>> contexts_;
+        CurveContextStore() = default;
+
+        static thread_local std::unique_ptr<CurveContextStore> instance_;
+        static thread_local std::map<std::string, size_t> nameToIdx_;
+        static thread_local std::vector<std::unique_ptr<CurveContext>> contexts_;
     };
 
 }  // namespace Atlas

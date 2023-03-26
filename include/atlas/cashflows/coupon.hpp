@@ -13,14 +13,24 @@ namespace Atlas {
      */
     class Coupon : public Cashflow {
        public:
-        /***
-         * Constructor
+        /**
+         * @brief Construct a new Coupon object
          *
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          */
-        Coupon(const Date& startDate, const Date& endDate, double notional, std::shared_ptr<CurveContext> discountCurveContext);
+        Coupon(const Date& startDate, const Date& endDate, double notional);
+
+        /**
+         * Constructor
+         *
+         * @param startDate The start date of the coupon
+         * @param endDate The end date of the coupon
+         * @param notional The notional amount of the coupon
+         * @param discountCurveContext The discount curve context of the coupon
+         */
+        Coupon(const Date& startDate, const Date& endDate, double notional, const CurveContext& discountCurveContext);
 
         virtual ~Coupon(){};
 
@@ -28,19 +38,19 @@ namespace Atlas {
          * Get the notional amount of the coupon
          * @return The notional amount of the coupon
          */
-        double notional() const;
+        inline double notional() const { return notional_; };
 
         /***
          * Gets the accrual start date of the coupon
          * @return The accrual start date of the coupon
          */
-        Date startDate() const { return startDate_; }
+        inline Date startDate() const { return startDate_; }
 
         /***
          * Gets the accrual end date of the coupon
          * @return The accrual end date of the coupon
          */
-        Date endDate() const { return endDate_; }
+        inline Date endDate() const { return endDate_; }
 
         /***
          * Gets the day counter of the coupon
