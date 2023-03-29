@@ -19,7 +19,6 @@ namespace Atlas {
          * @param endDate end date of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
-         * @param discountCurveContext discount curve context of the instrument
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate);
 

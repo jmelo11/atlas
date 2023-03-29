@@ -5,9 +5,9 @@
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    class CashflowIndexer : public Visitor {
+    class Indexer : public Visitor {
        public:
-        CashflowIndexer(){};
+        Indexer(){};
 
         void visit(FixedRateInstrument& inst) override;
         void visit(FloatingRateInstrument& inst) override;

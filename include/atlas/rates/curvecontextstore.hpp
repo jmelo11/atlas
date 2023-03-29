@@ -40,6 +40,17 @@ namespace Atlas {
          */
         const CurveContext& at(size_t idx) const;
 
+        /**
+         * @brief Checks if the store has a context with the given name.
+         * 
+         * @param contextName string name of the context.
+         * @return true if the store has a context with the given name.
+         * @return false if the store does not have a context with the given name.
+         */
+        inline bool hasContext(const std::string& contextName) const { return nameToIdx_.find(contextName) != nameToIdx_.end(); }
+
+        void copyContextsFromStore(const CurveContextStore& store);
+
        private:
         CurveContextStore() = default;
 

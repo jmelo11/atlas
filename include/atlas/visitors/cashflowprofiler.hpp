@@ -29,11 +29,10 @@ namespace Atlas {
         void agreggate(const T& leg) const {
             for (const auto& coupon : leg.constCoupons()) {
                 if (interests_.find(coupon.paymentDate()) == interests_.end()) { interests_[coupon.paymentDate()] = 0.0; }
-                interests_[coupon.paymentDate()] += coupon.amount();
+                interests_[coupon.paymentDate()] += Value(coupon.amount());
             };
             for (const auto& redemption : leg.constRedemptions()) {
                 if (redemptions_.find(redemption.paymentDate()) == redemptions_.end()) { redemptions_[redemption.paymentDate()] = 0.0; }
-                redemptions_[redemption.paymentDate()] += redemption.amount();
             };
         };
 

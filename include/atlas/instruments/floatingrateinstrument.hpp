@@ -31,42 +31,45 @@ namespace Atlas {
          *
          * @return const FloatingRateLeg&
          */
-        const FloatingRateLeg& constLeg() const { return leg_; };
+        inline const FloatingRateLeg& constLeg() const { return leg_; };
 
         /**
          * @brief Returns the leg of the instrument.
          *
          * @return FloatingRateLeg&
          */
-        FloatingRateLeg& leg() { return leg_; };
+        inline FloatingRateLeg& leg() { return leg_; };
 
         /**
          * @brief Returns the spread of the instrument.
          *
          * @return double
          */
-        double spread() const { return spread_; };
+        inline double spread() const { return spread_; };
 
         /**
          * @brief Sets the spread of the instrument.
          *
          * @param s
          */
-        void spread(double s);
+        inline void spread(double s) {
+            spread_ = s;
+            for (auto& coupon : leg_.coupons()) { coupon.spread(s); }
+        };
 
         /**
          * @brief Sets the discount curve context of the instrument.
          *
          * @param context
          */
-        void discountCurveContex(const CurveContext& context) { leg_.discountCurveContext(context); }
+        inline void discountCurveContex(const CurveContext& context) { leg_.discountCurveContext(context); }
 
         /**
          * @brief Sets the forecast curve context of the instrument.
          *
          * @param context
          */
-        void forecastCurveContext(const CurveContext& context) { leg_.forecastCurveContext(context); }
+        inline void forecastCurveContext(const CurveContext& context) { leg_.forecastCurveContext(context); }
 
         /**
          * @brief  Accepts a visitor.
@@ -87,14 +90,14 @@ namespace Atlas {
          *
          * @return Cashflow
          */
-        Cashflow disbursement() const { return disbursement_; };
+        inline Cashflow disbursement() const { return disbursement_; };
 
         /**
          * @brief Sets the disbursement of the instrument.
          *
          * @param disbursement
          */
-        void disbursement(const Cashflow& disbursement) { disbursement_ = disbursement; }
+        inline void disbursement(const Cashflow& disbursement) { disbursement_ = disbursement; }
 
        protected:
         FloatingRateLeg leg_;

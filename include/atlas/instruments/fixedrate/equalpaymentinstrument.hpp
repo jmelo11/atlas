@@ -21,7 +21,6 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param rate rate of the instrument
          * @param recalcNotionals recalculate notionals based on the given rate
-         * @param discountCurveContext discount curve context of the instrument
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate& rate,
                                bool recalcNotionals = false);

@@ -14,13 +14,6 @@
 
 namespace Atlas {
 
-    template <class Interp>
-    static ZeroRateCurve<Interp> buildFlatCurve(const Date& refDate, double rate) {
-        std::vector<Date> dates{refDate, refDate + Period(50, TimeUnit::Years)};
-        std::vector<double> rates(2, rate);
-        return ZeroRateCurve<Interp>(dates, rates);
-    }
-
     class Timer {
        public:
         Timer() { startPoint = std::chrono::high_resolution_clock::now(); };
@@ -56,6 +49,6 @@ namespace Atlas {
         int year  = std::stoi(date.substr(4, 4));
         return Date(day, (Month)month, year);
     }
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* A1E6F5B0_6F4A_4460_9F42_A14B525D8447 */

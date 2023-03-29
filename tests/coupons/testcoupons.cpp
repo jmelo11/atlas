@@ -13,11 +13,13 @@ struct FixedCouponVars {
     double notional   = 100;
     InterestRate rate = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
 
-    CurveContextStore store_;
+    CurveContextStore& store_ = CurveContextStore::instance();
     FixedCouponVars() {
-        auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
-        auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
-        store_.createCurveContext("TEST", std::move(curve), std::move(index));
+        if (!store_.hasContext("TEST")) {
+            FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+            RateIndex index("TEST", Frequency::Annual, Actual360());
+            store_.createCurveContext("TEST", curveStrategy, index);
+        }
     };
 };
 
@@ -27,11 +29,13 @@ struct FloatingCouponVars {
     double notional = 100;
     double spread   = 0.01;
 
-    CurveContextStore store_;
+    CurveContextStore& store_ = CurveContextStore::instance();
     FloatingCouponVars() {
-        auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
-        auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
-        store_.createCurveContext("TEST", std::move(curve), std::move(index));
+        if (!store_.hasContext("TEST")) {
+            FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+            RateIndex index("TEST", Frequency::Annual, Actual360());
+            store_.createCurveContext("TEST", curveStrategy, index);
+        }
     };
 };
 

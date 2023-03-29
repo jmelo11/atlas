@@ -17,15 +17,15 @@ namespace Atlas {
         double df  = 0.0;
         for (const auto& redemption : leg.constRedemptions()) {
             df = marketData_.dfs.at(redemption.dfIdx());
-            npv += redemption.amount() * df;
+            npv += Value(redemption.amount()) * df;
         }
         nonSensNPV_ += npv;
     };
 
     // missing numeraires
     void NPVCalculator::fixedLegNPV(const FixedRateLeg& leg) {
-        double npv = 0.0;
-        double df  = 0.0;
+        adouble npv = 0.0;
+        double df   = 0.0;
         for (auto& coupon : leg.constCoupons()) {
             df = marketData_.dfs.at(coupon.dfIdx());
             npv += coupon.amount() * df;
@@ -34,13 +34,13 @@ namespace Atlas {
     };
 
     void NPVCalculator::floatingLegNPV(FloatingRateLeg& leg) {
-        double npv = 0.0;
-        double df  = 0.0;
-        double fwd = 0.0;
+        adouble npv = 0.0;
+        double df   = 0.0;
+        double fwd  = 0.0;
         for (auto& coupon : leg.coupons()) {
             df  = marketData_.dfs.at(coupon.dfIdx());
             fwd = marketData_.fwds.at(coupon.fwdIdx());
-            coupon.fixing(fwd); // ?
+            coupon.fixing(fwd);  // ?
             npv += coupon.amount() * df;
         }
         npv_ += npv;

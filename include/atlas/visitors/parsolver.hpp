@@ -30,10 +30,10 @@ namespace Atlas {
             auto f = [&](double r) {
                 evalInst.rate(r);
                 calc.visit(evalInst);
-                double npv      = calc.results();
-                double notional = inst.notional();
+                adouble npv      = calc.results();
+                adouble notional = inst.notional();
                 calc.clear();
-                return npv - notional * startDf;
+                return Value(npv - notional * startDf);
             };
             value_ = solver_.solve(f, accuracy_, guess_, step_);
         };
@@ -47,10 +47,10 @@ namespace Atlas {
             auto f = [&](double s) {
                 evalInst.spread(s);
                 calc.visit(evalInst);
-                double npv      = calc.results();
-                double notional = inst.notional();
+                adouble npv      = calc.results();
+                adouble notional = inst.notional();
                 calc.clear();
-                return npv - notional * startDf;
+                return Value(npv - notional * startDf);
             };
             value_ = solver_.solve(f, accuracy_, guess_, step_);
         };

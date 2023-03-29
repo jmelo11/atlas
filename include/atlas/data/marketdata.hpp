@@ -75,9 +75,9 @@ namespace Atlas {
      */
     struct MarketData {
         Date refDate;              ///< The reference date for the market data.
-        double numerarie = 1;      ///< The numerarie used in financial calculations.
-        std::vector<double> dfs;   ///< The vector of discount factors.
-        std::vector<double> fwds;  ///< The vector of forward rates.
+        adouble numerarie = 1;      ///< The numerarie used in financial calculations.
+        std::vector<adouble> dfs;   ///< The vector of discount factors.
+        std::vector<adouble> fwds;  ///< The vector of forward rates.
 
         /**
          * @brief Allocates memory for the discount factors and forward rates according to the given market request.

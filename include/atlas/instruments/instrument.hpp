@@ -14,46 +14,45 @@ namespace Atlas {
      */
     class Instrument {
        public:
-
         /**
          * @brief Accepts a visitor.
-         * 
-         * @param visitor 
+         *
+         * @param visitor
          */
         virtual void accept(Visitor& visitor) = 0;
 
         /**
          * @brief Accepts a const visitor.
-         * 
-         * @param visitor 
+         *
+         * @param visitor
          */
         virtual void accept(ConstVisitor& visitor) const = 0;
 
         /**
          * @brief Returns the start date of the instrument.
-         * 
-         * @return Date 
+         *
+         * @return Date
          */
-        Date startDate() const { return startDate_; };
-        
+        inline Date startDate() const { return startDate_; };
+
         /**
          * @brief Returns the end date of the instrument.
-         * 
-         * @return Date 
+         *
+         * @return Date
          */
-        Date endDate() const { return endDate_; };
+        inline Date endDate() const { return endDate_; };
 
         /**
          * @brief Returns the notional of the instrument.
-         * 
-         * @return double 
+         *
+         * @return double
          */
-        double notional() const { return notional_; };
+        inline double notional() const { return notional_; };
 
        protected:
-        Date startDate_ = Date();
-        Date endDate_   = Date();
-        double notional_          = 0.0;
+        Date startDate_  = Date();
+        Date endDate_    = Date();
+        double notional_ = 0.0;
     };
 }  // namespace Atlas
 

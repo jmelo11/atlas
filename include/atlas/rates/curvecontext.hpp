@@ -16,17 +16,17 @@ namespace Atlas {
         /**
          * @return The yield term structure.
          */
-        const QuantLib::YieldTermStructure& curve() const { return curveStrategy_->curve(); }
+        inline const QuantLib::YieldTermStructure& curve() const { return curveStrategy_->curve(); }
 
         /**
          * @return The rate index used as the underlying interest rate.
          */
-        const RateIndex& index() const { return *index_; }
+        inline const RateIndex& index() const { return *index_; }
 
         /**
          * @return The index of the context in the store.
          */
-        size_t idx() const { return idx_; }
+        inline size_t idx() const { return idx_; }
 
        private:
         /**

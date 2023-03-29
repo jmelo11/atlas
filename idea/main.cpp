@@ -3,7 +3,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
-#include <atlas/visitors/cashflowindexer.hpp>
+#include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <iostream>
 
@@ -27,7 +27,7 @@ void pricingFixedRateInstruments() {
     // set curve context
     instrument.discountCurveContex(store_.at("TEST"));
 
-    CashflowIndexer indexer;
+    Indexer indexer;
     indexer.visit(instrument);
 
     MarketRequest request;
@@ -57,7 +57,7 @@ void pricingFloatingRateInstruments() {
     // set curve context
     instrument.discountCurveContex(context);
 
-    CashflowIndexer indexer;
+    Indexer indexer;
     indexer.visit(instrument);
 
     MarketRequest request;

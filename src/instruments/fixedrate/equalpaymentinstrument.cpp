@@ -65,7 +65,7 @@ namespace Atlas {
         size_t kN = pN + 1;
         QuantLib::Array factors(kN, 0), B(kN, 0), K;
 
-        for (size_t i = 1; i <= pN; i++) factors[i - 1] = (rate.compoundFactor(dates.at(i - 1), dates.at(i)) - 1);
+        for (size_t i = 1; i <= pN; i++) factors[i - 1] = Value(rate.compoundFactor(dates.at(i - 1), dates.at(i)) - 1);
 
         factors[kN - 1] = -1;
 

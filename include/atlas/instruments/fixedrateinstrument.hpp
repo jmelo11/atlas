@@ -32,7 +32,7 @@ namespace Atlas {
          *
          * @return const FixedRateLeg&
          */
-        const FixedRateLeg& constLeg() const { return leg_; };
+        inline const FixedRateLeg& constLeg() const { return leg_; };
 
         /**
          * @brief Returns the leg of the instrument.

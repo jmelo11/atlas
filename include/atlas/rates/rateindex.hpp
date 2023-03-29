@@ -27,34 +27,34 @@ namespace Atlas {
         /**
          * @brief Returns the name of the rate index.
          */
-        const std::string& name() const;
+        inline const std::string& name() const { return name_; };
 
         /**
          * @brief Returns the day counter.
          */
-        const DayCounter& dayCounter() const;
+        inline const DayCounter& dayCounter() const { return dayCounter_; };
 
         /**
          * @brief Returns the fixing frequency.
          */
-        Frequency fixingFrequency() const;
+        inline Frequency fixingFrequency() const { return fixingFreq_; };
 
         /**
          * @brief Returns the rate frequency.
          */
-        Frequency rateFrequency() const;
+        inline Frequency rateFrequency() const { return rateFreq_; };
 
         /**
          * @brief Returns the rate compounding.
          */
-        Compounding rateCompounding() const;
+        inline Compounding rateCompounding() const { return rateComp_; };
 
         /**
          * @brief Adds a fixing to the history.
          * @param date The date of the fixing.
          * @param value The value of the fixing.
          */
-        void addFixing(const Date& date, double value);
+        inline void addFixing(const Date& date, double value) { fixingHistory_[date] = value; };
 
         /**
          * @brief Returns the fixing for a given date.

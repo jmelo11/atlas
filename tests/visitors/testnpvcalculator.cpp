@@ -1,4 +1,10 @@
 #include "../pch.hpp"
+#include <ql/cashflows/couponpricer.hpp>
+#include <ql/indexes/ibor/usdlibor.hpp>
+#include <ql/instruments/bonds/fixedratebond.hpp>
+#include <ql/instruments/bonds/floatingratebond.hpp>
+#include <ql/pricingengines/bond/discountingbondengine.hpp>
+#include <ql/termstructures/volatility/optionlet/constantoptionletvol.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
@@ -12,19 +18,21 @@ TEST(NPVCalculator, FixedRateInstrument) {
     // Create a fixed rate instrument
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2021);
-    Frequency paymentFrequency = Frequency::Semiannual;
+    Frequency paymentFrequency = Frequency::Monthly;
     double notional            = 100;
-    InterestRate rate          = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    InterestRate rate          = InterestRate(0.03, Thirty360(Thirty360::BondBasis), Compounding::Continuous, Frequency::Annual);
     FixedRateBulletInstrument instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore store_;
-    auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
-    auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
-    store_.createCurveContext("TEST", std::move(curve), std::move(index));
-
+    CurveContextStore& store_ = CurveContextStore::instance();
+    if (!store_.hasContext("TEST")) {
+        FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+        RateIndex index("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", curveStrategy, index);
+    }
+    auto& context = store_.at("TEST");
     // set curve context
-    instrument.discountCurveContex(store_.at("TEST"));
+    instrument.discountCurveContex(context);
 
     CashflowIndexer indexer;
     indexer.visit(instrument);
@@ -32,14 +40,31 @@ TEST(NPVCalculator, FixedRateInstrument) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel model(request, store_);
+    StaticCurveModel model(request);
 
-    std::vector<Date> evalDates = {startDate};
-    MarketData marketData       = model.simulate();
+    MarketData marketData = model.simulate(startDate);
 
     NPVCalculator npvCalculator(marketData);
     npvCalculator.visit(instrument);
-    EXPECT_NEAR(npvCalculator.results(), 100.0, 1e-6);
+
+    // build QL instrument
+    QuantLib::Settings::instance().evaluationDate() = startDate;
+
+    Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
+    auto qlBond       = QuantLib::FixedRateBond(0, notional, schedule, {rate});
+
+    // for (auto& cashflow : instrument.leg().coupons()) { std::cout << cashflow.paymentDate() << "||" << cashflow.amount() << std::endl; }
+    // for (auto& cashflow : instrument.leg().redemptions()) { std::cout << cashflow.paymentDate() << "||" << cashflow.amount() << std::endl; }
+    // std::cout << "\n" << std::endl;
+    // for (auto& cashflow : qlBond.cashflows()) { std::cout << cashflow->date() << "||" << cashflow->amount() << std::endl; }
+
+    QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> discountingTermStructure;
+    boost::shared_ptr<QuantLib::YieldTermStructure> curve(
+        new QuantLib::FlatForward(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual));
+    discountingTermStructure.linkTo(curve);
+    boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
+    qlBond.setPricingEngine(bondEngine);
+    EXPECT_NEAR(npvCalculator.results(), qlBond.NPV(), 1e-6);
 }
 
 TEST(NPVCalculator, FloatingRateInstrument) {
@@ -47,16 +72,18 @@ TEST(NPVCalculator, FloatingRateInstrument) {
     Date startDate  = Date(1, Month::Aug, 2020);
     Date endDate    = Date(1, Month::Aug, 2021);
     double notional = 100;
-    double spread   = 0.03;
+    double spread   = 0.0;
 
     // Create a curve context store
-    CurveContextStore store_;
-    auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
-    auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
-    store_.createCurveContext("TEST", std::move(curve), std::move(index));
+    CurveContextStore& store_ = CurveContextStore::instance();
+    if (!store_.hasContext("LIBOR1M")) {
+        FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+        RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
+        store_.createCurveContext("LIBOR1M", curveStrategy, index);
+    }
 
     // get context
-    auto context = store_.at("TEST");
+    auto& context = store_.at("LIBOR1M");
     FloatingRateBulletInstrument instrument(startDate, endDate, notional, spread, context);
     // set curve context
     instrument.discountCurveContex(context);
@@ -67,12 +94,45 @@ TEST(NPVCalculator, FloatingRateInstrument) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel model(request, store_);
+    StaticCurveModel model(request);
 
-    std::vector<Date> evalDates = {startDate};
-    MarketData marketData       = model.simulate();
+    MarketData marketData = model.simulate(startDate);
 
     NPVCalculator npvCalculator(marketData);
     npvCalculator.visit(instrument);
-    EXPECT_NEAR(npvCalculator.results(), 100.0, 1e-6);
+
+    // build QL instrument
+    QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> forecastTermStructure;
+    QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> discountingTermStructure;
+
+    const boost::shared_ptr<QuantLib::IborIndex> libor1m(new QuantLib::IborIndex("Libor1m", Period(1, QuantLib::Months), 0, QuantLib::USDCurrency(),
+                                                                                 QuantLib::NullCalendar(), BusinessDayConvention::Unadjusted, false,
+                                                                                 Actual360(), forecastTermStructure));
+    libor1m->addFixing(Date(30, Month::July, 2020), 0.03);
+    Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(context.index().fixingFrequency());
+    auto qlBond       = QuantLib::FloatingRateBond(0, notional, schedule, libor1m, Actual360());
+
+    boost::shared_ptr<QuantLib::YieldTermStructure> curve(
+        new QuantLib::FlatForward(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual));
+    discountingTermStructure.linkTo(curve);
+    forecastTermStructure.linkTo(curve);
+
+    boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
+    qlBond.setPricingEngine(bondEngine);
+
+    // optionLet volatilities
+    QuantLib::Volatility volatility = 0.0;
+    QuantLib::Handle<QuantLib::OptionletVolatilityStructure> vol;
+    vol = QuantLib::Handle<QuantLib::OptionletVolatilityStructure>(boost::shared_ptr<QuantLib::OptionletVolatilityStructure>(
+        new QuantLib::ConstantOptionletVolatility(0, QuantLib::NullCalendar(), QuantLib::Unadjusted, volatility, Actual360())));
+    boost::shared_ptr<QuantLib::IborCouponPricer> pricer(new QuantLib::BlackIborCouponPricer);
+
+    pricer->setCapletVolatility(vol);
+    QuantLib::setCouponPricer(qlBond.cashflows(), pricer);
+
+    // for (auto& cashflow : instrument.leg().coupons()) { std::cout << cashflow.paymentDate() << "||" << cashflow.amount() << std::endl; }
+    // for (auto& cashflow : instrument.leg().redemptions()) { std::cout << cashflow.paymentDate() << "||" << cashflow.amount() << std::endl; }
+    // std::cout << "\n" << std::endl;
+    // for (auto& cashflow : qlBond.cashflows()) { std::cout << cashflow->date() << "||" << cashflow->amount() << std::endl; }
+    EXPECT_NEAR(npvCalculator.results(), qlBond.NPV(), 1e-6);
 }

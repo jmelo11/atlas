@@ -22,7 +22,7 @@ TEST(CashflowProfiler, FixedRateInstrument) {
 
 TEST(CashflowProfiler, FloatingRateInstrument) {
     FloatingInstrumentVars vars;
-    auto context = vars.store_.at("TEST");
+    auto& context = vars.store_.at("TEST");
     FloatingRateBulletInstrument floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
     CashflowProfiler profiler;
     profiler.visit(floatInst);

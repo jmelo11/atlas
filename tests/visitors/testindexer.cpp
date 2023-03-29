@@ -3,7 +3,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/rates/curvecontextstore.hpp>
-#include <atlas/visitors/cashflowindexer.hpp>
+#include <atlas/visitors/indexer.hpp>
 
 using namespace Atlas;
 
@@ -14,20 +14,22 @@ struct InstrumentVars {
     double notional            = 100;
     InterestRate rate          = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
     double spread              = 0.01;
-    CurveContextStore store_;
+    CurveContextStore& store_  = CurveContextStore::instance();
     InstrumentVars() {
-        auto curve = std::make_unique<QuantLib::FlatForward>(startDate, 0.03, Actual360());
-        auto index = std::make_unique<RateIndex>("TEST", Frequency::Annual, Actual360());
-        store_.createCurveContext("TEST", std::move(curve), std::move(index));
+        if (!store_.hasContext("TEST")) {
+            FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+            RateIndex index("TEST", Frequency::Annual, Actual360());
+            store_.createCurveContext("TEST", curveStrategy, index);
+        }
     };
 };
 
-TEST(CashflowIndexer, FixedRateInstrument) {
+TEST(Indexer, FixedRateInstrument) {
     InstrumentVars vars;
-    auto context = vars.store_.at("TEST");
+    auto& context = vars.store_.at("TEST");
     FixedRateBulletInstrument fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, context);
     size_t dfSize = fixedInst.leg().coupons().size() + fixedInst.leg().redemptions().size();
-    CashflowIndexer indexer;
+    Indexer indexer;
     fixedInst.accept(indexer);
     MarketRequest request;
     indexer.setRequest(request);
@@ -35,13 +37,13 @@ TEST(CashflowIndexer, FixedRateInstrument) {
     EXPECT_EQ(request.fwds.size(), 0);
 }
 
-TEST(CashflowIndexer, FloatingRateInstrument) {
+TEST(Indexer, FloatingRateInstrument) {
     InstrumentVars vars;
-    auto context = vars.store_.at("TEST");
+    auto& context = vars.store_.at("TEST");
     FloatingRateBulletInstrument floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
     size_t dfSize  = floatInst.leg().coupons().size() + floatInst.leg().redemptions().size();
     size_t fwdSize = floatInst.leg().coupons().size();
-    CashflowIndexer indexer;
+    Indexer indexer;
     MarketRequest request;
 
     floatInst.accept(indexer);
@@ -50,9 +52,9 @@ TEST(CashflowIndexer, FloatingRateInstrument) {
     EXPECT_EQ(request.fwds.size(), fwdSize);
 }
 
-TEST(CashflowIndexer, MultipleInstruments) {
+TEST(Indexer, MultipleInstruments) {
     InstrumentVars vars;
-    auto context = vars.store_.at("TEST");
+    auto& context = vars.store_.at("TEST");
     FixedRateBulletInstrument fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, context);
     FloatingRateBulletInstrument floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
 
@@ -60,7 +62,7 @@ TEST(CashflowIndexer, MultipleInstruments) {
     dfSize += floatInst.leg().coupons().size() + floatInst.leg().redemptions().size();
     size_t fwdSize = floatInst.leg().coupons().size();
 
-    CashflowIndexer indexer;
+    Indexer indexer;
     MarketRequest request;
 
     fixedInst.accept(indexer);

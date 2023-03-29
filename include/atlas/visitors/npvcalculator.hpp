@@ -16,11 +16,11 @@ namespace Atlas {
             nonSensNPV_ = 0.0;
         };
 
-        double results() const { return npv_ + nonSensNPV_; };
+        inline adouble results() const { return npv_ + nonSensNPV_; };
 
-        double sensNPV() const { return npv_; };
+        inline adouble sensNPV() const { return npv_; };
 
-        double nonSensNPV() const { return nonSensNPV_; };
+        inline double nonSensNPV() const { return nonSensNPV_; };
 
         void visit(FixedRateInstrument& inst) override;
 
@@ -31,7 +31,7 @@ namespace Atlas {
         void fixedLegNPV(const FixedRateLeg& leg);
         void floatingLegNPV(FloatingRateLeg& leg);
 
-        double npv_        = 0.0;
+        adouble npv_        = 0.0;
         double nonSensNPV_ = 0.0;
         const MarketData& marketData_;
     };

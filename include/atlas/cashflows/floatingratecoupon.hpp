@@ -90,7 +90,7 @@ namespace Atlas {
          * @param end The end date of the coupon
          * @return The accrued amount of the coupon
          */
-        inline double accruedAmount(const Date& start, const Date& end) const override {
+        inline adouble accruedAmount(const Date& start, const Date& end) const override {
             InterestRate r(fixing_ + spread_, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq);
             return notional() * (r.compoundFactor(start, end) - 1.0);
         };

@@ -4,7 +4,7 @@
 #include <ql/cashflows/cashflows.hpp>
 #include <ql/cashflows/fixedratecoupon.hpp>
 #include <ql/cashflows/simplecashflow.hpp>
-#include <atlas/visitors/cashflowindexer.hpp>
+#include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <type_traits>
 
@@ -13,7 +13,7 @@ namespace Atlas {
        public:
         DurationCalculator(const MarketData& marketData = MarketData(), double delta = 0.0001);
 
-        double results() const { return results_; }
+        adouble results() const { return results_; }
 
         void clear() { results_ = 0.0; }
 
@@ -27,13 +27,13 @@ namespace Atlas {
             T tmpProd = inst;
             NPVCalculator npvCacl(marketData_);
             npvCacl.visit(tmpProd);
-            double npv = npvCacl.results();
+            adouble npv = npvCacl.results();
             npvCacl.clear();
 
             auto rate = tmpProd.rate();
             tmpProd.rate(rate.rate() + delta_);
             npvCacl.visit(tmpProd);
-            double npv_ = npvCacl.results();
+            adouble npv_ = npvCacl.results();
 
             results_ = (npv_ - npv) / npv / delta_;
         };
@@ -43,18 +43,18 @@ namespace Atlas {
             T tmpProd = inst;
             NPVCalculator npvCacl(marketData_);
             npvCacl.visit(tmpProd);
-            double npv = npvCacl.results();
+            adouble npv = npvCacl.results();
             npvCacl.clear();
             tmpProd.spread(tmpProd.spread() + delta_);
             npvCacl.visit(tmpProd);
-            double npv_ = npvCacl.results();
+            adouble npv_ = npvCacl.results();
 
             results_ = (npv_ - npv) / npv / delta_;
         };
 
         double delta_;
         const MarketData& marketData_;
-        mutable double results_ = 0.0;
+        mutable adouble results_ = 0.0;
     };
 
 }  // namespace Atlas

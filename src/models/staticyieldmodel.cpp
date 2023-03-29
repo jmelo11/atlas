@@ -22,7 +22,7 @@ namespace Atlas {
     void StaticYieldModel::simulateDiscounts(const Date& refDate, MarketData& md) const {
         for (auto& request : marketRequest_.dfs) {
             const auto& date = request.date_;
-            double df;
+            adouble df;
             if (refDate < date) {
                 df = yield_.discountFactor(refDate, date);
             } else if (refDate == date) {
@@ -38,7 +38,7 @@ namespace Atlas {
         for (auto& request : marketRequest_.fwds) {
             const auto& startDate = request.startDate_;
             const auto& endDate   = request.endDate_;
-            double fwd;
+            adouble fwd;
 
             if (endDate < refDate) {
                 fwd = 0;

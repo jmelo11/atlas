@@ -5,34 +5,13 @@ namespace Atlas {
 
     FixedRateCoupon::FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate)
     : Coupon(startDate, endDate, notional), rate_(rate) {
-        amount_ = accruedAmount(startDate, endDate);
+        amount_ = Value(accruedAmount(startDate, endDate));
     };
 
     FixedRateCoupon::FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate,
                                      const CurveContext& discountCurveContext)
     : Coupon(startDate, endDate, notional, discountCurveContext), rate_(rate) {
-        amount_ = accruedAmount(startDate, endDate);
+        amount_ = Value(accruedAmount(startDate, endDate));
     };
-
-    double FixedRateCoupon::accruedAmount(const Date& start, const Date& end) const {
-        return notional() * (rate_.compoundFactor(start, end) - 1.0);
-    }
-
-    DayCounter FixedRateCoupon::dayCounter() const {
-        return rate_.dayCounter();
-    }
-
-    InterestRate FixedRateCoupon::rate() const {
-        return rate_;
-    }
-
-    void FixedRateCoupon::rate(const InterestRate& rate) {
-        rate_   = rate;
-        amount_ = accruedAmount(startDate(), endDate());
-    }
-
-    double FixedRateCoupon::accruedPeriod(const Date& start, const Date& end) const {
-        return dayCounter().yearFraction(start, end);
-    }
 
 }  // namespace Atlas

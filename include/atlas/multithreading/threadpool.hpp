@@ -14,7 +14,7 @@
 
 namespace Atlas {
 
-    //  Thread pool of chapter 3 - add
+    //  Thread pool of chapter 3 - aad savine
     typedef std::packaged_task<bool(void)> Task;
     typedef std::future<bool> TaskHandle;
 

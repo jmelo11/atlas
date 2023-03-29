@@ -34,19 +34,22 @@ namespace Atlas {
          * Gets the interest rate of the coupon
          * @return The interest rate of the coupon
          */
-        InterestRate rate() const;
+        inline InterestRate rate() const { return rate_; };
 
         /***
          * Sets the interest rate of the coupon
          * @param rate The interest rate of the coupon
          */
-        void rate(const InterestRate& rate);
+        inline void rate(const InterestRate& rate) {
+            rate_   = rate;
+            amount_ = accruedAmount(startDate(), endDate());
+        };
 
         /***
          * Gets the day counter of the coupon
          * @return The day counter of the coupon
          */
-        DayCounter dayCounter() const override;
+        inline DayCounter dayCounter() const override { return rate_.dayCounter(); };
 
         /***
          * Gets the accrued period of the coupon
@@ -54,7 +57,7 @@ namespace Atlas {
          * @param end The end date of the coupon
          * @return The accrued period of the coupon
          */
-        double accruedPeriod(const Date& start, const Date& end) const override;
+        inline double accruedPeriod(const Date& start, const Date& end) const override { return dayCounter().yearFraction(start, end); };
 
         /***
          * Gets the accrued amount of the coupon
@@ -62,7 +65,9 @@ namespace Atlas {
          * @param end The end date of the coupon
          * @return The accrued amount of the coupon
          */
-        double accruedAmount(const Date& start, const Date& end) const override;
+        inline adouble accruedAmount(const Date& start, const Date& end) const override {
+            return notional() * (rate_.compoundFactor(start, end) - 1.0);
+        };
 
        private:
         InterestRate rate_;

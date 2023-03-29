@@ -37,7 +37,7 @@ namespace Atlas {
          * Gets the amount of the cashflow
          * @return The amount (total payment) of the cashflow
          */
-        inline virtual double amount() const { return amount_; }
+        inline virtual adouble amount() const { return amount_; }
 
         /**
          * Gets the payment date of the cashflow
@@ -77,7 +77,7 @@ namespace Atlas {
         inline size_t discountContextIdx() const { return discountContextIdx_; }
 
        protected:
-        double amount_    = 0;
+        adouble amount_   = 0;  // amount means static (non-risk-sensitive cashflows)
         Date paymentDate_ = Date();
         size_t discountContextIdx_;
         bool hasDiscountContext_ = false;

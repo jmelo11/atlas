@@ -11,7 +11,8 @@ TEST(Instruments, CustomFloatingRateInstrument) {
     std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
 
     auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
-    CustomFloatingRateInstrument prod(schedule.dates(), redemptionAmounts, vars.spread);
+
+    CustomFloatingRateInstrument prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store_.at("TEST"));
 
     auto& leg         = prod.leg();
     auto& coupons     = leg.coupons();

@@ -11,11 +11,6 @@ namespace Atlas {
         notional_  = notional;
     };
 
-    void FloatingRateInstrument::spread(double s) {
-        spread_ = s;
-        for (auto& coupon : leg_.coupons()) { coupon.spread(s); }
-    }
-
     void FloatingRateInstrument::accept(Visitor& visitor) {
         visitor.visit(*this);
     }
@@ -24,5 +19,4 @@ namespace Atlas {
         visitor.visit(*this);
     }
 
-  
 }  // namespace Atlas
