@@ -9,7 +9,8 @@ namespace Atlas {
      * @brief A class for fixed, single-legged, bullet instruments.
      *
      */
-    class FixedRateBulletInstrument : public FixedRateInstrument {
+    template <typename adouble>
+    class FixedRateBulletInstrument : public FixedRateInstrument<adouble> {
        public:
         /**
          * @brief Construct a new Fixed Rate Bullet Instrument object
@@ -20,7 +21,24 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param rate rate of the instrument
          */
-        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate& rate);
+        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate)
+        : FixedRateInstrument<adouble>(startDate, endDate, rate, notional) {
+            Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+
+            Date firstDate = Date();
+            for (const auto& lastDate : schedule.dates()) {
+                if (firstDate != Date()) {
+                    FixedRateCoupon<adouble> coupon(firstDate, lastDate, notional, rate);
+                    this->leg_.addCoupon(coupon);
+                }
+                firstDate = lastDate;
+            }
+
+            Redemption<adouble> redemption(schedule.endDate(), notional);
+            this->leg_.addRedemption(redemption);
+
+            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+        };
 
         /**
          * @brief Construct a new Fixed Rate Bullet Instrument object
@@ -32,8 +50,12 @@ namespace Atlas {
          * @param rate rate of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
-        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate& rate,
-                                  const CurveContext& discountCurveContext);
+        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
+                                  const CurveContext& discountCurveContext)
+        : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate) {
+            this->leg().discountCurveContext(discountCurveContext);
+            this->disbursement_.discountCurveContext(discountCurveContext);
+        };
     };
 }  // namespace Atlas
 

@@ -10,7 +10,8 @@ namespace Atlas {
      * @class FloatingRateInstrument
      * @brief An class for floating, single-legged, rate instruments.
      */
-    class FloatingRateInstrument : public Instrument {
+    template <typename adouble>
+    class FloatingRateInstrument : public Instrument<adouble> {
        public:
         /**
          * @brief Construct a new Floating Rate Instrument object
@@ -21,8 +22,13 @@ namespace Atlas {
          * @param spread spread of the instrument
          * @param leg leg of the instrument
          */
-        FloatingRateInstrument(const Date& startDate, const Date& endDate, double notional = 0.0, double spread = 0.0,
-                               const FloatingRateLeg& leg = FloatingRateLeg());
+        FloatingRateInstrument(const Date& startDate, const Date& endDate, double notional = 0.0, adouble spread = 0.0,
+                               const FloatingRateLeg<adouble>& leg = FloatingRateLeg<adouble>())
+        : leg_(leg), spread_(spread) {
+            this->startDate_ = startDate;
+            this->endDate_   = endDate;
+            this->notional_  = notional;
+        };
 
         virtual ~FloatingRateInstrument(){};
 
@@ -31,28 +37,28 @@ namespace Atlas {
          *
          * @return const FloatingRateLeg&
          */
-        inline const FloatingRateLeg& constLeg() const { return leg_; };
+        inline const FloatingRateLeg<adouble>& constLeg() const { return leg_; };
 
         /**
          * @brief Returns the leg of the instrument.
          *
          * @return FloatingRateLeg&
          */
-        inline FloatingRateLeg& leg() { return leg_; };
+        inline FloatingRateLeg<adouble>& leg() { return leg_; };
 
         /**
          * @brief Returns the spread of the instrument.
          *
          * @return double
          */
-        inline double spread() const { return spread_; };
+        inline adouble spread() const { return spread_; };
 
         /**
          * @brief Sets the spread of the instrument.
          *
          * @param s
          */
-        inline void spread(double s) {
+        inline void spread(adouble s) {
             spread_ = s;
             for (auto& coupon : leg_.coupons()) { coupon.spread(s); }
         };
@@ -76,33 +82,33 @@ namespace Atlas {
          *
          * @param visitor
          */
-        virtual void accept(Visitor& visitor) override;
+        virtual void accept(Visitor<adouble>& visitor) override { visitor.visit(*this); };
 
         /**
          * @brief Accepts a const visitor.
          *
          * @param visitor
          */
-        virtual void accept(ConstVisitor& visitor) const override;
+        virtual void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
         /**
          * @brief Returns the disbursement of the instrument.
          *
          * @return Cashflow
          */
-        inline Cashflow disbursement() const { return disbursement_; };
+        inline Cashflow<adouble> disbursement() const { return disbursement_; };
 
         /**
          * @brief Sets the disbursement of the instrument.
          *
          * @param disbursement
          */
-        inline void disbursement(const Cashflow& disbursement) { disbursement_ = disbursement; }
+        inline void disbursement(const Cashflow<adouble>& disbursement) { disbursement_ = disbursement; }
 
        protected:
-        FloatingRateLeg leg_;
-        Cashflow disbursement_;
-        double spread_;
+        FloatingRateLeg<adouble> leg_;
+        Cashflow<adouble> disbursement_;
+        adouble spread_;
     };
 }  // namespace Atlas
 

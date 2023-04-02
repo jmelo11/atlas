@@ -3,33 +3,4 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
 
-namespace Atlas {
-
-    FixedRateBulletInstrument::FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                                         const InterestRate& rate)
-    : FixedRateInstrument(startDate, endDate, rate, notional) {
-        Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
-
-        Date firstDate = Date();
-        for (const auto& lastDate : schedule.dates()) {
-            if (firstDate != Date()) {
-                FixedRateCoupon coupon(firstDate, lastDate, notional, rate);
-                leg_.addCoupon(coupon);
-            }
-            firstDate = lastDate;
-        }
-
-        Redemption redemption(schedule.endDate(), notional);
-        leg_.addRedemption(redemption);
-
-        disbursement_ = Cashflow(startDate, -notional);
-    }
-
-    FixedRateBulletInstrument::FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                                         const InterestRate& rate, const CurveContext& discountCurveContext)
-    : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate) {
-        leg().discountCurveContext(discountCurveContext);
-        disbursement_.discountCurveContext(discountCurveContext);
-    }
-
-}  // namespace Atlas
+namespace Atlas {}  // namespace Atlas

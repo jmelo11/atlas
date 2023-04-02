@@ -10,7 +10,8 @@ namespace Atlas {
      * @brief A class representing a floating rate coupon
      * @details A floating rate coupon has a start date, an end date, a notional amount, a spread, and a rate index
      */
-    class FloatingRateCoupon : public Coupon {
+    template <typename adouble>
+    class FloatingRateCoupon : public Coupon<adouble> {
        public:
         /**
          * Constructor
@@ -20,7 +21,11 @@ namespace Atlas {
          * @param spread The spread of the coupon
          * @param forecastCurveContext The forecast CurveContext of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, double spread, const CurveContext& forecastCurveContext);
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const CurveContext& forecastCurveContext)
+        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), forecastContextIdx_(forecastCurveContext.idx()), hasForecastContext_(true) {
+            rateDef_ = {forecastCurveContext.index().dayCounter(), forecastCurveContext.index().rateFrequency(),
+                        forecastCurveContext.index().rateCompounding()};
+        };
 
         /**
          * Constructor
@@ -31,34 +36,38 @@ namespace Atlas {
          * @param forecastCurveContext The forecast CurveContext of the coupon
          * @param discountCurveContext The discount CurveContext of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, double spread, const CurveContext& forecastCurveContext,
-                           const CurveContext& discountCurveContext);
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const CurveContext& forecastCurveContext,
+                           const CurveContext& discountCurveContext)
+        : FloatingRateCoupon(startDate, endDate, notional, spread, forecastCurveContext) {
+            this->discountContextIdx_ = discountCurveContext.idx();
+            this->hasDiscountContext_ = true;
+        };
 
         /***
          * @return The spread of the coupon
          */
-        inline double spread() const { return spread_; }
+        inline adouble spread() const { return spread_; }
 
         /***
          * Sets the spread of the coupon
          * @param spread The spread of the coupon
          */
-        inline void spread(double spread) { spread_ = spread; }
+        inline void spread(adouble spread) { spread_ = spread; }
 
         /***
          * Sets the fixing of the coupon
          * @param fixing The fixing of the coupon
          */
-        inline void fixing(double fixing) {
-            fixing_ = fixing;
-            amount_ = accruedAmount(startDate(), endDate());
+        inline void fixing(adouble fixing) {
+            fixing_       = fixing;
+            this->amount_ = accruedAmount(this->startDate(), this->endDate());
         };
 
         /***
          * Gets the fixing of the coupon
          * @return The fixing of the coupon
          */
-        inline double fixing() const { return fixing_; }
+        inline adouble fixing() const { return fixing_; }
 
         /***
          * Sets the forecast CurveContext of the coupon
@@ -91,8 +100,9 @@ namespace Atlas {
          * @return The accrued amount of the coupon
          */
         inline adouble accruedAmount(const Date& start, const Date& end) const override {
-            InterestRate r(fixing_ + spread_, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq);
-            return notional() * (r.compoundFactor(start, end) - 1.0);
+            adouble totalRate = fixing_ + spread_;
+            InterestRate r(totalRate, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq);
+            return this->notional() * (r.compoundFactor(start, end) - 1.0);
         };
 
         /**
@@ -116,8 +126,8 @@ namespace Atlas {
             Compounding comp;
         };
 
-        double spread_ = 0.0;
-        double fixing_ = 0.0;
+        adouble spread_ = 0.0;
+        adouble fixing_ = 0.0;
         RateDef rateDef_;
 
         size_t forecastContextIdx_;

@@ -7,7 +7,7 @@
 #ifndef E3B070C1_8DDC_4DD1_AD78_061520147053
 #define E3B070C1_8DDC_4DD1_AD78_061520147053
 
-#include <ql/time/date.hpp>
+#include <atlas/atlasconfig.hpp>
 #include <iostream>
 #include <map>
 #include <tuple>
@@ -15,8 +15,12 @@
 
 namespace Atlas {
 
-    using namespace QuantLib;
-
+    /**
+     * @brief A bucket is a time interval with a value
+     *
+     * @tparam T type of the values to be stored (double, dual, etc.)
+     *
+     */
     template <class T>
     struct Bucket {
         Date start_;
@@ -28,11 +32,26 @@ namespace Atlas {
             throw std::runtime_error("Buckets do not match");
         };
     };
+
+    /**
+     * @brief Overload of the << operator for Bucket
+     *
+     * @tparam T
+     * @param s
+     * @param bucket
+     * @return std::ostream&
+     */
     template <class T>
     std::ostream& operator<<(std::ostream& s, const Bucket<T>& bucket) {
         return s << "(" << bucket.start_ << ", " << bucket.end_ << "," << bucket.value_ << ")";
     }
 
+    /**
+     * @brief A profile is a collection of buckets
+     *
+     * @tparam T type of the values to be stored (double, dual, etc.)
+     * @param referenceDate reference date for the profile
+     */
     template <class T>
     class Profile {
        public:
@@ -47,11 +66,9 @@ namespace Atlas {
         }
         Date referenceDate() const { return referenceDate_; }
         void addNewBucket(Date start, Date end) { buckets_.push_back(Bucket<T>(start, end, 0)); }
-        std::vector<Bucket<T>>* buckets() { return &buckets_; }
+        std::vector<Bucket<T>>& buckets() { return buckets_; }
         Bucket<T> bucket(size_t i) const { return buckets_[i]; }
         size_t bucketCount() const { return buckets_.size(); }
-        // todo
-        void flatten() {}
 
        private:
         Date referenceDate_;
@@ -64,6 +81,6 @@ namespace Atlas {
         for (size_t i = 0; i < profile.bucketCount(); i++) s << profile.bucket(i) << "\n";
         return s;
     }
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* E3B070C1_8DDC_4DD1_AD78_061520147053 */

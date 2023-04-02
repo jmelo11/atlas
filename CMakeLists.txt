@@ -55,8 +55,12 @@ target_include_directories(
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
 
+
 target_link_libraries(${PROJECT_NAME}  PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME}  PUBLIC Boost::boost)
+link_libraries(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/lib/libcppad_lib.dylib")
+
+#link cppad
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(

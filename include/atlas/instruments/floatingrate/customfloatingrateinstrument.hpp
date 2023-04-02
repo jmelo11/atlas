@@ -8,7 +8,8 @@ namespace Atlas {
      * @brief A class for custom floating rate instruments.
      *
      */
-    class CustomFloatingRateInstrument : public FloatingRateInstrument {
+    template <typename adouble>
+    class CustomFloatingRateInstrument : public FloatingRateInstrument<adouble> {
        public:
         /**
          * @brief Construct a new Custom Floating Rate Instrument object
@@ -18,8 +19,23 @@ namespace Atlas {
          * @param spread spread of the instrument
          * @param forecastCurveContext forecast curve context of the instrument
          */
-        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread,
-                                     const CurveContext& forecastCurveContext);
+        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, adouble spread,
+                                     const CurveContext& forecastCurveContext)
+        : FloatingRateInstrument<adouble>(dates.front(), dates.back(), 0, spread) {
+            this->notional_    = std::reduce(redemptions.begin(), redemptions.end());
+            double outstanding = this->notional_;
+            for (size_t i = 0; i < redemptions.size(); i++) {
+                Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
+                this->leg_.addRedemption(redemption);
+
+                FloatingRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, spread, forecastCurveContext);
+                this->leg_.addCoupon(coupon);
+                outstanding -= redemptions.at(i);
+            }
+
+            this->disbursement_ = Cashflow<adouble>(dates.front(), -this->notional_);
+        };
+        ;
         /**
          * @brief Construct a new Custom Floating Rate Instrument object
          *
@@ -29,8 +45,12 @@ namespace Atlas {
          * @param forecastCurveContext forecast curve context of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
-        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, double spread,
-                                     const CurveContext& forecastCurveContext, const CurveContext& discountCurveContext);
+        CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, adouble spread,
+                                     const CurveContext& forecastCurveContext, const CurveContext& discountCurveContext)
+        : CustomFloatingRateInstrument(dates, redemptions, spread, forecastCurveContext) {
+            this->leg().discountCurveContext(discountCurveContext);
+            this->disbursement_.discountCurveContext(discountCurveContext);
+        };
     };
 }  // namespace Atlas
 

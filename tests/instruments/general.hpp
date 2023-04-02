@@ -15,7 +15,7 @@ struct FixedInstrumentVars {
     Date endDate               = Date(1, Month::Aug, 2021);
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
-    InterestRate rate          = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    InterestRate<dual> rate          = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
     CurveContextStore& store_  = CurveContextStore::instance();
     FixedInstrumentVars() {
         if (!store_.hasContext("TEST")) {

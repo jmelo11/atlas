@@ -6,36 +6,40 @@
 
 namespace Atlas {
 
-    class FixedRateLeg : public Leg {
+    /***
+     * Fixed rate leg class
+     */
+    template <typename adouble>
+    class FixedRateLeg : public Leg<adouble> {
        public:
-        FixedRateLeg() : Leg(){};
+        FixedRateLeg() : Leg<adouble>(){};
 
-        FixedRateLeg(std::vector<FixedRateCoupon> coupons, std::vector<Redemption> redemptions, bool sort = false)
-        : Leg(redemptions, sort), coupons_(coupons) {
+        FixedRateLeg(std::vector<FixedRateCoupon<adouble>> coupons, std::vector<Redemption<adouble>> redemptions, bool sort = false)
+        : Leg<adouble>(redemptions, sort), coupons_(coupons) {
             if (sort) sortCashflows(coupons_);
         };
 
-        inline std::vector<FixedRateCoupon>& coupons() { return coupons_; }
+        inline std::vector<FixedRateCoupon<adouble>>& coupons() { return coupons_; }
 
-        inline const std::vector<FixedRateCoupon>& constCoupons() const { return coupons_; }
+        inline const std::vector<FixedRateCoupon<adouble>>& constCoupons() const { return coupons_; }
 
-        inline void addCoupon(FixedRateCoupon& coupon, bool sort = false) {
+        inline void addCoupon(FixedRateCoupon<adouble>& coupon, bool sort = false) {
             coupons_.push_back(coupon);
-            if (sort) sortCashflows(coupons_);
+            if (sort) this->sortCashflows(coupons_);
         }
 
         inline void sort() {
-            sortCashflows(redemptions_);
-            sortCashflows(coupons_);
+            this->sortCashflows(this->redemptions_);
+            this->sortCashflows(coupons_);
         }
 
         inline void discountCurveContext(const CurveContext& context) {
-            setDiscountCurveContext(coupons_, context);
-            setDiscountCurveContext(redemptions_, context);
+            this->setDiscountCurveContext(this->redemptions_, context);
+            this->setDiscountCurveContext(coupons_, context);
         }
 
        private:
-        std::vector<FixedRateCoupon> coupons_;
+        std::vector<FixedRateCoupon<adouble>> coupons_;
     };
 }  // namespace Atlas
 

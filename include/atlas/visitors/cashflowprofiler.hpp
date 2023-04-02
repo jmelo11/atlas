@@ -7,37 +7,39 @@
 
 namespace Atlas {
 
-    using Profile = std::map<Date, double>;
+    template <typename adouble>
+    using Profile = std::map<Date, adouble>;
 
-    class CashflowProfiler : public ConstVisitor {
+    template <typename adouble>
+    class CashflowProfiler : public ConstVisitor<adouble> {
        public:
         CashflowProfiler(){};
 
-        void visit(const FixedRateInstrument& inst) const override;
-        void visit(const FloatingRateInstrument& inst) const override;
+        void visit(const FixedRateInstrument<adouble>& inst) const override { agreggate(inst.constLeg()); };
+        void visit(const FloatingRateInstrument<adouble>& inst) const override { agreggate(inst.constLeg()); };
 
         void clear() {
             redemptions_.clear();
             interests_.clear();
         };
 
-        Profile redemptions() const { return redemptions_; }
-        Profile interests() const { return interests_; }
+        Profile<adouble> redemptions() const { return redemptions_; }
+        Profile<adouble> interests() const { return interests_; }
 
        private:
         template <typename T>
         void agreggate(const T& leg) const {
             for (const auto& coupon : leg.constCoupons()) {
                 if (interests_.find(coupon.paymentDate()) == interests_.end()) { interests_[coupon.paymentDate()] = 0.0; }
-                interests_[coupon.paymentDate()] += Value(coupon.amount());
+                interests_[coupon.paymentDate()] += coupon.amount();
             };
             for (const auto& redemption : leg.constRedemptions()) {
                 if (redemptions_.find(redemption.paymentDate()) == redemptions_.end()) { redemptions_[redemption.paymentDate()] = 0.0; }
             };
         };
 
-        mutable Profile redemptions_;
-        mutable Profile interests_;
+        mutable Profile<adouble> redemptions_;
+        mutable Profile<adouble> interests_;
     };
 }  // namespace Atlas
 

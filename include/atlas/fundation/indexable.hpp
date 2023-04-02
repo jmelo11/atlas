@@ -7,6 +7,8 @@ namespace Atlas {
      * @class Indexable
      * The Indexable class represents an object that can be indexed in multiple dimensions.
      * It has three index attributes: discount factor index, forward index, and currency index.
+     *
+     * Inspired in A. Savine book "Modern computational finance: AAD and parallel simulation"
      */
     class Indexable {
        public:

@@ -9,23 +9,25 @@
 #include <type_traits>
 
 namespace Atlas {
-    class DurationCalculator : public ConstVisitor {
+    template <typename adouble>
+    class DurationCalculator : public ConstVisitor<adouble> {
        public:
-        DurationCalculator(const MarketData& marketData = MarketData(), double delta = 0.0001);
+        DurationCalculator(const MarketData<adouble>& marketData = MarketData<adouble>(), double delta = 0.0001)
+        : marketData_(marketData), delta_(delta){};
 
         adouble results() const { return results_; }
 
         void clear() { results_ = 0.0; }
 
-        void visit(const FloatingRateInstrument& inst) const override;
+        void visit(const FloatingRateInstrument<adouble>& inst) const override { floatingInstSens(inst); };
 
-        void visit(const FixedRateInstrument& inst) const override;
+        void visit(const FixedRateInstrument<adouble>& inst) const override { fixedInstSens(inst); };
 
        private:
         template <typename T>
         void fixedInstSens(const T& inst) const {
             T tmpProd = inst;
-            NPVCalculator npvCacl(marketData_);
+            NPVCalculator<adouble> npvCacl(marketData_);
             npvCacl.visit(tmpProd);
             adouble npv = npvCacl.results();
             npvCacl.clear();
@@ -53,7 +55,7 @@ namespace Atlas {
         };
 
         double delta_;
-        const MarketData& marketData_;
+        const MarketData<adouble>& marketData_;
         mutable adouble results_ = 0.0;
     };
 

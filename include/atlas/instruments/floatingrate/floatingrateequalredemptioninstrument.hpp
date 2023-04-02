@@ -8,7 +8,8 @@ namespace Atlas {
      * @brief A class for floating rate equal redemption instruments.
      *
      */
-    class FloatingRateEqualRedemptionInstrument : public FloatingRateInstrument {
+    template <typename adouble>
+    class FloatingRateEqualRedemptionInstrument : public FloatingRateInstrument<adouble> {
        public:
         /**
          * @brief Construct a new Floating Rate Equal Redemption Instrument object
@@ -19,7 +20,7 @@ namespace Atlas {
          * @param spread spread of the instrument
          * @param forecastCurveContext forecast curve context of the instrument
          */
-        FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, double spread,
+        FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                               const CurveContext& forecastCurveContext);
         /**
          * @brief Construct a new Floating Rate Equal Redemption Instrument object
@@ -31,7 +32,7 @@ namespace Atlas {
          * @param forecastCurveContext forecast curve context of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
-        FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, double spread,
+        FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                               const CurveContext& forecastCurveContext, const CurveContext& discountCurveContext);
     };
 }  // namespace Atlas

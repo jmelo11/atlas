@@ -11,23 +11,26 @@
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
 #include <iostream>
+#include <type_traits>
 
 #define ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED std::cerr << "Warning: Visitor not implemented for " << __PRETTY_FUNCTION__ << std::endl;
 
 namespace Atlas {
 
+    template <typename adouble>
     class Visitor {
        public:
         virtual ~Visitor() = default;
-        virtual void visit(FloatingRateInstrument& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
-        virtual void visit(FixedRateInstrument& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+        virtual void visit(FloatingRateInstrument<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+        virtual void visit(FixedRateInstrument<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
+    template <typename adouble>
     class ConstVisitor {
        public:
         virtual ~ConstVisitor() = default;
-        virtual void visit(const FloatingRateInstrument& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
-        virtual void visit(const FixedRateInstrument& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+        virtual void visit(const FloatingRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+        virtual void visit(const FixedRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 }  // namespace Atlas
 

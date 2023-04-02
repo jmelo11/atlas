@@ -13,22 +13,73 @@
 
 namespace Atlas {
 
-    class StaticCurveModel : public Model {
+    template <typename adouble>
+    class StaticCurveModel : public Model<adouble> {
        public:
-        StaticCurveModel(const MarketRequest& marketRequest);
+        StaticCurveModel(const MarketRequest& marketRequest) : Model<adouble>(marketRequest), curveStore_(CurveContextStore::instance()){};
+        ;
 
-        void setRequest(const MarketRequest& request) { marketRequest_ = request; };
+        void setRequest(const MarketRequest& request) { this->marketRequest_ = request; };
 
-        void simulate(const std::vector<Date>& evalDates, Scenario& scenario) const override;
+        void simulate(const std::vector<Date>& evalDates, Scenario<adouble>& scenario) const override {
+            for (const auto& evalDate : evalDates) {
+                MarketData<adouble> marketData;
+                marketData.allocate(this->marketRequest_);
 
-        MarketData simulate(const Date& refDate) const;
+                simulateDiscounts(marketData);
+                simulateForwards(marketData);
+
+                marketData.refDate = evalDate;
+                scenario.push_back(marketData);
+            }
+        };
+
+        MarketData<adouble> simulate(const Date& refDate) const {
+            std::vector<QuantLib::Date> dates = {refDate};
+            Scenario<adouble> scenario;
+            simulate(dates, scenario);
+            return scenario.front();
+        };
 
        private:
-        void simulateDiscounts(MarketData& md) const;
+        void simulateDiscounts(MarketData<adouble>& md) const {
+            for (auto& request : this->marketRequest_.dfs) {
+                size_t idx                                = request.curve_;
+                const Date& date                          = request.date_;
+                const CurveContext& curveContext          = curveStore_.at(idx);
+                const QuantLib::YieldTermStructure& curve = curveContext.curve();
 
-        void simulateForwards(MarketData& md) const;
+                double df;
+                if (curve.referenceDate() < date) {
+                    df = curve.discount(date);
+                } else if (curve.referenceDate() == date) {
+                    df = 1;
+                } else {
+                    df = 0;
+                }
+                md.dfs.push_back(df);
+            }
+        };
 
-        bool checkRefDates();
+        void simulateForwards(MarketData<adouble>& md) const {
+            for (auto& request : this->marketRequest_.fwds) {
+                size_t idx            = request.curve_;
+                const Date& startDate = request.startDate_;
+                const Date& endDate   = request.endDate_;
+
+                const auto& curveContext = curveStore_.at(idx);
+                const auto& curve        = curveContext.curve();
+                const auto& index        = curveContext.index();
+
+                double fwd;
+                if (curve.referenceDate() <= startDate) {
+                    fwd = curve.forwardRate(startDate, endDate, index.dayCounter(), index.rateCompounding(), index.rateFrequency()).rate();
+                } else {
+                    fwd = index.getFixing(startDate);
+                }
+                md.fwds.push_back(fwd);
+            }
+        };
 
         const CurveContextStore& curveStore_;
     };

@@ -9,7 +9,8 @@ namespace Atlas {
     /***
      * Fixed rate coupon class
      */
-    class FixedRateCoupon : public Coupon {
+    template <typename adouble>
+    class FixedRateCoupon : public Coupon<adouble> {
        public:
         /**
          * Constructor
@@ -18,7 +19,10 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param rate The interest rate of the coupon
          */
-        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate);
+        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate)
+        : Coupon<adouble>(startDate, endDate, notional), rate_(rate) {
+            this->amount_ = accruedAmount(startDate, endDate);
+        };
 
         /**
          * Constructor
@@ -27,22 +31,25 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param rate The interest rate of the coupon
          */
-        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate& rate,
-                        const CurveContext& discountCurveContext);
+        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
+                        const CurveContext& discountCurveContext)
+        : Coupon<adouble>(startDate, endDate, notional, discountCurveContext), rate_(rate) {
+            this->amount_ = accruedAmount(startDate, endDate);
+        };
 
         /***
          * Gets the interest rate of the coupon
          * @return The interest rate of the coupon
          */
-        inline InterestRate rate() const { return rate_; };
+        inline InterestRate<adouble> rate() const { return rate_; };
 
         /***
          * Sets the interest rate of the coupon
          * @param rate The interest rate of the coupon
          */
-        inline void rate(const InterestRate& rate) {
-            rate_   = rate;
-            amount_ = accruedAmount(startDate(), endDate());
+        inline void rate(const InterestRate<adouble>& rate) {
+            rate_         = rate;
+            this->amount_ = accruedAmount(this->startDate(), this->endDate());
         };
 
         /***
@@ -66,11 +73,11 @@ namespace Atlas {
          * @return The accrued amount of the coupon
          */
         inline adouble accruedAmount(const Date& start, const Date& end) const override {
-            return notional() * (rate_.compoundFactor(start, end) - 1.0);
+            return this->notional() * (rate_.compoundFactor(start, end) - 1.0);
         };
 
        private:
-        InterestRate rate_;
+        InterestRate<adouble> rate_;
     };
 
 }  // namespace Atlas

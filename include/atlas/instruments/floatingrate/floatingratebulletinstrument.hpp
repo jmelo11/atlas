@@ -9,7 +9,8 @@ namespace Atlas {
      * @brief A class for floating rate bullet instruments.
      *
      */
-    class FloatingRateBulletInstrument : public FloatingRateInstrument {
+    template <typename adouble>
+    class FloatingRateBulletInstrument : public FloatingRateInstrument<adouble> {
        public:
         /**
          * @brief Construct a new Floating Rate Bullet Instrument object
@@ -21,8 +22,12 @@ namespace Atlas {
          * @param forecastCurveContext forecast curve context of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
-        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, double spread,
-                                     const CurveContext& forecastCurveContext, const CurveContext& discountCurveContext);
+        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
+                                     const CurveContext& forecastCurveContext, const CurveContext& discountCurveContext)
+        : FloatingRateBulletInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
+            this->leg().discountCurveContext(discountCurveContext);
+            this->disbursement_.discountCurveContext(discountCurveContext);
+        };
 
         /**
          * @brief Construct a new Floating Rate Bullet Instrument object
@@ -33,8 +38,24 @@ namespace Atlas {
          * @param spread spread of the instrument
          * @param forecastCurveContext forecast curve context of the instrument
          */
-        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, double spread,
-                                     const CurveContext& forecastCurveContext);
+        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
+                                     const CurveContext& forecastCurveContext)
+        : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread) {
+            const auto& index = forecastCurveContext.index();
+            Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+            Date firstDate    = Date();
+            for (const auto& endDate : schedule.dates()) {
+                if (firstDate != Date()) {
+                    FloatingRateCoupon<adouble> coupon(firstDate, endDate, notional, spread, forecastCurveContext);
+                    this->leg_.addCoupon(coupon);
+                }
+                firstDate = endDate;
+            }
+
+            Redemption<adouble> redemption(schedule.endDate(), notional);
+            this->leg_.addRedemption(redemption);
+            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+        };
     };
 }  // namespace Atlas
 

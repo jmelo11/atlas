@@ -12,6 +12,7 @@ find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
 
 
+
 add_executable(${PROJECT_NAME} main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
                                                   "${CMAKE_SOURCE_DIR}/src")
@@ -27,5 +28,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+
+
 
 

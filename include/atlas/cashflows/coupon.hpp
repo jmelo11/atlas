@@ -11,7 +11,8 @@ namespace Atlas {
      *
      * A coupon is a cashflow that is paid periodically, and is based on a notional amount.
      */
-    class Coupon : public Cashflow {
+    template <typename adouble>
+    class Coupon : public Cashflow<adouble> {
        public:
         /**
          * @brief Construct a new Coupon object
@@ -20,7 +21,10 @@ namespace Atlas {
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          */
-        Coupon(const Date& startDate, const Date& endDate, double notional);
+        Coupon(const Date& startDate, const Date& endDate, double notional)
+        : Cashflow<adouble>(), startDate_(startDate), endDate_(endDate), notional_(notional) {
+            this->paymentDate_ = endDate;  // paymentDate shouldnt be same as endDate
+        };
 
         /**
          * Constructor
@@ -30,7 +34,10 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param discountCurveContext The discount curve context of the coupon
          */
-        Coupon(const Date& startDate, const Date& endDate, double notional, const CurveContext& discountCurveContext);
+        Coupon(const Date& startDate, const Date& endDate, double notional, const CurveContext& discountCurveContext)
+        : Cashflow<adouble>(discountCurveContext), startDate_(startDate), endDate_(endDate), notional_(notional) {
+            this->paymentDate_ = endDate;  // paymentDate shouldnt be same as endDate
+        };
 
         virtual ~Coupon(){};
 

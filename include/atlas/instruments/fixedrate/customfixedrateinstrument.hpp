@@ -8,7 +8,8 @@ namespace Atlas {
      * @brief A class for custom fixed rate instruments.
      *
      */
-    class CustomFixedRateInstrument : public FixedRateInstrument {
+    template <typename adouble>
+    class CustomFixedRateInstrument : public FixedRateInstrument<adouble> {
        public:
         /**
          * @brief Construct a new Custom Fixed Rate Instrument object
@@ -17,7 +18,17 @@ namespace Atlas {
          * @param redemptions redemption amounts for the instrument
          * @param rate rate of the instrument
          */
-        CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate& rate);
+        CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate<adouble>& rate)
+        : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate) {
+            for (size_t i = 0; i < redemptions.size(); i++) {
+                Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
+                this->leg_.addRedemption(redemption);
+            }
+            this->notional_ = std::reduce(redemptions.begin(), redemptions.end());
+            this->calculateNotionals(dates, rate);
+            this->disbursement_ = Cashflow(dates.front(), -this->notional_);
+        };
+
         /**
          * @brief Construct a new Custom Fixed Rate Instrument object
          *
@@ -26,8 +37,12 @@ namespace Atlas {
          * @param rate rate of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
-        CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate& rate,
-                                  const CurveContext& discountCurveContext);
+        CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate<adouble>& rate,
+                                  const CurveContext& discountCurveContext)
+        : CustomFixedRateInstrument(dates, redemptions, rate) {
+            this->leg().discountCurveContext(discountCurveContext);
+            this->disbursement_.discountCurveContext(discountCurveContext);
+        };
     };
 }  // namespace Atlas
 

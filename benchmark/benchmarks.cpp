@@ -5,6 +5,7 @@
 #include <ql/cashflows/iborcoupon.hpp>
 #include <ql/indexes/ibor/euribor.hpp>
 #include <ql/instruments/bonds/fixedratebond.hpp>
+#include <ql/interestrate.hpp>
 #include <ql/pricingengines/bond/discountingbondengine.hpp>
 #include <ql/termstructures/volatility/optionlet/constantoptionletvol.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
@@ -18,14 +19,16 @@
 
 using namespace Atlas;
 
+template <typename NumType>
 void sizes() {
-    std::cout << "sizeof(Cashflow) = " << sizeof(Cashflow) << std::endl;
+    std::cout << "sizeof(Cashflow) = " << sizeof(Cashflow<NumType>) << std::endl;
 
-    std::cout << "sizeof(FixedRateCoupon) = " << sizeof(FixedRateCoupon) << std::endl;
+    std::cout << "sizeof(FixedRateCoupon) = " << sizeof(FixedRateCoupon<NumType>) << std::endl;
 
-    std::cout << "sizeof(FloatingRateCoupon) = " << sizeof(FloatingRateCoupon) << std::endl;
+    std::cout << "sizeof(FloatingRateCoupon) = " << sizeof(FloatingRateCoupon<NumType>) << std::endl;
 }
 
+template <typename NumType>
 void bechmarkFixedRateCoupons() {
     // this benchmark tries to measure the time cost of creating and iterating over a vector of coupons
     // first test: 1000 coupons and compare quantlib against atlas
@@ -39,45 +42,53 @@ void bechmarkFixedRateCoupons() {
     QuantLib::Settings::instance().evaluationDate() = startDate;
     Date endDate(1, Month::September, 2020);
     double notional = 100;
-    double rate     = 0.03;
-    InterestRate interestRate(rate, Actual360(), Compounding::Simple, Frequency::Annual);
+    NumType rate    = 0.03;
 
+    InterestRate<NumType> interestRate(rate, Actual360(), Compounding::Simple, Frequency::Annual);
+
+    QuantLib::InterestRate qlInterestRate;
+    if constexpr (std::is_same_v<NumType, double>) {
+        qlInterestRate = QuantLib::InterestRate(rate, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+    } else {
+        qlInterestRate = QuantLib::InterestRate(rate.val, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+    }
     // Atlas
-    std::vector<FixedRateCoupon> coupons;
-    for (size_t i = 0; i < numCoupons; ++i) { coupons.push_back(FixedRateCoupon(startDate, endDate, notional, interestRate)); }
+    std::vector<FixedRateCoupon<NumType>> coupons;
+    for (size_t i = 0; i < numCoupons; ++i) { coupons.push_back(FixedRateCoupon<NumType>(startDate, endDate, notional, interestRate)); }
 
     // QuantLib
     QuantLib::Leg qlCoupons;
     for (size_t i = 0; i < numCoupons; ++i) {
-        qlCoupons.push_back(boost::make_shared<QuantLib::FixedRateCoupon>(endDate, notional, interestRate, startDate, endDate));
+        qlCoupons.push_back(boost::make_shared<QuantLib::FixedRateCoupon>(endDate, notional, qlInterestRate, startDate, endDate));
     }
 
     // benchmark
     ankerl::nanobench::Bench().run("Amount: Atlas FixedRateCoupon", [&]() {
-        adouble sum = 0;
+        NumType sum = 0;
         for (size_t i = 0; i < numCoupons; ++i) { sum += coupons[i].amount(); }
     });
 
     ankerl::nanobench::Bench().run("Amount: QuantLib FixedRateCoupon", [&]() {
-        adouble sum = 0;
+        NumType sum = 0;
         for (size_t i = 0; i < numCoupons; ++i) { sum += qlCoupons[i]->amount(); }
     });
 
     ankerl::nanobench::Bench().run("Parallel Amount: QuantLib FixedRateCoupon", [&]() {
-        adouble sum = 0;
+        NumType sum = 0;
 // parallel for each
 #pragma omp parallel for reduction(+ : sum)
         for (size_t i = 0; i < numCoupons; ++i) { sum += qlCoupons[i]->amount(); }
     });
 
     ankerl::nanobench::Bench().run("Parallel Amount: Atlas FixedRateCoupon", [&]() {
-        adouble sum = 0;
+        NumType sum = 0;
 // parallel for each
 #pragma omp parallel for reduction(+ : sum)
         for (size_t i = 0; i < numCoupons; ++i) { sum += coupons[i].amount(); }
     });
 }
 
+template <typename NumType>
 void bechmarkFloatingRateCoupons() {
     ankerl::nanobench::Bench().title("Floating Rate Coupon Creation and Iteration");
 
@@ -85,14 +96,11 @@ void bechmarkFloatingRateCoupons() {
     Date startDate(1, Month::Aug, 2020);
     Date endDate(1, Month::September, 2020);
     double notional = 100;
-    double spread   = 0.01;
+    NumType spread  = 0.01;
 
     // Atlas index and curve settings
     CurveContextStore& store_ = CurveContextStore::instance();
-    FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-    RateIndex index("TEST", Frequency::Annual, Actual360());
-    store_.createCurveContext("TEST", curveStrategy, index);
-    auto& context = store_.at("TEST");
+    auto& context              = store_.at("TEST");
 
     // QuantLib index
     QuantLib::Handle<QuantLib::YieldTermStructure> curveHandle(boost::make_shared<QuantLib::FlatForward>(startDate, 0.03, Actual360()));
@@ -104,8 +112,8 @@ void bechmarkFloatingRateCoupons() {
     }
 
     // Atlas
-    std::vector<FloatingRateCoupon> coupons;
-    for (size_t i = 0; i < numCoupons; ++i) { coupons.push_back(FloatingRateCoupon(startDate, endDate, notional, spread, context)); }
+    std::vector<FloatingRateCoupon<NumType>> coupons;
+    for (size_t i = 0; i < numCoupons; ++i) { coupons.push_back(FloatingRateCoupon<NumType>(startDate, endDate, notional, spread, context)); }
 
     // benchmark
     QuantLib::Volatility volatility = 0.0;
@@ -116,7 +124,7 @@ void bechmarkFloatingRateCoupons() {
     pricer->setCapletVolatility(vol);
 
     ankerl::nanobench::Bench().run("Amount: Atlas FloatingRateCoupon", [&]() {
-        adouble sum = 0;
+        NumType sum = 0;
         for (size_t i = 0; i < numCoupons; ++i) {
             coupons[i].fixing(0.03);
             sum += coupons[i].amount();
@@ -148,16 +156,18 @@ void bechmarkFloatingRateCoupons() {
     });
 
     ankerl::nanobench::Bench().run("Parallel Amount: Atlas FloatingRateCoupon", [&]() {
-        adouble sum = 0;
+        NumType sum = 0;
+        NumType fwd = 0.03;
         // parallel for each
 #pragma omp parallel for reduction(+ : sum)
         for (size_t i = 0; i < numCoupons; ++i) {
-            coupons[i].fixing(0.03);
+            coupons[i].fixing(fwd);
             sum += coupons[i].amount();
         }
     });
 }
 
+template <typename NumType>
 void pricingBenchmark() {
     ankerl::nanobench::Bench().title("Fixed Rate Coupon Creation and Iteration");
 
@@ -168,49 +178,52 @@ void pricingBenchmark() {
     Date endDate(1, Month::September, 2025);
     Frequency paymentFreq = Frequency::Semiannual;
     double notional       = 100;
-    double rate           = 0.03;
-    InterestRate interestRate(rate, Actual360(), Compounding::Simple, Frequency::Annual);
-    std::vector<FixedRateBulletInstrument> instruments;
+    NumType rate          = 0.03;
+    InterestRate<NumType> interestRate(rate, Actual360(), Compounding::Simple, Frequency::Annual);
+
+    QuantLib::InterestRate qlInterestRate;
+    if constexpr (std::is_same_v<NumType, double>) {
+        qlInterestRate = QuantLib::InterestRate(rate, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+    } else {
+        qlInterestRate = QuantLib::InterestRate(rate.val, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+    }
+
+    std::vector<FixedRateBulletInstrument<NumType>> instruments;
 
     CurveContextStore& mainStore = CurveContextStore::instance();
-    if (!mainStore.hasContext("TEST")) {
-        FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-        RateIndex index("TEST", Frequency::Annual, Actual360());
-        mainStore.createCurveContext("TEST", curveStrategy, index);
-    }
-    auto& context = mainStore.at("TEST");
+    auto& context                = mainStore.at("TEST");
 
     for (size_t i = 0; i < numInstruments; ++i) {
-        instruments.push_back(FixedRateBulletInstrument(startDate, endDate, paymentFreq, notional, interestRate, context));
+        instruments.push_back(FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, context));
     }
 
     // slice instruments in sub vectors
-    std::vector<std::vector<FixedRateBulletInstrument>> slices;
+    std::vector<std::vector<FixedRateBulletInstrument<NumType>>> slices;
     size_t sliceSize = 1000;
 
     for (size_t i = 0; i < numInstruments; i += sliceSize) {
-        slices.push_back(std::vector<FixedRateBulletInstrument>(instruments.begin() + i, instruments.begin() + i + sliceSize));
+        slices.push_back(std::vector<FixedRateBulletInstrument<NumType>>(instruments.begin() + i, instruments.begin() + i + sliceSize));
     }
 
     ankerl::nanobench::Bench().run("Parallel Price: Atlas FixedRateBulletInstrument", [&]() {
         ThreadPool* pool = ThreadPool::getInstance();
         pool->start();
         std::vector<TaskHandle> futures;
-        adouble npv = 0;
+        NumType npv = 0;
         for (auto& slice : slices) {
             auto task = [&]() {
                 // std::cout << pool->threadNum() << std::endl;
                 Date evalDate(1, Month::Aug, 2020);
                 CurveContextStore& store_ = CurveContextStore::instance();
                 store_.copyContextsFromStore(mainStore);
-                Indexer indexer;
+                Indexer<NumType> indexer;
                 for (size_t i = 0; i < sliceSize; i++) { slice[i].accept(indexer); }
                 MarketRequest request;
                 indexer.setRequest(request);
-                StaticCurveModel model(request);
-                MarketData marketData = model.simulate(evalDate);
+                StaticCurveModel<NumType> model(request);
+                MarketData<NumType> marketData = model.simulate(evalDate);
 
-                NPVCalculator calculator(marketData);
+                NPVCalculator<NumType> calculator(marketData);
                 for (size_t i = 0; i < sliceSize; i++) { slice[i].accept(calculator); }
                 npv += calculator.results();
                 return true;
@@ -225,7 +238,7 @@ void pricingBenchmark() {
     std::vector<QuantLib::FixedRateBond> qlBonds;
     for (size_t i = 0; i < numInstruments; ++i) {
         Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFreq);
-        auto qlBond       = QuantLib::FixedRateBond(0, notional, schedule, {interestRate});
+        auto qlBond       = QuantLib::FixedRateBond(0, notional, schedule, {qlInterestRate});
         qlBonds.push_back(qlBond);
     }
 
@@ -262,8 +275,17 @@ void pricingBenchmark() {
 }
 
 int main() {
-    // sizes();
-    bechmarkFixedRateCoupons();
-    bechmarkFloatingRateCoupons();
-    pricingBenchmark();
+    Date startDate(1, Month::Aug, 2020);
+    CurveContextStore& store_ = CurveContextStore::instance();
+    FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    store_.createCurveContext("TEST", curveStrategy, index);
+
+    bechmarkFixedRateCoupons<double>();
+    bechmarkFloatingRateCoupons<double>();
+    pricingBenchmark<double>();
+
+    bechmarkFixedRateCoupons<dual>();
+    bechmarkFloatingRateCoupons<dual>();
+    pricingBenchmark<dual>();
 }

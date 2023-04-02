@@ -5,14 +5,21 @@
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    class ForwardRateForecaster : public Visitor {
+    template <typename adouble>
+    class ForwardRateForecaster : public Visitor<adouble> {
        public:
-        ForwardRateForecaster(const MarketData& marketData) : marketData_(marketData){};
+        ForwardRateForecaster(const MarketData<adouble>& marketData) : marketData_(marketData){};
 
-        void visit(FloatingRateInstrument& inst) override;
+        void visit(FloatingRateInstrument<adouble>& inst) override {
+            auto& leg = inst.leg();
+            for (auto& coupon : leg.coupons()) {
+                adouble fwd = marketData_.fwds.at(coupon.fwdIdx());
+                coupon.fixing(fwd);
+            }
+        };
 
        private:
-        const MarketData& marketData_;
+        const MarketData<adouble>& marketData_;
     };
 }  // namespace Atlas
 

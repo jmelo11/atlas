@@ -7,9 +7,10 @@
 
 namespace Atlas {
 
-    class NPVCalculator : public Visitor {
+    template <typename adouble>
+    class NPVCalculator : public Visitor<adouble> {
        public:
-        NPVCalculator(const MarketData& marketData) : marketData_(marketData){};
+        NPVCalculator(const MarketData<adouble>& marketData) : marketData_(marketData){};
 
         void clear() {
             npv_        = 0.0;
@@ -22,18 +23,57 @@ namespace Atlas {
 
         inline double nonSensNPV() const { return nonSensNPV_; };
 
-        void visit(FixedRateInstrument& inst) override;
+        void visit(FixedRateInstrument<adouble>& inst) override {
+            fixedLegNPV(inst.leg());
+            redemptionsNPV(inst.leg());
+        };
 
-        void visit(FloatingRateInstrument& inst) override;
+        void visit(FloatingRateInstrument<adouble>& inst) override {
+            floatingLegNPV(inst.leg());
+            redemptionsNPV(inst.leg());
+        };
 
        private:
-        void redemptionsNPV(const Leg& leg);
-        void fixedLegNPV(const FixedRateLeg& leg);
-        void floatingLegNPV(FloatingRateLeg& leg);
+        void redemptionsNPV(const Leg<adouble>& leg) {
+            adouble npv = 0.0;
+            adouble df  = 0.0;
+            for (const auto& redemption : leg.constRedemptions()) {
+                df = marketData_.dfs.at(redemption.dfIdx());
+                npv += redemption.amount() * df;
+            }
+            if constexpr (std::is_same_v<adouble, double>) {
+                nonSensNPV_ += npv;
+            } else {
+                nonSensNPV_ += npv.val;
+            }
+        };
 
-        adouble npv_        = 0.0;
+        void fixedLegNPV(const FixedRateLeg<adouble>& leg) {
+            adouble npv = 0.0;
+            adouble df  = 0.0;
+            for (auto& coupon : leg.constCoupons()) {
+                df = marketData_.dfs.at(coupon.dfIdx());
+                npv += coupon.amount() * df;
+            }
+            npv_ += npv;
+        };
+
+        void floatingLegNPV(FloatingRateLeg<adouble>& leg) {
+            adouble npv = 0.0;
+            adouble df  = 0.0;
+            adouble fwd = 0.0;
+            for (FloatingRateCoupon<adouble>& coupon : leg.coupons()) {
+                df  = marketData_.dfs.at(coupon.dfIdx());
+                fwd = marketData_.fwds.at(coupon.fwdIdx());
+                coupon.fixing(fwd);  // ?
+                npv += coupon.amount() * df;
+            }
+            npv_ += npv;
+        };
+
+        adouble npv_       = 0.0;
         double nonSensNPV_ = 0.0;
-        const MarketData& marketData_;
+        const MarketData<adouble>& marketData_;
     };
 }  // namespace Atlas
 

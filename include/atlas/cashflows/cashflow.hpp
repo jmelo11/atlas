@@ -1,15 +1,13 @@
 #ifndef FB3CE86C_B207_47DE_B110_DA337769FAF4
 #define FB3CE86C_B207_47DE_B110_DA337769FAF4
 
-#include <ql/time/date.hpp>
 #include <atlas/atlasconfig.hpp>
-#include <atlas/basictypes/indexable.hpp>
+#include <atlas/fundation/indexable.hpp>
 #include <atlas/rates/curvecontext.hpp>
 
 namespace Atlas {
-    class Cashflow;
-    typedef Cashflow Redemption;
 
+    template <typename adouble>
     class Cashflow : public Indexable {
        public:
         Cashflow() = default;
@@ -21,7 +19,7 @@ namespace Atlas {
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, double amount) : amount_(amount), paymentDate_(paymentDate){};
+        Cashflow(const Date& paymentDate, adouble amount) : amount_(amount), paymentDate_(paymentDate){};
 
         /**
          * Constructor
@@ -83,6 +81,8 @@ namespace Atlas {
         bool hasDiscountContext_ = false;
     };
 
+    template <typename adouble>
+    using Redemption = Cashflow<adouble>;
 }  // namespace Atlas
 
 #endif /* FB3CE86C_B207_47DE_B110_DA337769FAF4 */

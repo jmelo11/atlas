@@ -12,6 +12,7 @@ namespace Atlas {
      * @class Leg
      * @brief Represents a leg of a financial instrument, containing a vector of Redemption objects
      */
+    template <typename adouble>
     class Leg {
        public:
         /**
@@ -24,7 +25,7 @@ namespace Atlas {
          * @param redemptions The vector of Redemption objects
          * @param sort Flag indicating whether to sort the redemptions by payment date
          */
-        Leg(std::vector<Redemption> redemptions, bool sort = false) : redemptions_(redemptions) {
+        Leg(std::vector<Redemption<adouble>> redemptions, bool sort = false) : redemptions_(redemptions) {
             if (sort) sortCashflows(redemptions_);
         };
 
@@ -37,19 +38,19 @@ namespace Atlas {
          * @brief Returns a reference to the vector of Redemption objects contained in the Leg object
          * @return Reference to the vector of Redemption objects
          */
-        inline std::vector<Redemption>& redemptions() { return redemptions_; }
+        inline std::vector<Redemption<adouble>>& redemptions() { return redemptions_; }
 
         /**
          * @brief Returns a constant reference to the vector of Redemption objects contained in the Leg object
          * @return Constant reference to the vector of Redemption objects
          */
-        inline const std::vector<Redemption>& constRedemptions() const { return redemptions_; }
+        inline const std::vector<Redemption<adouble>>& constRedemptions() const { return redemptions_; }
 
         /**
          * @brief Adds a Redemption object to the vector of redemptions contained in the Leg object
          * @param redemption Redemption object to be added
          */
-        inline void addRedemption(Redemption& redemption) { redemptions_.push_back(redemption); }
+        inline void addRedemption(Redemption<adouble>& redemption) { redemptions_.push_back(redemption); }
 
         /**
          * @brief Sorts the redemptions in the vector by payment date
@@ -74,7 +75,7 @@ namespace Atlas {
             for (auto& cashflow : cashflows) { cashflow.discountCurveContext(context); }
         }
 
-        std::vector<Redemption> redemptions_;  // Vector of Redemption objects contained in the Leg object
+        std::vector<Redemption<adouble>> redemptions_;  // Vector of Redemption objects contained in the Leg object
     };
 }  // namespace Atlas
 

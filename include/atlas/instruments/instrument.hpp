@@ -5,13 +5,18 @@
 
 namespace Atlas {
 
+    template <typename adouble>
     class Visitor;
+
+    template <typename adouble>
     class ConstVisitor;
 
     /**
      * @class Instrument
      * @brief An abstract class for instruments.
      */
+
+    template <typename adouble>
     class Instrument {
        public:
         /**
@@ -19,14 +24,14 @@ namespace Atlas {
          *
          * @param visitor
          */
-        virtual void accept(Visitor& visitor) = 0;
+        virtual void accept(Visitor<adouble>& visitor) = 0;
 
         /**
          * @brief Accepts a const visitor.
          *
          * @param visitor
          */
-        virtual void accept(ConstVisitor& visitor) const = 0;
+        virtual void accept(ConstVisitor<adouble>& visitor) const = 0;
 
         /**
          * @brief Returns the start date of the instrument.

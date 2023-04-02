@@ -73,9 +73,10 @@ namespace Atlas {
     /**
      * @brief A struct representing market data used for financial calculations.
      */
+    template <typename adouble>
     struct MarketData {
-        Date refDate;              ///< The reference date for the market data.
-        adouble numerarie = 1;      ///< The numerarie used in financial calculations.
+        Date refDate;               ///< The reference date for the market data.
+        adouble numerarie;          ///< The numerarie used in financial calculations.
         std::vector<adouble> dfs;   ///< The vector of discount factors.
         std::vector<adouble> fwds;  ///< The vector of forward rates.
 
@@ -84,12 +85,19 @@ namespace Atlas {
          *
          * @param marketRequest The market request for which to allocate memory.
          */
-        void allocate(const MarketRequest& marketRequest);
+        inline void allocate(const MarketRequest& marketRequest) {
+            dfs.reserve(marketRequest.dfs.size());
+            fwds.reserve(marketRequest.fwds.size());
+        };
 
         /**
          * @brief Initializes the discount factors and forward rates to 1.
          */
-        void initialize();
+        inline void initialize() {
+            numerarie = 1;
+            std::fill(dfs.begin(), dfs.end(), 0.0);
+            std::fill(fwds.begin(), fwds.end(), 0.0);
+        };
     };
 
 }  // namespace Atlas

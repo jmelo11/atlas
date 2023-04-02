@@ -11,6 +11,10 @@
 #include <mutex>
 #include <queue>
 
+/**
+ * @brief A concurrent queue. Taken from A. Savine's book, AAD and parallel simulation.
+ * 
+ */
 namespace Atlas {
 
     template <class T>
