@@ -13,8 +13,8 @@ namespace Atlas {
     template <typename adouble>
     class ParSolver : public ConstVisitor<adouble> {
        public:
-        ParSolver(const MarketData<adouble>& marketData, double guess = 0.0, double accuracy = 0.00001, double step = 0.00001)
-        : marketData_(marketData), guess_(guess), accuracy_(accuracy), step_(step){};
+        ParSolver(const MarketData<adouble>& marketData, double guess = 0.0, double accuracy = 0.00001, double maxIter = 100)
+        : marketData_(marketData), guess_(guess), accuracy_(accuracy), maxIter_(maxIter){};
 
         void clear() { value_ = 0.0; };
 
@@ -40,10 +40,11 @@ namespace Atlas {
             };
             if constexpr (std::is_same_v<adouble, double>) {
                 QuantLib::Brent solver_;
-                value_ = solver_.solve(f, accuracy_, guess_, step_);
+                value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 NewtonRaphsonSolver solver_;
-                value_ = solver_.solve(f, accuracy_, guess_, step_);
+                auto g = [&](adouble r) { return pow(f(r), 2); };
+                value_ = solver_.solve(g, accuracy_, guess_, maxIter_);
             }
         };
 
@@ -52,7 +53,8 @@ namespace Atlas {
         void evalFixedRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator<adouble> calc(marketData_);
-            adouble startDf = marketData_.dfs.at(inst.disbursement().dfIdx());
+            size_t pos      = evalInst.disbursement().dfIdx();
+            adouble startDf = marketData_.dfs.at(pos);
 
             auto f = [&](adouble r) {
                 calc.clear();
@@ -60,14 +62,16 @@ namespace Atlas {
                 calc.visit(evalInst);
                 adouble npv      = calc.results();
                 adouble notional = evalInst.disbursement().amount();
-                return pow(npv - notional * startDf, 2);
+                adouble results  = npv + notional * startDf;
+                return results;
             };
             if constexpr (std::is_same_v<adouble, double>) {
                 QuantLib::Brent solver_;
-                value_ = solver_.solve(f, accuracy_, guess_, step_);
+                value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 NewtonRaphsonSolver solver_;
-                value_ = solver_.solve(f, accuracy_, guess_, step_);
+                auto g = [&](adouble r) { return pow(f(r), 2); };
+                value_ = solver_.solve(g, accuracy_, guess_, maxIter_);
             }
         };
 
@@ -75,7 +79,8 @@ namespace Atlas {
         void evalFloatingRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator calc(marketData_);
-            adouble startDf = marketData_.dfs.at(inst.disbursement().dfIdx());
+            size_t pos      = evalInst.disbursement().dfIdx();
+            adouble startDf = marketData_.dfs.at(pos);
 
             auto f = [&](adouble s) {
                 calc.clear();
@@ -83,14 +88,15 @@ namespace Atlas {
                 calc.visit(evalInst);
                 adouble npv      = calc.results();
                 adouble notional = evalInst.disbursement().amount();
-                return pow(npv - notional * startDf, 2);
+                return npv + notional * startDf;
             };
             if constexpr (std::is_same_v<adouble, double>) {
                 QuantLib::Brent solver_;
-                value_ = solver_.solve(f, accuracy_, guess_, step_);
+                value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 NewtonRaphsonSolver solver_;
-                value_ = solver_.solve(f, accuracy_, guess_, step_);
+                auto g = [&](adouble r) { return pow(f(r), 2); };
+                value_ = solver_.solve(g, accuracy_, guess_, maxIter_);
             }
         };
 
@@ -99,7 +105,7 @@ namespace Atlas {
         mutable adouble value_ = 0.0;
         double guess_;
         double accuracy_;
-        double step_;
+        double maxIter_;
     };
 }  // namespace Atlas
 

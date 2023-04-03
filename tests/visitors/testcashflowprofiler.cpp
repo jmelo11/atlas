@@ -8,9 +8,22 @@
 using namespace Atlas;
 
 TEST(CashflowProfiler, FixedRateInstrument) {
-    FixedInstrumentVars vars;
-    FixedRateBulletInstrument fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate);
-    CashflowProfiler profiler;
+    FixedInstrumentVars<double> vars;
+    FixedRateBulletInstrument<double> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate);
+    CashflowProfiler<double> profiler;
+    profiler.visit(fixedInst);
+
+    const auto& interestProfile   = profiler.interests();
+    const auto& redemptionProfile = profiler.redemptions();
+
+    for (const auto& coupon : fixedInst.leg().coupons()) { EXPECT_EQ(interestProfile.at(coupon.paymentDate()), coupon.amount()); }
+    for (const auto& redemption : fixedInst.leg().redemptions()) { EXPECT_EQ(redemptionProfile.at(redemption.paymentDate()), redemption.amount()); }
+}
+
+TEST(CashflowProfiler, FixedRateInstrumentDual) {
+    FixedInstrumentVars<dual> vars;
+    FixedRateBulletInstrument<dual> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate);
+    CashflowProfiler<dual> profiler;
     profiler.visit(fixedInst);
 
     const auto& interestProfile   = profiler.interests();
@@ -21,10 +34,25 @@ TEST(CashflowProfiler, FixedRateInstrument) {
 }
 
 TEST(CashflowProfiler, FloatingRateInstrument) {
-    FloatingInstrumentVars vars;
+    FloatingInstrumentVars<double> vars;
     auto& context = vars.store_.at("TEST");
-    FloatingRateBulletInstrument floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
-    CashflowProfiler profiler;
+    FloatingRateBulletInstrument<double> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
+    CashflowProfiler<double> profiler;
+    profiler.visit(floatInst);
+
+    const auto& interestProfile   = profiler.interests();
+    const auto& redemptionProfile = profiler.redemptions();
+
+    for (const auto& coupon : floatInst.leg().coupons()) { EXPECT_EQ(interestProfile.at(coupon.paymentDate()), coupon.amount()); }
+    for (const auto& redemption : floatInst.leg().redemptions()) { EXPECT_EQ(redemptionProfile.at(redemption.paymentDate()), redemption.amount()); }
+}
+
+
+TEST(CashflowProfiler, FloatingRateInstrumentDual) {
+    FloatingInstrumentVars<dual> vars;
+    auto& context = vars.store_.at("TEST");
+    FloatingRateBulletInstrument<dual> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
+    CashflowProfiler<dual> profiler;
     profiler.visit(floatInst);
 
     const auto& interestProfile   = profiler.interests();

@@ -8,12 +8,14 @@
 
 using namespace Atlas;
 
+template <typename adouble>
 struct FixedInstrumentVars {
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2021);
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
-    InterestRate rate          = InterestRate(0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    adouble rateValue          = 0.03;
+    InterestRate<adouble> rate = InterestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
     CurveContextStore& store_  = CurveContextStore::instance();
     FixedInstrumentVars() {
         if (!store_.hasContext("TEST")) {
@@ -24,12 +26,13 @@ struct FixedInstrumentVars {
     };
 };
 
+template <typename adouble>
 struct FloatingInstrumentVars {
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2021);
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
-    double spread              = 0.01;
+    adouble spread             = 0.01;
     CurveContextStore& store_  = CurveContextStore::instance();
     FloatingInstrumentVars() {
         if (!store_.hasContext("TEST")) {

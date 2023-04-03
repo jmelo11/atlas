@@ -38,6 +38,7 @@ namespace Atlas {
             };
             for (const auto& redemption : leg.constRedemptions()) {
                 if (redemptions_.find(redemption.paymentDate()) == redemptions_.end()) { redemptions_[redemption.paymentDate()] = 0.0; }
+                redemptions_[redemption.paymentDate()] += redemption.amount();
             };
         };
 

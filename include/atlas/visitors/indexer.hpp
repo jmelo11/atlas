@@ -20,6 +20,8 @@ namespace Atlas {
 
             for (auto& coupon : coupons) { indexCashflow(coupon); }
             for (auto& redemption : redemptions) { indexCashflow(redemption); }
+
+            indexCashflow(inst.disbursement());
         };
 
         void visit(FloatingRateInstrument<adouble>& inst) override {
@@ -33,6 +35,7 @@ namespace Atlas {
             }
 
             for (auto& redemption : redemptions) { indexCashflow(redemption); }
+            indexCashflow(inst.disbursement());
         };
 
         void setRequest(MarketRequest& request) {

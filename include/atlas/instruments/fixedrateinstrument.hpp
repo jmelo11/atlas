@@ -79,7 +79,10 @@ namespace Atlas {
          *
          * @param context
          */
-        inline void discountCurveContex(const CurveContext& context) { leg_.discountCurveContext(context); }
+        inline void discountCurveContex(const CurveContext& context) {
+            leg_.discountCurveContext(context);
+            disbursement_.discountCurveContext(context);
+        };
 
         /**
          * @brief accepts a visitor.
@@ -100,7 +103,7 @@ namespace Atlas {
          *
          * @return Cashflow
          */
-        inline Cashflow<adouble> disbursement() const { return disbursement_; };
+        inline Cashflow<adouble>& disbursement() { return disbursement_; };
 
         /**
          * @brief Sets the disbursement of the instrument.
