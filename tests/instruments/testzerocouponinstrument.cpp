@@ -1,13 +1,19 @@
 #include "../pch.hpp"
 #include "general.hpp"
-#include <ql/time/daycounters/actual360.hpp>
-#include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
 
 TEST(Instrument, ZeroCouponInstrument) {
-    FixedInstrumentVars vars;
+    FixedInstrumentVars<double> vars;
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(Frequency::Once);
-    ZeroCouponInstrument inst(vars.startDate, vars.endDate, vars.notional, vars.rate);
-    testStructure<ZeroCouponInstrument>(inst, schedule, PaymentStructure::BulletOrZero);
-    testInterest(inst, schedule, vars.rate);
+    ZeroCouponInstrument<double> inst(vars.startDate, vars.endDate, vars.notional, vars.rate);
+    testStructure<ZeroCouponInstrument<double>, double>(inst, schedule, PaymentStructure::BulletOrZero);
+    testInterest<double>(inst, schedule, vars.rate);
+}
+
+TEST(Instrument, ZeroCouponInstrumentDual) {
+    FixedInstrumentVars<dual> vars;
+    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(Frequency::Once);
+    ZeroCouponInstrument<dual> inst(vars.startDate, vars.endDate, vars.notional, vars.rate);
+    testStructure<ZeroCouponInstrument<dual>, dual>(inst, schedule, PaymentStructure::BulletOrZero);
+    testInterest<dual>(inst, schedule, vars.rate);
 }

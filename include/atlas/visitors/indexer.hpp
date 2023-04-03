@@ -2,6 +2,8 @@
 #define EDA3136B_5C3D_4D8A_8F4A_AE6D1B5AC406
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {

@@ -3,6 +3,8 @@
 
 #include <atlas/data/marketdata.hpp>
 #include <atlas/visitors/visitor.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <iostream>
 
 namespace Atlas {
@@ -65,7 +67,7 @@ namespace Atlas {
             for (FloatingRateCoupon<adouble>& coupon : leg.coupons()) {
                 df  = marketData_.dfs.at(coupon.dfIdx());
                 fwd = marketData_.fwds.at(coupon.fwdIdx());
-                coupon.fixing(fwd);  // ?
+                coupon.fixing(fwd);
                 npv += coupon.amount() * df;
             }
             npv_ += npv;

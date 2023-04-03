@@ -8,14 +8,18 @@
 #define C7EC2166_6C75_481E_8983_82B454069FCE
 
 #include <atlas/atlasconfig.hpp>
-#include <atlas/instruments/fixedrateinstrument.hpp>
-#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <iostream>
 #include <type_traits>
 
 #define ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED std::cerr << "Warning: Visitor not implemented for " << __PRETTY_FUNCTION__ << std::endl;
 
 namespace Atlas {
+
+    template <typename adouble>
+    class FloatingRateInstrument;
+
+    template <typename adouble>
+    class FixedRateInstrument;
 
     template <typename adouble>
     class Visitor {
@@ -32,6 +36,7 @@ namespace Atlas {
         virtual void visit(const FloatingRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
         virtual void visit(const FixedRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
+
 }  // namespace Atlas
 
 #endif /* C7EC2166_6C75_481E_8983_82B454069FCE */

@@ -2,6 +2,8 @@
 #define B9BF3F35_DABD_4ACD_8301_6BF2FADC4C31
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {

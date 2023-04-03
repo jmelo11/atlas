@@ -1,6 +1,9 @@
 #ifndef D56F5F8B_A8F6_4E9B_81F6_BCD8A1914F0D
 #define D56F5F8B_A8F6_4E9B_81F6_BCD8A1914F0D
 
+#include <ql/cashflows/cashflows.hpp>
+#include <ql/cashflows/fixedratecoupon.hpp>
+#include <ql/cashflows/simplecashflow.hpp>
 #include <atlas/data/marketdata.hpp>
 #include <atlas/visitors/visitor.hpp>
 #include <map>

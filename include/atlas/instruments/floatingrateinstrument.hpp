@@ -3,6 +3,7 @@
 
 #include <atlas/cashflows/legs/floatingrateleg.hpp>
 #include <atlas/instruments/instrument.hpp>
+#include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
 

@@ -29,13 +29,13 @@ namespace Atlas {
         : FixedRateInstrument<adouble>(startDate, endDate, rate, notional), recalcNotionals_(recalcNotionals) {
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
-            dates_ = schedule.dates();
+            this->dates_ = schedule.dates();
 
             // calculate redemptions for a equal payment structure
-            calculateRedemptions(dates_, rate, notional);
+            calculateRedemptions(this->dates_, rate, notional);
 
             // calculate each corresponding notional
-            calculateNotionals(dates_, rate);
+            this->calculateNotionals(this->dates_, rate);
             this->disbursement_ = Cashflow<adouble>(startDate, -notional);
         };
         /**
@@ -56,8 +56,8 @@ namespace Atlas {
             this->disbursement_.discountCurveContext(discountCurveContext);
         };
 
-        void rate(const InterestRate<adouble>& rate) override {
-            this->rate_ = rate;
+        void rate(const InterestRate<adouble>& r) override {
+            this->rate_ = r;
             if (recalcNotionals_) {
                 std::vector<size_t> redemptionIdxs;
                 std::vector<size_t> couponIdxs;
@@ -70,8 +70,8 @@ namespace Atlas {
                 }
                 redemptions.clear();
                 coupons.clear();
-                calculateRedemptions(dates_, this->rate_, this->notional_);
-                calculateNotionals(dates_, this->rate_);
+                this->calculateRedemptions(dates_, this->rate_, this->notional_);
+                this->calculateNotionals(dates_, this->rate_);
                 for (size_t i = 0; i < nCoupons; ++i) {
                     redemptions.at(i).dfIdx(redemptionIdxs.at(i));
                     coupons.at(i).dfIdx(couponIdxs.at(i));
@@ -81,12 +81,16 @@ namespace Atlas {
             }
         };
 
-        void rate(adouble rate) override {
-            InterestRate<adouble> tmpR(rate, this->rate_.dayCounter(), this->rate_.compounding(), this->rate_.frequency());
+        void rate(adouble r) override {
+            InterestRate<adouble> tmpR(r, this->rate_.dayCounter(), this->rate_.compounding(), this->rate_.frequency());
             rate(tmpR);
         };
 
         InterestRate<adouble> rate() const { return this->rate_; };
+
+        void accept(Visitor<adouble>& visitor) override { visitor.visit(*this); };
+
+        void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
        private:
         void calculateRedemptions(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional) {

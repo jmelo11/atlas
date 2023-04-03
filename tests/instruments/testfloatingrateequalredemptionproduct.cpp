@@ -1,13 +1,19 @@
 #include "../pch.hpp"
 #include "general.hpp"
-#include <atlas/data/marketdata.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
-#include <atlas/rates/rateindex.hpp>
 
 TEST(Instrument, FloatingRateEqualRedemptionInstrument) {
-    FloatingInstrumentVars vars;
+    FloatingInstrumentVars<double> vars;
     auto& index = vars.store_.at("TEST").index();
-    FloatingRateEqualRedemptionInstrument inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
+    FloatingRateEqualRedemptionInstrument<double> inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(index.fixingFrequency());
-    testStructure(inst, schedule, PaymentStructure::EqualRedemptions);
+    testStructure<FloatingRateEqualRedemptionInstrument<double>, double>(inst, schedule, PaymentStructure::EqualRedemptions);
+};
+
+TEST(Instrument, FloatingRateEqualRedemptionInstrumentDual) {
+    FloatingInstrumentVars<dual> vars;
+    auto& index = vars.store_.at("TEST").index();
+    FloatingRateEqualRedemptionInstrument<dual> inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
+    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(index.fixingFrequency());
+    testStructure<FloatingRateEqualRedemptionInstrument<dual>, dual>(inst, schedule, PaymentStructure::EqualRedemptions);
 };

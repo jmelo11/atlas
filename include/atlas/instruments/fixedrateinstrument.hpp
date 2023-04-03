@@ -120,7 +120,12 @@ namespace Atlas {
             std::map<Date, double> notionals;
             double notional = 0.0;
             for (const auto& redemption : leg_.redemptions()) {
-                double redemptionAmount = redemption.amount().val;
+                double redemptionAmount;
+                if constexpr (std::is_same_v<adouble, double>) {
+                    redemptionAmount = redemption.amount();
+                } else {
+                    redemptionAmount = redemption.amount().val;
+                }
                 notional += redemptionAmount;
                 notionals[redemption.paymentDate()] = redemptionAmount;
             }

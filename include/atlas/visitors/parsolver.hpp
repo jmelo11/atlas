@@ -3,6 +3,8 @@
 
 #include <ql/math/solvers1d/brent.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/others/newtonraphsonsolver.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 

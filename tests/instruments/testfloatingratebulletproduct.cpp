@@ -1,13 +1,19 @@
 #include "../pch.hpp"
 #include "general.hpp"
-#include <atlas/basictypes/rateindex.hpp>
-#include <atlas/data/marketdata.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 
 TEST(Instrument, FloatingRateBulletInstrument) {
-    FloatingInstrumentVars vars;
+    FloatingInstrumentVars<double> vars;
     auto& index = vars.store_.at("TEST").index();
-    FloatingRateBulletInstrument inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
+    FloatingRateBulletInstrument<double> inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(index.fixingFrequency());
-    testStructure(inst, schedule, PaymentStructure::BulletOrZero);
+    testStructure<FloatingRateBulletInstrument<double>, double>(inst, schedule, PaymentStructure::BulletOrZero);
+}
+
+TEST(Instrument, FloatingRateBulletInstrumentDual) {
+    FloatingInstrumentVars<dual> vars;
+    auto& index = vars.store_.at("TEST").index();
+    FloatingRateBulletInstrument<dual> inst(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
+    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(index.fixingFrequency());
+    testStructure<FloatingRateBulletInstrument<dual>, dual>(inst, schedule, PaymentStructure::BulletOrZero);
 }

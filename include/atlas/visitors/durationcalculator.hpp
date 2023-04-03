@@ -1,9 +1,8 @@
 #ifndef FEEC155C_A524_4B89_99CA_672817BB79CD
 #define FEEC155C_A524_4B89_99CA_672817BB79CD
 
-#include <ql/cashflows/cashflows.hpp>
-#include <ql/cashflows/fixedratecoupon.hpp>
-#include <ql/cashflows/simplecashflow.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <type_traits>
@@ -28,30 +27,45 @@ namespace Atlas {
         void fixedInstSens(const T& inst) const {
             T tmpProd = inst;
             NPVCalculator<adouble> npvCacl(marketData_);
-            npvCacl.visit(tmpProd);
-            adouble npv = npvCacl.results();
-            npvCacl.clear();
-
             auto rate = tmpProd.rate();
-            tmpProd.rate(rate.rate() + delta_);
-            npvCacl.visit(tmpProd);
-            adouble npv_ = npvCacl.results();
 
-            results_ = (npv_ - npv) / npv / delta_;
+            auto f = [&](adouble r) {
+                npvCacl.clear();
+                InterestRate tmpRate(r, rate.dayCounter(), rate.compounding(), rate.frequency());
+                tmpProd.rate();
+                npvCacl.visit(tmpProd);
+                return npvCacl.results();
+            };
+
+            if constexpr (std::is_same_v<adouble, double>) {
+                adouble npv  = f(rate.rate());
+                adouble npv_ = f(rate.rate() + delta_);
+                results_     = (npv_ - npv) / npv / delta_;
+            } else {
+                results_ = derivative(f, wrt(rate), at(rate)) / 100;
+            }
         };
 
         template <typename T>
         void floatingInstSens(const T& inst) const {
-            T tmpProd = inst;
-            NPVCalculator npvCacl(marketData_);
-            npvCacl.visit(tmpProd);
-            adouble npv = npvCacl.results();
-            npvCacl.clear();
-            tmpProd.spread(tmpProd.spread() + delta_);
-            npvCacl.visit(tmpProd);
-            adouble npv_ = npvCacl.results();
+            T tmpProd      = inst;
+            adouble spread = tmpProd.spread();
 
-            results_ = (npv_ - npv) / npv / delta_;
+            NPVCalculator<adouble> npvCacl(marketData_);
+            auto f = [&](adouble s) {
+                npvCacl.clear();
+                tmpProd.spread(s);
+                npvCacl.visit(tmpProd);
+                return npvCacl.results();
+            };
+
+            if constexpr (std::is_same_v<adouble, double>) {
+                adouble npv  = f(spread);
+                adouble npv_ = f(spread + delta_);
+                results_     = (npv_ - npv) / npv / delta_;
+            } else {
+                results_ = derivative(f, wrt(spread), at(spread)) / 100;
+            }
         };
 
         double delta_;
