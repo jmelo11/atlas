@@ -37,7 +37,7 @@ void bechmarkFixedRateCoupons() {
     ankerl::nanobench::Bench().title("Fixed Rate Coupon Creation and Iteration");
 
     // parameters
-    size_t numCoupons = 10000;
+    size_t numCoupons = 1000;
     Date startDate(1, Month::Aug, 2020);
     QuantLib::Settings::instance().evaluationDate() = startDate;
     Date endDate(1, Month::September, 2020);
@@ -92,7 +92,7 @@ template <typename NumType>
 void bechmarkFloatingRateCoupons() {
     ankerl::nanobench::Bench().title("Floating Rate Coupon Creation and Iteration");
 
-    size_t numCoupons = 10000;
+    size_t numCoupons = 1000;
     Date startDate(1, Month::Aug, 2020);
     Date endDate(1, Month::September, 2020);
     double notional = 100;
@@ -100,7 +100,7 @@ void bechmarkFloatingRateCoupons() {
 
     // Atlas index and curve settings
     CurveContextStore& store_ = CurveContextStore::instance();
-    auto& context              = store_.at("TEST");
+    auto& context             = store_.at("TEST");
 
     // QuantLib index
     QuantLib::Handle<QuantLib::YieldTermStructure> curveHandle(boost::make_shared<QuantLib::FlatForward>(startDate, 0.03, Actual360()));
@@ -204,15 +204,15 @@ void pricingBenchmark() {
     for (size_t i = 0; i < numInstruments; i += sliceSize) {
         slices.push_back(std::vector<FixedRateBulletInstrument<NumType>>(instruments.begin() + i, instruments.begin() + i + sliceSize));
     }
-
-    ankerl::nanobench::Bench().run("Parallel Price: Atlas FixedRateBulletInstrument", [&]() {
+    //std::cout << "Number of slices: " << slices.size() << std::endl;
+    ankerl::nanobench::Bench().run("Price: Atlas FixedRateBulletInstrument", [&]() {
         ThreadPool* pool = ThreadPool::getInstance();
-        pool->start();
+        pool->start(0);
         std::vector<TaskHandle> futures;
         NumType npv = 0;
         for (auto& slice : slices) {
             auto task = [&]() {
-                // std::cout << pool->threadNum() << std::endl;
+                //std::cout << pool->threadNum() << std::endl;
                 Date evalDate(1, Month::Aug, 2020);
                 CurveContextStore& store_ = CurveContextStore::instance();
                 store_.copyContextsFromStore(mainStore);
@@ -232,6 +232,37 @@ void pricingBenchmark() {
         }
 
         for (auto& future : futures) { pool->activeWait(future); }
+        pool->stop();
+    });
+
+    ankerl::nanobench::Bench().run("Parallel Price: Atlas FixedRateBulletInstrument", [&]() {
+        ThreadPool* pool = ThreadPool::getInstance();
+        pool->start();
+        std::vector<TaskHandle> futures;
+        NumType npv = 0;
+        for (auto& slice : slices) {
+            auto task = [&]() {
+                //std::cout << pool->threadNum() << std::endl;
+                Date evalDate(1, Month::Aug, 2020);
+                CurveContextStore& store_ = CurveContextStore::instance();
+                store_.copyContextsFromStore(mainStore);
+                Indexer<NumType> indexer;
+                for (size_t i = 0; i < sliceSize; i++) { slice[i].accept(indexer); }
+                MarketRequest request;
+                indexer.setRequest(request);
+                StaticCurveModel<NumType> model(request);
+                MarketData<NumType> marketData = model.simulate(evalDate);
+
+                NPVCalculator<NumType> calculator(marketData);
+                for (size_t i = 0; i < sliceSize; i++) { slice[i].accept(calculator); }
+                npv += calculator.results();
+                return true;
+            };
+            futures.push_back(pool->spawnTask(task));
+        }
+
+        for (auto& future : futures) { pool->activeWait(future); }
+        pool->stop();
     });
 
     // QL instruments
@@ -260,11 +291,13 @@ void pricingBenchmark() {
 
         for (auto& slice : qlSlices) {
             auto task = [&]() {
+                double npv_ = 0;
                 boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
                 for (auto& qlBond : slice) {
                     qlBond.setPricingEngine(bondEngine);
-                    npv += qlBond.NPV();
+                    npv_ += qlBond.NPV();
                 }
+                npv += npv_;
                 return true;
             };
             futures.push_back(pool->spawnTask(task));
@@ -281,10 +314,12 @@ int main() {
     RateIndex index("TEST", Frequency::Annual, Actual360());
     store_.createCurveContext("TEST", curveStrategy, index);
 
+    std::cout << "\nDouble mode benchmarks\n" << std::endl;
     bechmarkFixedRateCoupons<double>();
     bechmarkFloatingRateCoupons<double>();
     pricingBenchmark<double>();
 
+    std::cout << "\nDual mode benchmarks\n" << std::endl;
     bechmarkFixedRateCoupons<dual>();
     bechmarkFloatingRateCoupons<dual>();
     pricingBenchmark<dual>();

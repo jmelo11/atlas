@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(BUILD_PYTHON OFF)
 set(BUILD_TESTS ON)
 set(BUILD_BENCHMARK ON)
-set(BUILD_IDEA ON)
+set(BUILD_EXAMPLES ON)
 # target is curvemanager, and use include a src folders
 
 file(
@@ -114,6 +114,6 @@ if(BUILD_BENCHMARK)
   add_subdirectory(benchmark)
 endif()
 
-if(BUILD_IDEA)
-  add_subdirectory(idea)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
 endif()

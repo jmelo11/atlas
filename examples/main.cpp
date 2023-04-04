@@ -3,6 +3,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
+#include <atlas/multithreading/threadpool.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <cppad/cppad.hpp>
@@ -77,22 +78,6 @@ void pricingFloatingRateInstruments() {
     std::cout << "NPV: " << npvCalculator.results() << std::endl;
 }
 
-void newtonRaphson() {
-    auto f      = [](const dual& x) { return pow(x * x - 6 - 5, 2); };
-    auto newton = [](std::function<dual(dual)> f, double x0, double tol = 1e-6, int max_iter = 100) {
-        dual x = x0;
-        dual y = f(x);
-        for (int i = 0; i < max_iter; ++i) {
-            if (abs(y) < tol) { break; }
-            double dfdx = derivative(f, wrt(x), at(x));
-            x           = x - y / dfdx;
-            y           = f(x);
-        }
-        return x;
-    };
-    std::cout << "x: " << newton(f, 5.0) << std::endl;
-}
-
 void rateSens() {
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2025);
@@ -120,21 +105,78 @@ void rateSens() {
         return npvCalculator.results();
     };
 
-    dual tol  = 1e-6;
-    dual npv  = f(r);
-    dual npv2 = f(r + tol);
     dual sens = derivative(f, wrt(r), at(r)) * 0.01;
-
-    std::cout << "NPV: " << npv << std::endl;
-    std::cout << "NPV2: " << npv2 << std::endl;
-    std::cout << "NPV2-NPV: " << npv2.val - npv.val << std::endl;
     std::cout << "Sens: " << sens << std::endl;
+}
+
+void multithreadedSens() {
+    Date startDate             = Date(1, Month::Aug, 2020);
+    Date endDate               = Date(1, Month::Aug, 2025);
+    Frequency paymentFrequency = Frequency::Semiannual;
+    double notional            = 100;
+    dual r                     = 0.03;
+    InterestRate<dual> rate(r, Actual360(), Compounding::Simple, Frequency::Annual);
+    CurveContextStore& store_ = CurveContextStore::instance();
+    auto& context             = store_.at("TEST");
+    std::vector<FixedRateBulletInstrument<dual>> portfolio;
+    size_t numOps = 1000;
+
+    // create portfolio and index portfolio
+    Indexer<dual> indexer;
+    for (size_t i = 0; i < numOps; i++) {
+        FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate, context);
+        indexer.visit(instrument);
+        portfolio.push_back(instrument);
+    }
+
+    // slice portfolio
+    size_t opsPerSlice = 100;
+    size_t numSlices   = numOps / opsPerSlice;
+    std::vector<std::vector<FixedRateBulletInstrument<dual>>> slices;
+    for (size_t i = 0; i < numSlices; i++) {
+        std::vector<FixedRateBulletInstrument<dual>> slice;
+        for (size_t j = 0; j < opsPerSlice; j++) { slice.push_back(portfolio[i * opsPerSlice + j]); }
+        slices.push_back(slice);
+    }
+
+    // generate required rates
+    MarketRequest request;
+    indexer.setRequest(request);
+    StaticCurveModel<dual> model(request);
+    MarketData<dual> marketData = model.simulate(startDate);
+
+    auto npv = [&](dual r) {
+        // set curve context
+        ThreadPool* pool = ThreadPool::getInstance();
+        pool->start();
+        std::vector<TaskHandle> futures;
+        dual npv = 0.0;
+        for (auto& slice : slices) {
+            auto task = [&]() {
+                NPVCalculator<dual> npvCalculator(marketData);
+                for (auto& instrument : slice) {
+                    instrument.rate(r);
+                    npvCalculator.visit(instrument);
+                }
+                npv += npvCalculator.results();
+                return true;
+            };
+            futures.push_back(pool->spawnTask(task));
+        }
+
+        for (auto& future : futures) { pool->activeWait(future); }
+        pool->stop();
+        return npv;
+    };
+
+    dual sens = derivative(npv, wrt(r), at(r)) * 0.01;
+    std::cout << sens << std::endl;
 }
 
 int main() {
     pricingFixedRateInstruments();
     pricingFloatingRateInstruments();
-    newtonRaphson();
     rateSens();
+    multithreadedSens();
     return 0;
 }

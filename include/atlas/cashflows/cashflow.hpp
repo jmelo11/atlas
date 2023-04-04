@@ -7,11 +7,21 @@
 
 namespace Atlas {
 
+    /**
+     * @brief A class representing a cashflow
+     *
+     * @tparam adouble The type of the cashflow amount
+     */
     template <typename adouble>
     class Cashflow : public Indexable {
        public:
         Cashflow() = default;
 
+        /**
+         * @brief Construct a new Cashflow object
+         *
+         * @param discountCurveContext The discount curve context
+         */
         Cashflow(const CurveContext& discountCurveContext) : discountContextIdx_(discountCurveContext.idx()), hasDiscountContext_(true){};
 
         /**
@@ -26,7 +36,7 @@ namespace Atlas {
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, double amount, const CurveContext& discountCurveContext)
+        Cashflow(const Date& paymentDate, adouble amount, const CurveContext& discountCurveContext)
         : amount_(amount), paymentDate_(paymentDate), discountContextIdx_(discountCurveContext.idx()), hasDiscountContext_(true){};
 
         virtual ~Cashflow(){};

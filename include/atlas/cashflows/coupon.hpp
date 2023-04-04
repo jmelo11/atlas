@@ -9,7 +9,8 @@ namespace Atlas {
     /***
      * Coupon class
      *
-     * A coupon is a cashflow that is paid periodically, and is based on a notional amount.
+     * @brief coupon is a cashflow that is paid periodically, and is based on a notional amount.
+     * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>
     class Coupon : public Cashflow<adouble> {

@@ -5,14 +5,6 @@
 
 using namespace Atlas;
 
-struct ModelVars{
-
-}
-
-struct InstrumentVars{
-
-}
-
 TEST(StaticCurveModel, FixedRateInstrument) {
     Date startDate(1, Month::Aug, 2020);
     Date endDate(1, Month::Aug, 2021);

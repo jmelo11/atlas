@@ -34,16 +34,11 @@ target_include_directories(
 
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-find_package(QuantLibParser REQUIRED)
-find_package(nlohmann_json REQUIRED)
-find_package(nlohmann_json_schema_validator REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
-target_link_libraries(${PROJECT_NAME} PUBLIC QuantLibParser::QuantLibParser)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 target_link_libraries(${PROJECT_NAME} PUBLIC pybind11::pybind11)
-target_link_libraries(${PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
-target_link_libraries(${PROJECT_NAME} PUBLIC nlohmann_json_schema_validator)
+
 
 if(BUILD_TESTS)
   add_subdirectory(tests)

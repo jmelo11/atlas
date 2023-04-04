@@ -9,6 +9,7 @@ namespace Atlas {
     /***
      * @brief A class representing a floating rate coupon
      * @details A floating rate coupon has a start date, an end date, a notional amount, a spread, and a rate index
+     * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>
     class FloatingRateCoupon : public Coupon<adouble> {
@@ -52,7 +53,10 @@ namespace Atlas {
          * Sets the spread of the coupon
          * @param spread The spread of the coupon
          */
-        inline void spread(adouble spread) { spread_ = spread; }
+        inline void spread(adouble spread) {
+            spread_       = spread;
+            this->amount_ = accruedAmount(this->startDate(), this->endDate());
+        }
 
         /***
          * Sets the fixing of the coupon

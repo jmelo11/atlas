@@ -2,209 +2,194 @@
 #include <ql/termstructures/yield/discountcurve.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 
-// QLP
-#include <qlp/detail/parsingmethods.hpp>
-
-// python module
-#include "makeobjectfromjson.hpp"
-#include "schemas/all.hpp"
-
 // data
 #include <atlas/data/marketdata.hpp>
 
 // models
 #include <atlas/models/staticcurvemodel.hpp>
 
+// curves
+#include <atlas/rates/curvecontext.hpp>
+#include <atlas/rates/curvecontextstore.hpp>
+#include <atlas/rates/curvestrategy.hpp>
+
 // visitors
-#include <atlas/visitors/cashflowindexer.hpp>
 #include <atlas/visitors/cashflowprofiler.hpp>
 #include <atlas/visitors/durationcalculator.hpp>
+#include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
 
 // pybind11
+#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11_json/pybind11_json.hpp>
 
-namespace py  = pybind11;
-namespace QLP = QuantLibParser;
-using json    = nlohmann::json;
+// cashflows
+#include <atlas/cashflows/cashflow.hpp>
+#include <atlas/cashflows/coupon.hpp>
+#include <atlas/cashflows/fixedratecoupon.hpp>
+#include <atlas/cashflows/floatingratecoupon.hpp>
 
-#define Product(name)                                                               \
-    py::class_<name>(m, #name)                                                      \
-        .def("accept", py::overload_cast<Visitor&>(&name::accept))                  \
-        .def("accept", py::overload_cast<ConstVisitor&>(&name::accept, py::const_)) \
-        .def("discountCurve", &name::discountCurve)                                 \
-        .def("leg", &name::leg)
+// legs
+#include <atlas/cashflows/legs/fixedrateleg.hpp>
+#include <atlas/cashflows/legs/floatingrateleg.hpp>
+#include <atlas/cashflows/legs/leg.hpp>
 
-#define FixedProduct(name) Product(name).def("rate", py::overload_cast<double>(&name::rate))
+// instruments
+#include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/instrument.hpp>
 
-#define FloatingProduct(name) Product(name).def("spread", py::overload_cast<double>(&name::spread)).def("forecastCurve", &name::forecastCurve)
-
-#define VisitProducts(name)                                                              \
-    def("visit", py::overload_cast<FloatingRateBulletProduct&>(&name::visit))            \
-        .def("visit", py::overload_cast<EqualPaymentProduct&>(&name::visit))             \
-        .def("visit", py::overload_cast<FixedRateBulletProduct&>(&name::visit))          \
-        .def("visit", py::overload_cast<Deposit&>(&name::visit))                         \
-        .def("visit", py::overload_cast<CustomFixedRateProduct&>(&name::visit))          \
-        .def("visit", py::overload_cast<CustomFloatingRateProduct&>(&name::visit))       \
-        .def("visit", py::overload_cast<FixedRateEqualRedemptionProduct&>(&name::visit)) \
-        .def("visit", py::overload_cast<FloatingRateEqualRedemptionProduct&>(&name::visit))
-
-#define ConstVisitProducts(name)                                                                           \
-    def("visit", py::overload_cast<const FloatingRateBulletProduct&>(&name::visit, py::const_))            \
-        .def("visit", py::overload_cast<const EqualPaymentProduct&>(&name::visit, py::const_))             \
-        .def("visit", py::overload_cast<const FixedRateBulletProduct&>(&name::visit, py::const_))          \
-        .def("visit", py::overload_cast<const Deposit&>(&name::visit, py::const_))                         \
-        .def("visit", py::overload_cast<const CustomFixedRateProduct&>(&name::visit, py::const_))          \
-        .def("visit", py::overload_cast<const CustomFloatingRateProduct&>(&name::visit, py::const_))       \
-        .def("visit", py::overload_cast<const FixedRateEqualRedemptionProduct&>(&name::visit, py::const_)) \
-        .def("visit", py::overload_cast<const FloatingRateEqualRedemptionProduct&>(&name::visit, py::const_))
-
-#define SchemaWithoutMaker(name)                                           \
-    py::class_<QLP::Schema<name>>(m, #name "Schema")                       \
-        .def(py::init<>())                                                 \
-        .def("validate", &QLP::Schema<name>::validate)                     \
-        .def("isValid", &QLP::Schema<name>::isValid)                       \
-        .def("schema", &QLP::Schema<name>::schema)                         \
-        .def("addDefaultValue", &QLP::Schema<name>::addDefaultValue)       \
-        .def("removeDefaultValue", &QLP::Schema<name>::removeDefaultValue) \
-        .def("schema", &QLP::Schema<name>::schema)                         \
-        .def("addRequired", &QLP::Schema<name>::addRequired)               \
-        .def("removeRequired", &QLP::Schema<name>::removeRequired)
-
-#define SchemaWithMaker(name) SchemaWithoutMaker(name).def("makeObj", &QLP::Schema<name>::makeObj<>)
+namespace py = pybind11;
+using namespace Atlas;
 
 PYBIND11_MODULE(Atlas, m) {
     m.doc() = "Atlas";  // optional module docstring
 
-    // curves
-    py::class_<QuantLib::YieldTermStructure, std::shared_ptr<QuantLib::YieldTermStructure>>(m, "YieldTermStructure");
-    py::class_<QuantLib::DiscountCurve, std::shared_ptr<QuantLib::DiscountCurve>, QuantLib::YieldTermStructure>(m, "DiscountCurve");
-    py::class_<QuantLib::FlatForward, std::shared_ptr<QuantLib::FlatForward>, QuantLib::YieldTermStructure>(m, "FlatForwardCurve");
+    // QL Types
+    // enums
+    py::enum_<Compounding>(m, "Compounding")
+        .value("Simple", Compounding::Simple)
+        .value("Compounded", Compounding::Compounded)
+        .value("Continuous", Compounding::Continuous)
+        .value("SimpleThenCompounded", Compounding::SimpleThenCompounded)
+        .value("CompoundedThenSimple", Compounding::CompoundedThenSimple)
+        .export_values();
 
-    // market data
-    py::class_<MarketRequest>(m, "MarketRequest").def(py::init<>());
-    py::class_<MarketData>(m, "MarketData").def(py::init<>()).def_readwrite("dfs", &MarketData::dfs).def_readwrite("fwds", &MarketData::fwds);
+    py::enum_<Frequency>(m, "Frequency")
+        .value("NoFrequency", Frequency::NoFrequency)
+        .value("Once", Frequency::Once)
+        .value("Annual", Frequency::Annual)
+        .value("Semiannual", Frequency::Semiannual)
+        .value("EveryFourthMonth", Frequency::EveryFourthMonth)
+        .value("Quarterly", Frequency::Quarterly)
+        .value("Bimonthly", Frequency::Bimonthly)
+        .value("Monthly", Frequency::Monthly)
+        .value("EveryFourthWeek", Frequency::EveryFourthWeek)
+        .value("Biweekly", Frequency::Biweekly)
+        .value("Weekly", Frequency::Weekly)
+        .value("Daily", Frequency::Daily)
+        .value("OtherFrequency", Frequency::OtherFrequency)
+        .export_values();
 
-    // makers
-    m.def("makeFlatForwardCurve", &makeObjectFromJson<QuantLib::FlatForward>);
-    m.def("makeDiscountCurve", &makeObjectFromJson<QuantLib::DiscountCurve>);
+    py::enum_<Month>(m, "Month")
+        .value("January", Month::January)
+        .value("February", Month::February)
+        .value("March", Month::March)
+        .value("April", Month::April)
+        .value("May", Month::May)
+        .value("June", Month::June)
+        .value("July", Month::July)
+        .value("August", Month::August)
+        .value("September", Month::September)
+        .value("October", Month::October)
+        .value("November", Month::November)
+        .value("December", Month::December)
+        .export_values();
 
-    // cashflows
-    py::class_<Redemption>(m, "Redemption")
-        .def("amount", &Redemption::amount)
-        .def("paymentDate", [](const Redemption& self) { return QLP::parseDate(self.paymentDate()); })
-        .def("dfIdx", py::overload_cast<>(&Redemption::dfIdx, py::const_));
+    py::enum_<DateGeneration::Rule>(m, "DateGenerationRule")
+        .value("Backward", DateGeneration::Rule::Backward)
+        .value("Forward", DateGeneration::Rule::Forward)
+        .value("Zero", DateGeneration::Rule::Zero)
+        .value("ThirdWednesday", DateGeneration::Rule::ThirdWednesday)
+        .value("Twentieth", DateGeneration::Rule::Twentieth)
+        .value("TwentiethIMM", DateGeneration::Rule::TwentiethIMM)
+        .value("OldCDS", DateGeneration::Rule::OldCDS)
+        .value("CDS", DateGeneration::Rule::CDS)
+        .value("CDS2015", DateGeneration::Rule::CDS2015)
+        .export_values();
 
-    py::class_<FixedRateCoupon>(m, "FixedRateCoupon")
-        .def("amount", &FixedRateCoupon::amount)
-        .def("paymentDate", [](const FixedRateCoupon& self) { return QLP::parseDate(self.paymentDate()); })
-        .def("dfIdx", py::overload_cast<>(&FixedRateCoupon::dfIdx, py::const_));
+    py::enum_<BusinessDayConvention>(m, "BusinessDayConvention")
+        .value("Following", BusinessDayConvention::Following)
+        .value("ModifiedFollowing", BusinessDayConvention::ModifiedFollowing)
+        .value("Preceding", BusinessDayConvention::Preceding)
+        .value("ModifiedPreceding", BusinessDayConvention::ModifiedPreceding)
+        .value("Unadjusted", BusinessDayConvention::Unadjusted)
+        .value("HalfMonthModifiedFollowing", BusinessDayConvention::HalfMonthModifiedFollowing)
+        .value("Nearest", BusinessDayConvention::Nearest)
+        .export_values();
 
-    py::class_<FloatingRateCoupon>(m, "FloatingRateCoupon")
-        .def("amount", &FloatingRateCoupon::amount)
-        .def("paymentDate", [](const FloatingRateCoupon& self) { return QLP::parseDate(self.paymentDate()); })
-        .def("dfIdx", py::overload_cast<>(&FloatingRateCoupon::dfIdx, py::const_));
+    py::enum_<TimeUnit>(m, "TimeUnit")
+        .value("Days", TimeUnit::Days)
+        .value("Weeks", TimeUnit::Weeks)
+        .value("Months", TimeUnit::Months)
+        .value("Years", TimeUnit::Years)
+        .export_values();
 
-    py::class_<FixedRateLeg>(m, "FixedRateLeg")
+    // classes
+    py::class_<Period>(m, "Period").def(py::init<int, TimeUnit>());
+
+    py::class_<Actual360>(m, "Actual360").def(py::init<>()).def("dayCount", &Actual360::dayCount).def("yearFraction", &Actual360::yearFraction);
+
+    py::class_<Actual365Fixed>(m, "Actual365Fixed")
         .def(py::init<>())
-        .def("coupons", &FixedRateLeg::coupons)
-        .def("redemptions", &FixedRateLeg::redemptions);
+        .def("dayCount", &Actual365Fixed::dayCount)
+        .def("yearFraction", &Actual365Fixed::yearFraction);
 
-    py::class_<FloatingRateLeg>(m, "FloatingRateLeg")
+    py::class_<Thirty360>(m, "ActualActual")
+        .def(py::init<Thirty360::Convention, const Date&>())
+        .def("dayCount", &Thirty360::dayCount)
+        .def("yearFraction", &Thirty360::yearFraction);
+
+    py::class_<Schedule>(m, "Schedule")
+        .def(py::init<const Date&, const Date&, const Period&, const Calendar&, BusinessDayConvention, BusinessDayConvention, DateGeneration::Rule,
+                      bool>())
+        .def("size", &Schedule::size)
+        .def("dates", &Schedule::dates);
+
+    py::class_<MakeSchedule>(m, "MakeSchedule")
         .def(py::init<>())
-        .def("coupons", &FloatingRateLeg::coupons)
-        .def("redemptions", &FloatingRateLeg::redemptions);
+        .def("from", &MakeSchedule::from)
+        .def("to", &MakeSchedule::to)
+        .def("withTenor", &MakeSchedule::withTenor)
+        .def("withCalendar", &MakeSchedule::withCalendar)
+        .def("withConvention", &MakeSchedule::withConvention)
+        .def("withTerminationDateConvention", &MakeSchedule::withTerminationDateConvention)
+        .def("withRule", &MakeSchedule::withRule)
+        .def("endOfMonth", &MakeSchedule::endOfMonth)
+        .def("forwards", &MakeSchedule::forwards)
+        .def("backwards", &MakeSchedule::backwards)
+        .def("endOfMonth", &MakeSchedule::endOfMonth);
 
-    // instruments
-    // deposit
-    FixedProduct(Deposit);
-    SchemaWithMaker(Deposit);
+    // Curve
+    py::class_<CurveContext>(m, "CurveContext").def("curve", &CurveContext::curve).def("index", &CurveContext::index).def("idx", &CurveContext::idx);
 
-    // equalpaymentproduct
-    FixedProduct(EqualPaymentProduct);
-    SchemaWithMaker(EqualPaymentProduct);
+    py::class_<CurveContextStore>(m, "CurveContextStore")
+        .def("instance", &CurveContextStore::instance)
+        .def("createCurveContext", &CurveContextStore::createCurveContext)
+        .def("at", py::overload_cast<const std::string&>(&CurveContextStore::at, py::const_), "Get a curve context by name")
+        .def("at", py::overload_cast<size_t>(&CurveContextStore::at, py::const_), "Get a curve context by index")
+        .def("hasContext", &CurveContextStore::hasContext)
+        .def("copyContextsFromStore", &CurveContextStore::copyContextsFromStore);
 
-    // fixedratebulletproduct
-    FixedProduct(FixedRateBulletProduct);
-    SchemaWithMaker(FixedRateBulletProduct);
+    // CurveStrategy -> Trampoline?
+    py::class_<CurveStrategy, std::shared_ptr<CurveStrategy>>(m, "CurveStrategy");
 
-    // floatingbulletproduct
-    FloatingProduct(FloatingRateBulletProduct);
-    SchemaWithMaker(FloatingRateBulletProduct);
+    py::class_<DiscountCurveStrategy, CurveStrategy>(m, "DiscountCurveStrategy")
+        .def(py::init<const std::vector<Date>&, const std::vector<double>&, DayCounter>())
+        .def(py::init<const DiscountCurveStrategy&>())
+        .def("copy", &DiscountCurveStrategy::copy)
+        .def("curve", &DiscountCurveStrategy::curve);
 
-    // customfloatingrateproduct
-    FloatingProduct(CustomFloatingRateProduct);
-    SchemaWithMaker(CustomFloatingRateProduct);
+    py::class_<FlatForwardStrategy, CurveStrategy>(m, "FlatForwardStrategy")
+        .def(py::init<const Date&, double, const DayCounter&, Compounding, Frequency>())
+        .def(py::init<const FlatForwardStrategy&>())
+        .def("copy", &FlatForwardStrategy::copy)
+        .def("curve", &FlatForwardStrategy::curve);
 
-    // customfixedproduct
-    FixedProduct(CustomFixedRateProduct);
-    SchemaWithMaker(CustomFixedRateProduct);
-
-    // fixedrateequalredemptionproduct
-    FixedProduct(FixedRateEqualRedemptionProduct);
-    SchemaWithMaker(FixedRateEqualRedemptionProduct);
-
-    // floatingrateequalredemptionproduct
-    FloatingProduct(FloatingRateEqualRedemptionProduct);
-    SchemaWithMaker(FloatingRateEqualRedemptionProduct);
-
-    // models
-    py::class_<StaticCurveModel>(m, "StaticCurveModel")
-        .def(py::init<const MarketRequest&>())
-        .def("addDiscountCurve", &StaticCurveModel::addDiscountCurve)
-        .def("addForecastCurve", &StaticCurveModel::addForecastCurve)
-        .def("simulate", py::overload_cast<>(&StaticCurveModel::simulate, py::const_));
-
-    // visitors
-    py::class_<CashflowIndexer>(m, "CashflowIndexer")
+    // Cashflows
+    py::class_<Cashflow<dual>>(m, "Cashflow")
         .def(py::init<>())
-        .def("setRequest", &CashflowIndexer::setRequest)
-        .VisitProducts(CashflowIndexer);
-
-    py::class_<CashflowProfiler>(m, "CashflowProfiler")
-        .def(py::init<>())
-        .def("interests",
-             [](const CashflowProfiler& self) {
-                 const auto& cashflows = self.interests();
-                 json result           = json::array();
-                 for (auto& cashflow : cashflows) {
-                     json tmp = {{"DATE", QLP::parseDate(cashflow.first)}, {"VALUE", cashflow.second}};
-                     result.push_back(tmp);
-                 };
-                 return result;
-             })
-        .def("redemptions",
-             [](const CashflowProfiler& self) {
-                 const auto& cashflows = self.redemptions();
-                 json result           = json::array();
-                 for (auto& cashflow : cashflows) {
-                     json tmp = {{"DATE", QLP::parseDate(cashflow.first)}, {"VALUE", cashflow.second}};
-                     result.push_back(tmp);
-                 };
-                 return result;
-             })
-        .def("clear", &CashflowProfiler::clear)
-        .ConstVisitProducts(CashflowProfiler);
-
-    py::class_<NPVCalculator>(m, "NPVCalculator")
-        .def(py::init<const MarketData&>())
-        .def("results", &NPVCalculator::results)
-        .def("clear", &NPVCalculator::clear)
-        .VisitProducts(NPVCalculator);
-
-    py::class_<ParSolver>(m, "ParSolver")
-        .def(py::init<const MarketData&>())
-        .def("results", &ParSolver::results)
-        .def("clear", &ParSolver::clear)
-        .ConstVisitProducts(ParSolver);
-
-    py::class_<DurationCalculator>(m, "DurationCalculator")
-        .def(py::init<const MarketData&>())
-        .def("results", &DurationCalculator::results)
-        .def("clear", &DurationCalculator::clear)
-
-        .ConstVisitProducts(DurationCalculator);
+        .def(py::init<const CurveContext&>())
+        .def(py::init<const Date&, dual>())
+        .def(py::init<const Date&, dual, const CurveContext&>())
+        .def("amount", &Cashflow<dual>::amount)
+        .def("paymentDate", &Cashflow<dual>::paymentDate)
+        .def("hasOcurred", &Cashflow<dual>::hasOcurred)
+        .def("discountCurveContext", &Cashflow<dual>::discountCurveContext)
+        .def("hasDiscountContext", &Cashflow<dual>::hasDiscountContext)
+        .def("discountContextIdx", &Cashflow<dual>::discountContextIdx);
 }

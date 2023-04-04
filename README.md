@@ -20,35 +20,60 @@ Algunas caracteristicas tecnicas que se buscan incorporar por defecto son:
 
 ## Roadmap 
 
-### Funcionalidades 
+### Generales 
 
-- [ ] Estructura basica de las clases (en desarrollo)
-- [ ] Diferenciacion automatica
-- [x] Valorizacion (NPV)
-- [x] Calculo sensibilidad productos (duracion)
-- [x] Calculo tasas par
+- [x] Estructura basica de las clases (en desarrollo)
+- [x] Diferenciacion automatica
+- [x] Paralelización CPU
+- [ ] Port a Python
+- [ ] Paralelización GPU (depende de factibilidad)
+- [ ] Precisión monedas
+- [ ] Calendarios avanzados (incorporar parámetros QL)
+- [ ] Compresion portafolio
+
+### Funcionalidades
+
+- [x] NPV
+- [x] Sensibilidades (ej. Duracion)
+- [x] Tasas Par
+- [ ] ZSpread
 
 ### Instrumentos
 
-- [x] Instrumentos tasa fija (bullet)
-- [x] Instrumentos tasa fija (cuotas iguales)
-- [x] Instrumentos tasa fija (perfil de pagos custom)
-- [x] Instrumentos tasa flotante (bullet)
-- [x] Instrumentos tasa flotante (perfil de pagos custom)
+- [x] Loans
+    - [x] Loans tasa fija (bullet)
+    - [x] Loans tasa fija (cuotas iguales)
+    - [x] Loans tasa fija (perfil de pagos custom)
+    - [x] Loans tasa flotante (bullet)
+    - [x] Loans tasa flotante (perfil de pagos custom)
+    - [x] Loans tasa mixta
 - [ ] Derivados
-- [ ] Otros renta fija
+    - [ ] Forward
+    - [ ] Swaps vanilla
+    - [ ] Xccy
+    - [ ] OIS
+- [ ] Renta Fija
+    - [ ] Instrumentos con convenciones de mercados
 
-### Otros de mercado
+### Curvas
 
-- [ ] Curvas (con AAD)
+- [ ] Interpolación con soporte AD
+- [ ] Curvas con soporte AD
+- [ ] Bootstrap con soporte AD
+
+### Modelos
+
+- [x] Generación de tasas en base a curvas estáticas
+- [ ] LGM para generación de trayectorias de mercado
+
 
 ## Como compilar el proyecto 
 
 Para poder compilar el proyecto es necesario tener una version de Boost y QuantLib descargadas y compiladas, ya que esta libreria se apalacan aun en algunas herramientas ya desarrolladas en estas dos librerias. El plan a futuro es ir remplazando por versiones internas consistentes con los objetivos del proyecto. Algunas cosas son:
 
-- Fechas
-- DayCounters, Calendarios, Frequencias
-- Curvas
+- Date
+- DayCounter, Calendar, Frequency
+- DiscountCurve, FlatForward
 
 Tambien, es necesario contar con CMAKE. A continuacion se presenta un script de ejemplo para poder compilar:
  

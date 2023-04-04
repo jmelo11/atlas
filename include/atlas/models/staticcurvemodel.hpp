@@ -13,19 +13,33 @@
 
 namespace Atlas {
 
+    /**
+     * @brief Static curve model
+     * 
+     * @tparam adouble 
+     */
     template <typename adouble>
     class StaticCurveModel : public Model<adouble> {
        public:
         StaticCurveModel(const MarketRequest& marketRequest) : Model<adouble>(marketRequest), curveStore_(CurveContextStore::instance()){};
-        ;
 
+        /**
+         * @brief Set the Request object
+         * 
+         * @param request 
+         */
         void setRequest(const MarketRequest& request) { this->marketRequest_ = request; };
 
+        /**
+         * @brief Simulate the market data for a given scenario
+         * 
+         * @param evalDates 
+         * @param scenario 
+         */
         void simulate(const std::vector<Date>& evalDates, Scenario<adouble>& scenario) const override {
             for (const auto& evalDate : evalDates) {
                 MarketData<adouble> marketData;
                 marketData.allocate(this->marketRequest_);
-
                 simulateDiscounts(marketData);
                 simulateForwards(marketData);
 
@@ -34,6 +48,12 @@ namespace Atlas {
             }
         };
 
+        /**
+         * @brief simulate base on one date
+         * 
+         * @param refDate 
+         * @return MarketData<adouble> 
+         */
         MarketData<adouble> simulate(const Date& refDate) const {
             std::vector<QuantLib::Date> dates = {refDate};
             Scenario<adouble> scenario;

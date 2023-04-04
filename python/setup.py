@@ -4,7 +4,7 @@ from setuptools import setup
 from pathlib import Path
 from sys import platform
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
 BASE_DIR = Path(__file__).absolute().parent.resolve()
 
@@ -16,8 +16,7 @@ if platform == "win32":
     include_dirs += [str(LIB_DIR / 'include'), str(LIB_DIR / 'boost')]
     library_dirs += [str(LIB_DIR / 'lib')]
 
-    libraries += ['QuantLib-x64-mt', 'QuantLibParser',
-                  'nlohmann_json_schema_validator', 'Atlas']
+    libraries += ['QuantLib-x64-mt',  'Atlas']
 
 else:
     if platform == "linux" or platform == "linux2":
@@ -30,8 +29,7 @@ else:
     include_dirs += [str(LIB_DIR / 'include')]
     library_dirs += [str(LIB_DIR / 'lib')]
 
-    libraries += ['QuantLib', 'QuantLibParser',
-                  'nlohmann_json_schema_validator', 'Atlas']
+    libraries += ['QuantLib', 'Atlas']
 
 extra_compile_args = ['-std=c++20']
 
@@ -50,9 +48,9 @@ ext_modules = [
 setup(
     name="Atlas",
     version=__version__,
-    author="Itau",
-    author_email="jose.melo@itau.cl",
-    description="pricers using pybind11",
+    author="Jose Melo",
+    author_email="jmelo@live.cl",
+    description="Pricing library for Python",
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
     zip_safe=False,

@@ -31,13 +31,14 @@ namespace Atlas {
     using Schedule              = QuantLib::Schedule;
     using MakeSchedule          = QuantLib::MakeSchedule;
     using Month                 = QuantLib::Month;
-
+    using TimeUnit              = QuantLib::TimeUnit;
+    using DateGeneration        = QuantLib::DateGeneration;
     // QuantLib day counters, to be replaced with our own day counters
 
     using Actual360      = QuantLib::Actual360;
     using Actual365Fixed = QuantLib::Actual365Fixed;
     using Thirty360      = QuantLib::Thirty360;
-    using DiscountCurve = QuantLib::DiscountCurve;
+    using DiscountCurve  = QuantLib::DiscountCurve;
 
 }  // namespace Atlas
 
