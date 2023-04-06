@@ -46,6 +46,37 @@
 namespace py = pybind11;
 using namespace Atlas;
 
+namespace Aux {
+    class PyCoupon : public Coupon<dual> {
+       public:
+        using Coupon<dual>::Coupon;
+
+        DayCounter dayCounter() const override {
+            PYBIND11_OVERRIDE_PURE(DayCounter,   /* Return type */
+                                   Coupon<dual>, /* Parent class */
+                                   dayCounter,   /* Name of function in C++ (must match Python name) */
+                                                 /* Argument(s) */
+            );
+        }
+
+        double accruedPeriod(const Date& start, const Date& end) const override {
+            PYBIND11_OVERRIDE_PURE(double,        /* Return type */
+                                   Coupon<dual>,  /* Parent class */
+                                   accruedPeriod, /* Name of function in C++ (must match Python name) */
+                                   start,         /* Argument(s) */
+                                   end);
+        }
+
+        dual accruedAmount(const Date& start, const Date& end) const override {
+            PYBIND11_OVERRIDE_PURE(dual,          /* Return type */
+                                   Coupon<dual>,  /* Parent class */
+                                   accruedAmount, /* Name of function in C++ (must match Python name) */
+                                   start,         /* Argument(s) */
+                                   end);
+        }
+    };
+}  // namespace Aux
+
 PYBIND11_MODULE(Atlas, m) {
     m.doc() = "Atlas";  // optional module docstring
 
@@ -192,4 +223,41 @@ PYBIND11_MODULE(Atlas, m) {
         .def("discountCurveContext", &Cashflow<dual>::discountCurveContext)
         .def("hasDiscountContext", &Cashflow<dual>::hasDiscountContext)
         .def("discountContextIdx", &Cashflow<dual>::discountContextIdx);
+
+    py::class_<Coupon<dual>, Aux::PyCoupon, Cashflow<dual>>(m, "Coupon")
+        .def(py::init<const Date&, const Date&, double>())
+        .def(py::init<const Date&, const Date&, double, const CurveContext&>())
+        .def("notional", &Coupon<dual>::notional)
+        .def("startDate", &Coupon<dual>::startDate)
+        .def("endDate", &Coupon<dual>::endDate)
+        .def("dayCounter", &Coupon<dual>::dayCounter)
+        .def("accruedPeriod", &Coupon<dual>::accruedPeriod)
+        .def("accruedAmount", &Coupon<dual>::accruedAmount);
+
+    py::class_<FixedRateCoupon<dual>, Coupon<dual>>(m, "FixedRateCoupon")
+        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&>())
+        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, const CurveContext&>())
+        .def("rate", py::overload_cast<>(&FixedRateCoupon<dual>::rate, py::const_))
+        .def("rate", py::overload_cast<const InterestRate<dual>&>(&FixedRateCoupon<dual>::rate))
+        .def("accruedPeriod", &FixedRateCoupon<dual>::accruedPeriod)
+        .def("accruedAmount", &FixedRateCoupon<dual>::accruedAmount)
+        .def("dayCounter", &FixedRateCoupon<dual>::dayCounter);
+
+    py::class_<FloatingRateCoupon<dual>, Coupon<dual>>(m, "FloatingRateCoupon")
+        .def(py::init<const Date&, const Date&, double, dual, const CurveContext&>())
+        .def(py::init<const Date&, const Date&, double, dual, const CurveContext&, const CurveContext&>())
+        .def("spread", py::overload_cast<>(&FloatingRateCoupon<dual>::spread, py::const_))
+        .def("spread", py::overload_cast<dual>(&FloatingRateCoupon<dual>::spread))
+        .def("fixing", py::overload_cast<>(&FloatingRateCoupon<dual>::fixing, py::const_))
+        .def("fixing", py::overload_cast<dual>(&FloatingRateCoupon<dual>::fixing))
+        .def("forecastCurveContext", &FloatingRateCoupon<dual>::forecastCurveContext)
+        .def("accruedAmount", &FloatingRateCoupon<dual>::accruedAmount)
+        .def("dayCounter", &FloatingRateCoupon<dual>::dayCounter)
+        .def("accruedPeriod", &FloatingRateCoupon<dual>::accruedPeriod)
+        .def("forecastContextIdx", &FloatingRateCoupon<dual>::forecastContextIdx)
+        .def("hasForecastContext", &FloatingRateCoupon<dual>::hasForecastContext);
+
+    // Legs
+    py::class_<Leg<dual>>(m, "Leg");
+    
 }

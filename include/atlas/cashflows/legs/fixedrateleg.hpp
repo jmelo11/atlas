@@ -21,7 +21,7 @@ namespace Atlas {
 
         inline std::vector<FixedRateCoupon<adouble>>& coupons() { return coupons_; }
 
-        inline const std::vector<FixedRateCoupon<adouble>>& constCoupons() const { return coupons_; }
+        inline const std::vector<FixedRateCoupon<adouble>>& coupons() const { return coupons_; }
 
         inline void addCoupon(FixedRateCoupon<adouble>& coupon, bool sort = false) {
             coupons_.push_back(coupon);

@@ -8,9 +8,9 @@ TEST(Instrument, EqualPaymentInstrument) {
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
     testInterest<double>(prod, schedule, vars.rate);
 
-    const auto& leg         = prod.constLeg();
-    const auto& coupons     = leg.constCoupons();
-    const auto& redemptions = leg.constRedemptions();
+    const auto& leg         = prod.leg();
+    const auto& coupons     = leg.coupons();
+    const auto& redemptions = leg.redemptions();
 
     // test if payments are equal
     std::vector<Cashflow<double>> cashflows;
@@ -36,9 +36,9 @@ TEST(Instrument, EqualPaymentInstrumentDual) {
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
     testInterest<dual>(prod, schedule, vars.rate);
 
-    const auto& leg         = prod.constLeg();
-    const auto& coupons     = leg.constCoupons();
-    const auto& redemptions = leg.constRedemptions();
+    const auto& leg         = prod.leg();
+    const auto& coupons     = leg.coupons();
+    const auto& redemptions = leg.redemptions();
 
     // test if payments are equal
     std::vector<Cashflow<dual>> cashflows;

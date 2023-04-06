@@ -47,9 +47,9 @@ struct FloatingInstrumentVars {
 
 template <class T, typename adouble>
 void inline testStructure(const T& instrument, const Schedule& schedule, PaymentStructure structure) {
-    const auto& leg         = instrument.constLeg();
-    const auto& coupons     = leg.constCoupons();
-    const auto& redemptions = leg.constRedemptions();
+    const auto& leg         = instrument.leg();
+    const auto& coupons     = leg.coupons();
+    const auto& redemptions = leg.redemptions();
 
     const auto& dates = schedule.dates();
 
@@ -83,9 +83,9 @@ void inline testStructure(const T& instrument, const Schedule& schedule, Payment
 
 template <typename adouble>
 void inline testInterest(const FixedRateInstrument<adouble>& instrument, const Schedule& schedule, const InterestRate<adouble>& rate) {
-    const auto& leg         = instrument.constLeg();
-    const auto& coupons     = leg.constCoupons();
-    const auto& redemptions = leg.constRedemptions();
+    const auto& leg         = instrument.leg();
+    const auto& coupons     = leg.coupons();
+    const auto& redemptions = leg.redemptions();
 
     const auto& dates = schedule.dates();
 

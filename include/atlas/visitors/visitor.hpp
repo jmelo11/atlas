@@ -22,11 +22,15 @@ namespace Atlas {
     class FixedRateInstrument;
 
     template <typename adouble>
+    class Forward;
+
+    template <typename adouble>
     class Visitor {
        public:
         virtual ~Visitor() = default;
         virtual void visit(FloatingRateInstrument<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
         virtual void visit(FixedRateInstrument<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+        virtual void visit(Forward<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
     template <typename adouble>
@@ -35,6 +39,7 @@ namespace Atlas {
         virtual ~ConstVisitor() = default;
         virtual void visit(const FloatingRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
         virtual void visit(const FixedRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+        virtual void visit(const Forward<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
 }  // namespace Atlas

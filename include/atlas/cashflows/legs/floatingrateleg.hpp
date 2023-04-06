@@ -37,7 +37,7 @@ namespace Atlas {
         /**
          * @brief Returns a const reference to the vector of coupons in the leg.
          */
-        inline const std::vector<FloatingRateCoupon<adouble>>& constCoupons() const { return coupons_; }
+        inline const std::vector<FloatingRateCoupon<adouble>>& coupons() const { return coupons_; }
 
         /**
          * @brief Adds a coupon to the leg.

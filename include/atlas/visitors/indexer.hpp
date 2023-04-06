@@ -2,6 +2,7 @@
 #define EDA3136B_5C3D_4D8A_8F4A_AE6D1B5AC406
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/derivatives/forward.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
@@ -38,16 +39,25 @@ namespace Atlas {
             indexCashflow(inst.disbursement());
         };
 
+        void visit(Forward<adouble>& inst) override {
+            indexCashflow(inst.leg().redemptions()[0]);
+            indexCashflow(inst.leg().redemptions()[1]);
+        };
+
         void setRequest(MarketRequest& request) {
-            auto& dfs  = request.dfs;
-            auto& fwds = request.fwds;
+            auto& dfs   = request.dfs;
+            auto& fwds  = request.fwds;
+            auto& spots = request.spots;
+
             dfs.insert(dfs.end(), dfs_.begin(), dfs_.end());
             fwds.insert(fwds.end(), fwds_.begin(), fwds_.end());
+            spots.insert(spots.end(), spots_.begin(), spots_.end());
         };
 
         void clear() {
             dfs_.clear();
             fwds_.clear();
+            spots_.clear();
         };
 
        private:
@@ -57,6 +67,14 @@ namespace Atlas {
             const auto& paymentDate = cashflow.paymentDate();
             dfs_.push_back({curveIdx, paymentDate});
             cashflow.dfIdx(dfs_.size() - 1);
+
+            size_t ccyCode = cashflow.ccyCode();
+            if (cashflow.applyCcy()) {
+                spots_.push_back({ccyCode, paymentDate});
+            } else {
+                spots_.push_back({ccyCode});
+            }
+            cashflow.spotIdx(spots_.size() - 1);
         };
 
         void indexFloatingCoupon(FloatingRateCoupon<adouble>& coupon) {
@@ -68,6 +86,7 @@ namespace Atlas {
 
         std::vector<MarketRequest::Rate> fwds_;
         std::vector<MarketRequest::DiscountFactor> dfs_;
+        std::vector<MarketRequest::Spot> spots_;
     };
 }  // namespace Atlas
 

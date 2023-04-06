@@ -2,7 +2,7 @@
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/floatingratecoupon.hpp>
-#include <atlas/curves/rateindex.hpp>
+#include <atlas/rates/rateindex.hpp>
 #include <atlas/rates/curvecontextstore.hpp>
 
 using namespace Atlas;

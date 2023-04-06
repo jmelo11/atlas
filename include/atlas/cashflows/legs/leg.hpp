@@ -44,7 +44,7 @@ namespace Atlas {
          * @brief Returns a constant reference to the vector of Redemption objects contained in the Leg object
          * @return Constant reference to the vector of Redemption objects
          */
-        inline const std::vector<Redemption<adouble>>& constRedemptions() const { return redemptions_; }
+        inline const std::vector<Redemption<adouble>>& redemptions() const { return redemptions_; }
 
         /**
          * @brief Adds a Redemption object to the vector of redemptions contained in the Leg object

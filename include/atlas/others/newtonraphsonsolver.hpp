@@ -22,7 +22,7 @@ namespace Atlas {
          * @param max_iter maximum number of iterations
          * @return dual
          */
-        dual solve(std::function<dual(dual)> f, double x0 = 0.0, double tol = 1, int max_iter = 100) {
+        dual solve(std::function<dual(dual)> f, double x0 = 0.0, double tol = 1e-6, int max_iter = 100) {
             dual x = x0;
             dual y = f(x);
             for (int i = 0; i < max_iter; i++) {

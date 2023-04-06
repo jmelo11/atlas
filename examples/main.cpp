@@ -119,7 +119,7 @@ void multithreadedSens() {
     CurveContextStore& store_ = CurveContextStore::instance();
     auto& context             = store_.at("TEST");
     std::vector<FixedRateBulletInstrument<dual>> portfolio;
-    size_t numOps = 1000;
+    size_t numOps = 1000000;
 
     // create portfolio and index portfolio
     Indexer<dual> indexer;
@@ -170,7 +170,7 @@ void multithreadedSens() {
     };
 
     dual sens = derivative(npv, wrt(r), at(r)) * 0.01;
-    std::cout << sens << std::endl;
+    std::cout << "Multicore sens: " << sens << std::endl;
 }
 
 int main() {

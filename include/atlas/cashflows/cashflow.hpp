@@ -7,6 +7,8 @@
 
 namespace Atlas {
 
+    template <typename adouble>
+    class Instrument;
     /**
      * @brief A class representing a cashflow
      *
@@ -29,15 +31,21 @@ namespace Atlas {
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, adouble amount) : amount_(amount), paymentDate_(paymentDate){};
+        Cashflow(const Date& paymentDate, adouble amount, size_t ccyCode = 0, bool applyCcy = false)
+        : amount_(amount), paymentDate_(paymentDate), ccyCode_(ccyCode), applyCcy_(applyCcy){};
 
         /**
          * Constructor
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, adouble amount, const CurveContext& discountCurveContext)
-        : amount_(amount), paymentDate_(paymentDate), discountContextIdx_(discountCurveContext.idx()), hasDiscountContext_(true){};
+        Cashflow(const Date& paymentDate, adouble amount, const CurveContext& discountCurveContext, size_t ccyCode = 0, bool applyCcy = false)
+        : amount_(amount),
+          paymentDate_(paymentDate),
+          hasDiscountContext_(true),
+          ccyCode_(ccyCode),
+          applyCcy_(applyCcy),
+          discountContextIdx_(discountCurveContext.idx()){};
 
         virtual ~Cashflow(){};
 
@@ -84,11 +92,41 @@ namespace Atlas {
          */
         inline size_t discountContextIdx() const { return discountContextIdx_; }
 
+        /**
+         * @brief Gets the currency code
+         * @return The currency code
+         */
+        inline size_t ccyCode() const { return ccyCode_; }
+
+        /**
+         * @brief Sets the currency code
+         * @param ccyCode The currency code
+         */
+        inline void ccyCode(size_t ccyCode) { ccyCode_ = ccyCode; }
+
+        /**
+         * @brief Checks if the cashflow applies the currency
+         * @return True if the cashflow applies the currency, false otherwise
+         */
+        inline bool applyCcy() const { return applyCcy_; }
+
+        /**
+         * @brief Checks if the cashflow applies the currency
+         * @return True if the cashflow applies the currency, false otherwise
+         */
+        inline void applyCcy(bool applyCcy) { applyCcy_ = applyCcy; }
+
        protected:
-        adouble amount_   = 0;  // amount means static (non-risk-sensitive cashflows)
-        Date paymentDate_ = Date();
-        size_t discountContextIdx_;
+        adouble amount_          = 0;  // amount means static (non-risk-sensitive cashflows)
+        Date paymentDate_        = Date();
         bool hasDiscountContext_ = false;
+        size_t ccyCode_          = 0;
+        bool applyCcy_           = false;
+        size_t discountContextIdx_;
+
+       private:
+        void amount(adouble amount) { amount_ = amount; }
+        friend class Instrument<adouble>;
     };
 
     template <typename adouble>

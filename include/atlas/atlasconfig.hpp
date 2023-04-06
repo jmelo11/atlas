@@ -15,6 +15,7 @@
 #include <ql/time/schedule.hpp>
 #include <atlas/atlasdefine.hpp>
 #include <atlas/rates/interestrate.hpp>
+#include <ql/currency.hpp>
 #include <iostream>
 
 namespace Atlas {
@@ -33,6 +34,7 @@ namespace Atlas {
     using Month                 = QuantLib::Month;
     using TimeUnit              = QuantLib::TimeUnit;
     using DateGeneration        = QuantLib::DateGeneration;
+    using Currency              = QuantLib::Currency;
     // QuantLib day counters, to be replaced with our own day counters
 
     using Actual360      = QuantLib::Actual360;
