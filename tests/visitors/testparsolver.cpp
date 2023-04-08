@@ -28,13 +28,13 @@ TEST(ParSolver, FixedRateInstrument) {
     FixedRateBulletInstrument<double> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("TEST")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("TEST")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("TEST", Frequency::Annual, Actual360());
         store_.createCurveContext("TEST", curveStrategy, index);
     }
-    auto& context = store_.at("TEST");
+    auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
 
@@ -44,7 +44,7 @@ TEST(ParSolver, FixedRateInstrument) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<double> model(request);
+    StaticCurveModel<double> model(request, store_);
 
     MarketData<double> marketData = model.simulate(startDate);
 
@@ -79,13 +79,13 @@ TEST(ParSolver, FixedRateInstrumentDual) {
     FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("TEST")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("TEST")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("TEST", Frequency::Annual, Actual360());
         store_.createCurveContext("TEST", curveStrategy, index);
     }
-    auto& context = store_.at("TEST");
+    auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
 
@@ -95,7 +95,7 @@ TEST(ParSolver, FixedRateInstrumentDual) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<dual> model(request);
+    StaticCurveModel<dual> model(request, store_);
 
     MarketData<dual> marketData = model.simulate(startDate);
 
@@ -127,15 +127,15 @@ TEST(ParSolver, FloatingRateInstrument) {
     double spread   = 0.01;
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("LIBOR1M")) {
+    MarketStore store_  = MarketStore();
+    if (!store_.hasCurveContext("LIBOR1M")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
         store_.createCurveContext("LIBOR1M", curveStrategy, index);
     }
 
     // get context
-    auto& context = store_.at("LIBOR1M");
+    auto& context = store_.curveContext("LIBOR1M");
     FloatingRateBulletInstrument<double> instrument(startDate, endDate, notional, spread, context);
     // set curve context
     instrument.discountCurveContex(context);
@@ -146,7 +146,7 @@ TEST(ParSolver, FloatingRateInstrument) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<double> model(request);
+    StaticCurveModel<double> model(request, store_);
 
     MarketData<double> marketData = model.simulate(startDate);
 
@@ -190,18 +190,18 @@ TEST(ParSolver, FloatingRateInstrumentDual) {
     Date startDate  = Date(1, Month::Aug, 2020);
     Date endDate    = Date(1, Month::Aug, 2021);
     double notional = 100;
-    dual spread   = 0.01;
+    dual spread     = 0.01;
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("LIBOR1M")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("LIBOR1M")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
         store_.createCurveContext("LIBOR1M", curveStrategy, index);
     }
 
     // get context
-    auto& context = store_.at("LIBOR1M");
+    auto& context = store_.curveContext("LIBOR1M");
     FloatingRateBulletInstrument<dual> instrument(startDate, endDate, notional, spread, context);
     // set curve context
     instrument.discountCurveContex(context);
@@ -212,7 +212,7 @@ TEST(ParSolver, FloatingRateInstrumentDual) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<dual> model(request);
+    StaticCurveModel<dual> model(request, store_);
 
     MarketData<dual> marketData = model.simulate(startDate);
 

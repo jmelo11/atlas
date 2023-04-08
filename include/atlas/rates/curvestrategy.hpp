@@ -4,6 +4,7 @@
 #include <ql/termstructures/yield/discountcurve.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/atlasconfig.hpp>
+#include <iostream>
 
 namespace Atlas {
 
@@ -71,10 +72,7 @@ namespace Atlas {
          * @return A unique pointer to the copied `CurveStrategy` object.
          */
         std::unique_ptr<CurveStrategy> copy() const override {
-            std::vector<Date> dates(curve_->dates().begin(), curve_->dates().end());
-            std::vector<double> discounts(curve_->data().begin(), curve_->data().end());
-            DayCounter dayCounter = curve_->dayCounter();
-            std::unique_ptr<CurveStrategy> copy_(new DiscountCurveStrategy(dates, discounts, dayCounter));
+            std::unique_ptr<CurveStrategy> copy_(new DiscountCurveStrategy(curve_->dates(), curve_->data(), curve_->dayCounter()));
             return copy_;
         }
 
@@ -83,7 +81,9 @@ namespace Atlas {
          *
          * @return A reference to the yield term structure of the discount curve.
          */
-        const QuantLib::YieldTermStructure& curve() const override { return *curve_; };
+        const QuantLib::YieldTermStructure& curve() const override {
+            return *curve_;
+        };
 
        private:
         std::unique_ptr<QuantLib::DiscountCurve> curve_; /**< The discount curve managed by this object. */
@@ -104,9 +104,9 @@ namespace Atlas {
          * @param frequency The frequency of the curve.
          */
         FlatForwardStrategy(const Date& referenceDate, double forward = 0.03, const DayCounter& dayCounter = Actual360(),
-                            Compounding compounding = Compounding::Continuous, Frequency frequency = Frequency::Annual)
-        : referenceDate_(referenceDate), forward_(forward), dayCounter_(dayCounter), compounding_(compounding), frequency_(frequency) {
-            curve_ = std::make_unique<QuantLib::FlatForward>(referenceDate_, forward_, dayCounter_, compounding_, frequency_);
+                            Compounding compounding = Compounding::Continuous, Frequency frequency = Frequency::Annual){
+            curve_ = std::make_unique<QuantLib::FlatForward>(referenceDate, forward, dayCounter, compounding, frequency);
+            curve_->unregisterWithAll();
         };
 
         /**
@@ -114,13 +114,14 @@ namespace Atlas {
          *
          * @param other The `FlatForwardStrategy` object to be copied.
          */
-        FlatForwardStrategy(const FlatForwardStrategy& other)
-        : referenceDate_(other.referenceDate_),
-          forward_(other.forward_),
-          dayCounter_(other.dayCounter_),
-          compounding_(other.compounding_),
-          frequency_(other.frequency_) {
+        FlatForwardStrategy(const FlatForwardStrategy& other) {
             curve_ = std::make_unique<QuantLib::FlatForward>(*other.curve_);
+            curve_->unregisterWithAll();
+        };
+
+        FlatForwardStrategy(QuantLib::FlatForward& curve) {
+            curve_ = std::make_unique<QuantLib::FlatForward>(curve);
+            curve_->unregisterWithAll();
         };
 
         /**
@@ -131,12 +132,8 @@ namespace Atlas {
          */
         FlatForwardStrategy& operator=(const FlatForwardStrategy& other) {
             if (this != &other) {
-                referenceDate_ = other.referenceDate_;
-                forward_       = other.forward_;
-                dayCounter_    = other.dayCounter_;
-                compounding_   = other.compounding_;
-                frequency_     = other.frequency_;
-                curve_         = std::make_unique<QuantLib::FlatForward>(*other.curve_);
+                curve_ = std::make_unique<QuantLib::FlatForward>(*other.curve_);
+                curve_->unregisterWithAll();
             }
             return *this;
         }
@@ -146,10 +143,7 @@ namespace Atlas {
          *
          * @return A unique pointer to the copied `CurveStrategy` object.
          */
-        std::unique_ptr<CurveStrategy> copy() const override {
-            std::unique_ptr<CurveStrategy> copy_(new FlatForwardStrategy(referenceDate_, forward_, dayCounter_, compounding_, frequency_));
-            return copy_;
-        }
+        std::unique_ptr<CurveStrategy> copy() const override { return std::make_unique<FlatForwardStrategy>(*curve_); }
 
         /**
          * @brief Returns a reference to the yield term structure of the flat forward curve.
@@ -159,12 +153,6 @@ namespace Atlas {
         const QuantLib::YieldTermStructure& curve() const override { return *curve_; };
 
        private:
-        Date referenceDate_;
-        double forward_;
-        DayCounter dayCounter_;
-        Compounding compounding_;
-        Frequency frequency_;
-
         std::unique_ptr<QuantLib::FlatForward> curve_;
     };
 

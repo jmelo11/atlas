@@ -12,7 +12,7 @@ TEST(Instruments, CustomFloatingRateInstrument) {
 
     auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
 
-    CustomFloatingRateInstrument<double> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store_.at("TEST"));
+    CustomFloatingRateInstrument<double> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store_.curveContext("TEST"));
 
     auto& leg         = prod.leg();
     auto& coupons     = leg.coupons();
@@ -31,7 +31,7 @@ TEST(Instruments, CustomFloatingRateInstrumentDual) {
 
     auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
 
-    CustomFloatingRateInstrument<dual> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store_.at("TEST"));
+    CustomFloatingRateInstrument<dual> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store_.curveContext("TEST"));
 
     auto& leg         = prod.leg();
     auto& coupons     = leg.coupons();

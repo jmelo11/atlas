@@ -27,13 +27,13 @@ TEST(ZSpreadSolver, FixedRateInstrument) {
     FixedRateBulletInstrument<double> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("TEST")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("TEST")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("TEST", Frequency::Annual, Actual360());
         store_.createCurveContext("TEST", curveStrategy, index);
     }
-    auto& context = store_.at("TEST");
+    auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
 
@@ -43,7 +43,7 @@ TEST(ZSpreadSolver, FixedRateInstrument) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<double> model(request);
+    StaticCurveModel<double> model(request, store_);
     MarketData<double> marketData = model.simulate(startDate);
     ZSpreadCalculator<double> calculator(marketData, 100.0);
     calculator.visit(instrument);
@@ -75,20 +75,20 @@ TEST(ZSpreadSolver, FixedRateInstrumentDual) {
     Date endDate               = Date(1, Month::Aug, 2021);
     Frequency paymentFrequency = Frequency::Monthly;
     double notional            = 100;
-    dual rateValue           = 0.05;
+    dual rateValue             = 0.05;
     InterestRate<dual> rate(rateValue, Thirty360(Thirty360::BondBasis), Compounding::Simple, Frequency::Annual);
     QuantLib::InterestRate qlRate(rateValue.val, Thirty360(Thirty360::BondBasis), QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
 
     FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("TEST")) {
+    MarketStore store_  = MarketStore();
+    if (!store_.hasCurveContext("TEST")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("TEST", Frequency::Annual, Actual360());
         store_.createCurveContext("TEST", curveStrategy, index);
     }
-    auto& context = store_.at("TEST");
+    auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
 
@@ -98,7 +98,7 @@ TEST(ZSpreadSolver, FixedRateInstrumentDual) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<dual> model(request);
+    StaticCurveModel<dual> model(request, store_);
     MarketData<dual> marketData = model.simulate(startDate);
     ZSpreadCalculator<dual> calculator(marketData, 100.0);
     calculator.visit(instrument);

@@ -7,7 +7,6 @@
 #ifndef A1E6F5B0_6F4A_4460_9F42_A14B525D8447
 #define A1E6F5B0_6F4A_4460_9F42_A14B525D8447
 
-#include <atlas/curves/curve.hpp>
 #include <chrono>
 #include <iostream>
 #include <vector>

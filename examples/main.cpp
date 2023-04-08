@@ -4,17 +4,19 @@
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
 #include <atlas/multithreading/threadpool.hpp>
+#include <atlas/others/auxfuncs.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <cppad/cppad.hpp>
 #include <iostream>
 #include <numeric>
+#include <thread>
 
 using namespace Atlas;
 
 using NumType = double;
 
-void pricingFixedRateInstruments() {
+void pricingFixedRateInstruments(MarketStore& store_) {
     // Create a fixed rate instrument
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2021);
@@ -25,13 +27,7 @@ void pricingFixedRateInstruments() {
     FixedRateBulletInstrument<NumType> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-    RateIndex index("TEST", Frequency::Annual, Actual360());
-    store_.createCurveContext("TEST", curveStrategy, index);
-
-    // set curve context
-    instrument.discountCurveContex(store_.at("TEST"));
+    instrument.discountCurveContex(store_.curveContext("TEST"));
 
     Indexer<NumType> indexer;
     indexer.visit(instrument);
@@ -39,7 +35,7 @@ void pricingFixedRateInstruments() {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<NumType> model(request);
+    StaticCurveModel<NumType> model(request, store_);
 
     MarketData<NumType> marketData = model.simulate(startDate);
 
@@ -48,7 +44,7 @@ void pricingFixedRateInstruments() {
     std::cout << "NPV: " << npvCalculator.results() << std::endl;
 }
 
-void pricingFloatingRateInstruments() {
+void pricingFloatingRateInstruments(MarketStore& store_) {
     // Create a fixed rate instrument
     Date startDate  = Date(1, Month::Aug, 2020);
     Date endDate    = Date(1, Month::Aug, 2021);
@@ -56,8 +52,8 @@ void pricingFloatingRateInstruments() {
     double spread   = 0.03;
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    const auto& context       = store_.at("TEST");
+
+    const auto& context = store_.curveContext("TEST");
 
     FloatingRateBulletInstrument<double> instrument(startDate, endDate, notional, spread, context);
     // set curve context
@@ -69,7 +65,7 @@ void pricingFloatingRateInstruments() {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<double> model(request);
+    StaticCurveModel<double> model(request, store_);
 
     MarketData<double> marketData = model.simulate(startDate);
 
@@ -78,25 +74,23 @@ void pricingFloatingRateInstruments() {
     std::cout << "NPV: " << npvCalculator.results() << std::endl;
 }
 
-void rateSens() {
+void rateSens(MarketStore& store_) {
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2025);
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
     dual r                     = 0.03;
 
-    CurveContextStore& store_ = CurveContextStore::instance();
-
     auto f = [&](const dual& r) {
         InterestRate<dual> rate = InterestRate(r, Actual360(), Compounding::Simple, Frequency::Annual);
         FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate);
         // set curve context
-        instrument.discountCurveContex(store_.at("TEST"));
+        instrument.discountCurveContex(store_.curveContext("TEST"));
         Indexer<dual> indexer;
         indexer.visit(instrument);
         MarketRequest request;
         indexer.setRequest(request);
-        StaticCurveModel<dual> model(request);
+        StaticCurveModel<dual> model(request, store_);
         MarketData<dual> marketData = model.simulate(instrument.startDate());
 
         instrument.rate(r);
@@ -109,41 +103,56 @@ void rateSens() {
     std::cout << "Sens: " << sens << std::endl;
 }
 
-void multithreadedSens() {
+void multithreadedSens(MarketStore& store_) {
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2025);
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
     dual r                     = 0.03;
     InterestRate<dual> rate(r, Actual360(), Compounding::Simple, Frequency::Annual);
-    CurveContextStore& store_ = CurveContextStore::instance();
-    auto& context             = store_.at("TEST");
-    std::vector<FixedRateBulletInstrument<dual>> portfolio;
+
+    auto& context = store_.curveContext("TEST");
     size_t numOps = 1000000;
+    std::vector<FixedRateBulletInstrument<dual>> portfolio;
+    portfolio.reserve(numOps);
 
     // create portfolio and index portfolio
     Indexer<dual> indexer;
-    for (size_t i = 0; i < numOps; i++) {
-        FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate, context);
-        indexer.visit(instrument);
-        portfolio.push_back(instrument);
+    {
+        std::cout << "Creating portfolio" << std::endl;
+        Timer t;
+
+        for (size_t i = 0; i < numOps; i++) {
+            FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate, context);
+            indexer.visit(instrument);
+            portfolio.push_back(instrument);
+        }
     }
 
     // slice portfolio
-    size_t opsPerSlice = 100;
-    size_t numSlices   = numOps / opsPerSlice;
-    std::vector<std::vector<FixedRateBulletInstrument<dual>>> slices;
-    for (size_t i = 0; i < numSlices; i++) {
-        std::vector<FixedRateBulletInstrument<dual>> slice;
-        for (size_t j = 0; j < opsPerSlice; j++) { slice.push_back(portfolio[i * opsPerSlice + j]); }
-        slices.push_back(slice);
+    const size_t num_threads  = std::thread::hardware_concurrency();
+    const size_t segment_size = (portfolio.size() + num_threads - 1) / num_threads;
+    const size_t num_slices   = (portfolio.size() + segment_size - 1) / segment_size;
+    std::vector<std::vector<FixedRateBulletInstrument<dual>>> slices(num_slices);
+    {
+        std::cout << "Slicing portfolio" << std::endl;
+        Timer t;
+        for (size_t i = 0; i < num_slices; i++) {
+            auto start = portfolio.begin() + i * segment_size;
+            auto end   = std::min(start + segment_size, portfolio.end());
+            slices[i].assign(start, end);
+        }
     }
 
-    // generate required rates
+    // // generate required rates
     MarketRequest request;
     indexer.setRequest(request);
-    StaticCurveModel<dual> model(request);
-    MarketData<dual> marketData = model.simulate(startDate);
+    // StaticCurveModel<dual> model(request, store_);
+    // MarketData<dual> marketData;
+    // {
+    //     std::cout << "Simulating market data" << std::endl;
+    //     Timer t;
+    // }
 
     auto npv = [&](dual r) {
         // set curve context
@@ -153,7 +162,11 @@ void multithreadedSens() {
         dual npv = 0.0;
         for (auto& slice : slices) {
             auto task = [&]() {
+                StaticCurveModel<dual> model(request, store_);
+                MarketData<dual> marketData;
+                marketData = model.simulate(startDate);
                 NPVCalculator<dual> npvCalculator(marketData);
+
                 for (auto& instrument : slice) {
                     instrument.rate(r);
                     npvCalculator.visit(instrument);
@@ -169,14 +182,31 @@ void multithreadedSens() {
         return npv;
     };
 
-    dual sens = derivative(npv, wrt(r), at(r)) * 0.01;
+    {
+        std::cout << "Calculating portfolio NPV" << std::endl;
+        Timer t;
+        dual npv_ = npv(r);
+    }
+
+    dual sens;
+    {
+        std::cout << "Calculating portfolio rate sensitivity" << std::endl;
+        Timer t;
+        sens = derivative(npv, wrt(r), at(r)) * 0.01;
+    }
     std::cout << "Multicore sens: " << sens << std::endl;
 }
 
 int main() {
-    pricingFixedRateInstruments();
-    pricingFloatingRateInstruments();
-    rateSens();
-    multithreadedSens();
+    Date evalDate = Date(1, Month::Aug, 2020);
+    MarketStore store_;
+    FlatForwardStrategy curveStrategy(evalDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    store_.createCurveContext("TEST", curveStrategy, index);
+
+    // pricingFixedRateInstruments(store_);
+    // pricingFloatingRateInstruments(store_);
+    // rateSens(store_);
+    multithreadedSens(store_);
     return 0;
 }

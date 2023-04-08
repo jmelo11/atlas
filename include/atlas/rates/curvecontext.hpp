@@ -28,6 +28,7 @@ namespace Atlas {
          */
         inline size_t idx() const { return idx_; }
 
+        inline const std::unique_ptr<CurveStrategy>& curveStrategy() const { return curveStrategy_; }
        private:
         /**
          * Constructs a yield curve from a vector of dates and a vector of corresponding rates.
@@ -35,13 +36,13 @@ namespace Atlas {
          * @param index unique_ptr to the RateIndex
          * @param idx positional index in the CurveContextStore
          */
-        CurveContext(std::unique_ptr<CurveStrategy> curveStrategy, std::unique_ptr<RateIndex> index, size_t idx)
+        CurveContext(std::unique_ptr<CurveStrategy>& curveStrategy, std::unique_ptr<RateIndex>& index, size_t idx)
         : curveStrategy_(std::move(curveStrategy)), index_(std::move(index)), idx_(idx) {}
 
         std::unique_ptr<CurveStrategy> curveStrategy_;
         std::unique_ptr<RateIndex> index_;
         size_t idx_;
-        friend class CurveContextStore;
+        friend class MarketStore;
     };
 
 }  // namespace Atlas

@@ -151,8 +151,54 @@ namespace Atlas {
      *
      * @return std::ostream&
      */
-    template <typename adouble = dual>
+    template <typename adouble>
     std::ostream& operator<<(std::ostream&, const InterestRate<adouble>&);
+
+    template <typename adouble>
+    inline adouble fastCompoundFactor(adouble r, const QuantLib::DayCounter& dc, QuantLib::Compounding comp, QuantLib::Frequency freq_,
+                                      const QuantLib::Date& d1, const QuantLib::Date& d2) {
+        
+        double freq = double(freq_);
+        double t = dc.yearFraction(d1, d2);
+        switch (comp) {
+            case QuantLib::Compounding::Simple:
+                return 1.0 + r * t;
+            case QuantLib::Compounding::Compounded:
+                if constexpr (std::is_same_v<adouble, double>) {
+                    return std::pow(1.0 + r / freq, freq * t);
+                } else {
+                    return pow(1.0 + r / freq, freq * t);
+                }
+            case QuantLib::Compounding::Continuous:
+                if constexpr (std::is_same_v<adouble, double>) {
+                    return std::exp(r * t);
+                } else {
+                    return exp(r * t);
+                }
+            case QuantLib::Compounding::SimpleThenCompounded:
+                if (t <= 1.0 / freq) {
+                    return 1.0 + r * t;
+                } else {
+                    if constexpr (std::is_same_v<adouble, double>) {
+                        return std::pow(1.0 + r / freq, freq * t);
+                    } else {
+                        return pow(1.0 + r / freq, freq * t);
+                    }
+                }
+            case QuantLib::Compounding::CompoundedThenSimple:
+                if (t > 1.0 / freq) {
+                    return 1.0 + r * t;
+                } else {
+                    if constexpr (std::is_same_v<adouble, double>) {
+                        return std::pow(1.0 + r / freq, freq * t);
+                    } else {
+                        return pow(1.0 + r / freq, freq * t);
+                    }
+                }
+            default:
+                QL_FAIL("unknown compounding convention");
+        };
+    };
 }  // namespace Atlas
 
 #endif /* D55DBD41_ABBD_418C_9E65_3A7C969C955F */

@@ -2,8 +2,8 @@
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/floatingratecoupon.hpp>
+#include <atlas/fundation/marketstore.hpp>
 #include <atlas/rates/rateindex.hpp>
-#include <atlas/rates/curvecontextstore.hpp>
 
 using namespace Atlas;
 
@@ -15,9 +15,9 @@ struct FixedCouponVars {
     adouble rateValue          = 0.03;
     InterestRate<adouble> rate = InterestRate<adouble>(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
 
-    CurveContextStore& store_ = CurveContextStore::instance();
+    MarketStore store_ = MarketStore();
     FixedCouponVars() {
-        if (!store_.hasContext("TEST")) {
+        if (!store_.hasCurveContext("TEST")) {
             FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
             RateIndex index("TEST", Frequency::Annual, Actual360());
             store_.createCurveContext("TEST", curveStrategy, index);
@@ -32,9 +32,9 @@ struct FloatingCouponVars {
     double notional = 100;
     adouble spread  = 0.01;
 
-    CurveContextStore& store_ = CurveContextStore::instance();
+    MarketStore store_ = MarketStore();
     FloatingCouponVars() {
-        if (!store_.hasContext("TEST")) {
+        if (!store_.hasCurveContext("TEST")) {
             FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
             RateIndex index("TEST", Frequency::Annual, Actual360());
             store_.createCurveContext("TEST", curveStrategy, index);
@@ -44,7 +44,7 @@ struct FloatingCouponVars {
 
 TEST(Coupons, FixedRateCoupon) {
     FixedCouponVars<double> vars;
-    FixedRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.store_.at("TEST"));
+    FixedRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.store_.curveContext("TEST"));
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
@@ -63,7 +63,7 @@ TEST(Coupons, FixedRateCoupon) {
 
 TEST(Coupons, FloatingRateCoupon) {
     FloatingCouponVars<double> vars;
-    FloatingRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
+    FloatingRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.curveContext("TEST"));
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
@@ -73,7 +73,7 @@ TEST(Coupons, FloatingRateCoupon) {
 
 TEST(Coupons, FixedRateCouponDual) {
     FixedCouponVars<dual> vars;
-    FixedRateCoupon<dual> coupon(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.store_.at("TEST"));
+    FixedRateCoupon<dual> coupon(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.store_.curveContext("TEST"));
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
@@ -92,7 +92,7 @@ TEST(Coupons, FixedRateCouponDual) {
 
 TEST(Coupons, FloatingRateCouponDual) {
     FloatingCouponVars<dual> vars;
-    FloatingRateCoupon<dual> coupon(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.at("TEST"));
+    FloatingRateCoupon<dual> coupon(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store_.curveContext("TEST"));
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());

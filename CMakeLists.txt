@@ -14,6 +14,7 @@ file(
   SOURCES
   "src/*.cpp"
   "src/data/*.cpp"
+  "src/fundation/*.cpp"
   "src/cashflows/*.cpp"
   "src/instruments/*.cpp"
   "src/instruments/fixedrate/*.cpp"

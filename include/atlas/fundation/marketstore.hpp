@@ -7,16 +7,16 @@
 namespace Atlas {
 
     /**
-     * @class CurveContextStore
-     * @brief Singleton class with thread local storage that stores all the curve contexts.
+     * @class MarketStore
+     * @brief Class with thread local storage that stores all the curve contexts.
      */
-    class CurveContextStore {
+    class MarketStore {
        public:
         /**
          * @brief Returns the instance of the store.
          * @return The instance of the store.
          */
-        static CurveContextStore& instance();
+        MarketStore() = default;
 
         /**
          * @brief Creates a copy of curve context and adds it to the store.
@@ -31,32 +31,32 @@ namespace Atlas {
          * @param contextName The name of the context.
          * @return The curve context.
          */
-        const CurveContext& at(const std::string& contextName) const;
+        const CurveContext& curveContext(const std::string& contextName) const;
 
         /**
          * @brief Returns a thread local versoin of curve context at the given index.
          * @param idx The index of the context.
          * @return The curve context.
          */
-        const CurveContext& at(size_t idx) const;
+        const CurveContext& curveContext(size_t idx) const;
 
         /**
          * @brief Checks if the store has a context with the given name.
-         * 
+         *
          * @param contextName string name of the context.
          * @return true if the store has a context with the given name.
          * @return false if the store does not have a context with the given name.
          */
-        inline bool hasContext(const std::string& contextName) const { return nameToIdx_.find(contextName) != nameToIdx_.end(); }
+        inline bool hasCurveContext(const std::string& contextName) const { return nameToIdx_.find(contextName) != nameToIdx_.end(); }
 
-        void copyContextsFromStore(const CurveContextStore& store);
+        void copyFromStore(const MarketStore& store);
 
        private:
-        CurveContextStore() = default;
 
-        static thread_local std::unique_ptr<CurveContextStore> instance_;
-        static thread_local std::map<std::string, size_t> nameToIdx_;
-        static thread_local std::vector<std::unique_ptr<CurveContext>> contexts_;
+        Date referenceDate_ = Date();
+        std::map<std::string, size_t> nameToIdx_;
+        std::vector<CurveContext> contexts_;
+        
     };
 
 }  // namespace Atlas

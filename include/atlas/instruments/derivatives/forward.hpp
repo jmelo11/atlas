@@ -14,8 +14,6 @@ namespace Atlas {
     template <typename adouble>
     class Forward : public Instrument<adouble> {
        public:
-        enum Side { Pay = 1, Recieve = -1 };
-
         /**
          * @brief Construct a new Forward object
          *
@@ -26,7 +24,10 @@ namespace Atlas {
          * @param currency
          */
         Forward(const Date& startDate, const Date& endDate, adouble fwdPrice, double notional, Currency curr1, Currency curr2, Side side)
-        : Instrument<adouble>(startDate, endDate, notional), fwdPrice_(fwdPrice), side_(side) {
+        : fwdPrice_(fwdPrice), side_(side) {
+            this->startDate_ = startDate;
+            this->endDate_   = endDate;
+            this->notional_  = notional;
             Cashflow<adouble> cashflow1(startDate, fwdPrice * notional, curr1.numericCode());
             Cashflow<adouble> cashflow2(endDate, notional, curr2.numericCode());
             leg_.addRedemption(cashflow1);

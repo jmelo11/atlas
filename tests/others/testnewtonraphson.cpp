@@ -2,7 +2,7 @@
 #include <atlas/others/newtonraphsonsolver.hpp>
 using namespace Atlas;
 
-TEST(Others, NewtonRaphson) {
+TEST(Solver, NewtonRaphson) {
     auto f = [](dual x) { return x * x; };
 
     NewtonRaphsonSolver solver;

@@ -2,9 +2,9 @@
 #define EA82B4A2_2A5C_4B6E_A0A0_0807E93983BE
 
 #include <atlas/data/marketdata.hpp>
-#include <atlas/visitors/visitor.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/visitors/visitor.hpp>
 #include <iostream>
 
 namespace Atlas {
@@ -28,6 +28,7 @@ namespace Atlas {
         void visit(FixedRateInstrument<adouble>& inst) override {
             fixedLegNPV(inst.leg());
             redemptionsNPV(inst.leg());
+            //npv(inst.leg());
         };
 
         void visit(FloatingRateInstrument<adouble>& inst) override {
@@ -36,6 +37,28 @@ namespace Atlas {
         };
 
        private:
+        template <typename LegType>
+        void npv(LegType& leg) {
+            adouble df = 0.0;
+            for (const auto& redemption : leg.redemptions()) {
+                df = marketData_.dfs.at(redemption.dfIdx());
+                if constexpr (std::is_same_v<adouble, double>) {
+                    nonSensNPV_ += redemption.amount() * df;
+                } else {
+                    nonSensNPV_ += redemption.amount().val * df.val;
+                }
+            }
+
+            for (auto& coupon : leg.coupons()) {
+                df = marketData_.dfs.at(coupon.dfIdx());
+                if constexpr (std::is_same_v<LegType, FloatingRateLeg<adouble>>) {
+                    adouble fwd = marketData_.fwds.at(coupon.fwdIdx());
+                    coupon.fixing(fwd);
+                }
+                npv_ += coupon.amount() * df;
+            }
+        };
+
         void redemptionsNPV(const Leg<adouble>& leg) {
             adouble npv = 0.0;
             adouble df  = 0.0;

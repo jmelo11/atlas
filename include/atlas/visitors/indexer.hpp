@@ -54,6 +54,12 @@ namespace Atlas {
             spots.insert(spots.end(), spots_.begin(), spots_.end());
         };
 
+        MarketRequest request() {
+            MarketRequest request;
+            setRequest(request);
+            return request;
+        };
+
         void clear() {
             dfs_.clear();
             fwds_.clear();

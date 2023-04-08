@@ -2,9 +2,9 @@
 #define A48CDCC5_BB81_4A85_AA59_E7D536EFAC4B
 
 #include <ql/termstructures/yield/flatforward.hpp>
+#include <atlas/fundation/marketstore.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
-#include <atlas/rates/curvecontextstore.hpp>
 
 using namespace Atlas;
 
@@ -18,9 +18,9 @@ struct FixedInstrumentVars {
     double notional            = 100;
     adouble rateValue          = 0.03;
     InterestRate<adouble> rate = InterestRate<adouble>(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
-    CurveContextStore& store_  = CurveContextStore::instance();
+    MarketStore store_         = MarketStore();
     FixedInstrumentVars() {
-        if (!store_.hasContext("TEST")) {
+        if (!store_.hasCurveContext("TEST")) {
             FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
             RateIndex index("TEST", Frequency::Annual, Actual360());
             store_.createCurveContext("TEST", curveStrategy, index);
@@ -35,9 +35,9 @@ struct FloatingInstrumentVars {
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
     adouble spread             = 0.01;
-    CurveContextStore& store_  = CurveContextStore::instance();
+    MarketStore store_         = MarketStore();
     FloatingInstrumentVars() {
-        if (!store_.hasContext("TEST")) {
+        if (!store_.hasCurveContext("TEST")) {
             FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
             RateIndex index("TEST", Frequency::Annual, Actual360());
             store_.createCurveContext("TEST", curveStrategy, index);

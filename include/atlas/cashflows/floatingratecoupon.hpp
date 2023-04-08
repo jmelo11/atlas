@@ -104,9 +104,9 @@ namespace Atlas {
          * @return The accrued amount of the coupon
          */
         inline adouble accruedAmount(const Date& start, const Date& end) const override {
-            adouble totalRate = fixing_ + spread_;
-            InterestRate r(totalRate, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq);
-            return this->notional() * (r.compoundFactor(start, end) - 1.0);
+            adouble totalRate  = fixing_ + spread_;
+            adouble compFactor = fastCompoundFactor<adouble>(totalRate, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq, start, end);
+            return this->notional() * (compFactor - 1.0);
         };
 
         /**

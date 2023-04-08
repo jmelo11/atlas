@@ -25,13 +25,13 @@ TEST(NPVCalculator, FixedRateInstrument) {
     FixedRateBulletInstrument<double> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("TEST")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("TEST")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("TEST", Frequency::Annual, Actual360());
         store_.createCurveContext("TEST", curveStrategy, index);
     }
-    auto& context = store_.at("TEST");
+    auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
 
@@ -41,7 +41,7 @@ TEST(NPVCalculator, FixedRateInstrument) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<double> model(request);
+    StaticCurveModel<double> model(request, store_);
 
     MarketData<double> marketData = model.simulate(startDate);
 
@@ -75,18 +75,18 @@ TEST(NPVCalculator, FixedRateInstrumentDual) {
     Date endDate               = Date(1, Month::Aug, 2021);
     Frequency paymentFrequency = Frequency::Monthly;
     double notional            = 100;
-    dual rateValue           = 0.03;
-    InterestRate<dual> rate  = InterestRate(rateValue, Thirty360(Thirty360::BondBasis), Compounding::Simple, Frequency::Annual);
+    dual rateValue             = 0.03;
+    InterestRate<dual> rate    = InterestRate(rateValue, Thirty360(Thirty360::BondBasis), Compounding::Simple, Frequency::Annual);
     FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("TEST")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("TEST")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("TEST", Frequency::Annual, Actual360());
         store_.createCurveContext("TEST", curveStrategy, index);
     }
-    auto& context = store_.at("TEST");
+    auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
 
@@ -96,7 +96,7 @@ TEST(NPVCalculator, FixedRateInstrumentDual) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<dual> model(request);
+    StaticCurveModel<dual> model(request, store_);
 
     MarketData<dual> marketData = model.simulate(startDate);
 
@@ -132,15 +132,15 @@ TEST(NPVCalculator, FloatingRateInstrument) {
     double spread   = 0.0;
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("LIBOR1M")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("LIBOR1M")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
         store_.createCurveContext("LIBOR1M", curveStrategy, index);
     }
 
     // get context
-    auto& context = store_.at("LIBOR1M");
+    auto& context = store_.curveContext("LIBOR1M");
     FloatingRateBulletInstrument<double> instrument(startDate, endDate, notional, spread, context);
     // set curve context
     instrument.discountCurveContex(context);
@@ -151,7 +151,7 @@ TEST(NPVCalculator, FloatingRateInstrument) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<double> model(request);
+    StaticCurveModel<double> model(request, store_);
 
     MarketData<double> marketData = model.simulate(startDate);
 
@@ -199,18 +199,18 @@ TEST(NPVCalculator, FloatingRateInstrumentDual) {
     Date startDate  = Date(1, Month::Aug, 2020);
     Date endDate    = Date(1, Month::Aug, 2021);
     double notional = 100;
-    dual spread   = 0.0;
+    dual spread     = 0.0;
 
     // Create a curve context store
-    CurveContextStore& store_ = CurveContextStore::instance();
-    if (!store_.hasContext("LIBOR1M")) {
+    MarketStore store_ = MarketStore();
+    if (!store_.hasCurveContext("LIBOR1M")) {
         FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
         RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
         store_.createCurveContext("LIBOR1M", curveStrategy, index);
     }
 
     // get context
-    auto& context = store_.at("LIBOR1M");
+    auto& context = store_.curveContext("LIBOR1M");
     FloatingRateBulletInstrument<dual> instrument(startDate, endDate, notional, spread, context);
     // set curve context
     instrument.discountCurveContex(context);
@@ -221,7 +221,7 @@ TEST(NPVCalculator, FloatingRateInstrumentDual) {
     MarketRequest request;
     indexer.setRequest(request);
 
-    StaticCurveModel<dual> model(request);
+    StaticCurveModel<dual> model(request, store_);
 
     MarketData<dual> marketData = model.simulate(startDate);
 
@@ -262,4 +262,15 @@ TEST(NPVCalculator, FloatingRateInstrumentDual) {
     // std::cout << "\n" << std::endl;
     // for (auto& cashflow : qlBond.cashflows()) { std::cout << cashflow->date() << "||" << cashflow->amount() << std::endl; }
     EXPECT_NEAR(npvCalculator.results().val, qlBond.NPV(), 1e-6);
+}
+
+TEST(NPVCalculator, Forward) {
+    // Create a fixed rate instrument
+    Date startDate  = Date(1, Month::Aug, 2020);
+    Date endDate    = Date(1, Month::Aug, 2021);
+    double notional = 100;
+    double fwdPrice = 800;
+    Currency curr1  = USD();
+    Currency curr2  = CLP();
+    Forward<double> instrument(startDate, endDate, fwdPrice, notional, curr1, curr2, Side::PAY);
 }
