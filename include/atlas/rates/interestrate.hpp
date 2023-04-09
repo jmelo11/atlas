@@ -157,9 +157,8 @@ namespace Atlas {
     template <typename adouble>
     inline adouble fastCompoundFactor(adouble r, const QuantLib::DayCounter& dc, QuantLib::Compounding comp, QuantLib::Frequency freq_,
                                       const QuantLib::Date& d1, const QuantLib::Date& d2) {
-        
         double freq = double(freq_);
-        double t = dc.yearFraction(d1, d2);
+        double t    = dc.yearFraction(d1, d2);
         switch (comp) {
             case QuantLib::Compounding::Simple:
                 return 1.0 + r * t;

@@ -1,42 +1,36 @@
 # Atlas: Libreria Financiera (alpha version)
 
-El objetivo de esta libreria es convertirse en una alternativa real a las herramientas que ya existen en el mercado, diferenciandose en performance, simplicidad y scope. En cuanto a esto, podemos mencionar:
+El objetivo de Atlas es convertirse en una alternativa real a las herramientas financieras existentes en el mercado, ofreciendo un mayor rendimiento, simplicidad y alcance.
 
-- Performance:
-    Hasta el dia de hoy, la unica alternativa utilizable en sistemas productivos es QuantLib, la cual cuenta con un sinfin de herramientas elaboradas para valorizar diversos instrumentos. Sin embargo, es importante mencionar que esta libreria no esta orientada a ser rapida (no cuenta con multithreading por default, por ejemplo), si no que a ser una herramienta flexible. Creo que aqui hay un espacio donde Atlas puede diferenciarse, al reducir el scope de herramientas disponibles, pero con una performance mucho mayor al estar construida desde un inicio pensando en performance.
+- Performance: En cuanto al rendimiento, hasta el día de hoy, la única alternativa utilizable en sistemas productivos es QuantLib, que cuenta con un sinfín de herramientas para valorizar diversos instrumentos. Sin embargo, es importante mencionar que QuantLib no está pensada a ser rápida (no cuenta con multithreading por defecto, por ejemplo), sino que se enfoca en la flexibilidad. Creemos que hay un espacio en el mercado donde Atlas puede diferenciarse al reducir el alcance de herramientas disponibles y enfocarse en la velocidad, construyéndose desde un inicio con ese objetivo.
 
-- Simplicidad:
-    En linea con lo anterior, el objetivo es tener una herramienta simple, con la suficiente flexibilidad para poder implementar los instrumentos mas comunes del mercado (instrumentos vanilla), de manera que los usuarios pueden aprender de forma facil a usarla. Idealmente, la libreria deberia tener tambien la suficiente flexibilidad para aquellos usuarios mas expertos que buscan cosas especificas.
+- Simplicidad: La simplicidad es otro aspecto clave de Atlas. Se busca tener una herramienta sencilla pero práctica, para que los usuarios puedan aprender a usarla fácilmente, y lo suficientemente flexible para implementar los instrumentos financieros más avanzados del mercado. 
 
+Algunas características técnicas que se buscan incorporar en Atlas son:
 
-Algunas caracteristicas tecnicas que se buscan incorporar por defecto son:
-
-- Multithreading:
-    Contar con una estructura que permitar utilizar la libreria de una forma thread-safe es crucial para poder usar el maximo de performance.
-
-- Diferenciacion automatica:
-    AAD se ha convertido en un estandar para el calculo de sensibilidades en el mundo financiero, habilitando la posibilidad de contar con riesgos de forma automatica sin tener que recalcular (bump'n revalue) todos nuestros instrumentos. Esta funcionalidad es crucial si, por ejemplo, uno busca calcular XVAs o otras metricas.
+- Multithreading: contar con una estructura que permita utilizar la librería de forma thread-safe es crucial para poder sacarle el máximo de rendimiento.
+- Diferenciación automática: AAD se ha convertido en un estándar para el cálculo de sensibilidades en el mundo financiero, habilitando la posibilidad de contar con riesgos de forma automática sin tener que recalcular todos nuestros instrumentos. Esta funcionalidad es crucial si, por ejemplo, se busca calcular XVAs u otras métricas.
 
 
 ## Roadmap 
 
 ### Generales 
 
-- [x] Estructura basica de las clases (en desarrollo)
+- [x] Estructura básica de las clases (en desarrollo)
 - [x] Diferenciacion automatica
 - [x] Paralelización CPU
 - [ ] Port a Python
-- [ ] Paralelización GPU (depende de factibilidad)
+- [ ] Compresión de portafolio
 - [ ] Precisión monedas
+- [ ] Paralelización GPU (depende de factibilidad)
 - [ ] Calendarios avanzados (incorporar parámetros QL)
-- [ ] Compresion portafolio
 
 ### Funcionalidades
 
 - [x] NPV
 - [x] Sensibilidades (ej. Duracion)
 - [x] Tasas Par
-- [ ] ZSpread
+- [x] ZSpread
 
 ### Instrumentos
 
@@ -57,7 +51,7 @@ Algunas caracteristicas tecnicas que se buscan incorporar por defecto son:
 
 ### Curvas
 
-- [ ] Interpolación con soporte AD
+- [x] Interpolación con soporte AD
 - [ ] Curvas con soporte AD
 - [ ] Bootstrap con soporte AD
 

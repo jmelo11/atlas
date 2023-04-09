@@ -4,7 +4,7 @@
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <numeric>
 
-TEST(Instruments, CustomFloatingRateInstrument) {
+TEST(Instrument, CustomFloatingRateInstrument) {
     FloatingInstrumentVars<double> vars;
 
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
@@ -23,7 +23,7 @@ TEST(Instruments, CustomFloatingRateInstrument) {
     for (const auto& redemption : redemptions) { EXPECT_EQ(redemption.amount(), notional / 2); }
 }
 
-TEST(Instruments, CustomFloatingRateInstrumentDual) {
+TEST(Instrument, CustomFloatingRateInstrumentDual) {
     FloatingInstrumentVars<dual> vars;
 
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);

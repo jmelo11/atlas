@@ -4,7 +4,7 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <numeric>
 
-TEST(Instruments, CustomFixedRateInstrument) {
+TEST(Instrument, CustomFixedRateInstrument) {
     FixedInstrumentVars<double> vars;
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
 
@@ -20,7 +20,7 @@ TEST(Instruments, CustomFixedRateInstrument) {
     for (const auto& redemption : redemptions) { EXPECT_EQ(redemption.amount(), notional / 2); }
 }
 
-TEST(Instruments, CustomFixedRateInstrumentDual) {
+TEST(Instrument, CustomFixedRateInstrumentDual) {
     FixedInstrumentVars<dual> vars;
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
 
