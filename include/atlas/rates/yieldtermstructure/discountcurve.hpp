@@ -7,9 +7,9 @@
 namespace Atlas {
 
     template <typename adouble, typename Interpol>
-    class DiscountCurveStrategy : public YieldTermStructureStrategy<adouble> {
+    class DiscountStrategy : public YieldTermStructureStrategy<adouble> {
        public:
-        DiscountCurveStrategy(const std::vector<Date>& dates, const std::vector<adouble>& dfs, const DayCounter& dayCounter)
+        DiscountStrategy(const std::vector<Date>& dates, const std::vector<adouble>& dfs, const DayCounter& dayCounter)
         : dayCounter_(dayCounter), dates_(dates), dfs_(dfs) {
             if (dates.size() != dfs.size()) { throw std::invalid_argument("dates and dfs must have the same size"); }
             if (dates.size() < 2) { throw std::invalid_argument("dates and dfs must have at least 2 elements"); }
@@ -44,7 +44,7 @@ namespace Atlas {
         };
 
         std::unique_ptr<YieldTermStructureStrategy<adouble>> copy() const override {
-            return std::make_unique<DiscountCurveStrategy<adouble, Interpol>>(dates_, dfs_, dayCounter_);
+            return std::make_unique<DiscountStrategy<adouble, Interpol>>(dates_, dfs_, dayCounter_);
         };
 
         void enableExtrapolation() { interpol_.enableExtrapolation(); }

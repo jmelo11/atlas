@@ -13,9 +13,11 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
 #include <atlas/multithreading/threadpool.hpp>
+#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <nanobench.h>
+
 using namespace Atlas;
 
 template <typename NumType>
@@ -28,12 +30,20 @@ void sizes() {
 }
 
 template <typename NumType>
-void bechmarkFixedRateCoupons(MarketStore& store_) {
+void bechmarkFixedRateCoupons() {
     // this benchmark tries to measure the time cost of creating and iterating over a vector of coupons
     // first test: 1000 coupons and compare quantlib against atlas
 
     // benchmark description
-    ankerl::nanobench::Bench().title("Fixed Rate Coupon Creation and Iteration");
+    ankerl::nanobench::Bench bench;
+    if constexpr (std::is_same_v<NumType, double>) {
+        bench.title("(double) Fixed Rate Coupon Creation and Iteration").warmup(100).relative(true);
+
+    } else {
+        bench.title("(dual) Fixed Rate Coupon Creation and Iteration").warmup(100).relative(true);
+    }
+
+    bench.performanceCounters(true);
 
     // parameters
     size_t numCoupons = 1000000;
@@ -70,7 +80,7 @@ void bechmarkFixedRateCoupons(MarketStore& store_) {
     }
 
     // benchmark
-    ankerl::nanobench::Bench().run("Amount: Atlas FixedRateCoupon", [&]() {
+    bench.run("Amount: Atlas FixedRateCoupon", [&]() {
         NumType sum = 0;
         // iter over all slices
         for (auto& slice : slices) {
@@ -79,7 +89,7 @@ void bechmarkFixedRateCoupons(MarketStore& store_) {
     });
 
     ThreadPool* pool = ThreadPool::getInstance();
-    ankerl::nanobench::Bench().run("Parallel Amount: Atlas FixedRateCoupon", [&]() {
+    bench.run("Parallel Amount: Atlas FixedRateCoupon", [&]() {
         NumType sum = 0;
         // parallel for each
         pool->start();
@@ -95,7 +105,7 @@ void bechmarkFixedRateCoupons(MarketStore& store_) {
         pool->stop();
     });
 
-    ankerl::nanobench::Bench().run("Amount: QuantLib FixedRateCoupon", [&]() {
+    bench.run("Amount: QuantLib FixedRateCoupon", [&]() {
         NumType sum = 0;
         // iter over all slices
         for (auto& slice : qlSlices) {
@@ -103,7 +113,7 @@ void bechmarkFixedRateCoupons(MarketStore& store_) {
         }
     });
 
-    ankerl::nanobench::Bench().run("Parallel Amount: QuantLib FixedRateCoupon", [&]() {
+    bench.run("Parallel Amount: QuantLib FixedRateCoupon", [&]() {
         NumType sum = 0;
         // parallel for each
         pool->start();
@@ -121,17 +131,29 @@ void bechmarkFixedRateCoupons(MarketStore& store_) {
 }
 
 template <typename NumType>
-void bechmarkFloatingRateCoupons(MarketStore& store_) {
-    ankerl::nanobench::Bench().title("Floating Rate Coupon Creation and Iteration");
+void bechmarkFloatingRateCoupons() {
+    ankerl::nanobench::Bench bench;
+    if (std::is_same_v<NumType, double>) {
+        bench.title("(double) Floating Rate Coupon Creation and Iteration").warmup(100).relative(true);
+    } else {
+        bench.title("(dual) Floating Rate Coupon Creation and Iteration").warmup(100).relative(true);
+    }
+
+    bench.performanceCounters(true);
 
     size_t numCoupons = 100000;
     Date startDate(1, Month::Aug, 2020);
     Date endDate(1, Month::September, 2020);
-    double notional = 100;
-    NumType spread  = 0.01;
-
+    double notional   = 100;
+    NumType spread    = 0.01;
+    NumType rateValue = 0.03;
     // Atlas index and curve settings
-    auto& context = store_.curveContext("TEST");
+    MarketStore<NumType> mainStore_;
+    FlatForwardStrategy<NumType> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<NumType> curve_(std::make_unique<FlatForwardStrategy<NumType>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    mainStore_.createCurveContext("TEST", curve_, index);
+    auto& context = mainStore_.curveContext("TEST");
 
     // QuantLib index
     QuantLib::Handle<QuantLib::YieldTermStructure> curveHandle(boost::make_shared<QuantLib::FlatForward>(startDate, 0.03, Actual360()));
@@ -163,7 +185,7 @@ void bechmarkFloatingRateCoupons(MarketStore& store_) {
     boost::shared_ptr<QuantLib::IborCouponPricer> pricer(new QuantLib::BlackIborCouponPricer);
     pricer->setCapletVolatility(vol);
 
-    ankerl::nanobench::Bench().run("Amount: Atlas FloatingRateCoupon", [&]() {
+    bench.run("Amount: Atlas FloatingRateCoupon", [&]() {
         NumType sum = 0;
         // iter over all slices
         NumType fwd = 0.03;
@@ -176,7 +198,7 @@ void bechmarkFloatingRateCoupons(MarketStore& store_) {
     });
 
     ThreadPool* pool = ThreadPool::getInstance();
-    ankerl::nanobench::Bench().run("Parallel Amount: Atlas FloatingRateCoupon", [&]() {
+    bench.run("Parallel Amount: Atlas FloatingRateCoupon", [&]() {
         // parallel for each
         pool->start();
         std::vector<TaskHandle> futures;
@@ -196,7 +218,7 @@ void bechmarkFloatingRateCoupons(MarketStore& store_) {
         pool->stop();
     });
 
-    ankerl::nanobench::Bench().run("Amount: QuantLib FloatingRateCoupon", [&]() {
+    bench.run("Amount: QuantLib FloatingRateCoupon", [&]() {
         double sum = 0;
         // iter over all slices
         for (auto& slice : qlSlices) {
@@ -211,7 +233,7 @@ void bechmarkFloatingRateCoupons(MarketStore& store_) {
     });
 
     std::mutex m;
-    ankerl::nanobench::Bench().run("Parallel Amount: QuantLib FloatingRateCoupon", [&]() {
+    bench.run("Parallel Amount: QuantLib FloatingRateCoupon", [&]() {
         pool->start();
         std::vector<TaskHandle> futures;
         for (auto& slice : qlSlices) {
@@ -237,8 +259,17 @@ void bechmarkFloatingRateCoupons(MarketStore& store_) {
 }
 
 template <typename NumType>
-void pricingBenchmark(MarketStore& mainStore_) {
-    ankerl::nanobench::Bench().title("Fixed Rate Coupon Creation and Iteration");
+void pricingBenchmark() {
+    // benchmark
+    ankerl::nanobench::Bench bench;
+
+    if constexpr (std::is_same_v<NumType, double>) {
+        bench.title("(double) Pricing Instruments").warmup(200).relative(true);
+    } else {
+        bench.title("(dual) Pricing Instruments").warmup(200).relative(true);
+    }
+
+    bench.performanceCounters(true);
 
     // parameters
     size_t numInstruments = 10000;
@@ -247,15 +278,22 @@ void pricingBenchmark(MarketStore& mainStore_) {
     Date endDate(1, Month::September, 2025);
     Frequency paymentFreq = Frequency::Semiannual;
     double notional       = 100;
-    NumType rate          = 0.03;
-    InterestRate<NumType> interestRate(rate, Actual360(), Compounding::Simple, Frequency::Annual);
+    NumType rateValue     = 0.03;
+    InterestRate<NumType> interestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
 
     QuantLib::InterestRate qlInterestRate;
     if constexpr (std::is_same_v<NumType, double>) {
-        qlInterestRate = QuantLib::InterestRate(rate, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+        qlInterestRate = QuantLib::InterestRate(rateValue, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
     } else {
-        qlInterestRate = QuantLib::InterestRate(rate.val, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+        qlInterestRate = QuantLib::InterestRate(rateValue.val, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
     }
+    // market data
+    MarketStore<NumType> mainStore_;
+    FlatForwardStrategy<NumType> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<NumType> curve_(std::make_unique<FlatForwardStrategy<NumType>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    mainStore_.createCurveContext("TEST", curve_, index);
+    auto& context = mainStore_.curveContext("TEST");
 
     // slices of atlas instruments
     size_t numThreads = std::thread::hardware_concurrency();
@@ -265,45 +303,42 @@ void pricingBenchmark(MarketStore& mainStore_) {
     for (size_t i = 0; i < numThreads; ++i) {
         std::vector<FixedRateBulletInstrument<NumType>> slice;
         for (size_t j = 0; j < sliceSize; ++j) {
-            slice.push_back(
-                FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, mainStore_.curveContext("TEST")));
+            slice.push_back(FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, context));
         }
         slices.push_back(slice);
     }
 
     ThreadPool* pool = ThreadPool::getInstance();
-    // ankerl::nanobench::Bench().run("Price: Atlas FixedRateBulletInstrument", [&]() {
-    //     pool->start(0);
+    bench.run("Price: Atlas FixedRateBulletInstrument", [&]() {
+        pool->start(0);
 
-    //     std::vector<TaskHandle> futures;
-    //     NumType npv = 0;
-    //     for (auto& slice : slices) {
-    //         auto task = [&]() {
-    //             // std::cout << pool->threadNum() << std::endl;
-    //             Date evalDate(1, Month::Aug, 2020);
-    //             MarketStore store;
-    //             store.copyFromStore(mainStore_);
+        std::vector<TaskHandle> futures;
+        NumType npv = 0;
+        for (auto& slice : slices) {
+            auto task = [&]() {
+                MarketStore<NumType> store;
+                store.copyFromStore(mainStore_);
 
-    //             Indexer<NumType> indexer;
-    //             for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(indexer); }
+                Indexer<NumType> indexer;
+                for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(indexer); }
 
-    //             MarketRequest request = indexer.request();
-    //             StaticCurveModel<NumType> model(request, store);
+                MarketRequest request = indexer.request();
+                StaticCurveModel<NumType> model(request, store);
 
-    //             MarketData<NumType> marketData = model.simulate(evalDate);
+                MarketData<NumType> marketData = model.simulate(startDate);
 
-    //             NPVCalculator<NumType> calculator(marketData);
-    //             for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(calculator); }
-    //             npv += calculator.results();
-    //             return true;
-    //         };
-    //         futures.push_back(pool->spawnTask(task));
-    //     }
-    //     for (auto& future : futures) { pool->activeWait(future); }
-    //     pool->stop();
-    // });
+                NPVCalculator<NumType> calculator(marketData);
+                for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(calculator); }
+                npv += calculator.results();
+                return true;
+            };
+            futures.push_back(pool->spawnTask(task));
+        }
+        for (auto& future : futures) { pool->activeWait(future); }
+        pool->stop();
+    });
 
-    ankerl::nanobench::Bench().run("Parallel Price: Atlas FixedRateBulletInstrument", [&]() {
+    bench.run("Parallel Price: Atlas FixedRateBulletInstrument", [&]() {
         pool->start();
 
         std::vector<TaskHandle> futures;
@@ -312,7 +347,7 @@ void pricingBenchmark(MarketStore& mainStore_) {
             auto task = [&]() {
                 // std::cout << pool->threadNum() << std::endl;
 
-                MarketStore store;
+                MarketStore<NumType> store;
                 store.copyFromStore(mainStore_);
 
                 Indexer<NumType> indexer;
@@ -335,73 +370,67 @@ void pricingBenchmark(MarketStore& mainStore_) {
         pool->stop();
     });
 
-    // // slices of quantlib instruments
+    // slices of quantlib instruments
 
-    // std::vector<std::vector<QuantLib::FixedRateBond>> qlSlices;
-    // Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFreq);
-    // for (size_t i = 0; i < numThreads; ++i) {
-    //     std::vector<QuantLib::FixedRateBond> slice;
-    //     for (size_t j = 0; j < sliceSize; ++j) { slice.push_back(QuantLib::FixedRateBond(0, notional, schedule, {qlInterestRate})); }
-    //     qlSlices.push_back(slice);
-    // }
+    std::vector<std::vector<QuantLib::FixedRateBond>> qlSlices;
+    Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFreq);
+    for (size_t i = 0; i < numThreads; ++i) {
+        std::vector<QuantLib::FixedRateBond> slice;
+        for (size_t j = 0; j < sliceSize; ++j) { slice.push_back(QuantLib::FixedRateBond(0, notional, schedule, {qlInterestRate})); }
+        qlSlices.push_back(slice);
+    }
 
-    // QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> discountingTermStructure;
-    // boost::shared_ptr<QuantLib::YieldTermStructure> curve(
-    //     new QuantLib::FlatForward(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual));
-    // discountingTermStructure.linkTo(curve);
-    // boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
+    QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> discountingTermStructure;
+    boost::shared_ptr<QuantLib::YieldTermStructure> curve(
+        new QuantLib::FlatForward(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual));
+    discountingTermStructure.linkTo(curve);
+    boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
 
-    // ankerl::nanobench::Bench().run("Pricing: QuantLib FixedRateBulletInstrument", [&]() {
-    //     pool->start(0);
-    //     std::vector<TaskHandle> futures;
-    //     double npv = 0;
-    //     for (auto& slice : qlSlices) {
-    //         auto task = [&]() {
-    //             double npv_ = 0;
-    //             for (auto& qlBond : slice) {
-    //                 qlBond.setPricingEngine(bondEngine);
-    //                 npv_ += qlBond.NPV();
-    //             }
-    //             npv += npv_;
-    //             return true;
-    //         };
-    //         futures.push_back(pool->spawnTask(task));
-    //     }
-    //     for (auto& future : futures) { pool->activeWait(future); }
-    // });
+    bench.run("Pricing: QuantLib FixedRateBulletInstrument", [&]() {
+        pool->start(0);
+        std::vector<TaskHandle> futures;
+        double npv = 0;
+        for (auto& slice : qlSlices) {
+            auto task = [&]() {
+                double npv_ = 0;
+                for (auto& qlBond : slice) {
+                    qlBond.setPricingEngine(bondEngine);
+                    npv_ += qlBond.NPV();
+                }
+                npv += npv_;
+                return true;
+            };
+            futures.push_back(pool->spawnTask(task));
+        }
+        for (auto& future : futures) { pool->activeWait(future); }
+    });
 
-    // ankerl::nanobench::Bench().run("Parallel Pricing: QuantLib FixedRateBulletInstrument", [&]() {
-    //     pool->start();
-    //     std::vector<TaskHandle> futures;
-    //     double npv = 0;
-    //     for (auto& slice : qlSlices) {
-    //         auto task = [&]() {
-    //             double npv_ = 0;
-    //             for (auto& qlBond : slice) {
-    //                 qlBond.setPricingEngine(bondEngine);
-    //                 npv_ += qlBond.NPV();
-    //             }
-    //             npv += npv_;
-    //             return true;
-    //         };
-    //         futures.push_back(pool->spawnTask(task));
-    //     }
-    //     for (auto& future : futures) { pool->activeWait(future); }
-    // });
+    bench.run("Parallel Pricing: QuantLib FixedRateBulletInstrument", [&]() {
+        pool->start();
+        std::vector<TaskHandle> futures;
+        double npv = 0;
+        for (auto& slice : qlSlices) {
+            auto task = [&]() {
+                double npv_ = 0;
+                for (auto& qlBond : slice) {
+                    qlBond.setPricingEngine(bondEngine);
+                    npv_ += qlBond.NPV();
+                }
+                npv += npv_;
+                return true;
+            };
+            futures.push_back(pool->spawnTask(task));
+        }
+        for (auto& future : futures) { pool->activeWait(future); }
+    });
 }
 
 int main() {
-    Date startDate(1, Month::Aug, 2020);
-    MarketStore store_;
-    FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-    RateIndex index("TEST", Frequency::Annual, Actual360());
-    store_.createCurveContext("TEST", curveStrategy, index);
+    bechmarkFixedRateCoupons<double>();
+    bechmarkFloatingRateCoupons<double>();
+    pricingBenchmark<double>();
 
-    // bechmarkFixedRateCoupons<double>(store_);
-    // bechmarkFloatingRateCoupons<double>(store_);
-    pricingBenchmark<double>(store_);
-
-    // bechmarkFixedRateCoupons<dual>(store_);
-    // bechmarkFloatingRateCoupons<dual>(store_);
-    // pricingBenchmark<dual>(store_);
+    bechmarkFixedRateCoupons<dual>();
+    bechmarkFloatingRateCoupons<dual>();
+    pricingBenchmark<dual>();
 }

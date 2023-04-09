@@ -5,6 +5,7 @@
 #include <atlas/models/staticcurvemodel.hpp>
 #include <atlas/multithreading/threadpool.hpp>
 #include <atlas/others/auxfuncs.hpp>
+#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <cppad/cppad.hpp>
@@ -16,7 +17,7 @@ using namespace Atlas;
 
 using NumType = double;
 
-void pricingFixedRateInstruments(MarketStore& store_) {
+void pricingFixedRateInstruments(MarketStore<NumType>& store_) {
     // Create a fixed rate instrument
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2021);
@@ -44,7 +45,7 @@ void pricingFixedRateInstruments(MarketStore& store_) {
     std::cout << "NPV: " << npvCalculator.results() << std::endl;
 }
 
-void pricingFloatingRateInstruments(MarketStore& store_) {
+void pricingFloatingRateInstruments(MarketStore<NumType>& store_) {
     // Create a fixed rate instrument
     Date startDate  = Date(1, Month::Aug, 2020);
     Date endDate    = Date(1, Month::Aug, 2021);
@@ -74,12 +75,18 @@ void pricingFloatingRateInstruments(MarketStore& store_) {
     std::cout << "NPV: " << npvCalculator.results() << std::endl;
 }
 
-void rateSens(MarketStore& store_) {
+void rateSens() {
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2025);
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
     dual r                     = 0.03;
+
+    MarketStore<dual> store_;
+    FlatForwardStrategy<dual> curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<dual> curve_(std::make_unique<FlatForwardStrategy<dual>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    store_.createCurveContext("TEST", curve_, index);
 
     auto f = [&](const dual& r) {
         InterestRate<dual> rate = InterestRate(r, Actual360(), Compounding::Simple, Frequency::Annual);
@@ -103,7 +110,7 @@ void rateSens(MarketStore& store_) {
     std::cout << "Sens: " << sens << std::endl;
 }
 
-void multithreadedSens(MarketStore& store_) {
+void multithreadedSens() {
     Date startDate             = Date(1, Month::Aug, 2020);
     Date endDate               = Date(1, Month::Aug, 2025);
     Frequency paymentFrequency = Frequency::Semiannual;
@@ -111,10 +118,16 @@ void multithreadedSens(MarketStore& store_) {
     dual r                     = 0.03;
     InterestRate<dual> rate(r, Actual360(), Compounding::Simple, Frequency::Annual);
 
-    auto& context = store_.curveContext("TEST");
-    size_t numOps = 1000000;
+    size_t numOps = 10000;
     std::vector<FixedRateBulletInstrument<dual>> portfolio;
     portfolio.reserve(numOps);
+
+    MarketStore<dual> mainStore_;
+    FlatForwardStrategy<dual> curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<dual> curve_(std::make_unique<FlatForwardStrategy<dual>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    mainStore_.createCurveContext("TEST", curve_, index);
+    auto& context = mainStore_.curveContext("TEST");
 
     // create portfolio and index portfolio
     Indexer<dual> indexer;
@@ -147,21 +160,18 @@ void multithreadedSens(MarketStore& store_) {
     // // generate required rates
     MarketRequest request;
     indexer.setRequest(request);
-    // StaticCurveModel<dual> model(request, store_);
-    // MarketData<dual> marketData;
-    // {
-    //     std::cout << "Simulating market data" << std::endl;
-    //     Timer t;
-    // }
 
     auto npv = [&](dual r) {
         // set curve context
         ThreadPool* pool = ThreadPool::getInstance();
-        pool->start();
+        pool->start(0);
         std::vector<TaskHandle> futures;
         dual npv = 0.0;
         for (auto& slice : slices) {
             auto task = [&]() {
+                MarketStore<dual> store_;
+                store_.copyFromStore(mainStore_);
+
                 StaticCurveModel<dual> model(request, store_);
                 MarketData<dual> marketData;
                 marketData = model.simulate(startDate);
@@ -182,10 +192,11 @@ void multithreadedSens(MarketStore& store_) {
         return npv;
     };
 
+    dual npv_;
     {
         std::cout << "Calculating portfolio NPV" << std::endl;
         Timer t;
-        dual npv_ = npv(r);
+        npv_ = npv(r);
     }
 
     dual sens;
@@ -195,18 +206,13 @@ void multithreadedSens(MarketStore& store_) {
         sens = derivative(npv, wrt(r), at(r)) * 0.01;
     }
     std::cout << "Multicore sens: " << sens << std::endl;
+    std::cout << "NPV: " << npv_ << std::endl;
 }
 
 int main() {
-    Date evalDate = Date(1, Month::Aug, 2020);
-    MarketStore store_;
-    FlatForwardStrategy curveStrategy(evalDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-    RateIndex index("TEST", Frequency::Annual, Actual360());
-    store_.createCurveContext("TEST", curveStrategy, index);
-
     // pricingFixedRateInstruments(store_);
     // pricingFloatingRateInstruments(store_);
     // rateSens(store_);
-    multithreadedSens(store_);
+    multithreadedSens();
     return 0;
 }

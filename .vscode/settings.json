@@ -95,6 +95,25 @@
         "future": "cpp",
         "strstream": "cpp",
         "source_location": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "core": "cpp",
+        "iterativelinearsolvers": "cpp",
+        "orderingmethods": "cpp",
+        "sparse": "cpp",
+        "sparsecholesky": "cpp",
+        "sparsecore": "cpp",
+        "sparselu": "cpp",
+        "sparseqr": "cpp",
+        "*.inc": "cpp",
+        "cassert": "cpp",
+        "ccomplex": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "ciso646": "cpp",
+        "climits": "cpp",
+        "ctgmath": "cpp",
+        "execution": "cpp",
+        "cstdbool": "cpp",
+        "version": "cpp"
     }
 }

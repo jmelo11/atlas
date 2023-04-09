@@ -69,7 +69,7 @@ namespace Atlas {
          *
          * @param context
          */
-        inline void discountCurveContex(const CurveContext& context) {
+        inline void discountCurveContex(const CurveContext<adouble>& context) {
             leg_.discountCurveContext(context);
             disbursement_.discountCurveContext(context);
         }
@@ -79,7 +79,7 @@ namespace Atlas {
          *
          * @param context
          */
-        inline void forecastCurveContext(const CurveContext& context) { leg_.forecastCurveContext(context); }
+        inline void forecastCurveContext(const CurveContext<adouble>& context) { leg_.forecastCurveContext(context); }
 
         /**
          * @brief  Accepts a visitor.

@@ -12,14 +12,17 @@ namespace Atlas {
 
         virtual adouble discount(const Date& date) const = 0;
 
-        virtual adouble discount(adouble t) const = 0;
+        virtual adouble discount(double t) const = 0;
 
         virtual adouble forwardRate(const Date& startDate, const Date& endDate, const DayCounter& dayCounter, Compounding comp,
                                     Frequency freq) const = 0;
 
         virtual std::unique_ptr<YieldTermStructureStrategy> copy() const = 0;
 
-        Date referenceDate() const { return refDate_; };
+        Date refDate() const {
+            if (refDate_ == Date()) { throw std::invalid_argument("Reference date not set"); }
+            return refDate_;
+        };
 
        protected:
         Date refDate_;
@@ -34,7 +37,7 @@ namespace Atlas {
        public:
         YieldTermStructure(std::unique_ptr<YieldTermStructureStrategy<adouble>> strategy) : strategy_(std::move(strategy)) {}
 
-        Date referenceDate() const { return strategy_->refDate(); };
+        Date refDate() const { return strategy_->refDate(); };
 
         adouble discount(const Date& date) const { return strategy_->discount(date); };
 
@@ -45,7 +48,7 @@ namespace Atlas {
             return strategy_->forwardRate(startDate, endDate, dayCounter, comp, freq);
         };
 
-        YieldTermStructure copy() const { return YieldTermStructure(strategy_->copy()); }
+        std::unique_ptr<YieldTermStructure> copy() const { return std::make_unique<YieldTermStructure>(strategy_->copy()); }
 
        private:
         std::unique_ptr<YieldTermStructureStrategy<adouble>> strategy_;

@@ -23,7 +23,7 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                     const CurveContext& forecastCurveContext, const CurveContext& discountCurveContext)
+                                     const CurveContext<adouble>& forecastCurveContext, const CurveContext<adouble>& discountCurveContext)
         : FloatingRateBulletInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);
@@ -39,7 +39,7 @@ namespace Atlas {
          * @param forecastCurveContext forecast curve context of the instrument
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                     const CurveContext& forecastCurveContext)
+                                     const CurveContext<adouble>& forecastCurveContext)
         : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread) {
             const auto& index = forecastCurveContext.index();
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());

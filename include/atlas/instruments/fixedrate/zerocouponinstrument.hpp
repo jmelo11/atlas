@@ -41,7 +41,7 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
-                             const CurveContext& discountCurveContext)
+                             const CurveContext<adouble>& discountCurveContext)
         : ZeroCouponInstrument(startDate, endDate, notional, rate) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);

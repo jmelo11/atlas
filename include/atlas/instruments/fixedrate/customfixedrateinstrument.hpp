@@ -38,7 +38,7 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate<adouble>& rate,
-                                  const CurveContext& discountCurveContext)
+                                  const CurveContext<adouble>& discountCurveContext)
         : CustomFixedRateInstrument(dates, redemptions, rate) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);

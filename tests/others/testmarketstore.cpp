@@ -4,18 +4,20 @@
 #include "../pch.hpp"
 #include <atlas/atlasconfig.hpp>
 #include <atlas/fundation/marketstore.hpp>
+#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 
 using namespace Atlas;
 
 TEST(Others, CreateCurveContext) {
-    MarketStore store1_ = MarketStore();
+    MarketStore<double> store1_;
 
     Date startDate(1, Month::Jan, 2020);
     FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<double> curve(std::make_unique<FlatForwardStrategy<double>>(curveStrategy));
     RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
-    store1_.createCurveContext("LIBOR1M", curveStrategy, index);
+    store1_.createCurveContext("LIBOR1M", curve, index);
 
-    MarketStore store2_ = MarketStore();
+    MarketStore<double> store2_;
     store2_.copyFromStore(store1_);
 
     EXPECT_TRUE(store2_.hasCurveContext("LIBOR1M"));
@@ -27,7 +29,7 @@ TEST(Others, CreateCurveContext) {
     EXPECT_NE(&context, &context2);
 
     // check if same curve
-    EXPECT_NE(&context.curveStrategy(), &context2.curveStrategy());
+    EXPECT_NE(&context.curve(), &context2.curve());
 }
 
 #endif /* CDF79660_C142_4893_AE44_D9D945717DDB */

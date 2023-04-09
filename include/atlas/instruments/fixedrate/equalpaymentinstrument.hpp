@@ -50,7 +50,7 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               const CurveContext& discountCurveContext, bool recalcNotionals = false)
+                               const CurveContext<adouble>& discountCurveContext, bool recalcNotionals = false)
         : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, recalcNotionals) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);

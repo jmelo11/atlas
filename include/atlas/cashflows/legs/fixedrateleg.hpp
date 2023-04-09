@@ -33,7 +33,7 @@ namespace Atlas {
             this->sortCashflows(coupons_);
         }
 
-        inline void discountCurveContext(const CurveContext& context) {
+        inline void discountCurveContext(const CurveContext<adouble>& context) {
             this->setDiscountCurveContext(this->redemptions_, context);
             this->setDiscountCurveContext(coupons_, context);
         }

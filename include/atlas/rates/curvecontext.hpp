@@ -2,21 +2,25 @@
 #define C9383CFF_FA55_4061_A633_C8B6F16B0878
 
 #include <atlas/atlasconfig.hpp>
-#include <atlas/rates/curvestrategy.hpp>
 #include <atlas/rates/rateindex.hpp>
+#include <atlas/rates/yieldtermstructure/yieldtermstructure.hpp>
 
 namespace Atlas {
+    template <typename adouble>
+    class MarketStore;
+
     /**
      * @class CurveContext
      * @brief A context for a yield curve. Contains the yield term structure and the rate index used as the underlying interest rate. It contains its
      * own copy of the curve and index.
      */
+    template <typename adouble>
     class CurveContext {
        public:
         /**
          * @return The yield term structure.
          */
-        inline const QuantLib::YieldTermStructure& curve() const { return curveStrategy_->curve(); }
+        inline const YieldTermStructure<adouble>& curve() const { return *curve_; }
 
         /**
          * @return The rate index used as the underlying interest rate.
@@ -28,7 +32,6 @@ namespace Atlas {
          */
         inline size_t idx() const { return idx_; }
 
-        inline const std::unique_ptr<CurveStrategy>& curveStrategy() const { return curveStrategy_; }
        private:
         /**
          * Constructs a yield curve from a vector of dates and a vector of corresponding rates.
@@ -36,13 +39,19 @@ namespace Atlas {
          * @param index unique_ptr to the RateIndex
          * @param idx positional index in the CurveContextStore
          */
-        CurveContext(std::unique_ptr<CurveStrategy>& curveStrategy, std::unique_ptr<RateIndex>& index, size_t idx)
-        : curveStrategy_(std::move(curveStrategy)), index_(std::move(index)), idx_(idx) {}
+        CurveContext(std::unique_ptr<YieldTermStructure<adouble>>& curve, std::unique_ptr<RateIndex>& index, size_t idx)
+        : curve_(std::move(curve)), index_(std::move(index)), idx_(idx) {}
 
-        std::unique_ptr<CurveStrategy> curveStrategy_;
+        CurveContext copy() const {
+            auto curveCopy = curve_->copy();
+            auto indexCopy = index_->copy();
+            return CurveContext(curveCopy, indexCopy, idx_);
+        }
+
+        std::unique_ptr<YieldTermStructure<adouble>> curve_;
         std::unique_ptr<RateIndex> index_;
         size_t idx_;
-        friend class MarketStore;
+        friend class MarketStore<adouble>;
     };
 
 }  // namespace Atlas

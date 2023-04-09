@@ -2,9 +2,10 @@
 #define E4EE0D74_1E13_403E_BFAA_A52DB3AD99FF
 
 #include <ql/termstructures/yield/flatforward.hpp>
+#include <atlas/fundation/marketstore.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
-#include <atlas/fundation/marketstore.hpp>
+#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 
 using namespace Atlas;
 
@@ -16,13 +17,12 @@ struct FixedInstrumentVars {
     double notional            = 100;
     adouble rateValue          = 0.03;
     InterestRate<adouble> rate = InterestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
-    MarketStore store_  = MarketStore();
+    MarketStore<adouble> store_;
     FixedInstrumentVars() {
-        if (!store_.hasCurveContext("TEST")) {
-            FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-            RateIndex index("TEST", Frequency::Annual, Actual360());
-            store_.createCurveContext("TEST", curveStrategy, index);
-        }
+        FlatForwardStrategy<adouble> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+        YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
+        RateIndex index("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", curve, index);
     };
 };
 
@@ -33,13 +33,13 @@ struct FloatingInstrumentVars {
     Frequency paymentFrequency = Frequency::Semiannual;
     double notional            = 100;
     adouble spread             = 0.01;
-    MarketStore store_  = MarketStore();
+    adouble rateValue          = 0.03;
+    MarketStore<adouble> store_;
     FloatingInstrumentVars() {
-        if (!store_.hasCurveContext("TEST")) {
-            FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-            RateIndex index("TEST", Frequency::Annual, Actual360());
-            store_.createCurveContext("TEST", curveStrategy, index);
-        }
+        FlatForwardStrategy<adouble> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+        YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
+        RateIndex index("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", curve, index);
     };
 };
 

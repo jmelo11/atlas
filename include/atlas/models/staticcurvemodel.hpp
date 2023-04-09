@@ -21,7 +21,7 @@ namespace Atlas {
     template <typename adouble>
     class StaticCurveModel : public Model<adouble> {
        public:
-        StaticCurveModel(const MarketRequest& marketRequest, const MarketStore& marketStore)
+        StaticCurveModel(const MarketRequest& marketRequest, const MarketStore<adouble>& marketStore)
         : Model<adouble>(marketRequest), marketStore_(marketStore){};
 
         /**
@@ -64,16 +64,17 @@ namespace Atlas {
 
        private:
         void simulateDiscounts(MarketData<adouble>& md) const {
-            for (auto& request : this->marketRequest_.dfs) {
-                size_t idx                                = request.curve_;
-                const Date& date                          = request.date_;
-                const CurveContext& curveContext          = marketStore_.curveContext(idx);
-                const QuantLib::YieldTermStructure& curve = curveContext.curve();
+            for (size_t i = 0; i < this->marketRequest_.dfs.size(); ++i) {
+                auto& request            = this->marketRequest_.dfs[i];
+                size_t idx               = request.curve_;
+                const Date& date         = request.date_;
+                const auto& curveContext = marketStore_.curveContext(idx);
+                const auto& curve        = curveContext.curve();
 
-                double df;
-                if (curve.referenceDate() < date) {
+                adouble df;
+                if (curve.refDate() < date) {
                     df = curve.discount(date);
-                } else if (curve.referenceDate() == date) {
+                } else if (curve.refDate() == date) {
                     df = 1;
                 } else {
                     df = 0;
@@ -83,7 +84,8 @@ namespace Atlas {
         };
 
         void simulateForwards(MarketData<adouble>& md) const {
-            for (auto& request : this->marketRequest_.fwds) {
+            for (size_t i = 0; i < this->marketRequest_.fwds.size(); ++i) {
+                auto& request         = this->marketRequest_.fwds[i];
                 size_t idx            = request.curve_;
                 const Date& startDate = request.startDate_;
                 const Date& endDate   = request.endDate_;
@@ -92,9 +94,9 @@ namespace Atlas {
                 const auto& curve        = curveContext.curve();
                 const auto& index        = curveContext.index();
 
-                double fwd;
-                if (curve.referenceDate() <= startDate) {
-                    fwd = curve.forwardRate(startDate, endDate, index.dayCounter(), index.rateCompounding(), index.rateFrequency()).rate();
+                adouble fwd;
+                if (curve.refDate() <= startDate) {
+                    fwd = curve.forwardRate(startDate, endDate, index.dayCounter(), index.rateCompounding(), index.rateFrequency());
                 } else {
                     fwd = index.getFixing(startDate);
                 }
@@ -102,7 +104,7 @@ namespace Atlas {
             }
         };
 
-        const MarketStore& marketStore_;
+        const MarketStore<adouble>& marketStore_;
     };
 }  // namespace Atlas
 

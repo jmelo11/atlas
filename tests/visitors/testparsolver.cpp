@@ -11,6 +11,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
+#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/parsolver.hpp>
 #include <numeric>
@@ -28,12 +29,12 @@ TEST(ParSolver, FixedRateInstrument) {
     FixedRateBulletInstrument<double> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    MarketStore store_ = MarketStore();
-    if (!store_.hasCurveContext("TEST")) {
-        FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-        RateIndex index("TEST", Frequency::Annual, Actual360());
-        store_.createCurveContext("TEST", curveStrategy, index);
-    }
+    MarketStore<double> store_;
+    FlatForwardStrategy<double> curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<double> curve_(std::make_unique<FlatForwardStrategy<double>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    store_.createCurveContext("TEST", curve_, index);
+
     auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
@@ -79,12 +80,11 @@ TEST(ParSolver, FixedRateInstrumentDual) {
     FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
     // Create a curve context store
-    MarketStore store_ = MarketStore();
-    if (!store_.hasCurveContext("TEST")) {
-        FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-        RateIndex index("TEST", Frequency::Annual, Actual360());
-        store_.createCurveContext("TEST", curveStrategy, index);
-    }
+    MarketStore<dual> store_;
+    FlatForwardStrategy<dual> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<dual> curve_(std::make_unique<FlatForwardStrategy<dual>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    store_.createCurveContext("TEST", curve_, index);
     auto& context = store_.curveContext("TEST");
     // set curve context
     instrument.discountCurveContex(context);
@@ -127,15 +127,14 @@ TEST(ParSolver, FloatingRateInstrument) {
     double spread   = 0.01;
 
     // Create a curve context store
-    MarketStore store_  = MarketStore();
-    if (!store_.hasCurveContext("LIBOR1M")) {
-        FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-        RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
-        store_.createCurveContext("LIBOR1M", curveStrategy, index);
-    }
+    MarketStore<double> store_;
+    FlatForwardStrategy<double> curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<double> curve_(std::make_unique<FlatForwardStrategy<double>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    store_.createCurveContext("TEST", curve_, index);
 
     // get context
-    auto& context = store_.curveContext("LIBOR1M");
+    auto& context = store_.curveContext("TEST");
     FloatingRateBulletInstrument<double> instrument(startDate, endDate, notional, spread, context);
     // set curve context
     instrument.discountCurveContex(context);
@@ -157,7 +156,7 @@ TEST(ParSolver, FloatingRateInstrument) {
     QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> forecastTermStructure;
     QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> discountingTermStructure;
 
-    const boost::shared_ptr<QuantLib::IborIndex> libor1m(new QuantLib::IborIndex("Libor1m", Period(1, QuantLib::Months), 0, QuantLib::USDCurrency(),
+    const boost::shared_ptr<QuantLib::IborIndex> libor1m(new QuantLib::IborIndex("TEST", Period(1, QuantLib::Months), 0, QuantLib::USDCurrency(),
                                                                                  QuantLib::NullCalendar(), BusinessDayConvention::Unadjusted, false,
                                                                                  Actual360(), forecastTermStructure));
     libor1m->addFixing(Date(30, Month::July, 2020), 0.03);
@@ -191,17 +190,17 @@ TEST(ParSolver, FloatingRateInstrumentDual) {
     Date endDate    = Date(1, Month::Aug, 2021);
     double notional = 100;
     dual spread     = 0.01;
+    dual rateValue  = 0.03;
 
     // Create a curve context store
-    MarketStore store_ = MarketStore();
-    if (!store_.hasCurveContext("LIBOR1M")) {
-        FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-        RateIndex index("LIBOR1M", Frequency::Monthly, Actual360());
-        store_.createCurveContext("LIBOR1M", curveStrategy, index);
-    }
+    MarketStore<dual> store_;
+    FlatForwardStrategy<dual> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+    YieldTermStructure<dual> curve_(std::make_unique<FlatForwardStrategy<dual>>(curveStrategy));
+    RateIndex index("TEST", Frequency::Annual, Actual360());
+    store_.createCurveContext("TEST", curve_, index);
 
     // get context
-    auto& context = store_.curveContext("LIBOR1M");
+    auto& context = store_.curveContext("TEST");
     FloatingRateBulletInstrument<dual> instrument(startDate, endDate, notional, spread, context);
     // set curve context
     instrument.discountCurveContex(context);
@@ -223,7 +222,7 @@ TEST(ParSolver, FloatingRateInstrumentDual) {
     QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> forecastTermStructure;
     QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> discountingTermStructure;
 
-    const boost::shared_ptr<QuantLib::IborIndex> libor1m(new QuantLib::IborIndex("Libor1m", Period(1, QuantLib::Months), 0, QuantLib::USDCurrency(),
+    const boost::shared_ptr<QuantLib::IborIndex> libor1m(new QuantLib::IborIndex("TEST", Period(1, QuantLib::Months), 0, QuantLib::USDCurrency(),
                                                                                  QuantLib::NullCalendar(), BusinessDayConvention::Unadjusted, false,
                                                                                  Actual360(), forecastTermStructure));
     libor1m->addFixing(Date(30, Month::July, 2020), 0.03);

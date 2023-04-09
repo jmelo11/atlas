@@ -35,7 +35,7 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param discountCurveContext The discount curve context of the coupon
          */
-        Coupon(const Date& startDate, const Date& endDate, double notional, const CurveContext& discountCurveContext)
+        Coupon(const Date& startDate, const Date& endDate, double notional, const CurveContext<adouble>& discountCurveContext)
         : Cashflow<adouble>(discountCurveContext), startDate_(startDate), endDate_(endDate), notional_(notional) {
             this->paymentDate_ = endDate;  // paymentDate shouldnt be same as endDate
         };

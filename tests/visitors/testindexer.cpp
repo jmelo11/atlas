@@ -4,6 +4,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/visitors/indexer.hpp>
+#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 
 using namespace Atlas;
 
@@ -16,13 +17,13 @@ struct InstrumentVars {
     adouble rateValue          = 0.03;
     InterestRate<adouble> rate = InterestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
     adouble spread             = 0.01;
-    MarketStore store_         = MarketStore();
+    MarketStore<adouble> store_;
     InstrumentVars() {
-        if (!store_.hasCurveContext("TEST")) {
-            FlatForwardStrategy curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
-            RateIndex index("TEST", Frequency::Annual, Actual360());
-            store_.createCurveContext("TEST", curveStrategy, index);
-        }
+        // Create a curve context store
+        FlatForwardStrategy<adouble> curveStrategy(startDate, 0.03, Actual360(), Compounding::Simple, Frequency::Annual);
+        YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
+        RateIndex index("TEST", Frequency::Annual, Actual360());
+        store_.createCurveContext("TEST", curve, index);
     };
 };
 

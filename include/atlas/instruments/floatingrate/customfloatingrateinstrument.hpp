@@ -20,7 +20,7 @@ namespace Atlas {
          * @param forecastCurveContext forecast curve context of the instrument
          */
         CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, adouble spread,
-                                     const CurveContext& forecastCurveContext)
+                                     const CurveContext<adouble>& forecastCurveContext)
         : FloatingRateInstrument<adouble>(dates.front(), dates.back(), 0, spread) {
             this->notional_    = std::reduce(redemptions.begin(), redemptions.end());
             double outstanding = this->notional_;
@@ -46,7 +46,7 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         CustomFloatingRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, adouble spread,
-                                     const CurveContext& forecastCurveContext, const CurveContext& discountCurveContext)
+                                     const CurveContext<adouble>& forecastCurveContext, const CurveContext<adouble>& discountCurveContext)
         : CustomFloatingRateInstrument(dates, redemptions, spread, forecastCurveContext) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);

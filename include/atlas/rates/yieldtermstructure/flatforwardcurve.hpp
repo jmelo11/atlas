@@ -7,31 +7,38 @@
 namespace Atlas {
 
     template <typename adouble>
-    class FlatForwardCurveStrategy : public YieldTermStructureStrategy<adouble> {
+    class FlatForwardStrategy : public YieldTermStructureStrategy<adouble> {
        public:
-        FlatForwardCurveStrategy(const Date& refDate, adouble rate, const DayCounter& dayCounter = Actual360(),
-                                 Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual)
+        FlatForwardStrategy(const Date& refDate, adouble rate, const DayCounter& dayCounter = Actual360(), Compounding comp = Compounding::Simple,
+                            Frequency freq = Frequency::Annual)
         : rate_(InterestRate<adouble>(rate, dayCounter, comp, freq)) {
             this->refDate_ = refDate;
         }
 
-        FlatForwardCurveStrategy(const InterestRate<adouble>& rate) : rate_(rate) {}
+        FlatForwardStrategy(const Date& refDate, const InterestRate<adouble>& rate) : rate_(rate) {
+            this->refDate_ = refDate;
+        }
 
         adouble discount(const Date& date) const override {
             if (date < this->refDate_) { throw std::invalid_argument("Date is before reference date"); }
-            return rate_.discountFactor(this->refDate_, date);
+            double t = rate_.dayCounter().yearFraction(this->refDate_, date);
+            return discount(t);
         };
 
-        adouble discount(adouble t) const override { return rate_.discountFactor(t); };
+        adouble discount(double t) const override {
+            adouble df = 1 / rate_.compoundFactor(t);
+            return df;
+        };
 
         adouble forwardRate(const Date& startDate, const Date& endDate, const DayCounter& dayCounter, Compounding comp,
                             Frequency freq) const override {
+            if (startDate < this->refDate_) { throw std::invalid_argument("Start date is before reference date"); }
             adouble compound = rate_.compoundFactor(startDate, endDate);
             return InterestRate<adouble>::impliedRate(compound, dayCounter, comp, freq, startDate, endDate).rate();
         };
 
         std::unique_ptr<YieldTermStructureStrategy<adouble>> copy() const override {
-            return std::make_unique<FlatForwardCurveStrategy<adouble>>(rate_);
+            return std::make_unique<FlatForwardStrategy<adouble>>(this->refDate_, rate_);
         };
 
        private:

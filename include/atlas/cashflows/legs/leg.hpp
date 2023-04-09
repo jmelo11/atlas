@@ -71,7 +71,7 @@ namespace Atlas {
         }
 
         template <typename C>
-        void setDiscountCurveContext(std::vector<C>& cashflows, const CurveContext& context) {
+        void setDiscountCurveContext(std::vector<C>& cashflows, const CurveContext<adouble>& context) {
             for (auto& cashflow : cashflows) { cashflow.discountCurveContext(context); }
         }
 
