@@ -107,7 +107,7 @@ TEST(NPVCalculator, FixedRateInstrumentDual) {
     // build QL instrument
     QuantLib::Settings::instance().evaluationDate() = startDate;
 
-    QuantLib::InterestRate qlRate(rateValue.val, Thirty360(Thirty360::BondBasis), QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
+    QuantLib::InterestRate qlRate(val(rateValue), Thirty360(Thirty360::BondBasis), QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
     Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
     auto qlBond       = QuantLib::FixedRateBond(0, notional, schedule, {qlRate});
 
@@ -122,7 +122,7 @@ TEST(NPVCalculator, FixedRateInstrumentDual) {
     discountingTermStructure.linkTo(curve);
     boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
     qlBond.setPricingEngine(bondEngine);
-    EXPECT_NEAR(npvCalculator.results().val, qlBond.NPV(), 1e-6);
+    EXPECT_NEAR(val(npvCalculator.results()), qlBond.NPV(), 1e-6);
 }
 
 TEST(NPVCalculator, FloatingRateInstrument) {
@@ -260,7 +260,7 @@ TEST(NPVCalculator, FloatingRateInstrumentDual) {
     // for (auto& cashflow : instrument.leg().redemptions()) { std::cout << cashflow.paymentDate() << "||" << cashflow.amount() << std::endl; }
     // std::cout << "\n" << std::endl;
     // for (auto& cashflow : qlBond.cashflows()) { std::cout << cashflow->date() << "||" << cashflow->amount() << std::endl; }
-    EXPECT_NEAR(npvCalculator.results().val, qlBond.NPV(), 1e-6);
+    EXPECT_NEAR(val(npvCalculator.results()), qlBond.NPV(), 1e-6);
 }
 
 TEST(NPVCalculator, Forward) {
@@ -271,6 +271,6 @@ TEST(NPVCalculator, Forward) {
     double fwdPrice = 800;
     Currency curr1  = USD();
     Currency curr2  = CLP();
-    Forward<double> instrument(startDate, endDate, fwdPrice, notional, curr1, curr2, Side::PAY);
+    FxForward<double> instrument(startDate, endDate, fwdPrice, notional, curr1, curr2, Side::PAY);
     EXPECT_TRUE(false);
 }

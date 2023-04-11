@@ -30,10 +30,10 @@ namespace Atlas {
             double outstanding = notional;
             for (size_t i = 0; i < redemptions.size(); ++i) {
                 FixedRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, rate);
-                this->leg_.addCoupon(coupon);
+                this->leg().addCoupon(coupon);
 
                 Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg_.addRedemption(redemption);
+                this->leg().addRedemption(redemption);
                 outstanding -= redemptions.at(i);
             }
 

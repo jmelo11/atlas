@@ -39,5 +39,5 @@ TEST(Instrument, CustomFloatingRateInstrumentDual) {
     EXPECT_EQ(coupons.size(), 2);
     EXPECT_EQ(redemptions.size(), 2);
 
-    for (const auto& redemption : redemptions) { EXPECT_EQ(redemption.amount().val, notional / 2); }
+    for (const auto& redemption : redemptions) { EXPECT_EQ(val(redemption.amount()), notional / 2); }
 }

@@ -105,7 +105,7 @@ TEST(ParSolver, FixedRateInstrumentDual) {
     // build QL instrument
     QuantLib::Settings::instance().evaluationDate() = startDate;
 
-    QuantLib::InterestRate qlRate(rateValue.val, Thirty360(Thirty360::BondBasis), QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
+    QuantLib::InterestRate qlRate(val(rateValue), Thirty360(Thirty360::BondBasis), QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
     Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
     auto qlBond       = QuantLib::FixedRateBond(0, notional, schedule, {qlRate});
 
@@ -116,7 +116,7 @@ TEST(ParSolver, FixedRateInstrumentDual) {
     boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
     qlBond.setPricingEngine(bondEngine);
     double tmpRate = QuantLib::CashFlows::atmRate(qlBond.cashflows(), *curve, false);
-    EXPECT_NEAR(solver.results().val, tmpRate, 1e-4);
+    EXPECT_NEAR(val(solver.results()), tmpRate, 1e-4);
 }
 
 TEST(ParSolver, FloatingRateInstrument) {
@@ -247,5 +247,5 @@ TEST(ParSolver, FloatingRateInstrumentDual) {
     pricer->setCapletVolatility(vol);
     QuantLib::setCouponPricer(qlBond.cashflows(), pricer);
     double tmpRate = QuantLib::CashFlows::atmRate(qlBond.cashflows(), *curve, false);
-    EXPECT_NEAR(solver.results().val, 0.0, 1e-6);
+    EXPECT_NEAR(val(solver.results()), 0.0, 1e-6);
 }

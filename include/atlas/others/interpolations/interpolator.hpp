@@ -6,7 +6,7 @@ namespace Atlas {
     template <typename adouble>
     class Interpolator {
        public:
-        virtual adouble operator()(adouble x) const = 0;
+        virtual adouble operator()(double x) const = 0;
     };
 
 }  // namespace Atlas

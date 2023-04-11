@@ -62,7 +62,7 @@ void inline testStructure(const T& instrument, const Schedule& schedule, Payment
             if constexpr (std::is_same_v<adouble, double>) {
                 EXPECT_EQ(redemptions.front().amount(), instrument.notional());
             } else {
-                EXPECT_EQ(redemptions.front().amount().val, instrument.notional());
+                EXPECT_EQ(val(redemptions.front().amount()), instrument.notional());
             }
 
             break;
@@ -72,7 +72,7 @@ void inline testStructure(const T& instrument, const Schedule& schedule, Payment
                 if constexpr (std::is_same_v<adouble, double>) {
                     EXPECT_EQ(redemption.amount(), instrument.notional() / coupons.size());
                 } else {
-                    EXPECT_EQ(redemption.amount().val, instrument.notional() / coupons.size());
+                    EXPECT_EQ(val(redemption.amount()), instrument.notional() / coupons.size());
                 }
             }
             break;
@@ -94,7 +94,7 @@ void inline testInterest(const FixedRateInstrument<adouble>& instrument, const S
         if constexpr (std::is_same_v<adouble, double>) {
             EXPECT_EQ(coupon.amount(), coupon.notional() * (rate.compoundFactor(dates.at(i), dates.at(i + 1)) - 1));
         } else {
-            EXPECT_EQ(coupon.amount().val, coupon.notional() * (rate.compoundFactor(dates.at(i), dates.at(i + 1)).val - 1));
+            EXPECT_EQ(val(coupon.amount()), coupon.notional() * (val(rate.compoundFactor(dates.at(i), dates.at(i + 1))) - 1));
         }
         EXPECT_EQ(coupon.startDate(), dates.at(i));
         EXPECT_EQ(coupon.endDate(), dates.at(i + 1));

@@ -48,7 +48,7 @@ TEST(Instrument, EqualPaymentInstrumentDual) {
     std::map<Date, double> payments;
     for (const auto& cashflow : cashflows) {
         if (payments.find(cashflow.paymentDate()) == payments.end()) { payments[cashflow.paymentDate()] = 0; }
-        payments[cashflow.paymentDate()] += cashflow.amount().val;
+        payments[cashflow.paymentDate()] += val(cashflow.amount());
     }
 
     double firstPayment = payments.begin()->second;

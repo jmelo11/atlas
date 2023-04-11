@@ -8,5 +8,5 @@ TEST(Solver, NewtonRaphson) {
     NewtonRaphsonSolver solver;
     double x0 = 0.0;
     dual y    = solver.solve(f, x0);
-    EXPECT_NEAR(y.val, 0.0, 1e-6);
+    EXPECT_NEAR(val(y), 0.0, 1e-6);
 }

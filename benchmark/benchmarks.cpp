@@ -59,7 +59,7 @@ void bechmarkFixedRateCoupons() {
     if constexpr (std::is_same_v<NumType, double>) {
         qlInterestRate = QuantLib::InterestRate(rate, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
     } else {
-        qlInterestRate = QuantLib::InterestRate(rate.val, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+        qlInterestRate = QuantLib::InterestRate(val(rate), QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
     }
     // Atlas
     size_t numThreads = std::thread::hardware_concurrency();
@@ -285,7 +285,7 @@ void pricingBenchmark() {
     if constexpr (std::is_same_v<NumType, double>) {
         qlInterestRate = QuantLib::InterestRate(rateValue, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
     } else {
-        qlInterestRate = QuantLib::InterestRate(rateValue.val, QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
+        qlInterestRate = QuantLib::InterestRate(val(rateValue), QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
     }
     // market data
     MarketStore<NumType> mainStore_;

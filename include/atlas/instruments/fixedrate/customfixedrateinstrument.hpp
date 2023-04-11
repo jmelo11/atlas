@@ -22,7 +22,7 @@ namespace Atlas {
         : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate) {
             for (size_t i = 0; i < redemptions.size(); i++) {
                 Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg_.addRedemption(redemption);
+                this->leg().addRedemption(redemption);
             }
             this->notional_ = std::reduce(redemptions.begin(), redemptions.end());
             this->calculateNotionals(dates, rate);

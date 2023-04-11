@@ -79,14 +79,14 @@ TEST(Coupons, FixedRateCouponDual) {
     EXPECT_EQ(vars.endDate, coupon.paymentDate());
 
     double yf = vars.rate.dayCounter().yearFraction(vars.startDate, vars.endDate);
-    EXPECT_FLOAT_EQ(yf * vars.rate.rate().val * vars.notional, coupon.accruedAmount(vars.startDate, vars.endDate).val);
-    EXPECT_FLOAT_EQ(yf * vars.rate.rate().val * vars.notional, coupon.amount().val);
+    EXPECT_FLOAT_EQ(yf * val(vars.rate.rate()) * vars.notional, val(coupon.accruedAmount(vars.startDate, vars.endDate)));
+    EXPECT_FLOAT_EQ(yf * val(vars.rate.rate())* vars.notional, val(coupon.amount()));
 
     InterestRate<dual> rate(0.05, Actual360(), Compounding::Simple, Frequency::Annual);
     coupon.rate(rate);
 
-    EXPECT_FLOAT_EQ(yf * rate.rate().val * vars.notional, coupon.amount().val);
-    EXPECT_FLOAT_EQ(yf * rate.rate().val * vars.notional, coupon.accruedAmount(vars.startDate, vars.endDate).val);
+    EXPECT_FLOAT_EQ(yf * val(rate.rate()) * vars.notional, val(coupon.amount()));
+    EXPECT_FLOAT_EQ(yf *  val(rate.rate()) * vars.notional, val(coupon.accruedAmount(vars.startDate, vars.endDate)));
 }
 
 TEST(Coupons, FloatingRateCouponDual) {
@@ -96,5 +96,5 @@ TEST(Coupons, FloatingRateCouponDual) {
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
     EXPECT_EQ(vars.endDate, coupon.paymentDate());
-    EXPECT_FLOAT_EQ(vars.spread.val, coupon.spread().val);
+    EXPECT_FLOAT_EQ(val(vars.spread), val(coupon.spread()));
 }

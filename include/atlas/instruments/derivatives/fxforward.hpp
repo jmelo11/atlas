@@ -2,17 +2,17 @@
 #define D867AADA_2F45_4391_8716_07815C63DD2F
 
 #include <atlas/cashflows/legs/leg.hpp>
-#include <atlas/instruments/instrument.hpp>
+#include <atlas/instruments/doubleleginstrument.hpp>
 
 namespace Atlas {
 
     /**
-     * @brief Forward instrument
+     * @brief FxForward instrument
      *
      * @tparam adouble
      */
     template <typename adouble>
-    class Forward : public Instrument<adouble> {
+    class FxForward : public DoubleLegInstrument<adouble, Leg<adouble>, Leg<adouble>> {
        public:
         /**
          * @brief Construct a new Forward object
@@ -23,27 +23,21 @@ namespace Atlas {
          * @param notional
          * @param currency
          */
-        Forward(const Date& startDate, const Date& endDate, adouble fwdPrice, double notional, Currency curr1, Currency curr2, Side side)
-        : fwdPrice_(fwdPrice), side_(side) {
-            this->startDate_ = startDate;
-            this->endDate_   = endDate;
-            this->notional_  = notional;
+        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, double notional, Currency curr1, Currency curr2, Side side)
+        : DoubleLegInstrument<adouble, Leg<adouble>, Leg<adouble>>(startDate, endDate, notional, Leg<adouble>(), Leg<adouble>(), side),
+          fwdPrice_(fwdPrice) {
             Cashflow<adouble> cashflow1(startDate, fwdPrice * notional, curr1.numericCode());
             Cashflow<adouble> cashflow2(endDate, notional, curr2.numericCode());
-            leg_.addRedemption(cashflow1);
-            leg_.addRedemption(cashflow1);
+            this->firstLeg().addRedemption(cashflow1);
+            this->secondLeg().addRedemption(cashflow2);
         }
 
         adouble fwdPrice() const { return fwdPrice_; }
 
         void fwdPrice(adouble fwdPrice) {
             fwdPrice_ = fwdPrice;
-            leg_.coupons()[0].amount(fwdPrice * this->notional());
+            this->firstLeg().redemptions()[0].amount(fwdPrice * this->notional());
         }
-
-        const Leg<adouble>& leg() const { return leg_; }
-
-        Leg<adouble>& leg() { return leg_; }
 
         void accept(Visitor<adouble>& v) override { v.visit(*this); }
 
@@ -51,8 +45,6 @@ namespace Atlas {
 
        private:
         adouble fwdPrice_;
-        Side side_;
-        Leg<adouble> leg_;
     };
 }  // namespace Atlas
 

@@ -61,8 +61,8 @@ namespace Atlas {
             if (recalcNotionals_) {
                 std::vector<size_t> redemptionIdxs;
                 std::vector<size_t> couponIdxs;
-                auto& redemptions = this->leg_.redemptions();
-                auto& coupons     = this->leg_.coupons();
+                auto& redemptions = this->leg().redemptions();
+                auto& coupons     = this->leg().coupons();
                 size_t nCoupons   = coupons.size();
                 for (size_t i = 0; i < nCoupons; ++i) {
                     redemptionIdxs.push_back(redemptions.at(i).dfIdx());
@@ -77,7 +77,7 @@ namespace Atlas {
                     coupons.at(i).dfIdx(couponIdxs.at(i));
                 }
             } else {
-                for (auto& coupon : this->leg_.coupons()) { coupon.rate(this->rate_); }
+                for (auto& coupon : this->leg().coupons()) { coupon.rate(this->rate_); }
             }
         };
 
@@ -101,7 +101,7 @@ namespace Atlas {
             if constexpr (std::is_same_v<adouble, double>) {
                 for (size_t i = 1; i <= pN; i++) factors[i - 1] = rate.compoundFactor(dates.at(i - 1), dates.at(i)) - 1;
             } else {
-                for (size_t i = 1; i <= pN; i++) factors[i - 1] = rate.compoundFactor(dates.at(i - 1), dates.at(i)).val - 1;
+                for (size_t i = 1; i <= pN; i++) factors[i - 1] = val(rate.compoundFactor(dates.at(i - 1), dates.at(i))) - 1;
             }
 
             factors[kN - 1] = -1;
@@ -126,7 +126,7 @@ namespace Atlas {
             K = inverse(A) * B;
             for (size_t i = 1; i < dates.size(); i++) {
                 Redemption<adouble> redemption(dates[i], K[i]);
-                this->leg_.addRedemption(redemption);
+                this->leg().addRedemption(redemption);
             }
         };
 

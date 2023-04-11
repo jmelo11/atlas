@@ -26,8 +26,8 @@ namespace Atlas {
             FixedRateCoupon<adouble> coupon(startDate, endDate, notional, rate);  // interest coupon
             Redemption<adouble> redemption(endDate, notional);                    // notinal payment at the end
 
-            this->leg_.addCoupon(coupon);
-            this->leg_.addRedemption(redemption);
+            this->leg().addCoupon(coupon);
+            this->leg().addRedemption(redemption);
             this->disbursement_ = Cashflow<adouble>(startDate, -notional);
         };
 

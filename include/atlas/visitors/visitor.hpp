@@ -8,6 +8,8 @@
 #define C7EC2166_6C75_481E_8983_82B454069FCE
 
 #include <atlas/atlasconfig.hpp>
+#include <atlas/cashflows/legs/fixedrateleg.hpp>
+#include <atlas/cashflows/legs/floatingrateleg.hpp>
 #include <iostream>
 #include <type_traits>
 
@@ -22,24 +24,30 @@ namespace Atlas {
     class FixedRateInstrument;
 
     template <typename adouble>
-    class Forward;
+    class FxForward;
 
     template <typename adouble>
     class Visitor {
        public:
         virtual ~Visitor() = default;
+
         virtual void visit(FloatingRateInstrument<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
         virtual void visit(FixedRateInstrument<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
-        virtual void visit(Forward<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
+        virtual void visit(FxForward<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
     template <typename adouble>
     class ConstVisitor {
        public:
         virtual ~ConstVisitor() = default;
+
         virtual void visit(const FloatingRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
         virtual void visit(const FixedRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
-        virtual void visit(const Forward<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
+        virtual void visit(const FxForward<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
 }  // namespace Atlas

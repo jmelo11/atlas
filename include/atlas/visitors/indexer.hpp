@@ -2,7 +2,7 @@
 #define EDA3136B_5C3D_4D8A_8F4A_AE6D1B5AC406
 
 #include <atlas/data/marketdata.hpp>
-#include <atlas/instruments/derivatives/forward.hpp>
+#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
@@ -37,11 +37,6 @@ namespace Atlas {
 
             for (auto& redemption : redemptions) { indexCashflow(redemption); }
             indexCashflow(inst.disbursement());
-        };
-
-        void visit(Forward<adouble>& inst) override {
-            indexCashflow(inst.leg().redemptions()[0]);
-            indexCashflow(inst.leg().redemptions()[1]);
         };
 
         void setRequest(MarketRequest& request) {

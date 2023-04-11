@@ -14,21 +14,16 @@ namespace Atlas {
        public:
         NPVCalculator(const MarketData<adouble>& marketData) : marketData_(marketData){};
 
-        void clear() {
-            npv_        = 0.0;
-            nonSensNPV_ = 0.0;
-        };
+        void clear() { npv_ = 0.0; };
 
-        inline adouble results() const { return npv_ + nonSensNPV_; };
+        inline adouble results() const { return npv_; };
 
         inline adouble sensNPV() const { return npv_; };
-
-        inline double nonSensNPV() const { return nonSensNPV_; };
 
         void visit(FixedRateInstrument<adouble>& inst) override {
             fixedLegNPV(inst.leg());
             redemptionsNPV(inst.leg());
-            //npv(inst.leg());
+            // npv(inst.leg());
         };
 
         void visit(FloatingRateInstrument<adouble>& inst) override {
@@ -42,11 +37,7 @@ namespace Atlas {
             adouble df = 0.0;
             for (const auto& redemption : leg.redemptions()) {
                 df = marketData_.dfs.at(redemption.dfIdx());
-                if constexpr (std::is_same_v<adouble, double>) {
-                    nonSensNPV_ += redemption.amount() * df;
-                } else {
-                    nonSensNPV_ += redemption.amount().val * df.val;
-                }
+                npv_ += redemption.amount() * df;
             }
 
             for (auto& coupon : leg.coupons()) {
@@ -66,11 +57,7 @@ namespace Atlas {
                 df = marketData_.dfs.at(redemption.dfIdx());
                 npv += redemption.amount() * df;
             }
-            if constexpr (std::is_same_v<adouble, double>) {
-                nonSensNPV_ += npv;
-            } else {
-                nonSensNPV_ += npv.val;
-            }
+            npv_ += npv;
         };
 
         void fixedLegNPV(const FixedRateLeg<adouble>& leg) {
@@ -96,8 +83,7 @@ namespace Atlas {
             npv_ += npv;
         };
 
-        adouble npv_       = 0.0;
-        double nonSensNPV_ = 0.0;
+        adouble npv_ = 0.0;
         const MarketData<adouble>& marketData_;
     };
 }  // namespace Atlas

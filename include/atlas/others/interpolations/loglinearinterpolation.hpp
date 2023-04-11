@@ -12,16 +12,16 @@ namespace Atlas {
 
         LogLinearInterpolator() = default;
         
-        LogLinearInterpolator(const std::vector<adouble>& x, const std::vector<adouble>& y, bool extrapolate = false)
+        LogLinearInterpolator(const std::vector<double>& x, const std::vector<adouble>& y, bool extrapolate = false)
         : x_(x), y_(y), extrapolate_(extrapolate) {
             if (x_.size() != y_.size()) { throw std::invalid_argument("x_ and y_ should have the same size."); }
         }
 
-        adouble operator()(adouble x) const override { return logLinearInterpolation(x); }
+        adouble operator()(double x) const override { return logLinearInterpolation(x); }
 
         void enableExtrapolation() { extrapolate_ = true; }
        private:
-        adouble logLinearInterpolation(adouble x) const {
+        adouble logLinearInterpolation(double x) const {
             auto it      = std::lower_bound(x_.begin(), x_.end(), x);
             size_t index = std::distance(x_.begin(), it);
 
@@ -31,17 +31,17 @@ namespace Atlas {
                 }
             }
 
-            if (index == 0) { return y_[0] * std::exp((x - x_[0]) * (std::log(y_[1]) - std::log(y_[0])) / (x_[1] - x_[0])); }
+            if (index == 0) { return y_[0] * exp((x - x_[0]) * (log(y_[1]) - log(y_[0])) / (x_[1] - x_[0])); }
 
             if (index == x_.size()) {
                 return y_[index - 1] *
-                       std::exp((x - x_[index - 1]) * (std::log(y_[index - 1]) - std::log(y_[index - 2])) / (x_[index - 1] - x_[index - 2]));
+                       exp((x - x_[index - 1]) * (log(y_[index - 1]) - log(y_[index - 2])) / (x_[index - 1] - x_[index - 2]));
             }
 
-            return y_[index - 1] * std::exp((x - x_[index - 1]) * (std::log(y_[index]) - std::log(y_[index - 1])) / (x_[index] - x_[index - 1]));
+            return y_[index - 1] * exp((x - x_[index - 1]) * (log(y_[index]) - log(y_[index - 1])) / (x_[index] - x_[index - 1]));
         }
 
-        std::vector<adouble> x_;
+        std::vector<double> x_;
         std::vector<adouble> y_;
         bool extrapolate_;
     };

@@ -3,7 +3,7 @@
 
 #include <ql/interestrate.hpp>
 #include <atlas/cashflows/legs/fixedrateleg.hpp>
-#include <atlas/instruments/instrument.hpp>
+#include <atlas/instruments/singleleginstrument.hpp>
 
 namespace Atlas {
 
@@ -12,7 +12,7 @@ namespace Atlas {
      * @brief An class for fixed, single-legged, rate instruments.
      */
     template <typename adouble>
-    class FixedRateInstrument : public Instrument<adouble> {
+    class FixedRateInstrument : public SingleLegInstrument<adouble, FixedRateLeg<adouble>> {
        public:
         /**
          * @brief Construct a new Fixed Rate Instrument object
@@ -25,11 +25,7 @@ namespace Atlas {
          */
         FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, double notional = 0.0,
                             const FixedRateLeg<adouble>& leg = FixedRateLeg<adouble>())
-        : leg_(leg), rate_(rate) {
-            this->startDate_ = startDate;
-            this->endDate_   = endDate;
-            this->notional_  = notional;
-        };
+        : SingleLegInstrument<adouble, FixedRateLeg<adouble>>(startDate, endDate, notional, leg), rate_(rate){};
 
         virtual ~FixedRateInstrument(){};
 
@@ -38,14 +34,14 @@ namespace Atlas {
          *
          * @return const FixedRateLeg&
          */
-        inline const FixedRateLeg<adouble>& leg() const { return leg_; };
+        // inline const FixedRateLeg<adouble>& leg() const { return leg_; };
 
         /**
          * @brief Returns the leg of the instrument.
          *
          * @return FixedRateLeg&
          */
-        inline FixedRateLeg<adouble>& leg() { return leg_; };
+        // inline FixedRateLeg<adouble>& leg() { return leg_; };
 
         /**
          * @brief Sets the rate of the instrument.
@@ -54,7 +50,7 @@ namespace Atlas {
          */
         virtual void rate(const InterestRate<adouble>& r) {
             rate_ = r;
-            for (auto& coupon : leg_.coupons()) { coupon.rate(r); }
+            for (auto& coupon : this->leg().coupons()) { coupon.rate(r); }
         };
 
         /**
@@ -80,7 +76,7 @@ namespace Atlas {
          * @param context
          */
         inline void discountCurveContex(const CurveContext<adouble>& context) {
-            leg_.discountCurveContext(context);
+            this->leg().discountCurveContext(context);
             disbursement_.discountCurveContext(context);
         };
 
@@ -122,12 +118,12 @@ namespace Atlas {
         void calculateNotionals(const std::vector<Date>& dates, const InterestRate<adouble>& rate) {
             std::map<Date, double> notionals;
             double notional = 0.0;
-            for (const auto& redemption : leg_.redemptions()) {
+            for (const auto& redemption : this->leg().redemptions()) {
                 double redemptionAmount;
                 if constexpr (std::is_same_v<adouble, double>) {
                     redemptionAmount = redemption.amount();
                 } else {
-                    redemptionAmount = redemption.amount().val;
+                    redemptionAmount = val(redemption.amount());
                 }
                 notional += redemptionAmount;
                 notionals[redemption.paymentDate()] = redemptionAmount;
@@ -135,12 +131,12 @@ namespace Atlas {
             this->notional_ = notional;
             for (size_t i = 0; i < dates.size() - 1; i++) {
                 FixedRateCoupon<adouble> coupon(dates[i], dates[i + 1], notional, rate);
-                leg_.addCoupon(coupon);
+                this->leg().addCoupon(coupon);
                 if (notionals.find(dates[i + 1]) != notionals.end()) notional -= notionals[dates[i + 1]];
             }
         };
 
-        FixedRateLeg<adouble> leg_;
+        // FixedRateLeg<adouble> leg_;
         InterestRate<adouble> rate_;
         Cashflow<adouble> disbursement_;
     };

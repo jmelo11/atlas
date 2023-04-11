@@ -26,8 +26,8 @@ namespace Atlas {
             dual x = x0;
             dual y = f(x);
             for (int i = 0; i < max_iter; i++) {
-                if (std::isnan(x.val) || std::isnan(y.val)) { throw std::runtime_error("NaN encountered"); }
-                if (std::abs(y.val) < tol) { return x; }
+                if (std::isnan(val(x)) || std::isnan(val(y))) { throw std::runtime_error("NaN encountered"); }
+                if (std::abs(val(y)) < tol) { return x; }
                 double dfdx = derivative(f, wrt(x), at(x));
                 if (abs(dfdx) < tol) {
                     // df/dx is close to zero, so we can't divide by it

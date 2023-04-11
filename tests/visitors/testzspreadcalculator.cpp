@@ -77,7 +77,7 @@ TEST(ZSpreadSolver, FixedRateInstrumentDual) {
     double notional            = 100;
     dual rateValue             = 0.05;
     InterestRate<dual> rate(rateValue, Thirty360(Thirty360::BondBasis), Compounding::Simple, Frequency::Annual);
-    QuantLib::InterestRate qlRate(rateValue.val, Thirty360(Thirty360::BondBasis), QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
+    QuantLib::InterestRate qlRate(val(rateValue), Thirty360(Thirty360::BondBasis), QuantLib::Compounding::Simple, QuantLib::Frequency::Annual);
 
     FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate);
 
@@ -122,5 +122,5 @@ TEST(ZSpreadSolver, FixedRateInstrumentDual) {
 
     double zspread = QuantLib::CashFlows::zSpread(qlBond.cashflows(), *discountingTermStructure, 100, Actual360(), Compounding::Compounded,
                                                   Frequency::Semiannual, false);
-    EXPECT_NEAR(calculator.results().val, zspread, 1e-6);
+    EXPECT_NEAR(val(calculator.results()), zspread, 1e-6);
 }

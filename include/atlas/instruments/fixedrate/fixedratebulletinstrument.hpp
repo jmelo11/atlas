@@ -29,13 +29,13 @@ namespace Atlas {
             for (const auto& lastDate : schedule.dates()) {
                 if (firstDate != Date()) {
                     FixedRateCoupon<adouble> coupon(firstDate, lastDate, notional, rate);
-                    this->leg_.addCoupon(coupon);
+                    this->leg().addCoupon(coupon);
                 }
                 firstDate = lastDate;
             }
 
             Redemption<adouble> redemption(schedule.endDate(), notional);
-            this->leg_.addRedemption(redemption);
+            this->leg().addRedemption(redemption);
 
             this->disbursement_ = Cashflow<adouble>(startDate, -notional);
         };

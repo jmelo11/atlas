@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Atlas VERSION 0.1.0)
+project(Atlas VERSION 1.0.0)
 
 include(GNUInstallDirs) # despues de definir el proyecto
+
 set(CMAKE_CXX_STANDARD 20)
 set(BUILD_PYTHON OFF)
 set(BUILD_TESTS ON)
@@ -12,16 +13,7 @@ set(BUILD_EXAMPLES ON)
 file(
   GLOB
   SOURCES
-  "src/*.cpp"
-  "src/data/*.cpp"
-  "src/fundation/*.cpp"
-  "src/cashflows/*.cpp"
-  "src/instruments/*.cpp"
-  "src/instruments/fixedrate/*.cpp"
-  "src/visitors/*.cpp"
-  "src/models/*.cpp"
   "src/rates/*.cpp"
-  "src/instruments/floatingrate/*.cpp"
   "src/multithreading/*.cpp")
 
 file(
@@ -55,11 +47,14 @@ target_include_directories(
 
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-
+find_package(autodiff REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}  PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME}  PUBLIC Boost::boost)
-link_libraries(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/lib/libcppad_lib.dylib")
+target_link_libraries(${PROJECT_NAME}  PUBLIC autodiff::autodiff)
+target_link_libraries(${PROJECT_NAME}  PUBLIC Eigen3::Eigen)
+#link_libraries(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/lib/libcppad_lib.dylib")
 
 #link cppad
 

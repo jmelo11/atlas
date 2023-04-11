@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-
+find_package(Eigen3 REQUIRED)
 
 
 add_executable(${PROJECT_NAME} main.cpp)
@@ -28,7 +28,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
-
+target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 
 
 
