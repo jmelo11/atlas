@@ -12,6 +12,8 @@ namespace Atlas {
 
     template <typename adouble>
     class ParSolver : public ConstVisitor<adouble> {
+        using ConstVisitor<adouble>::visit;
+
        public:
         ParSolver(const MarketData<adouble>& marketData, double guess = 0.0, double accuracy = 0.00001, double maxIter = 100)
         : marketData_(marketData), guess_(guess), accuracy_(accuracy), maxIter_(maxIter){};
@@ -29,10 +31,10 @@ namespace Atlas {
             for (const auto& coupon : coupons) dfSum += marketData_.dfs.at(coupon.dfIdx());
             adouble payment = startDf / dfSum;
 
-            InterestRate prodRate = inst.rate();
+            InterestRate<adouble> prodRate = inst.rate();
 
             auto f = [&](adouble r) {
-                InterestRate tmpRate(r, prodRate.dayCounter(), prodRate.compounding(), prodRate.frequency());
+                InterestRate<adouble> tmpRate(r, prodRate.dayCounter(), prodRate.compounding(), prodRate.frequency());
                 adouble totalRedemption = 0;
                 for (const auto& coupon : coupons)
                     totalRedemption += payment - (tmpRate.compoundFactor(coupon.startDate(), coupon.endDate()) - 1) * (1 - totalRedemption);
@@ -90,6 +92,7 @@ namespace Atlas {
                 adouble notional = evalInst.disbursement().amount();
                 return npv + notional * startDf;
             };
+
             if constexpr (std::is_same_v<adouble, double>) {
                 QuantLib::Brent solver_;
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);

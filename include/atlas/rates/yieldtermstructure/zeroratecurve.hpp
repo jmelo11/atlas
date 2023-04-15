@@ -48,7 +48,7 @@ namespace Atlas {
             return r.rate();
         };
 
-        std::unique_ptr<YieldTermStructureStrategy<adouble>> copy() const override {
+        std::unique_ptr<YieldTermStructureStrategy<adouble>> clone() const override {
             return std::make_unique<ZeroRateStrategy<adouble, Interpol>>(*this);
         };
 

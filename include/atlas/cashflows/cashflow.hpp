@@ -24,7 +24,7 @@ namespace Atlas {
          *
          * @param discountCurveContext The discount curve context
          */
-        Cashflow(const CurveContext<adouble>& discountCurveContext) : discountContextIdx_(discountCurveContext.idx()), hasDiscountContext_(true){};
+        Cashflow(const CurveContext<adouble>& discountCurveContext) : hasDiscountContext_(true), discountContextIdx_(discountCurveContext.idx()){};
 
         /**
          * Constructor
@@ -39,7 +39,8 @@ namespace Atlas {
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, adouble amount, const CurveContext<adouble>& discountCurveContext, size_t ccyCode = 0, bool applyCcy = false)
+        Cashflow(const Date& paymentDate, adouble amount, const CurveContext<adouble>& discountCurveContext, size_t ccyCode = 0,
+                 bool applyCcy = false)
         : amount_(amount),
           paymentDate_(paymentDate),
           hasDiscountContext_(true),

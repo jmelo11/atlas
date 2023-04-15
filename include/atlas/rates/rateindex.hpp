@@ -62,7 +62,7 @@ namespace Atlas {
          */
         double getFixing(const Date& date) const;
 
-        std::unique_ptr<RateIndex> copy() const;
+        std::unique_ptr<RateIndex> clone() const;
 
        private:
         std::string name_      = "undefined";

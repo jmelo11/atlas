@@ -59,7 +59,7 @@ namespace Atlas {
          * @param rate
          */
         virtual void rate(adouble r) {
-            InterestRate tmpR(r, rate_.dayCounter(), rate_.compounding(), rate_.frequency());
+            InterestRate<adouble> tmpR(r, rate_.dayCounter(), rate_.compounding(), rate_.frequency());
             rate(tmpR);
         };
 
@@ -75,7 +75,7 @@ namespace Atlas {
          *
          * @param context
          */
-        inline void discountCurveContex(const CurveContext<adouble>& context) {
+        inline void discountCurveContext(const CurveContext<adouble>& context) {
             this->leg().discountCurveContext(context);
             disbursement_.discountCurveContext(context);
         };

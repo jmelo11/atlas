@@ -18,7 +18,7 @@ TEST(Others, CreateCurveContext) {
     store1_.createCurveContext("LIBOR1M", curve, index);
 
     MarketStore<double> store2_;
-    store2_.copyFromStore(store1_);
+    store2_.cloneFromStore(store1_);
 
     EXPECT_TRUE(store2_.hasCurveContext("LIBOR1M"));
 

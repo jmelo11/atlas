@@ -24,6 +24,7 @@ else:
     else:
         LIB_DIR = Path('/Users/josemelo/Desktop/dev/builds')
         include_dirs += ['/opt/homebrew/opt/boost/include']
+        include_dirs += ['/Users/josemelo/Desktop/dev/builds/include/eigen3']
         library_dirs += ['/opt/homebrew/opt/boost/lib']
 
     include_dirs += [str(LIB_DIR / 'include')]

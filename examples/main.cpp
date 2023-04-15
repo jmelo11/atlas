@@ -33,7 +33,7 @@ void pricingFixedRateInstruments() {
     store_.createCurveContext("TEST", curve_, index);
 
     // Create a curve context store
-    instrument.discountCurveContex(store_.curveContext("TEST"));
+    instrument.discountCurveContext(store_.curveContext("TEST"));
 
     Indexer<NumType> indexer;
     indexer.visit(instrument);
@@ -67,7 +67,7 @@ void pricingFloatingRateInstruments() {
 
     FloatingRateBulletInstrument<NumType> instrument(startDate, endDate, notional, spread, context);
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<NumType> indexer;
     indexer.visit(instrument);
@@ -101,7 +101,7 @@ void rateSens() {
         InterestRate<dual> rate = InterestRate(r, Actual360(), Compounding::Simple, Frequency::Annual);
         FixedRateBulletInstrument<dual> instrument(startDate, endDate, paymentFrequency, notional, rate);
         // set curve context
-        instrument.discountCurveContex(store_.curveContext("TEST"));
+        instrument.discountCurveContext(store_.curveContext("TEST"));
         Indexer<dual> indexer;
         indexer.visit(instrument);
         MarketRequest request;
@@ -179,7 +179,7 @@ void multithreadedSens() {
         for (auto& slice : slices) {
             auto task = [&]() {
                 MarketStore<dual> store_;
-                store_.copyFromStore(mainStore_);
+                store_.cloneFromStore(mainStore_);
 
                 StaticCurveModel<dual> model(request, store_);
                 MarketData<dual> marketData;
@@ -242,7 +242,7 @@ void curveSens() {
         RateIndex index("TEST", Frequency::Annual, Actual360());
         mainStore.createCurveContext("TEST", curve, index);
         auto& context = mainStore.curveContext("TEST");
-        instrument.discountCurveContex(context);
+        instrument.discountCurveContext(context);
 
         Indexer<dual> indexer;
         indexer.visit(instrument);

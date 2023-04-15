@@ -15,9 +15,10 @@ namespace Atlas {
        public:
         /**
          * @brief Returns the instance of the store.
-         * @return The instance of the store.
+         * @param refDate The reference date.
+         * @param localCcy The local currency.
          */
-        MarketStore() = default;
+        MarketStore(const Date& refDate = Date(), Currency localCcy = Currency()) : refDate_(refDate), localCcy_(localCcy) {}
 
         /**
          * @brief Creates a copy of curve context and adds it to the store.
@@ -26,14 +27,22 @@ namespace Atlas {
          * @param index The rate index used as the underlying interest rate.
          */
         void createCurveContext(const std::string& contextName, const YieldTermStructure<adouble>& curve, const RateIndex& index) {
-            if (nameToIdx_.count(contextName) == 0) {
-                auto curveCopy = curve.copy();
-                auto indexCopy = index.copy();
-                CurveContext<adouble> context(curveCopy, indexCopy, contexts_.size());
+            if (ctxToIdx_.count(contextName) == 0) {
+                auto curveClone = curve.clone();
+                auto indexClone = index.clone();
+                CurveContext<adouble> context(curveClone, indexClone, contexts_.size());
                 contexts_.push_back(std::move(context));
-                nameToIdx_[contextName] = contexts_.size() - 1;
+                ctxToIdx_[contextName] = contexts_.size() - 1;
             } else {
                 throw std::invalid_argument("A curve context with the given name already exists.");
+            }
+        };
+
+        void createCurrency(const Currency& currency, adouble value) {
+            if (currencies_.count(currency.numericCode()) == 0) {
+                currencies_[currency.numericCode()] = value;
+            } else {
+                throw std::invalid_argument("A currency context with the given name already exists.");
             }
         };
 
@@ -42,10 +51,11 @@ namespace Atlas {
          * @param contextName The name of the context.
          * @return The curve context.
          */
-        CurveContext<adouble>& curveContext(const std::string& contextName) {
-            auto it = nameToIdx_.find(contextName);
-            if (it != nameToIdx_.end()) {
-                return contexts_.at(it->second);
+        const CurveContext<adouble>& curveContext(const std::string& contextName) const {
+            auto it = ctxToIdx_.find(contextName);
+            if (it != ctxToIdx_.end()) {
+                size_t pos = ctxToIdx_.at(contextName);
+                return contexts_.at(pos);
             } else {
                 throw std::out_of_range("No curve context found with the given name.");
             }
@@ -70,18 +80,24 @@ namespace Atlas {
          * @return true if the store has a context with the given name.
          * @return false if the store does not have a context with the given name.
          */
-        inline bool hasCurveContext(const std::string& contextName) const { return nameToIdx_.find(contextName) != nameToIdx_.end(); }
+        inline bool hasCurveContext(const std::string& contextName) const { return ctxToIdx_.find(contextName) != ctxToIdx_.end(); }
 
-        void copyFromStore(const MarketStore& store)  {
-            for (auto& context : store.contexts_) {
-                contexts_.push_back(context.copy());
-            }
-            nameToIdx_ = store.nameToIdx_;
+        void cloneFromStore(const MarketStore& store) {
+            for (auto& context : store.contexts_) { contexts_.push_back(context.clone()); }
+            ctxToIdx_ = store.ctxToIdx_;
+
+            currencies_ = store.currencies_;
+            localCcy_   = store.localCcy_;
+            refDate_    = store.refDate_;
         };
 
        private:
-        Date referenceDate_ = Date();
-        std::map<std::string, size_t> nameToIdx_;
+        Date refDate_;
+        Currency localCcy_;
+
+        std::map<size_t, adouble> currencies_;
+
+        std::map<std::string, size_t> ctxToIdx_;
         std::vector<CurveContext<adouble>> contexts_;
     };
 

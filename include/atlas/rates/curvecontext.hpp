@@ -42,9 +42,9 @@ namespace Atlas {
         CurveContext(std::unique_ptr<YieldTermStructure<adouble>>& curve, std::unique_ptr<RateIndex>& index, size_t idx)
         : curve_(std::move(curve)), index_(std::move(index)), idx_(idx) {}
 
-        CurveContext copy() const {
-            auto curveCopy = curve_->copy();
-            auto indexCopy = index_->copy();
+        CurveContext clone() const {
+            auto curveCopy = curve_->clone();
+            auto indexCopy = index_->clone();
             return CurveContext(curveCopy, indexCopy, idx_);
         }
 

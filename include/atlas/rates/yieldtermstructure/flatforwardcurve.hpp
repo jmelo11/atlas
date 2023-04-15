@@ -37,7 +37,7 @@ namespace Atlas {
             return InterestRate<adouble>::impliedRate(compound, dayCounter, comp, freq, startDate, endDate).rate();
         };
 
-        std::unique_ptr<YieldTermStructureStrategy<adouble>> copy() const override {
+        std::unique_ptr<YieldTermStructureStrategy<adouble>> clone() const override {
             return std::make_unique<FlatForwardStrategy<adouble>>(this->refDate_, rate_);
         };
 

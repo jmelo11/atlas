@@ -17,6 +17,9 @@ namespace Atlas {
     template <typename adouble>
     class Instrument {
        public:
+
+        virtual ~Instrument() = default;
+
         /**
          * @brief Accepts a visitor.
          *

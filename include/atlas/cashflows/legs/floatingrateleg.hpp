@@ -24,9 +24,9 @@ namespace Atlas {
          * @param redemptions vector of Redemption objects representing the redemptions in the leg.
          * @param sort boolean indicating whether the cashflows should be sorted by date.
          */
-        FloatingRateLeg(std::vector<FloatingRateCoupon<adouble>> coupons, std::vector<Redemption<adouble>> redemptions, bool sort = false)
+        FloatingRateLeg(std::vector<FloatingRateCoupon<adouble>>& coupons, std::vector<Redemption<adouble>>& redemptions, bool sort = false)
         : Leg<adouble>(redemptions, sort), coupons_(coupons) {
-            if (sort) sortCashflows(coupons_);
+            if (sort) this->sortCashflows(coupons_);
         };
 
         /**
@@ -54,8 +54,8 @@ namespace Atlas {
          * @brief Sorts the cashflows in the leg by date.
          */
         inline void sort() {
-            sortCashflows(this->redemptions_);
-            sortCashflows(coupons_);
+            this->sortCashflows(this->redemptions_);
+            this->sortCashflows(coupons_);
         }
 
         inline void discountCurveContext(const CurveContext<adouble>& discountCurveContext) {

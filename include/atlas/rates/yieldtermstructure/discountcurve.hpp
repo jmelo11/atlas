@@ -16,7 +16,7 @@ namespace Atlas {
             times_    = std::vector<double>(dates.size());
             times_[0] = 0.0;
 
-            for (auto i = 1; i < dates.size(); ++i) {
+            for (size_t i = 1; i < dates.size(); ++i) {
                 if (dates[i] < dates[i - 1]) { throw std::invalid_argument("dates must be sorted"); }
                 double t = dayCounter.yearFraction(dates[0], dates[i]);
                 if (t < 0) throw std::invalid_argument("dates must be greater than reference date");
@@ -36,14 +36,14 @@ namespace Atlas {
 
         adouble forwardRate(const Date& startDate, const Date& endDate, const DayCounter& dayCounter, Compounding comp,
                             Frequency freq) const override {
-            double t1    = dayCounter_.yearFraction(this->refDate_, startDate);
-            double t2    = dayCounter_.yearFraction(this->refDate_, endDate);
+            double t1     = dayCounter_.yearFraction(this->refDate_, startDate);
+            double t2     = dayCounter_.yearFraction(this->refDate_, endDate);
             adouble value = interpol_(t1) / interpol_(t2);
             auto r        = InterestRate<adouble>::impliedRate(value, dayCounter, comp, freq, startDate, endDate);
             return r.rate();
         };
 
-        std::unique_ptr<YieldTermStructureStrategy<adouble>> copy() const override {
+        std::unique_ptr<YieldTermStructureStrategy<adouble>> clone() const override {
             return std::make_unique<DiscountStrategy<adouble, Interpol>>(dates_, dfs_, dayCounter_);
         };
 

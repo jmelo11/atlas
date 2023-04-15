@@ -37,7 +37,7 @@ TEST(ParSolver, FixedRateInstrument) {
 
     auto& context = store_.curveContext("TEST");
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<double> indexer;
     indexer.visit(instrument);
@@ -87,7 +87,7 @@ TEST(ParSolver, FixedRateInstrumentDual) {
     store_.createCurveContext("TEST", curve_, index);
     auto& context = store_.curveContext("TEST");
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<dual> indexer;
     indexer.visit(instrument);
@@ -137,7 +137,7 @@ TEST(ParSolver, FloatingRateInstrument) {
     auto& context = store_.curveContext("TEST");
     FloatingRateBulletInstrument<double> instrument(startDate, endDate, notional, spread, context);
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<double> indexer;
     indexer.visit(instrument);
@@ -203,7 +203,7 @@ TEST(ParSolver, FloatingRateInstrumentDual) {
     auto& context = store_.curveContext("TEST");
     FloatingRateBulletInstrument<dual> instrument(startDate, endDate, notional, spread, context);
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<dual> indexer;
     indexer.visit(instrument);

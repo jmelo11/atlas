@@ -317,7 +317,7 @@ void pricingBenchmark() {
         for (auto& slice : slices) {
             auto task = [&]() {
                 MarketStore<NumType> store;
-                store.copyFromStore(mainStore_);
+                store.cloneFromStore(mainStore_);
 
                 Indexer<NumType> indexer;
                 for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(indexer); }
@@ -348,7 +348,7 @@ void pricingBenchmark() {
                 // std::cout << pool->threadNum() << std::endl;
 
                 MarketStore<NumType> store;
-                store.copyFromStore(mainStore_);
+                store.cloneFromStore(mainStore_);
 
                 Indexer<NumType> indexer;
                 for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(indexer); }

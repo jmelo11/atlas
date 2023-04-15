@@ -95,8 +95,8 @@ namespace Atlas {
         };
 
         mutable adouble value_ = 0.0;
-        adouble targetNPV_;
         const MarketData<adouble>& marketData_;
+        adouble targetNPV_;
         DayCounter dayCounter_;
         Compounding comp_;
         Frequency freq_;

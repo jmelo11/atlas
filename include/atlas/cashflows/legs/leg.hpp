@@ -25,7 +25,7 @@ namespace Atlas {
          * @param redemptions The vector of Redemption objects
          * @param sort Flag indicating whether to sort the redemptions by payment date
          */
-        Leg(std::vector<Redemption<adouble>> redemptions, bool sort = false) : redemptions_(redemptions) {
+        Leg(std::vector<Redemption<adouble>>& redemptions, bool sort = false) : redemptions_(redemptions) {
             if (sort) sortCashflows(redemptions_);
         };
 

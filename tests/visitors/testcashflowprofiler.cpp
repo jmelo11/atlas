@@ -35,7 +35,7 @@ TEST(CashflowProfiler, FixedRateInstrumentDual) {
 
 TEST(CashflowProfiler, FloatingRateInstrument) {
     FloatingInstrumentVars<double> vars;
-    CurveContext<double>& context = vars.store_.curveContext("TEST");
+    const auto& context = vars.store_.curveContext("TEST");
     FloatingRateBulletInstrument<double> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, vars.store_.curveContext("TEST"));
     CashflowProfiler<double> profiler;
     profiler.visit(floatInst);

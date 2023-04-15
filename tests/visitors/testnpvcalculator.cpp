@@ -34,7 +34,7 @@ TEST(NPVCalculator, FixedRateInstrument) {
 
     auto& context = store_.curveContext("TEST");
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<double> indexer;
     indexer.visit(instrument);
@@ -89,7 +89,7 @@ TEST(NPVCalculator, FixedRateInstrumentDual) {
 
     auto& context = store_.curveContext("TEST");
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<dual> indexer;
     indexer.visit(instrument);
@@ -143,7 +143,7 @@ TEST(NPVCalculator, FloatingRateInstrument) {
     auto& context = store_.curveContext("TEST");
     FloatingRateBulletInstrument<double> instrument(startDate, endDate, notional, spread, context);
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<double> indexer;
     indexer.visit(instrument);
@@ -212,7 +212,7 @@ TEST(NPVCalculator, FloatingRateInstrumentDual) {
     auto& context = store_.curveContext("TEST");
     FloatingRateBulletInstrument<dual> instrument(startDate, endDate, notional, spread, context);
     // set curve context
-    instrument.discountCurveContex(context);
+    instrument.discountCurveContext(context);
 
     Indexer<dual> indexer;
     indexer.visit(instrument);

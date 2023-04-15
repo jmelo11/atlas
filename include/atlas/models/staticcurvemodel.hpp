@@ -104,6 +104,10 @@ namespace Atlas {
             }
         };
 
+        void simulateSpots(MarketData<adouble>& md) const {
+            for (size_t i = 0; i < this->marketRequest_.spots.size(); ++i) { auto& request = this->marketRequest_.dfs[i]; }
+        }
+
         const MarketStore<adouble>& marketStore_;
     };
 }  // namespace Atlas

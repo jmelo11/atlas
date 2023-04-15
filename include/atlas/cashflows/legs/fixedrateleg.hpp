@@ -14,9 +14,9 @@ namespace Atlas {
        public:
         FixedRateLeg() : Leg<adouble>(){};
 
-        FixedRateLeg(std::vector<FixedRateCoupon<adouble>> coupons, std::vector<Redemption<adouble>> redemptions, bool sort = false)
+        FixedRateLeg(std::vector<FixedRateCoupon<adouble>>& coupons, std::vector<Redemption<adouble>>& redemptions, bool sort = false)
         : Leg<adouble>(redemptions, sort), coupons_(coupons) {
-            if (sort) sortCashflows(coupons_);
+            if (sort) this->sortCashflows(coupons_);
         };
 
         inline std::vector<FixedRateCoupon<adouble>>& coupons() { return coupons_; }

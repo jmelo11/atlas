@@ -39,6 +39,11 @@ namespace Atlas {
             indexCashflow(inst.disbursement());
         };
 
+        void visit(FxForward<adouble>& inst) override {
+            indexCashflow(inst.firstLeg().redemptions()[0]);
+            indexCashflow(inst.secondLeg().redemptions()[0]);
+        };
+
         void setRequest(MarketRequest& request) {
             auto& dfs   = request.dfs;
             auto& fwds  = request.fwds;
@@ -78,6 +83,14 @@ namespace Atlas {
             cashflow.spotIdx(spots_.size() - 1);
         };
 
+        /**
+         * @brief Indexes a floating rate coupon.
+         *
+         * @param coupon The coupon to index.
+         * @return void
+         * @throw std::runtime_error If the coupon does not have a forecast curve context.
+         * TODO: should handle in-arrears coupons.
+         */
         void indexFloatingCoupon(FloatingRateCoupon<adouble>& coupon) {
             if (!coupon.hasForecastContext()) { throw std::runtime_error("Floating rate coupon does not have a forecast curve context."); }
             size_t curveIdx = coupon.forecastContextIdx();

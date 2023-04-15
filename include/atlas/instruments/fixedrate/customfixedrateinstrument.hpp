@@ -18,7 +18,7 @@ namespace Atlas {
          * @param redemptions redemption amounts for the instrument
          * @param rate rate of the instrument
          */
-        CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate<adouble>& rate)
+        CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate)
         : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate) {
             for (size_t i = 0; i < redemptions.size(); i++) {
                 Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
@@ -37,7 +37,7 @@ namespace Atlas {
          * @param rate rate of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
-        CustomFixedRateInstrument(std::vector<Date> dates, std::vector<double> redemptions, const InterestRate<adouble>& rate,
+        CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate,
                                   const CurveContext<adouble>& discountCurveContext)
         : CustomFixedRateInstrument(dates, redemptions, rate) {
             this->leg().discountCurveContext(discountCurveContext);
