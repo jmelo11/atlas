@@ -348,9 +348,9 @@ PYBIND11_MODULE(Atlas, m) {
         .def("curveContext", py::overload_cast<size_t>(&MarketStore<dual>::curveContext, py::const_), "Get a curve context by index")
         .def("hasCurveContext", &MarketStore<dual>::hasCurveContext)
         .def("cloneFromStore", &MarketStore<dual>::cloneFromStore)
-        .def("createCurrency", &MarketStore<dual>::createCurrency)
-        .def("currency", py::overload_cast<const Currency&>(&MarketStore<dual>::currency, py::const_), "Get a curve context by name")
-        .def("currency", py::overload_cast<size_t>(&MarketStore<dual>::currency, py::const_), "Get a curve context by name");
+        .def("createCurrencyContext", &MarketStore<dual>::createCurrencyContext)
+        .def("currencyContext", py::overload_cast<const std::string&>(&MarketStore<dual>::currencyContext, py::const_), "Get a curve context by name")
+        .def("currencyContext", py::overload_cast<size_t>(&MarketStore<dual>::currencyContext, py::const_), "Get a curve context by name");
 
     py::class_<YieldTermStructureStrategy<dual>>(m, "YieldTermStructureStrategy")
         .def("discount", py::overload_cast<const Date&>(&YieldTermStructureStrategy<dual>::discount, py::const_))

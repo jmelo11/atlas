@@ -96,7 +96,7 @@ namespace Atlas {
          * @param currency
          * @return const CurrencyContext<adouble>&
          */
-        const CurrencyContext<adouble>& currencyContext(std::string& contextName) const {
+        const CurrencyContext<adouble>& currencyContext(const std::string& contextName) const {
             if (ccyToIdx_.find(contextName) != ccyToIdx_.end()) {
                 size_t pos = ccyToIdx_.at(contextName);
                 return currencyContexts_.at(pos);

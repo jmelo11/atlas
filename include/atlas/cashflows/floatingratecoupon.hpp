@@ -80,7 +80,8 @@ namespace Atlas {
          */
         void forecastCurveContext(const CurveContext<adouble>& context) {
             forecastContextIdx_ = context.idx();
-            if (context.index() == nullptr) throw std::runtime_error("FloatingRateCoupon::forecastCurveContext: RateIndex is null");
+            if (!context.hasIndex())
+                throw std::runtime_error("FloatingRateCoupon::forecastCurveContext: The forecast CurveContext does not have an index");
             rateDef_            = {context.index().dayCounter(), context.index().rateFrequency(), context.index().rateCompounding()};
             hasForecastContext_ = true;
         }

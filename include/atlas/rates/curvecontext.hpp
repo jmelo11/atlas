@@ -32,6 +32,16 @@ namespace Atlas {
          */
         inline size_t idx() const { return idx_; }
 
+        /**
+         * @return True if the context has a yield term structure, false otherwise.
+         */
+        inline bool hasIndex() const { return index_ != nullptr; }
+
+        /**
+         * @return True if the context has a rate index, false otherwise.
+         */
+        inline bool hasCurve() const { return curve_ != nullptr; }
+
        private:
         /**
          * Constructs a yield curve from a vector of dates and a vector of corresponding rates.
