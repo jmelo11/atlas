@@ -22,7 +22,8 @@ namespace Atlas {
          * @param spread The spread of the coupon
          * @param forecastCurveContext The forecast CurveContext of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const CurveContext<adouble>& forecastCurveContext)
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
+                           const CurveContext<adouble>& forecastCurveContext)
         : Coupon<adouble>(startDate, endDate, notional), spread_(spread), forecastContextIdx_(forecastCurveContext.idx()), hasForecastContext_(true) {
             rateDef_ = {forecastCurveContext.index().dayCounter(), forecastCurveContext.index().rateFrequency(),
                         forecastCurveContext.index().rateCompounding()};
@@ -37,8 +38,8 @@ namespace Atlas {
          * @param forecastCurveContext The forecast CurveContext of the coupon
          * @param discountCurveContext The discount CurveContext of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const CurveContext<adouble>& forecastCurveContext,
-                           const CurveContext<adouble>& discountCurveContext)
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
+                           const CurveContext<adouble>& forecastCurveContext, const CurveContext<adouble>& discountCurveContext)
         : FloatingRateCoupon(startDate, endDate, notional, spread, forecastCurveContext) {
             this->discountContextIdx_ = discountCurveContext.idx();
             this->hasDiscountContext_ = true;
@@ -79,6 +80,7 @@ namespace Atlas {
          */
         void forecastCurveContext(const CurveContext<adouble>& context) {
             forecastContextIdx_ = context.idx();
+            if (context.index() == nullptr) throw std::runtime_error("FloatingRateCoupon::forecastCurveContext: RateIndex is null");
             rateDef_            = {context.index().dayCounter(), context.index().rateFrequency(), context.index().rateCompounding()};
             hasForecastContext_ = true;
         }

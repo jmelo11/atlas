@@ -352,8 +352,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("currency", py::overload_cast<const Currency&>(&MarketStore<dual>::currency, py::const_), "Get a curve context by name")
         .def("currency", py::overload_cast<size_t>(&MarketStore<dual>::currency, py::const_), "Get a curve context by name");
 
-    // CurveStrategy -> Trampoline?
-    py::class_<YieldTermStructureStrategy<dual>>(m, "CurveStrategy")
+    py::class_<YieldTermStructureStrategy<dual>>(m, "YieldTermStructureStrategy")
         .def("discount", py::overload_cast<const Date&>(&YieldTermStructureStrategy<dual>::discount, py::const_))
         .def("discount", py::overload_cast<double>(&YieldTermStructureStrategy<dual>::discount, py::const_))
         .def("forwardRate", &YieldTermStructureStrategy<dual>::forwardRate)

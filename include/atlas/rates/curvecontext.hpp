@@ -51,6 +51,7 @@ namespace Atlas {
         std::unique_ptr<YieldTermStructure<adouble>> curve_;
         std::unique_ptr<RateIndex> index_;
         size_t idx_;
+
         friend class MarketStore<adouble>;
     };
 

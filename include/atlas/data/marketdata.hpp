@@ -60,7 +60,7 @@ namespace Atlas {
          *
          */
         struct Spot {
-            size_t ccyCode_;     /**< The index of the currency used to calculate the spot. */
+            size_t ccy_;         /**< The index of the currency used to calculate the spot. */
             Date date_ = Date(); /**< The date of the spot request. Only if applyCCy is true, the spot should be forecasted according its ccyRecepy */
         };
 
@@ -93,10 +93,10 @@ namespace Atlas {
     template <typename adouble>
     struct MarketData {
         Date refDate;                ///< The reference date for the market data.
-        adouble numerarie;           ///< The numerarie used in financial calculations.
         std::vector<adouble> dfs;    ///< The vector of discount factors.
         std::vector<adouble> fwds;   ///< The vector of forward rates.
         std::vector<adouble> spots;  ///< The vector of spot rates.
+        adouble numerarie = 1;       ///< The numerarie used in financial calculations.
 
         /**
          * @brief Allocates memory for the discount factors and forward rates according to the given market request.
@@ -113,7 +113,6 @@ namespace Atlas {
          * @brief Initializes the discount factors and forward rates to 1.
          */
         inline void initialize() {
-            numerarie = 1;
             std::fill(dfs.begin(), dfs.end(), 0.0);
             std::fill(fwds.begin(), fwds.end(), 0.0);
             std::fill(spots.begin(), spots.end(), 0.0);

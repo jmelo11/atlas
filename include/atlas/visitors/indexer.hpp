@@ -74,12 +74,8 @@ namespace Atlas {
             dfs_.push_back({curveIdx, paymentDate});
             cashflow.dfIdx(dfs_.size() - 1);
 
-            size_t ccyCode = cashflow.ccyCode();
-            if (cashflow.applyCcy()) {
-                spots_.push_back({ccyCode, paymentDate});
-            } else {
-                spots_.push_back({ccyCode});
-            }
+            size_t ccyIdx = cashflow.currencyContextIdx();
+            spots_.push_back({ccyIdx, paymentDate});
             cashflow.spotIdx(spots_.size() - 1);
         };
 

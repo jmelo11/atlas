@@ -26,10 +26,10 @@ namespace Atlas {
         FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, double notional, Currency curr1, Currency curr2, Side side)
         : DoubleLegInstrument<adouble, Leg<adouble>, Leg<adouble>>(startDate, endDate, notional, Leg<adouble>(), Leg<adouble>(), side),
           fwdPrice_(fwdPrice) {
-            Cashflow<adouble> cashflow1(startDate, fwdPrice * notional, curr1.numericCode());
-            Cashflow<adouble> cashflow2(endDate, notional, curr2.numericCode());
-            this->firstLeg().addRedemption(cashflow1);
-            this->secondLeg().addRedemption(cashflow2);
+            // Cashflow<adouble> cashflow1(startDate, fwdPrice * notional, curr1.numericCode());
+            // Cashflow<adouble> cashflow2(endDate, notional, curr2.numericCode());
+            // this->firstLeg().addRedemption(cashflow1);
+            // this->secondLeg().addRedemption(cashflow2);
         }
 
         adouble fwdPrice() const { return fwdPrice_; }

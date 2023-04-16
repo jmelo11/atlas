@@ -114,6 +114,7 @@
         "ctgmath": "cpp",
         "execution": "cpp",
         "cstdbool": "cpp",
-        "version": "cpp"
+        "version": "cpp",
+        "__memory": "cpp"
     }
 }

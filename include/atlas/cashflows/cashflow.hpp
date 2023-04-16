@@ -2,6 +2,7 @@
 #define FB3CE86C_B207_47DE_B110_DA337769FAF4
 
 #include <atlas/atlasconfig.hpp>
+#include <atlas/fundation/currencycontext.hpp>
 #include <atlas/fundation/indexable.hpp>
 #include <atlas/rates/curvecontext.hpp>
 
@@ -31,22 +32,15 @@ namespace Atlas {
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, adouble amount, size_t ccyCode = 0, bool applyCcy = false)
-        : amount_(amount), paymentDate_(paymentDate), ccyCode_(ccyCode), applyCcy_(applyCcy){};
+        Cashflow(const Date& paymentDate, adouble amount) : amount_(amount), paymentDate_(paymentDate){};
 
         /**
          * Constructor
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, adouble amount, const CurveContext<adouble>& discountCurveContext, size_t ccyCode = 0,
-                 bool applyCcy = false)
-        : amount_(amount),
-          paymentDate_(paymentDate),
-          hasDiscountContext_(true),
-          ccyCode_(ccyCode),
-          applyCcy_(applyCcy),
-          discountContextIdx_(discountCurveContext.idx()){};
+        Cashflow(const Date& paymentDate, adouble amount, const CurveContext<adouble>& discountCurveContext)
+        : amount_(amount), paymentDate_(paymentDate), hasDiscountContext_(true), discountContextIdx_(discountCurveContext.idx()){};
 
         virtual ~Cashflow(){};
 
@@ -97,32 +91,33 @@ namespace Atlas {
          * @brief Gets the currency code
          * @return The currency code
          */
-        inline size_t ccyCode() const { return ccyCode_; }
-
-        /**
-         * @brief Sets the currency code
-         * @param ccyCode The currency code
-         */
-        inline void ccyCode(size_t ccyCode) { ccyCode_ = ccyCode; }
+        // inline size_t ccyCode() const { return ccyCode_; }
 
         /**
          * @brief Checks if the cashflow applies the currency
          * @return True if the cashflow applies the currency, false otherwise
          */
-        inline bool applyCcy() const { return applyCcy_; }
+        // inline bool applyCcy() const { return applyCcy_; }
 
         /**
          * @brief Checks if the cashflow applies the currency
          * @return True if the cashflow applies the currency, false otherwise
          */
-        inline void applyCcy(bool applyCcy) { applyCcy_ = applyCcy; }
+        // inline void applyCcy(bool applyCcy) { applyCcy_ = applyCcy; }
+
+        /**
+         * @brief Sets the currency context
+         * @param context The currency context
+         */
+        inline void currencyContext(const CurrencyContext<adouble>& context) { currencyContextIdx_ = context.idx(); }
+
+        inline size_t currencyContextIdx() const { return currencyContextIdx_; }
 
        protected:
-        adouble amount_          = 0;  // amount means static (non-risk-sensitive cashflows)
-        Date paymentDate_        = Date();
-        bool hasDiscountContext_ = false;
-        size_t ccyCode_          = 0;
-        bool applyCcy_           = false;
+        adouble amount_            = 0;
+        Date paymentDate_          = Date();
+        bool hasDiscountContext_   = false;
+        size_t currencyContextIdx_ = 0;
         size_t discountContextIdx_;
 
        private:

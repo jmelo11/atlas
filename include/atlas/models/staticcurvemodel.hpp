@@ -131,19 +131,14 @@ namespace Atlas {
         void simulateSpots(const Date& evalDate, MarketData<adouble>& md) const override {
             for (size_t i = 0; i < this->marketRequest_.spots.size(); ++i) {
                 auto& request    = this->marketRequest_.spots[i];
-                size_t idx       = request.ccyCode_;
+                size_t idx       = request.ccy_;
                 const auto& date = request.date_;
                 adouble spot;
-                const std::tuple<adouble, CcyRecepy<adouble>>& values = marketStore_.currency(idx);
-                if (date == Date()) {
-                    spot = std::get<0>(values);
+                if (marketStore_.currencyContext(idx).recepy() != nullptr) {
+                    auto fx = marketStore_.currencyContext(idx).recepy();
+                    spot    = fx(evalDate, date, marketStore_);
                 } else {
-                    auto fx         = std::get<1>(values);
-                    adouble tmpSpot = std::get<0>(values);
-                    if (fx == nullptr) { throw std::invalid_argument("Currency does not have a fx function"); }
-                    if (evalDate > date) { throw std::invalid_argument("Currency date is before evaluation date"); }
-                    adouble pond = fx(evalDate, date, marketStore_);
-                    spot         = tmpSpot * pond;
+                    spot = marketStore_.currencyContext(idx).value();
                 }
                 md.spots.push_back(spot);
             }

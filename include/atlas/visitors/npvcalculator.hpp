@@ -78,10 +78,11 @@ namespace Atlas {
          */
         adouble redemptionsNPV(const Leg<adouble>& leg) {
             adouble npv = 0.0;
-            adouble df  = 0.0;
             for (const auto& redemption : leg.redemptions()) {
-                df = marketData_.dfs.at(redemption.dfIdx());
-                npv += redemption.amount() * df;
+                adouble spot      = marketData_.spots.at(redemption.spotIdx());
+                adouble numeraire = marketData_.numerarie;
+                adouble df        = marketData_.dfs.at(redemption.dfIdx());
+                npv += redemption.amount() * df * spot / numeraire;
             }
             return npv;
         };
