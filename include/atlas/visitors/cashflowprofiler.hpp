@@ -10,8 +10,7 @@
 
 namespace Atlas {
 
-    template <typename adouble>
-    using Profile = std::map<Date, adouble>;
+    using Profile = std::map<Date, double>;
 
     template <typename adouble>
     class CashflowProfiler : public ConstVisitor<adouble> {
@@ -26,24 +25,32 @@ namespace Atlas {
             interests_.clear();
         };
 
-        Profile<adouble> redemptions() const { return redemptions_; }
-        Profile<adouble> interests() const { return interests_; }
+        Profile redemptions() const { return redemptions_; }
+        Profile interests() const { return interests_; }
 
        private:
         template <typename T>
         void agreggate(const T& leg) const {
             for (const auto& coupon : leg.coupons()) {
                 if (interests_.find(coupon.paymentDate()) == interests_.end()) { interests_[coupon.paymentDate()] = 0.0; }
-                interests_[coupon.paymentDate()] += coupon.amount();
+                if constexpr (std::is_same_v<adouble, double>) {
+                    interests_[coupon.paymentDate()] += coupon.amount();
+                } else {
+                    interests_[coupon.paymentDate()] += val(coupon.amount());
+                }
             };
             for (const auto& redemption : leg.redemptions()) {
                 if (redemptions_.find(redemption.paymentDate()) == redemptions_.end()) { redemptions_[redemption.paymentDate()] = 0.0; }
-                redemptions_[redemption.paymentDate()] += redemption.amount();
+                if constexpr (std::is_same_v<adouble, double>) {
+                    redemptions_[redemption.paymentDate()] += redemption.amount();
+                } else {
+                    redemptions_[redemption.paymentDate()] += val(redemption.amount());
+                }
             };
         };
 
-        mutable Profile<adouble> redemptions_;
-        mutable Profile<adouble> interests_;
+        mutable Profile redemptions_;
+        mutable Profile interests_;
     };
 }  // namespace Atlas
 

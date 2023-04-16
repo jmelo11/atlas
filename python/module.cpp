@@ -124,6 +124,42 @@ namespace Aux {
             );
         }
     };
+
+    class PyModel : public Model<dual> {
+        using Model<dual>::Model;
+
+        void simulate(const std::vector<Date>& evalDates, Scenario<dual>& scenario) const override {
+            PYBIND11_OVERRIDE_PURE(void,        /* Return type */
+                                   Model<dual>, /* Parent class */
+                                   simulate,    /* Name of function in C++ (must match Python name) */
+                                   evalDates,   /* Argument(s) */
+                                   scenario);
+        };
+
+        void simulateDiscounts(const Date& evalDate, MarketData<dual>& md) const override {
+            PYBIND11_OVERRIDE_PURE(void,              /* Return type */
+                                   Model<dual>,       /* Parent class */
+                                   simulateDiscounts, /* Name of function in C++ (must match Python name) */
+                                   evalDate,          /* Argument(s) */
+                                   md);
+        };
+
+        void simulateForwards(const Date& evalDate, MarketData<dual>& md) const override {
+            PYBIND11_OVERRIDE_PURE(void,             /* Return type */
+                                   Model<dual>,      /* Parent class */
+                                   simulateForwards, /* Name of function in C++ (must match Python name) */
+                                   evalDate,         /* Argument(s) */
+                                   md);
+        };
+
+        void simulateSpots(const Date& evalDate, MarketData<dual>& md) const override {
+            PYBIND11_OVERRIDE_PURE(void,          /* Return type */
+                                   Model<dual>,   /* Parent class */
+                                   simulateSpots, /* Name of function in C++ (must match Python name) */
+                                   evalDate,      /* Argument(s) */
+                                   md);
+        };
+    };
 };  // namespace Aux
 
 PYBIND11_MODULE(Atlas, m) {
@@ -131,8 +167,28 @@ PYBIND11_MODULE(Atlas, m) {
 
     // autodiff
     py::class_<dual>(m, "dual").def(py::init<double>());
+    m.def("getValue", [](const dual& d) { return val(d); });
 
     // QL Types
+    // Date
+    py::class_<Date>(m, "Date")
+        .def(py::init<int, Month, int>())
+        .def(py::init<const Date&>())
+        .def("serialNumber", &Date::serialNumber)
+        .def("weekday", &Date::weekday)
+        .def("dayOfMonth", &Date::dayOfMonth)
+        .def("month", &Date::month)
+        .def("year", &Date::year)
+        .def("__str__",
+             [](const Date& d) {
+                 std::string s = std::to_string(d.year()) + "-" + std::to_string(d.month()) + "-" + std::to_string(d.dayOfMonth());
+                 return s;
+             })
+        .def("__repr__", [](const Date& d) {
+            std::string s = std::to_string(d.year()) + "-" + std::to_string(d.month()) + "-" + std::to_string(d.dayOfMonth());
+            return s;
+        });
+
     // enums
     py::enum_<Compounding>(m, "Compounding")
         .value("Simple", Compounding::Simple)
@@ -202,20 +258,61 @@ PYBIND11_MODULE(Atlas, m) {
         .value("Years", TimeUnit::Years)
         .export_values();
 
+    // currencies
+    py::class_<Rounding>(m, "Rounding").def("__call__", &Rounding::operator());
+
+    py::class_<Currency>(m, "Currency")
+        .def(py::init<>())
+        .def("name", &Currency::name)
+        .def("code", &Currency::code)
+        .def("numericCode", &Currency::numericCode)
+        .def("symbol", &Currency::symbol)   
+        .def("rounding", &Currency::rounding);
+
+    py::class_<USD, Currency>(m, "USD").def(py::init<>());
+    py::class_<CLP, Currency>(m, "CLP").def(py::init<>());
+    py::class_<EUR, Currency>(m, "EUR").def(py::init<>());
+    py::class_<GBP, Currency>(m, "GBP").def(py::init<>());
+    py::class_<JPY, Currency>(m, "JPY").def(py::init<>());
+    py::class_<MXN, Currency>(m, "MXN").def(py::init<>());
+    py::class_<NOK, Currency>(m, "NOK").def(py::init<>());
+    py::class_<SEK, Currency>(m, "SEK").def(py::init<>());
+    py::class_<CHF, Currency>(m, "CHF").def(py::init<>());
+    py::class_<CAD, Currency>(m, "CAD").def(py::init<>());
+    py::class_<AUD, Currency>(m, "AUD").def(py::init<>());
+    py::class_<NZD, Currency>(m, "NZD").def(py::init<>());
+    py::class_<CNY, Currency>(m, "CNY").def(py::init<>());
+    py::class_<HKD, Currency>(m, "HKD").def(py::init<>());
+    py::class_<CLF, Currency>(m, "CLF").def(py::init<>());
+
     // classes
+    py::class_<DayCounter>(m, "DayCounter").def(py::init<>());
+
     py::class_<Period>(m, "Period").def(py::init<int, TimeUnit>());
 
-    py::class_<Actual360>(m, "Actual360").def(py::init<>()).def("dayCount", &Actual360::dayCount).def("yearFraction", &Actual360::yearFraction);
+    py::class_<Actual360, DayCounter>(m, "Actual360")
+        .def(py::init<>())
+        .def("dayCount", &Actual360::dayCount)
+        .def("yearFraction", &Actual360::yearFraction);
 
-    py::class_<Actual365Fixed>(m, "Actual365")
+    py::class_<Actual365Fixed, DayCounter>(m, "Actual365")
         .def(py::init<>())
         .def("dayCount", &Actual365Fixed::dayCount)
         .def("yearFraction", &Actual365Fixed::yearFraction);
 
-    py::class_<Thirty360>(m, "Thirty360")
+    py::class_<Thirty360, DayCounter>(m, "Thirty360")
         .def(py::init<Thirty360::Convention, const Date&>())
         .def("dayCount", &Thirty360::dayCount)
         .def("yearFraction", &Thirty360::yearFraction);
+
+    py::class_<InterestRate<dual>>(m, "InterestRate")
+        .def(py::init<>())
+        .def(py::init<dual, DayCounter, Compounding, Frequency>())
+        .def("rate", &InterestRate<dual>::rate)
+        .def("compoundFactor", py::overload_cast<double>(&InterestRate<dual>::compoundFactor, py::const_))
+        .def("compoundFactor", py::overload_cast<const Date&, const Date&, const Date&, const Date&>(&InterestRate<dual>::compoundFactor, py::const_))
+        .def("discountFactor", py::overload_cast<const Date&, const Date&, const Date&, const Date&>(&InterestRate<dual>::discountFactor, py::const_))
+        .def("discountFactor", py::overload_cast<double>(&InterestRate<dual>::discountFactor, py::const_));
 
     py::class_<Schedule>(m, "Schedule")
         .def(py::init<const Date&, const Date&, const Period&, const Calendar&, BusinessDayConvention, BusinessDayConvention, DateGeneration::Rule,
@@ -251,7 +348,9 @@ PYBIND11_MODULE(Atlas, m) {
         .def("curveContext", py::overload_cast<size_t>(&MarketStore<dual>::curveContext, py::const_), "Get a curve context by index")
         .def("hasCurveContext", &MarketStore<dual>::hasCurveContext)
         .def("cloneFromStore", &MarketStore<dual>::cloneFromStore)
-        .def("createCurrency", &MarketStore<dual>::createCurrency);
+        .def("createCurrency", &MarketStore<dual>::createCurrency)
+        .def("currency", py::overload_cast<const Currency&>(&MarketStore<dual>::currency, py::const_), "Get a curve context by name")
+        .def("currency", py::overload_cast<size_t>(&MarketStore<dual>::currency, py::const_), "Get a curve context by name");
 
     // CurveStrategy -> Trampoline?
     py::class_<YieldTermStructureStrategy<dual>>(m, "CurveStrategy")
@@ -429,4 +528,22 @@ PYBIND11_MODULE(Atlas, m) {
         .def(py::init<const MarketData<dual>&, dual, const DayCounter&, Compounding, Frequency, double>())
         .def("results", &ZSpreadCalculator<dual>::results)
         .def("clear", &ZSpreadCalculator<dual>::clear);
+
+    py::class_<CashflowProfiler<dual>, ConstVisitor<dual>>(m, "CashflowProfiler")
+        .def(py::init<>())
+        .def("redemptions", &CashflowProfiler<dual>::redemptions)
+        .def("interests", &CashflowProfiler<dual>::interests)
+        .def("clear", &CashflowProfiler<dual>::clear);
+
+    py::class_<DurationCalculator<dual>, ConstVisitor<dual>>(m, "DurationCalculator")
+        .def(py::init<const MarketData<dual>&, double>())
+        .def("results", &DurationCalculator<dual>::results)
+        .def("clear", &DurationCalculator<dual>::clear);
+
+    // Models
+    py::class_<Model<dual>, Aux::PyModel>(m, "Model").def("simulate", &Model<dual>::simulate);
+
+    py::class_<StaticCurveModel<dual>>(m, "StaticCurveModel")
+        .def(py::init<const MarketRequest&, const MarketStore<dual>&>())
+        .def("setRequest", &StaticCurveModel<dual>::setRequest);
 }

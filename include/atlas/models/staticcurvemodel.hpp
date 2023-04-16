@@ -41,9 +41,9 @@ namespace Atlas {
             for (const auto& evalDate : evalDates) {
                 MarketData<adouble> marketData;
                 marketData.allocate(this->marketRequest_);
-                simulateDiscounts(marketData);
-                simulateForwards(marketData);
-
+                simulateDiscounts(evalDate, marketData);
+                simulateForwards(evalDate, marketData);
+                simulateSpots(evalDate, marketData);
                 marketData.refDate = evalDate;
                 scenario.push_back(marketData);
             }
@@ -55,15 +55,22 @@ namespace Atlas {
          * @param refDate
          * @return MarketData<adouble>
          */
-        MarketData<adouble> simulate(const Date& refDate) const {
-            std::vector<QuantLib::Date> dates = {refDate};
+        MarketData<adouble> simulate(const Date& evalDate) const {
+            std::vector<QuantLib::Date> dates = {evalDate};
             Scenario<adouble> scenario;
             simulate(dates, scenario);
             return scenario.front();
         };
 
-       private:
-        void simulateDiscounts(MarketData<adouble>& md) const {
+       protected:
+        /**
+         * @brief Simulate the discount factors for a given scenario. If the evaluation date is after the curve reference date, a "forward" discount
+         * factor will be calculated.
+         *
+         * @param evalDate
+         * @param md
+         */
+        void simulateDiscounts(const Date& evalDate, MarketData<adouble>& md) const override {
             for (size_t i = 0; i < this->marketRequest_.dfs.size(); ++i) {
                 auto& request            = this->marketRequest_.dfs[i];
                 size_t idx               = request.curve_;
@@ -71,19 +78,29 @@ namespace Atlas {
                 const auto& curveContext = marketStore_.curveContext(idx);
                 const auto& curve        = curveContext.curve();
 
+                if (curve.refDate() > evalDate) { throw std::invalid_argument("Curve reference date does not match the simulation reference date"); }
+
                 adouble df;
-                if (curve.refDate() < date) {
-                    df = curve.discount(date);
-                } else if (curve.refDate() == date) {
-                    df = 1;
+                if (evalDate < date) {
+                    adouble df0 = curve.discount(evalDate);
+                    adouble df1 = curve.discount(date);  // shift valuation date? or raise exception?
+                    df          = df1 / df0;
+                } else if (evalDate == date) {
+                    df = 1.0;
                 } else {
-                    df = 0;
+                    df = 0.0;
                 }
                 md.dfs.push_back(df);
             }
         };
 
-        void simulateForwards(MarketData<adouble>& md) const {
+        /**
+         * @brief Simulate the forward rates. Uses the curves to forecast each forward rate.
+         *
+         * @param evalDate
+         * @param md
+         */
+        void simulateForwards(const Date& evalDate, MarketData<adouble>& md) const override {
             for (size_t i = 0; i < this->marketRequest_.fwds.size(); ++i) {
                 auto& request         = this->marketRequest_.fwds[i];
                 size_t idx            = request.curve_;
@@ -95,7 +112,7 @@ namespace Atlas {
                 const auto& index        = curveContext.index();
 
                 adouble fwd;
-                if (curve.refDate() <= startDate) {
+                if (evalDate <= startDate) {
                     fwd = curve.forwardRate(startDate, endDate, index.dayCounter(), index.rateCompounding(), index.rateFrequency());
                 } else {
                     fwd = index.getFixing(startDate);
@@ -104,8 +121,32 @@ namespace Atlas {
             }
         };
 
-        void simulateSpots(MarketData<adouble>& md) const {
-            for (size_t i = 0; i < this->marketRequest_.spots.size(); ++i) { auto& request = this->marketRequest_.dfs[i]; }
+        /**
+         * @brief Simulate the spot rates. If the date is not provided, the spot rate is used, otherwise the fx function is used
+         * to forecast the spot rate.
+         *
+         * @param evalDate
+         * @param md
+         */
+        void simulateSpots(const Date& evalDate, MarketData<adouble>& md) const override {
+            for (size_t i = 0; i < this->marketRequest_.spots.size(); ++i) {
+                auto& request    = this->marketRequest_.spots[i];
+                size_t idx       = request.ccyCode_;
+                const auto& date = request.date_;
+                adouble spot;
+                const std::tuple<adouble, CcyRecepy<adouble>>& values = marketStore_.currency(idx);
+                if (date == Date()) {
+                    spot = std::get<0>(values);
+                } else {
+                    auto fx         = std::get<1>(values);
+                    adouble tmpSpot = std::get<0>(values);
+                    if (fx == nullptr) { throw std::invalid_argument("Currency does not have a fx function"); }
+                    if (evalDate > date) { throw std::invalid_argument("Currency date is before evaluation date"); }
+                    adouble pond = fx(evalDate, date, marketStore_);
+                    spot         = tmpSpot * pond;
+                }
+                md.spots.push_back(spot);
+            }
         }
 
         const MarketStore<adouble>& marketStore_;

@@ -6,6 +6,9 @@
 
 namespace Atlas {
 
+    template <typename adouble>
+    using CcyRecepy = std::function<adouble(const Date&, const Date&, const MarketStore<adouble>&)>;
+
     /**
      * @class MarketStore
      * @brief Class with thread local storage that stores all the curve contexts.
@@ -18,7 +21,11 @@ namespace Atlas {
          * @param refDate The reference date.
          * @param localCcy The local currency.
          */
-        MarketStore(const Date& refDate = Date(), Currency localCcy = Currency()) : refDate_(refDate), localCcy_(localCcy) {}
+        MarketStore(const Date& refDate = Date(), Currency localCcy = Currency()) : refDate_(refDate), localCcy_(localCcy) {
+            // Create a default curve context for the local currency.
+            adouble ccyValue = 1.0;
+            createCurrency(localCcy_, ccyValue);
+        }
 
         /**
          * @brief Creates a copy of curve context and adds it to the store.
@@ -38,11 +45,20 @@ namespace Atlas {
             }
         };
 
-        void createCurrency(const Currency& currency, adouble value) {
+        /**
+         * @brief Create a Currency object
+         *
+         * @param currency
+         * @param value
+         * @param ccyRecepy
+         * @return * void
+         */
+
+        void createCurrency(const Currency& currency, adouble value, CcyRecepy<adouble> ccyRecepy = nullptr) {
             if (currencies_.count(currency.numericCode()) == 0) {
-                currencies_[currency.numericCode()] = value;
+                currencies_[currency.numericCode()] = {value, ccyRecepy};
             } else {
-                throw std::invalid_argument("A currency context with the given name already exists.");
+                throw std::invalid_argument("A currency context with the given code already exists.");
             }
         };
 
@@ -57,7 +73,8 @@ namespace Atlas {
                 size_t pos = ctxToIdx_.at(contextName);
                 return contexts_.at(pos);
             } else {
-                throw std::out_of_range("No curve context found with the given name.");
+                std::string msg = "No curve context found with the given name: " + contextName;
+                throw std::out_of_range(msg);
             }
         };
 
@@ -70,7 +87,8 @@ namespace Atlas {
             if (idx < contexts_.size()) {
                 return contexts_[idx];
             } else {
-                throw std::out_of_range("The index is out of the range of available curve contexts.");
+                std::string msg = "No curve context found at the given index: " + std::to_string(idx);
+                throw std::out_of_range(msg);
             }
         };
         /**
@@ -82,10 +100,44 @@ namespace Atlas {
          */
         inline bool hasCurveContext(const std::string& contextName) const { return ctxToIdx_.find(contextName) != ctxToIdx_.end(); }
 
+        /**
+         * @brief Returns a tuple of the value of the currency and the recepy to forecast the currency.
+         *
+         * @param currency
+         * @return const std::tuple<adouble, CcyRecepy<adouble>>&
+         */
+        const std::tuple<adouble, CcyRecepy<adouble>>& currency(const Currency& currency) const {
+            if (currencies_.find(currency.numericCode()) == currencies_.end()) {
+                std::string msg = "Currency " + currency.name() + " was not found in the store.";
+                throw std::out_of_range(msg);
+            } else {
+                return currencies_.at(currency.numericCode());
+            }
+        };
+
+        /**
+         * @brief Returns a tuple of the value of the currency and the recepy to forecast the currency.
+         *
+         * @param idx
+         * @return const std::tuple<adouble, CcyRecepy<adouble>>&
+         */
+        const std::tuple<adouble, CcyRecepy<adouble>>& currency(size_t idx) const {
+            if (currencies_.find(idx) == currencies_.end()) {
+                std::string msg = "Currency with index " + std::to_string(idx) + " was not found in the store.";
+                throw std::out_of_range(msg);
+            } else {
+                return currencies_.at(idx);
+            }
+        };
+
+        /**
+         * @brief clones from the given store. Cloning makes a deep copy of the store.
+         *
+         * @param store
+         */
         void cloneFromStore(const MarketStore& store) {
             for (auto& context : store.contexts_) { contexts_.push_back(context.clone()); }
-            ctxToIdx_ = store.ctxToIdx_;
-
+            ctxToIdx_   = store.ctxToIdx_;
             currencies_ = store.currencies_;
             localCcy_   = store.localCcy_;
             refDate_    = store.refDate_;
@@ -95,8 +147,7 @@ namespace Atlas {
         Date refDate_;
         Currency localCcy_;
 
-        std::map<size_t, adouble> currencies_;
-
+        std::map<size_t, std::tuple<adouble, CcyRecepy<adouble>>> currencies_;
         std::map<std::string, size_t> ctxToIdx_;
         std::vector<CurveContext<adouble>> contexts_;
     };

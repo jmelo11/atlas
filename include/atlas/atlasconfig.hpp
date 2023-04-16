@@ -38,7 +38,6 @@ namespace Atlas {
     using Month                 = QuantLib::Month;
     using TimeUnit              = QuantLib::TimeUnit;
     using DateGeneration        = QuantLib::DateGeneration;
-    using Currency              = QuantLib::Currency;
     // QuantLib day counters, to be replaced with our own day counters
 
     using Actual360      = QuantLib::Actual360;
@@ -46,37 +45,39 @@ namespace Atlas {
     using Thirty360      = QuantLib::Thirty360;
     using DiscountCurve  = QuantLib::DiscountCurve;
 
-    // QuantLib Currencies
-    using USD = QuantLib::USDCurrency;
-    using EUR = QuantLib::EURCurrency;
-    using GBP = QuantLib::GBPCurrency;
-    using CHF = QuantLib::CHFCurrency;
-    using JPY = QuantLib::JPYCurrency;
-    using CAD = QuantLib::CADCurrency;
-    using AUD = QuantLib::AUDCurrency;
-    using NZD = QuantLib::NZDCurrency;
-    using SEK = QuantLib::SEKCurrency;
-    using NOK = QuantLib::NOKCurrency;
-    using DKK = QuantLib::DKKCurrency;
-    using HKD = QuantLib::HKDCurrency;
-    using SGD = QuantLib::SGDCurrency;
-    using KRW = QuantLib::KRWCurrency;
-    using MXN = QuantLib::MXNCurrency;
-    using BRL = QuantLib::BRLCurrency;
-    using TRY = QuantLib::TRYCurrency;
-    using RUB = QuantLib::RUBCurrency;
-    using INR = QuantLib::INRCurrency;
-    using CNY = QuantLib::CNYCurrency;
-    using TWD = QuantLib::TWDCurrency;
-    using THB = QuantLib::THBCurrency;
-    using AED = QuantLib::AEDCurrency;
-    using SAR = QuantLib::SARCurrency;
-    using ILS = QuantLib::ILSCurrency;
-    using CLP = QuantLib::CLPCurrency;
-    using CLF = QuantLib::CLPCurrency;
-    using PEN = QuantLib::PENCurrency;
-    using COP = QuantLib::COPCurrency;
-    using ARS = QuantLib::ARSCurrency;
+    // QuantLib Currencies+
+    using Rounding = QuantLib::Rounding;
+    using Currency = QuantLib::Currency;
+    using USD      = QuantLib::USDCurrency;
+    using EUR      = QuantLib::EURCurrency;
+    using GBP      = QuantLib::GBPCurrency;
+    using CHF      = QuantLib::CHFCurrency;
+    using JPY      = QuantLib::JPYCurrency;
+    using CAD      = QuantLib::CADCurrency;
+    using AUD      = QuantLib::AUDCurrency;
+    using NZD      = QuantLib::NZDCurrency;
+    using SEK      = QuantLib::SEKCurrency;
+    using NOK      = QuantLib::NOKCurrency;
+    using DKK      = QuantLib::DKKCurrency;
+    using HKD      = QuantLib::HKDCurrency;
+    using SGD      = QuantLib::SGDCurrency;
+    using KRW      = QuantLib::KRWCurrency;
+    using MXN      = QuantLib::MXNCurrency;
+    using BRL      = QuantLib::BRLCurrency;
+    using TRY      = QuantLib::TRYCurrency;
+    using RUB      = QuantLib::RUBCurrency;
+    using INR      = QuantLib::INRCurrency;
+    using CNY      = QuantLib::CNYCurrency;
+    using TWD      = QuantLib::TWDCurrency;
+    using THB      = QuantLib::THBCurrency;
+    using AED      = QuantLib::AEDCurrency;
+    using SAR      = QuantLib::SARCurrency;
+    using ILS      = QuantLib::ILSCurrency;
+    using CLP      = QuantLib::CLPCurrency;
+    using CLF      = QuantLib::CLFCurrency;
+    using PEN      = QuantLib::PENCurrency;
+    using COP      = QuantLib::COPCurrency;
+    using ARS      = QuantLib::ARSCurrency;
 
 }  // namespace Atlas
 

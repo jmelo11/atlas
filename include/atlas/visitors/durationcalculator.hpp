@@ -14,7 +14,7 @@ namespace Atlas {
         DurationCalculator(const MarketData<adouble>& marketData = MarketData<adouble>(), double delta = 0.0001)
         : marketData_(marketData), delta_(delta){};
 
-        adouble results() const { return results_; }
+        double results() const { return results_; }
 
         void clear() { results_ = 0.0; }
 
@@ -27,12 +27,12 @@ namespace Atlas {
         void fixedInstSens(const T& inst) const {
             T tmpProd = inst;
             NPVCalculator<adouble> npvCacl(marketData_);
-            auto rate = tmpProd.rate();
+            InterestRate<adouble> rate = tmpProd.rate();
+            adouble rateValue          = rate.rate();
 
             auto f = [&](adouble r) {
                 npvCacl.clear();
-                InterestRate tmpRate(r, rate.dayCounter(), rate.compounding(), rate.frequency());
-                tmpProd.rate();
+                tmpProd.rate(r);
                 npvCacl.visit(tmpProd);
                 return npvCacl.results();
             };
@@ -42,7 +42,7 @@ namespace Atlas {
                 adouble npv_ = f(rate.rate() + delta_);
                 results_     = (npv_ - npv) / npv / delta_;
             } else {
-                results_ = derivative(f, wrt(rate), at(rate)) / 100;
+                results_ = derivative(f, wrt(rateValue), at(rateValue)) / 100.0;
             }
         };
 
@@ -64,13 +64,13 @@ namespace Atlas {
                 adouble npv_ = f(spread + delta_);
                 results_     = (npv_ - npv) / npv / delta_;
             } else {
-                results_ = derivative(f, wrt(spread), at(spread)) / 100;
+                results_ = derivative(f, wrt(spread), at(spread)) / 100.0;
             }
         };
 
-        double delta_;
         const MarketData<adouble>& marketData_;
-        mutable adouble results_ = 0.0;
+        double delta_;
+        mutable double results_ = 0.0;
     };
 
 }  // namespace Atlas

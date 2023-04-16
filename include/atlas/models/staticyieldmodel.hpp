@@ -4,13 +4,18 @@
 #include <atlas/models/model.hpp>
 
 namespace Atlas {
+
+    /**
+     * @brief Static yield model. Generates scenarios based on a single yield. Mainly for educational purposes.
+     *
+     * @tparam adouble
+     */
     template <typename adouble>
     class StaticYieldModel : public Model<adouble> {
        public:
-        StaticYieldModel(const MarketRequest& marketRequest, const InterestRate<adouble>& yield, const Date& refDate = Date())
-        : Model<adouble>(marketRequest), yield_(yield), refDate_(refDate){};
+        StaticYieldModel(const MarketRequest& marketRequest, const InterestRate<adouble>& yield) : Model<adouble>(marketRequest), yield_(yield){};
 
-        StaticYieldModel(const MarketRequest& marketRequest, const Date& refDate = Date()) : Model<adouble>(marketRequest), refDate_(refDate){};
+        StaticYieldModel(const MarketRequest& marketRequest) : Model<adouble>(marketRequest){};
 
         void simulate(const std::vector<Date>& evalDates, Scenario<adouble>& scenario) const override {
             for (const auto& evalDate : evalDates) {
@@ -19,6 +24,7 @@ namespace Atlas {
 
                 simulateDiscounts(evalDate, marketData);
                 simulateForwards(evalDate, marketData);
+                simulateSpots(evalDate, marketData);
                 marketData.refDate = evalDate;
                 scenario.push_back(marketData);
             }
@@ -28,16 +34,16 @@ namespace Atlas {
 
         InterestRate<adouble> yield() const { return yield_; };
 
-        MarketData<adouble> simulate() const {
-            std::vector<Date> dates = {refDate_};
+        MarketData<adouble> simulate(const Date& refDate) const {
+            std::vector<Date> dates = {refDate};
             Scenario<adouble> scenario;
             simulate(dates, scenario);
             return scenario.front();
         };
 
-       private:
-        void simulateDiscounts(const Date& refDate, MarketData<adouble>& md) const {
-            for (auto& request : this->marketRequest_.dfs) {
+       protected:
+        void simulateDiscounts(const Date& refDate, MarketData<adouble>& md) const override {
+            for (const auto& request : this->marketRequest_.dfs) {
                 const auto& date = request.date_;
                 adouble df;
                 if (refDate < date) {
@@ -51,8 +57,8 @@ namespace Atlas {
             }
         };
 
-        void simulateForwards(const Date& refDate, MarketData<adouble>& md) const {
-            for (auto& request : this->marketRequest_.fwds) {
+        void simulateForwards(const Date& refDate, MarketData<adouble>& md) const override {
+            for (const auto& request : this->marketRequest_.fwds) {
                 const auto& startDate = request.startDate_;
                 const auto& endDate   = request.endDate_;
                 adouble fwd;
@@ -69,8 +75,18 @@ namespace Atlas {
             }
         };
 
+        /**
+         * @brief Simulate the spot rates. If the date is not provided, the spot rate is used, otherwise the fx function is used
+         * to forecast the spot rate.
+         *
+         * @param evalDate
+         * @param md
+         */
+        void simulateSpots(const Date& evalDate, MarketData<adouble>& md) const override {
+            if (this->marketRequest_.spots.size() > 0) throw std::invalid_argument("StaticYieldModel: spots not supported.");
+        }
+
         InterestRate<adouble> yield_;
-        Date refDate_;
     };
 }  // namespace Atlas
 

@@ -61,7 +61,7 @@ namespace Atlas {
          */
         struct Spot {
             size_t ccyCode_;     /**< The index of the currency used to calculate the spot. */
-            Date date_ = Date(); /**< The date of the spot request. */
+            Date date_ = Date(); /**< The date of the spot request. Only if applyCCy is true, the spot should be forecasted according its ccyRecepy */
         };
 
         /**

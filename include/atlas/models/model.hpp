@@ -15,6 +15,11 @@ namespace Atlas {
     template <typename adouble>
     using Scenario = std::vector<MarketData<adouble>>;
 
+    /**
+     * @brief Model interface
+     *
+     * @tparam adouble
+     */
     template <typename adouble>
     class Model {
        public:
@@ -25,6 +30,12 @@ namespace Atlas {
         virtual void simulate(const std::vector<Date>& evalDates, Scenario<adouble>& scenario) const = 0;
 
        protected:
+        virtual void simulateDiscounts(const Date& evalDate, MarketData<adouble>& md) const = 0;
+
+        virtual void simulateForwards(const Date& evalDate, MarketData<adouble>& md) const = 0;
+
+        virtual void simulateSpots(const Date& evalDate, MarketData<adouble>& md) const = 0;
+
         MarketRequest marketRequest_;
     };
 
