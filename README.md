@@ -34,25 +34,28 @@ Algunas características técnicas que se buscan incorporar en Atlas son:
 
 ### Instrumentos
 
-- [x] Loans
-    - [x] Loans tasa fija (bullet)
-    - [x] Loans tasa fija (cuotas iguales)
-    - [x] Loans tasa fija (perfil de pagos custom)
-    - [x] Loans tasa flotante (bullet)
-    - [x] Loans tasa flotante (perfil de pagos custom)
-    - [x] Loans tasa mixta
-- [ ] Derivados
-    - [ ] Forward
-    - [ ] Swaps vanilla
-    - [ ] Xccy
+- [x] Productos lineales
+    - [x] Loans
+        - [x] Loans tasa fija (bullet)
+        - [x] Loans tasa fija (cuotas iguales)
+        - [x] Loans tasa fija (perfil de pagos custom)
+        - [x] Loans tasa flotante (bullet)
+        - [x] Loans tasa flotante (perfil de pagos custom)
+        - [x] Loans tasa mixta
+    - [ ] Derivados
+        - [ ] Forward
+        - [ ] Swaps vanilla
+        - [ ] Xccy
     - [ ] OIS
-- [ ] Renta Fija
-    - [ ] Instrumentos con convenciones de mercados
+    - [ ] Renta Fija
+        - [ ] Instrumentos con convenciones de mercados
+
+- [ ] Productos no lineales
 
 ### Curvas
 
 - [x] Interpolación con soporte AD
-- [ ] Curvas con soporte AD
+- [x] Curvas con soporte AD
 - [ ] Bootstrap con soporte AD
 
 ### Modelos

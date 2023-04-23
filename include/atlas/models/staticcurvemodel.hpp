@@ -82,9 +82,7 @@ namespace Atlas {
 
                 adouble df;
                 if (evalDate < date) {
-                    adouble df0 = curve.discount(evalDate);
-                    adouble df1 = curve.discount(date);  // shift valuation date? or raise exception?
-                    df          = df1 / df0;
+                    df = curve.discount(date);
                 } else if (evalDate == date) {
                     df = 1.0;
                 } else {

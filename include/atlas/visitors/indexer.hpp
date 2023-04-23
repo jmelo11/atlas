@@ -6,6 +6,8 @@
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
+#include <set>
+#include <unordered_map>
 
 namespace Atlas {
 
@@ -30,11 +32,7 @@ namespace Atlas {
             auto& coupons     = leg.coupons();
             auto& redemptions = leg.redemptions();
 
-            for (auto& coupon : coupons) {
-                indexCashflow(coupon);
-                indexFloatingCoupon(coupon);
-            }
-
+            for (auto& coupon : coupons) { indexCashflow(coupon); }
             for (auto& redemption : redemptions) { indexCashflow(redemption); }
             indexCashflow(inst.disbursement());
         };
@@ -45,13 +43,9 @@ namespace Atlas {
         };
 
         void setRequest(MarketRequest& request) {
-            auto& dfs   = request.dfs;
-            auto& fwds  = request.fwds;
-            auto& spots = request.spots;
-
-            dfs.insert(dfs.end(), dfs_.begin(), dfs_.end());
-            fwds.insert(fwds.end(), fwds_.begin(), fwds_.end());
-            spots.insert(spots.end(), spots_.begin(), spots_.end());
+            request.dfs   = dfsVector_;
+            request.fwds  = fwdsVector_;
+            request.spots = spotsVector_;
         };
 
         MarketRequest request() {
@@ -61,42 +55,67 @@ namespace Atlas {
         };
 
         void clear() {
-            dfs_.clear();
-            fwds_.clear();
-            spots_.clear();
+            dfsMap_.clear();
+            dfsVector_.clear();
+            fwdsMap_.clear();
+            fwdsVector_.clear();
+            spotsMap_.clear();
+            spotsVector_.clear();
         };
 
        private:
-        void indexCashflow(Cashflow<adouble>& cashflow) {
+        /**
+         * @brief Indexes a cashflow
+         *
+         * @tparam Flow
+         * @param cashflow
+         */
+        template <typename Flow>
+        void indexCashflow(Flow& cashflow) {
             if (!cashflow.hasDiscountContext()) { throw std::runtime_error("Cashflow does not have a discount curve context."); }
             size_t curveIdx         = cashflow.discountContextIdx();
-            const auto& paymentDate = cashflow.paymentDate();
-            dfs_.push_back({curveIdx, paymentDate});
-            cashflow.dfIdx(dfs_.size() - 1);
+            const Date& paymentDate = cashflow.paymentDate();
+            evaluationDates_.insert(paymentDate);
+
+            MarketRequest::DiscountFactor df(curveIdx, paymentDate);
+
+            // If the discount factor has not been indexed, add it to the vector
+            if (dfsMap_.find(df) == dfsMap_.end()) {
+                dfsVector_.push_back(df);
+                dfsMap_[df] = dfsVector_.size() - 1;
+            }
+            cashflow.dfIdx(dfsMap_[df]);
 
             size_t ccyIdx = cashflow.currencyContextIdx();
-            spots_.push_back({ccyIdx, paymentDate});
-            cashflow.spotIdx(spots_.size() - 1);
+            MarketRequest::Spot spot(ccyIdx, paymentDate);
+            if (spotsMap_.find(spot) == spotsMap_.end()) {
+                spotsVector_.push_back(spot);
+                spotsMap_[spot] = spotsVector_.size() - 1;
+            }
+            cashflow.spotIdx(spotsMap_[spot]);
+
+            if constexpr (std::is_same_v<Flow, FloatingRateCoupon<adouble>>) {
+                if (!cashflow.hasForecastContext()) { throw std::runtime_error("Cashflow does not have a forecast curve context."); }
+                size_t curveIdx = cashflow.forecastContextIdx();
+                MarketRequest::ForwardRate fwd(cashflow.startDate(), cashflow.endDate(), curveIdx);
+                if (fwdsMap_.find(fwd) == fwdsMap_.end()) {
+                    fwdsVector_.push_back(fwd);
+                    fwdsMap_[fwd] = fwdsVector_.size() - 1;
+                }
+                cashflow.fwdIdx(fwdsMap_[fwd]);
+            }
         };
 
-        /**
-         * @brief Indexes a floating rate coupon.
-         *
-         * @param coupon The coupon to index.
-         * @return void
-         * @throw std::runtime_error If the coupon does not have a forecast curve context.
-         * TODO: should handle in-arrears coupons.
-         */
-        void indexFloatingCoupon(FloatingRateCoupon<adouble>& coupon) {
-            if (!coupon.hasForecastContext()) { throw std::runtime_error("Floating rate coupon does not have a forecast curve context."); }
-            size_t curveIdx = coupon.forecastContextIdx();
-            fwds_.push_back({curveIdx, coupon.startDate(), coupon.endDate()});
-            coupon.fwdIdx(fwds_.size() - 1);
-        };
+        std::unordered_map<MarketRequest::ForwardRate, size_t> fwdsMap_;
+        std::vector<MarketRequest::ForwardRate> fwdsVector_;
 
-        std::vector<MarketRequest::Rate> fwds_;
-        std::vector<MarketRequest::DiscountFactor> dfs_;
-        std::vector<MarketRequest::Spot> spots_;
+        std::unordered_map<MarketRequest::DiscountFactor, size_t> dfsMap_;
+        std::vector<MarketRequest::DiscountFactor> dfsVector_;
+
+        std::vector<MarketRequest::Spot> spotsVector_;
+        std::unordered_map<MarketRequest::Spot, size_t> spotsMap_;
+
+        std::set<Date> evaluationDates_;
     };
 }  // namespace Atlas
 

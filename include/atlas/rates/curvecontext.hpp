@@ -11,7 +11,7 @@ namespace Atlas {
 
     /**
      * @class CurveContext
-     * @brief A context for a yield curve. Contains the yield term structure and the rate index used as the underlying interest rate. It contains its
+     * @brief A context for a yield curve. Contains the yield term structure and the rate index used. Contains its
      * own copy of the curve and index.
      */
     template <typename adouble>

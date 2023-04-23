@@ -9,9 +9,9 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/models/staticcurvemodel.hpp>
+#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
-#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 
 using namespace Atlas;
 
@@ -261,16 +261,4 @@ TEST(NPVCalculator, FloatingRateInstrumentDual) {
     // std::cout << "\n" << std::endl;
     // for (auto& cashflow : qlBond.cashflows()) { std::cout << cashflow->date() << "||" << cashflow->amount() << std::endl; }
     EXPECT_NEAR(val(npvCalculator.results()), qlBond.NPV(), 1e-6);
-}
-
-TEST(NPVCalculator, Forward) {
-    // Create a fixed rate instrument
-    Date startDate  = Date(1, Month::Aug, 2020);
-    Date endDate    = Date(1, Month::Aug, 2021);
-    double notional = 100;
-    double fwdPrice = 800;
-    Currency curr1  = USD();
-    Currency curr2  = CLP();
-    FxForward<double> instrument(startDate, endDate, fwdPrice, notional, curr1, curr2, Side::PAY);
-    EXPECT_TRUE(false);
 }

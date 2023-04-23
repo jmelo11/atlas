@@ -8,6 +8,7 @@
 #define AFBFF92A_3FC8_47D1_8AA5_E29304D51829
 
 #include <atlas/atlasconfig.hpp>
+#include <functional>
 #include <optional>
 #include <tuple>
 #include <vector>
@@ -18,26 +19,22 @@ namespace Atlas {
         /**
          * @brief A struct representing a rate request.
          */
-        struct Rate {
-            Date startDate_;          /**< The start date of the rate request. */
-            Date endDate_;            /**< The end date of the rate request. */
-            DayCounter dayCounter_;   /**< The day counter used to calculate the rate. */
-            Compounding compounding_; /**< The compounding frequency used to calculate the rate. */
-            Frequency frequency_;     /**< The frequency of the rate. */
-            size_t curve_;            /**< The index of the curve used to calculate the rate. */
+        struct ForwardRate {
+            Date startDate_; /**< The start date of the rate request. */
+            Date endDate_;   /**< The end date of the rate request. */
+            size_t curve_;   /**< The index of the curve used to calculate the rate. */
 
             /**
              * @brief Constructs a Rate object with the specified parameters.
              * @param curve The index of the curve used to calculate the rate.
              * @param startDate The start date of the rate request.
              * @param endDate The end date of the rate request.
-             * @param dayCounter The day counter used to calculate the rate. Default is Actual360.
-             * @param compounding The compounding frequency used to calculate the rate. Default is Compounding::Simple.
-             * @param frequency The frequency of the rate. Default is Frequency::Annual.
              */
-            Rate(const size_t& curve, const Date& startDate, const Date& endDate, const DayCounter& dayCounter = Actual360(),
-                 const Compounding& compounding = Compounding::Simple, const Frequency& frequency = Frequency::Annual)
-            : startDate_(startDate), endDate_(endDate), dayCounter_(dayCounter), compounding_(compounding), frequency_(frequency), curve_(curve){};
+            ForwardRate(const Date& startDate, const Date& endDate, size_t curve) : startDate_(startDate), endDate_(endDate), curve_(curve){};
+
+            bool operator==(const ForwardRate& other) const {
+                return startDate_ == other.startDate_ && endDate_ == other.endDate_ && curve_ == other.curve_;
+            }
         };
 
         /**
@@ -53,6 +50,8 @@ namespace Atlas {
              * @param date The date of the discount factor request.
              */
             DiscountFactor(size_t curve, const Date& date) : date_(date), curve_(curve) {}
+
+            bool operator==(const DiscountFactor& other) const { return date_ == other.date_ && curve_ == other.curve_; }
         };
 
         /**
@@ -61,7 +60,10 @@ namespace Atlas {
          */
         struct Spot {
             size_t ccy_;         /**< The index of the currency used to calculate the spot. */
-            Date date_ = Date(); /**< The date of the spot request. Only if applyCCy is true, the spot should be forecasted according its ccyRecepy */
+            Date date_ = Date(); /**< The date of the spot request. */
+
+            Spot(size_t ccy, const Date& date) : ccy_(ccy), date_(date) {}
+            bool operator==(const Spot& other) const { return ccy_ == other.ccy_ && date_ == other.date_; }
         };
 
         /**
@@ -83,7 +85,7 @@ namespace Atlas {
         size_t spotIdx() const { return spots.size() - 1; }
 
         std::vector<DiscountFactor> dfs; /**< A vector of discount factor requests. */
-        std::vector<Rate> fwds;          /**< A vector of forward rate requests. */
+        std::vector<ForwardRate> fwds;   /**< A vector of forward rate requests. */
         std::vector<Spot> spots;         /**< A vector of spot requests. */
     };
 
@@ -120,5 +122,30 @@ namespace Atlas {
     };
 
 }  // namespace Atlas
+
+// namespace Atlas
+namespace std {
+    template <>
+    struct hash<Atlas::MarketRequest::DiscountFactor> {
+        size_t operator()(const Atlas::MarketRequest::DiscountFactor& df) const {
+            return std::hash<size_t>()(df.date_.serialNumber()) ^ std::hash<size_t>()(df.curve_);
+        }
+    };
+
+    template <>
+    struct hash<Atlas::MarketRequest::ForwardRate> {
+        size_t operator()(const Atlas::MarketRequest::ForwardRate& rate) const {
+            return std::hash<size_t>()(rate.startDate_.serialNumber()) ^ std::hash<size_t>()(rate.endDate_.serialNumber()) ^
+                   std::hash<size_t>()(rate.curve_);
+        }
+    };
+
+    template <>
+    struct hash<Atlas::MarketRequest::Spot> {
+        size_t operator()(const Atlas::MarketRequest::Spot& spot) const {
+            return std::hash<size_t>()(spot.date_.serialNumber()) ^ std::hash<size_t>()(spot.ccy_);
+        }
+    };
+}  // namespace std
 
 #endif /* AFBFF92A_3FC8_47D1_8AA5_E29304D51829 */

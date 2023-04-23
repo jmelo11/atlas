@@ -3,8 +3,8 @@
 #include <atlas/fundation/marketstore.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
-#include <atlas/visitors/indexer.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
+#include <atlas/visitors/indexer.hpp>
 
 using namespace Atlas;
 
@@ -31,7 +31,7 @@ TEST(Indexer, FixedRateInstrument) {
     InstrumentVars<double> vars;
     auto& context = vars.store_.curveContext("TEST");
     FixedRateBulletInstrument<double> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, context);
-    size_t dfSize = fixedInst.leg().coupons().size() + fixedInst.leg().redemptions().size() + 1;
+    size_t dfSize = fixedInst.leg().coupons().size() + 1;  // +1 for the disbursement
     Indexer<double> indexer;
     fixedInst.accept(indexer);
     MarketRequest request;
@@ -44,7 +44,7 @@ TEST(Indexer, FloatingRateInstrument) {
     InstrumentVars<double> vars;
     auto& context = vars.store_.curveContext("TEST");
     FloatingRateBulletInstrument floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
-    size_t dfSize  = floatInst.leg().coupons().size() + floatInst.leg().redemptions().size() + 1;
+    size_t dfSize  = floatInst.leg().coupons().size() + 1;  // +1 for the disbursement
     size_t fwdSize = floatInst.leg().coupons().size();
     Indexer<double> indexer;
     MarketRequest request;
@@ -61,8 +61,7 @@ TEST(Indexer, MultipleInstruments) {
     FixedRateBulletInstrument<double> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, context);
     FloatingRateBulletInstrument<double> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
 
-    size_t dfSize = fixedInst.leg().coupons().size() + fixedInst.leg().redemptions().size() + 2;  // +2 for the disbursement
-    dfSize += floatInst.leg().coupons().size() + floatInst.leg().redemptions().size();
+    size_t dfSize  = fixedInst.leg().coupons().size() + 1;  // +2 for the disbursement, equal payment structure
     size_t fwdSize = floatInst.leg().coupons().size();
 
     Indexer<double> indexer;
@@ -79,7 +78,7 @@ TEST(Indexer, FixedRateInstrumentDual) {
     InstrumentVars<dual> vars;
     auto& context = vars.store_.curveContext("TEST");
     FixedRateBulletInstrument<dual> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, context);
-    size_t dfSize = fixedInst.leg().coupons().size() + fixedInst.leg().redemptions().size() + 1;
+    size_t dfSize = fixedInst.leg().coupons().size() + 1;
     Indexer<dual> indexer;
     fixedInst.accept(indexer);
     MarketRequest request;
@@ -92,7 +91,7 @@ TEST(Indexer, FloatingRateInstrumentDual) {
     InstrumentVars<dual> vars;
     auto& context = vars.store_.curveContext("TEST");
     FloatingRateBulletInstrument<dual> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
-    size_t dfSize  = floatInst.leg().coupons().size() + floatInst.leg().redemptions().size() + 1;
+    size_t dfSize  = floatInst.leg().coupons().size() + 1;
     size_t fwdSize = floatInst.leg().coupons().size();
     Indexer<dual> indexer;
     MarketRequest request;
@@ -109,8 +108,7 @@ TEST(Indexer, MultipleInstrumentsDual) {
     FixedRateBulletInstrument<dual> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, context);
     FloatingRateBulletInstrument<dual> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, context);
 
-    size_t dfSize = fixedInst.leg().coupons().size() + fixedInst.leg().redemptions().size() + 2;
-    dfSize += floatInst.leg().coupons().size() + floatInst.leg().redemptions().size();
+    size_t dfSize  = fixedInst.leg().coupons().size() + 1;
     size_t fwdSize = floatInst.leg().coupons().size();
 
     Indexer<dual> indexer;

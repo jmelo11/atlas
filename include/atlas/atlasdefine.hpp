@@ -8,14 +8,9 @@
 
 #include <autodiff/forward/dual.hpp>
 #include <autodiff/forward/dual/eigen.hpp>
-// #include <autodiff/forward/real.hpp>
-// #include <autodiff/forward/real/eigen.hpp>
 
 namespace Atlas {
     using dual = autodiff::dual;
-    // using dual = autodiff::var;
-    //using dual = autodiff::real;
-
 }  // namespace Atlas
 
 #endif /* AF67A639_F380_427B_88DD_9765B0579217 */
