@@ -126,21 +126,7 @@ namespace Atlas {
          * @param evalDate
          * @param md
          */
-        void simulateSpots(const Date& evalDate, MarketData<adouble>& md) const override {
-            for (size_t i = 0; i < this->marketRequest_.spots.size(); ++i) {
-                auto& request    = this->marketRequest_.spots[i];
-                size_t idx       = request.ccy_;
-                const auto& date = request.date_;
-                adouble spot;
-                if (marketStore_.currencyContext(idx).recepy() != nullptr) {
-                    auto fx = marketStore_.currencyContext(idx).recepy();
-                    spot    = fx(evalDate, date, marketStore_);
-                } else {
-                    spot = marketStore_.currencyContext(idx).value();
-                }
-                md.spots.push_back(spot);
-            }
-        }
+        void simulateSpots(const Date& evalDate, MarketData<adouble>& md) const override {}
 
         const MarketStore<adouble>& marketStore_;
     };

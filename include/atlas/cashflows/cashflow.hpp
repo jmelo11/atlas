@@ -88,24 +88,6 @@ namespace Atlas {
         inline size_t discountContextIdx() const { return discountContextIdx_; }
 
         /**
-         * @brief Gets the currency code
-         * @return The currency code
-         */
-        // inline size_t ccyCode() const { return ccyCode_; }
-
-        /**
-         * @brief Checks if the cashflow applies the currency
-         * @return True if the cashflow applies the currency, false otherwise
-         */
-        // inline bool applyCcy() const { return applyCcy_; }
-
-        /**
-         * @brief Checks if the cashflow applies the currency
-         * @return True if the cashflow applies the currency, false otherwise
-         */
-        // inline void applyCcy(bool applyCcy) { applyCcy_ = applyCcy; }
-
-        /**
          * @brief Sets the currency context
          * @param context The currency context
          */

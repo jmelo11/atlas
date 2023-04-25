@@ -38,14 +38,32 @@ namespace Atlas {
         };
 
         void visit(FxForward<adouble>& inst) override {
-            indexCashflow(inst.firstLeg().redemptions()[0]);
-            indexCashflow(inst.secondLeg().redemptions()[0]);
+            // npv = (strikePrice (823 CLP/USD) -fwdPrice (835 CLP/USD))*notional (100_000 USD) * dfLocal (CLP) * localCcy (CLP/CLP)-> OK
+            // npv = (strikePrice (1.1 USD/EUR) -fwdPrice (1.02 USD/EUR))*notional (100_000 EUR) *  dfLocal (CLP) * localCcy (CLP/USD) -> OK
+            auto& strikeCashflow = inst.leg().redemptions()[0];
+            auto& mktCashflow    = inst.leg().redemptions()[1];
+            size_t ccy1          = strikeCashflow.currencyContextIdx();
+            size_t ccy2          = mktCashflow.currencyContextIdx();
+            MarketRequest::FxPrice fwdPrice(ccy1, ccy2, inst.endDate());
+            MarketRequest::FxPrice spotPrice(ccy1, 0, Date());
+            if (fxPricesMap_.find(fwdPrice) == fxPricesMap_.end()) {
+                fxPricesVector_.push_back(fwdPrice);
+                fxPricesMap_[fwdPrice] = fxPricesVector_.size() - 1;
+            }
+            if (fxPricesMap_.find(spotPrice) == fxPricesMap_.end()) {
+                fxPricesVector_.push_back(spotPrice);
+                fxPricesMap_[spotPrice] = fxPricesVector_.size() - 1;
+            }
+            strikeCashflow.fxIdx(fxPricesMap_[fwdPrice]);
+            mktCashflow.fxIdx(fxPricesMap_[spotPrice]);
+            indexCashflow(strikeCashflow);
         };
 
         void setRequest(MarketRequest& request) {
-            request.dfs   = dfsVector_;
-            request.fwds  = fwdsVector_;
-            request.spots = spotsVector_;
+            request.dfs      = dfsVector_;
+            request.fwds     = fwdsVector_;
+            request.prices   = pricesVector_;
+            request.fxPrices = fxPricesVector_;
         };
 
         MarketRequest request() {
@@ -59,8 +77,8 @@ namespace Atlas {
             dfsVector_.clear();
             fwdsMap_.clear();
             fwdsVector_.clear();
-            spotsMap_.clear();
-            spotsVector_.clear();
+            pricesMap_.clear();
+            pricesVector_.clear();
         };
 
        private:
@@ -86,14 +104,6 @@ namespace Atlas {
             }
             cashflow.dfIdx(dfsMap_[df]);
 
-            size_t ccyIdx = cashflow.currencyContextIdx();
-            MarketRequest::Spot spot(ccyIdx, paymentDate);
-            if (spotsMap_.find(spot) == spotsMap_.end()) {
-                spotsVector_.push_back(spot);
-                spotsMap_[spot] = spotsVector_.size() - 1;
-            }
-            cashflow.spotIdx(spotsMap_[spot]);
-
             if constexpr (std::is_same_v<Flow, FloatingRateCoupon<adouble>>) {
                 if (!cashflow.hasForecastContext()) { throw std::runtime_error("Cashflow does not have a forecast curve context."); }
                 size_t curveIdx = cashflow.forecastContextIdx();
@@ -112,8 +122,11 @@ namespace Atlas {
         std::unordered_map<MarketRequest::DiscountFactor, size_t> dfsMap_;
         std::vector<MarketRequest::DiscountFactor> dfsVector_;
 
-        std::vector<MarketRequest::Spot> spotsVector_;
-        std::unordered_map<MarketRequest::Spot, size_t> spotsMap_;
+        std::vector<MarketRequest::Price> pricesVector_;
+        std::unordered_map<MarketRequest::Price, size_t> pricesMap_;
+
+        std::vector<MarketRequest::FxPrice> fxPricesVector_;
+        std::unordered_map<MarketRequest::FxPrice, size_t> fxPricesMap_;
 
         std::set<Date> evaluationDates_;
     };

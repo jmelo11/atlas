@@ -25,7 +25,6 @@
 namespace Atlas {
 
     // QuantLib types, to be replaced with our own types
-    enum class Side { RECEIVE = 1, PAY = -1 };
     using Date                  = QuantLib::Date;
     using DayCounter            = QuantLib::DayCounter;
     using Calendar              = QuantLib::Calendar;

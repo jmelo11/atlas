@@ -7,7 +7,7 @@
 #ifndef C35B7E8D_253B_4C4B_B4AD_4ECF13926073
 #define C35B7E8D_253B_4C4B_B4AD_4ECF13926073
 
-#include <atlas/data/concurrentqueue.hpp>
+#include <atlas/multithreading/concurrentqueue.hpp>
 #include <functional>
 #include <future>
 #include <thread>

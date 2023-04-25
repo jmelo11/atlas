@@ -2,7 +2,9 @@
 #define C49C3B38_A428_4D92_AB3E_8E88957A544A
 
 #include <atlas/atlasconfig.hpp>
+#include <atlas/fundation/contextmanager.hpp>
 #include <atlas/fundation/currencycontext.hpp>
+#include <atlas/fundation/exchangeratemanager.hpp>
 #include <atlas/rates/curvecontext.hpp>
 
 namespace Atlas {
@@ -156,6 +158,56 @@ namespace Atlas {
         std::vector<CurveContext<adouble>> curveContexts_;
     };
 
+    template <typename adouble>
+    class MarketStore2 {
+       public:
+        MarketStore2(const Date& refDate, Currency localCcy = USD()) : refDate_(refDate), localCcy_(localCcy) {
+            curveManager_     = std::make_unique<ContextManager<YieldTermStructure<adouble>>>(refDate_);
+            rateIndexManager_ = std::make_unique<ContextManager<RateIndex>>(refDate_);
+            fxManager_        = std::make_unique<ExchangeRateManager<adouble>>(refDate_);
+        };
+
+        void addCurve(const std::string& name, const YieldTermStructure<adouble>& curve, const RateIndex& index) {
+            if (curveManager_->hasContext(name)) {
+                throw std::invalid_argument("A curve context with the given name already exists.");
+            } else {
+                curveManager_->createContext(name, curve);
+                rateIndexManager_->createContext(name, index);
+            }
+        };
+
+        const YieldTermStructure<adouble>& curve(const std::string& name) const { return curveManager_->getContext(name).object(); };
+
+        const YieldTermStructure<adouble>& curve(size_t idx) const { return curveManager_->getContext(idx).object(); };
+
+        size_t curveIdx(const std::string& name) const { return curveManager_->getContext(name).idx(); };
+
+        const RateIndex& rateIndex(const std::string& name) const { return rateIndexManager_->getContext(name).object(); };
+
+        const RateIndex& rateIndex(size_t idx) const { return rateIndexManager_->getContext(idx).object(); };
+
+        size_t rateIndexIdx(const std::string& name) const { return rateIndexManager_->getContext(name).idx(); };
+
+        void addExchangeRate(const Currency& weak, const Currency& strong, adouble rate) {
+            if (fxManager_->hasExchangeRate(weak, strong)) {
+                throw std::invalid_argument("An exchange rate with the given currencies already exists.");
+            } else {
+                fxManager_->addExchangeRate(weak, strong, rate);
+            }
+        };
+
+        adouble exchange(const Currency& weak, const Currency& strong) const { return fxManager_->exchange(weak, strong); };
+
+        const Currency& localCcy() const { return localCcy_; };
+
+       private:
+        Date refDate_;
+        Currency localCcy_;
+
+        std::unique_ptr<ContextManager<YieldTermStructure<adouble>>> curveManager_;
+        std::unique_ptr<ContextManager<RateIndex>> rateIndexManager_;
+        std::unique_ptr<ExchangeRateManager<adouble>> fxManager_;
+    };
 }  // namespace Atlas
 
 #endif /* C49C3B38_A428_4D92_AB3E_8E88957A544A */

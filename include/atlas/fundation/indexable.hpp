@@ -39,19 +39,31 @@ namespace Atlas {
         void fwdIdx(size_t idx) { idx_[1] = idx; }
 
         /**
-         * Returns the index of the spot.
-         * @return The index of the spot.
+         * Returns the index of the related price.
+         * @return The index of the price.
          */
-        size_t spotIdx() const { return idx_[2]; }
+        size_t priceIdx() const { return idx_[2]; }
 
         /**
-         * Sets the index of the spot.
-         * @param idx The index of the spot to set.
+         * Sets the index of the price.
+         * @param idx The index of the price to set.
          */
-        void spotIdx(size_t idx) { idx_[2] = idx; }
+        void priceIdx(size_t idx) { idx_[2] = idx; }
+
+        /**
+         * @brief Returns the index of the fx price.
+         * @return The index of the fx price.
+         */
+        size_t fxIdx() const { return idx_[3]; }
+
+        /**
+         * @brief Sets the index of the fx price.
+         * @param idx The index of the fx price to set.
+         */
+        void fxIdx(size_t idx) { idx_[3] = idx; }
 
        private:
-        size_t idx_[3]; /**< An array of indices representing the discount factor index (0), forward index (1), and spot index (2). */
+        size_t idx_[4]; /**< An array of indices representing the discount factor index (0), forward index (1), price index (2) and fx price (3). */
     };
 
 }  // namespace Atlas

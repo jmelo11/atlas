@@ -57,16 +57,20 @@ namespace Atlas {
         };
 
         /**
-         * @brief Visit a swap
+         * @brief Visit a FxForward
          *
          * @param inst
          */
         void visit(FxForward<adouble>& inst) override {
-            int side     = (int)inst.side();
-            adouble spot = marketData_.spots.at(inst.secondLeg().redemptions()[0].spotIdx());
-            adouble npv1 = redemptionsNPV(inst.firstLeg());
-            adouble npv2 = redemptionsNPV(inst.secondLeg());
-            npv_ += side * (npv1 - npv2 * spot);
+            const auto& strikeCashflow = inst.leg().redemptions().at(0);
+            const auto& mktCashflow    = inst.leg().redemptions().at(1);
+            adouble df                 = marketData_.dfs.at(strikeCashflow.dfIdx());
+            adouble fwdPrice           = marketData_.fx.at(strikeCashflow.fxIdx());
+            adouble localCcy           = marketData_.fx.at(mktCashflow.fxIdx());
+            adouble strike             = strikeCashflow.amount();  // fwdPrice*notional
+            adouble mkt                = mktCashflow.amount();     // notional
+            int side                   = (int)inst.side();
+            npv_ += (mkt * fwdPrice - strike) * df * side * localCcy;
         };
 
        private:
@@ -79,10 +83,8 @@ namespace Atlas {
         adouble redemptionsNPV(const Leg<adouble>& leg) {
             adouble npv = 0.0;
             for (const auto& redemption : leg.redemptions()) {
-                adouble spot      = marketData_.spots.at(redemption.spotIdx());
-                adouble numeraire = marketData_.numerarie;
-                adouble df        = marketData_.dfs.at(redemption.dfIdx());
-                npv += redemption.amount() * df * spot / numeraire;
+                adouble df = marketData_.dfs.at(redemption.dfIdx());
+                npv += redemption.amount() * df;
             }
             return npv;
         };

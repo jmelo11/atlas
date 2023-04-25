@@ -80,7 +80,7 @@ namespace Atlas {
     };
 
     /**
-     * @class Leg
+     * @class Leg2, testing template parameters
      * @brief Represents a leg of a financial instrument, containing a vector of Redemption objects
      */
     template <typename adouble, template <typename> class Flow>

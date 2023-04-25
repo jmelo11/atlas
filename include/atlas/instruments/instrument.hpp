@@ -18,6 +18,7 @@ namespace Atlas {
     class Instrument {
        public:
 
+        
         virtual ~Instrument() = default;
 
         /**

@@ -62,7 +62,27 @@ namespace Atlas {
          */
         double getFixing(const Date& date) const;
 
+        /**
+         * @brief Clones the rate index.         
+         * @return std::unique_ptr<RateIndex> 
+         */
         std::unique_ptr<RateIndex> clone() const;
+
+        /**
+         * @brief Adds a simulated fixing.
+         * 
+         * @param date 
+         * @param value 
+         */
+        inline void addSimFixing(const Date& date, double value) { simFixings_[date] = value; };
+
+        /**
+         * @brief Clears the simulated fixing for a given date.
+         * 
+         * @param date 
+         * @return void
+         */
+        inline void clearSimFixings() { simFixings_.clear(); };
 
        private:
         std::string name_      = "undefined";
@@ -71,6 +91,7 @@ namespace Atlas {
         Frequency rateFreq_    = Frequency::NoFrequency;
         Compounding rateComp_  = Compounding::Simple;
         std::map<Date, double> fixingHistory_;
+        std::map<Date, double> simFixings_; // adouble
     };
 
 }  // namespace Atlas

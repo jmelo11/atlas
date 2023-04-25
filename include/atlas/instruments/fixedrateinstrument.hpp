@@ -3,16 +3,17 @@
 
 #include <ql/interestrate.hpp>
 #include <atlas/cashflows/legs/fixedrateleg.hpp>
+#include <atlas/instruments/mixins/onelegmixin.hpp>
 #include <atlas/instruments/singleleginstrument.hpp>
 
 namespace Atlas {
 
     /**
      * @class FixedRateInstrument
-     * @brief An class for fixed, single-legged, rate instruments.
+     * @brief An class for fixed-rate-single-legged instruments.
      */
     template <typename adouble>
-    class FixedRateInstrument : public SingleLegInstrument<adouble, FixedRateLeg<adouble>> {
+    class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<FixedRateLeg<adouble>> {
        public:
         /**
          * @brief Construct a new Fixed Rate Instrument object
@@ -25,23 +26,18 @@ namespace Atlas {
          */
         FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, double notional = 0.0,
                             const FixedRateLeg<adouble>& leg = FixedRateLeg<adouble>())
-        : SingleLegInstrument<adouble, FixedRateLeg<adouble>>(startDate, endDate, notional, leg), rate_(rate){};
+        : OneLegMixin<FixedRateLeg<adouble>>(leg), rate_(rate){
+            this->startDate_ = startDate;
+            this->endDate_ = endDate;
+            this->notional_ = notional;
+            for (auto& coupon : this->leg().coupons()) { coupon.rate(rate); }
+        };
 
+        /**
+         * @brief Destroy the Fixed Rate Instrument object
+         *
+         */
         virtual ~FixedRateInstrument(){};
-
-        /**
-         * @brief Returns the leg of the instrument.
-         *
-         * @return const FixedRateLeg&
-         */
-        // inline const FixedRateLeg<adouble>& leg() const { return leg_; };
-
-        /**
-         * @brief Returns the leg of the instrument.
-         *
-         * @return FixedRateLeg&
-         */
-        // inline FixedRateLeg<adouble>& leg() { return leg_; };
 
         /**
          * @brief Sets the rate of the instrument.
