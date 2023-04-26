@@ -42,8 +42,11 @@ namespace Atlas {
          * @param inst
          */
         void visit(FixedRateInstrument<adouble>& inst) override {
-            npv_ += fixedLegNPV(inst.leg());
-            npv_ += redemptionsNPV(inst.leg());
+            adouble npv = 0.0;
+            npv += fixedLegNPV(inst.leg());
+            npv += redemptionsNPV(inst.leg());
+            adouble fx = marketData_.fxs.at(inst.disbursement().fxIdx());
+            npv_ += npv / fx;
         };
 
         /**
@@ -52,8 +55,11 @@ namespace Atlas {
          * @param inst
          */
         void visit(FloatingRateInstrument<adouble>& inst) override {
-            npv_ += floatingLegNPV(inst.leg());
-            npv_ += redemptionsNPV(inst.leg());
+            adouble npv = 0.0;
+            npv += floatingLegNPV(inst.leg());
+            npv += redemptionsNPV(inst.leg());
+            adouble fx = marketData_.fxs.at(inst.disbursement().fxIdx());
+            npv_ += npv / fx;
         };
 
         /**
@@ -62,15 +68,7 @@ namespace Atlas {
          * @param inst
          */
         void visit(FxForward<adouble>& inst) override {
-            const auto& strikeCashflow = inst.leg().redemptions().at(0);
-            const auto& mktCashflow    = inst.leg().redemptions().at(1);
-            adouble df                 = marketData_.dfs.at(strikeCashflow.dfIdx());
-            adouble fwdPrice           = marketData_.fxs.at(strikeCashflow.fxIdx());
-            adouble localCcy           = marketData_.fxs.at(mktCashflow.fxIdx());
-            adouble strike             = strikeCashflow.amount();  // fwdPrice*notional
-            adouble mkt                = mktCashflow.amount();     // notional
-            int side                   = (int)inst.side();
-            npv_ += (mkt * fwdPrice - strike) * df * side * localCcy;
+            
         };
 
        private:

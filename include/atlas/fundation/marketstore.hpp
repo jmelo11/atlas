@@ -122,6 +122,12 @@ namespace Atlas {
         const Currency& localCurrency() const { return localCcy_; };
 
         /**
+         * @brief sets the currency as local
+         *
+         * @param ccy
+         */
+        void localCurrency(const Currency& ccy) { localCcy_ = ccy; };
+        /**
          * @brief clone the market store
          *
          * @return MarketStore<adouble>
