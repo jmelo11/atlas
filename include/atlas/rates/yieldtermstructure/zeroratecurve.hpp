@@ -2,10 +2,16 @@
 #define A44280F0_C2FC_4939_991C_18E6A449EEA6
 
 #include <atlas/rates/interestrate.hpp>
-#include <atlas/rates/yieldtermstructure/yieldtermstructure.hpp>
+#include <atlas/rates/yieldtermstructure.hpp>
 
 namespace Atlas {
 
+    /**
+     * @brief A class representing a zero rate curve
+     * 
+     * @tparam adouble 
+     * @tparam Interpol 
+     */
     template <typename adouble, typename Interpol>
     class ZeroRateStrategy : public YieldTermStructureStrategy<dual> {
        public:

@@ -194,7 +194,7 @@ namespace Atlas {
          * @param ccy
          * @param curve
          */
-        void setRiskFreeCurve(const Currency& ccy, const Context<YieldTermStructure<adouble>>& curve) {
+        void riskFreeCurveIdx(const Currency& ccy, const Context<YieldTermStructure<adouble>>& curve) {
             riskFreeCurveMap_[ccy.numericCode()] = curve.idx();
         }
 
@@ -204,8 +204,10 @@ namespace Atlas {
          * @param ccy
          * @return size_t
          */
-        size_t getRiskFreeCurve(const Currency& ccy) const {
-            auto it = riskFreeCurveMap_.find(ccy.numericCode());
+        size_t riskFreeCurveIdx(const Currency& ccy) const { return riskFreeCurveIdx(ccy.numericCode()); }
+
+        size_t riskFreeCurveIdx(size_t ccy) const {
+            auto it = riskFreeCurveMap_.find(ccy);
             if (it == riskFreeCurveMap_.end()) { throw std::runtime_error("Risk-free curve not found for the given currency"); }
             return it->second;
         }

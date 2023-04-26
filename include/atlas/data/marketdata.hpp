@@ -21,7 +21,7 @@ namespace Atlas {
         std::vector<adouble> dfs;     ///< The vector of discount factors.
         std::vector<adouble> fwds;    ///< The vector of forward rates.
         std::vector<adouble> prices;  ///< The vector of spot prices.
-        std::vector<adouble> fx;      ///< The vector of fx prices.
+        std::vector<adouble> fxs;      ///< The vector of fx prices.
         adouble numerarie = 1;        ///< The numerarie used in financial calculations.
 
         /**
@@ -33,7 +33,7 @@ namespace Atlas {
             dfs.reserve(marketRequest.dfs.size());
             fwds.reserve(marketRequest.fwds.size());
             prices.reserve(marketRequest.prices.size());
-            fx.reserve(marketRequest.fxPrices.size());
+            fxs.reserve(marketRequest.fxs.size());
         };
 
         /**
@@ -43,7 +43,7 @@ namespace Atlas {
             std::fill(dfs.begin(), dfs.end(), 0.0);
             std::fill(fwds.begin(), fwds.end(), 0.0);
             std::fill(prices.begin(), prices.end(), 0.0);
-            std::fill(fx.begin(), fx.end(), 0.0);
+            std::fill(fxs.begin(), fxs.end(), 0.0);
         };
     };
 

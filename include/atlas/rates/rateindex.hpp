@@ -9,9 +9,10 @@ namespace Atlas {
     /**
      * @brief A rate index.
      */
+    template <typename adouble>
     class RateIndex {
        public:
-        RateIndex();
+        RateIndex() = default;
 
         /**
          * @brief Constructs a rate index.
@@ -21,13 +22,9 @@ namespace Atlas {
          * @param rateFreq The rate frequency.
          * @param rateComp The rate compounding.
          */
-        RateIndex(const std::string& name, Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
-                  Compounding rateComp = Compounding::Simple);
-
-        /**
-         * @brief Returns the name of the rate index.
-         */
-        inline const std::string& name() const { return name_; };
+        RateIndex(const Date& refDate, Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
+                  Compounding rateComp = Compounding::Simple)
+        : refDate_(refDate), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateFreq_(rateFreq), rateComp_(rateComp){};
 
         /**
          * @brief Returns the day counter.
@@ -60,38 +57,65 @@ namespace Atlas {
          * @brief Returns the fixing for a given date.
          * @param date The date of the fixing.
          */
-        double getFixing(const Date& date) const;
+        adouble getFixing(const Date& date) const {
+            if (date >= refDate_) {
+                auto it = simFixings_.find(date);
+                if (it != simFixings_.end()) { return it->second; }
+                {
+                    // ql date to string
+                    std::string d   = std::to_string(date.year()) + "-" + std::to_string(date.month()) + "-" + std::to_string(date.dayOfMonth());
+                    std::string msg = "No fixing found for date " + d;
+
+                    throw std::runtime_error(msg);
+                }
+            } else {
+                auto it = fixingHistory_.find(date);
+                if (it != fixingHistory_.end()) { return it->second; }
+                {
+                    std::string d   = std::to_string(date.year()) + "-" + std::to_string(date.month()) + "-" + std::to_string(date.dayOfMonth());
+                    std::string msg = "No fixing found for date " + d;
+                    throw std::runtime_error(msg);
+                }
+            }
+        };
 
         /**
-         * @brief Clones the rate index.         
-         * @return std::unique_ptr<RateIndex> 
+         * @brief Clones the rate index.
+         * @return std::unique_ptr<RateIndex>
          */
-        std::unique_ptr<RateIndex> clone() const;
+        std::unique_ptr<RateIndex> clone() const {
+            auto copy            = std::make_unique<RateIndex>(refDate_, fixingFreq_, dayCounter_, rateFreq_, rateComp_);
+            copy->fixingHistory_ = fixingHistory_;
+            copy->simFixings_    = simFixings_;
+            return copy;
+        };
 
         /**
          * @brief Adds a simulated fixing.
-         * 
-         * @param date 
-         * @param value 
+         *
+         * @param date
+         * @param value
          */
         inline void addSimFixing(const Date& date, double value) { simFixings_[date] = value; };
 
         /**
          * @brief Clears the simulated fixing for a given date.
-         * 
-         * @param date 
+         *
+         * @param date
          * @return void
          */
         inline void clearSimFixings() { simFixings_.clear(); };
 
+        Date refDate() const { return refDate_; };
+
        private:
-        std::string name_      = "undefined";
+        Date refDate_;
         DayCounter dayCounter_ = DayCounter();
         Frequency fixingFreq_  = Frequency::NoFrequency;
         Frequency rateFreq_    = Frequency::NoFrequency;
         Compounding rateComp_  = Compounding::Simple;
         std::map<Date, double> fixingHistory_;
-        std::map<Date, double> simFixings_; // adouble
+        mutable std::map<Date, adouble> simFixings_;  // adouble
     };
 
 }  // namespace Atlas

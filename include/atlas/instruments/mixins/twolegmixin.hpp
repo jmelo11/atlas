@@ -2,6 +2,13 @@
 #define D5FE712D_E293_4049_9A71_A2C0C44665A8
 
 namespace Atlas {
+
+    /**
+     * @brief A mixin class for two legs of an instrument
+     *
+     * @tparam FirstLeg
+     * @tparam SecondLeg
+     */
     template <class FirstLeg, class SecondLeg>
     class TwoLegMixin {
        public:

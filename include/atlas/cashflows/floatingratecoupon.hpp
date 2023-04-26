@@ -23,10 +23,10 @@ namespace Atlas {
          * @param forecastCurveContext The forecast CurveContext of the coupon
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                           const CurveContext<adouble>& forecastCurveContext)
+                           const Context<RateIndex<adouble>>& forecastCurveContext)
         : Coupon<adouble>(startDate, endDate, notional), spread_(spread), forecastContextIdx_(forecastCurveContext.idx()), hasForecastContext_(true) {
-            rateDef_ = {forecastCurveContext.index().dayCounter(), forecastCurveContext.index().rateFrequency(),
-                        forecastCurveContext.index().rateCompounding()};
+            rateDef_ = {forecastCurveContext.object().dayCounter(), forecastCurveContext.object().rateFrequency(),
+                        forecastCurveContext.object().rateCompounding()};
         };
 
         /**
@@ -39,7 +39,7 @@ namespace Atlas {
          * @param discountCurveContext The discount CurveContext of the coupon
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                           const CurveContext<adouble>& forecastCurveContext, const CurveContext<adouble>& discountCurveContext)
+                           const Context<RateIndex<adouble>>& forecastCurveContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FloatingRateCoupon(startDate, endDate, notional, spread, forecastCurveContext) {
             this->discountContextIdx_ = discountCurveContext.idx();
             this->hasDiscountContext_ = true;
@@ -78,7 +78,7 @@ namespace Atlas {
          * Sets the forecast CurveContext of the coupon
          * @param forecastCurveContext The forecast CurveContext of the coupon
          */
-        void forecastCurveContext(const CurveContext<adouble>& context) {
+        void forecastCurveContext(const Context<YieldTermStructure<adouble>>& context) {
             forecastContextIdx_ = context.idx();
             if (!context.hasIndex())
                 throw std::runtime_error("FloatingRateCoupon::forecastCurveContext: The forecast CurveContext does not have an index");

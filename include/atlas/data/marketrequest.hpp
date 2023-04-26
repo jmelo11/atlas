@@ -61,18 +61,18 @@ namespace Atlas {
          * @brief A struct representing a fx price request.
          * @details A fx price request is a container for the currency codes and the date.
          */
-        struct FxPrice {
+        struct ExchangeRate {
             size_t ccy1_;
             size_t ccy2_;
             Date date_;
-            FxPrice(size_t ccy1, size_t ccy2, const Date& date) : ccy1_(ccy1), ccy2_(ccy2), date_(date) {}
-            bool operator==(const FxPrice& other) const { return ccy1_ == other.ccy1_ && ccy2_ == other.ccy2_ && date_ == other.date_; }
+            ExchangeRate(size_t ccy1, size_t ccy2, const Date& date) : ccy1_(ccy1), ccy2_(ccy2), date_(date) {}
+            bool operator==(const ExchangeRate& other) const { return ccy1_ == other.ccy1_ && ccy2_ == other.ccy2_ && date_ == other.date_; }
         };
 
         std::vector<DiscountFactor> dfs; /**< A vector of discount factor requests. */
         std::vector<ForwardRate> fwds;   /**< A vector of forward rate requests. */
         std::vector<Price> prices;       /**< A vector of spot requests. */
-        std::vector<FxPrice> fxPrices;   /**< A vector of fx price requests. */
+        std::vector<ExchangeRate> fxs;   /**< A vector of fx price requests. */
     };
 }  // namespace Atlas
 
@@ -121,8 +121,8 @@ namespace std {
      * @tparam
      */
     template <>
-    struct hash<Atlas::MarketRequest::FxPrice> {
-        size_t operator()(const Atlas::MarketRequest::FxPrice& fx) const {
+    struct hash<Atlas::MarketRequest::ExchangeRate> {
+        size_t operator()(const Atlas::MarketRequest::ExchangeRate& fx) const {
             return std::hash<size_t>()(fx.date_.serialNumber()) ^ std::hash<size_t>()(fx.ccy1_) ^ std::hash<size_t>()(fx.ccy2_);
         }
     };

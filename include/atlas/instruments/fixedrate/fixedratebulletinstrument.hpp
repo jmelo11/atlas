@@ -51,7 +51,7 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                                  const CurveContext<adouble>& discountCurveContext)
+                                  const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);

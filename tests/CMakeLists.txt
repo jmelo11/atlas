@@ -11,6 +11,7 @@ include(GNUInstallDirs)
 
 file(GLOB SOURCES "*.cpp" "coupons/*.cpp" "instruments/*.cpp" "visitors/*.cpp" "others/*.cpp" "rates/*.cpp")
 
+
 file(GLOB INCLUDES "*.hpp")
 
 include(FetchContent)

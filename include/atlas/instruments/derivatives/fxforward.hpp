@@ -28,18 +28,18 @@ namespace Atlas {
          * @param notionalInSecondCcy notional in first currency
          * @example FxForward(Date(1, 1, 2020), Date(1, 1, 2021), 823, CLP , USD, 100_000, Side::BUY)  // Buying USD 100K forward @ 823 CLP
          */
-        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const CurrencyContext<adouble>& ccy1,
-                  const CurrencyContext<adouble>& ccy2, double notionalInSecondCcy, Side side)
+        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& ccy1, const Currency& ccy2,
+                  double notionalInSecondCcy, Side side)
         : fwdPrice_(fwdPrice), side_(side) {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->notional_  = notionalInSecondCcy;
 
             this->leg().addRedemption(Cashflow<adouble>(endDate, notionalInSecondCcy));
-            this->leg().redemptions()[0].currencyContext(ccy2);
+            this->leg().redemptions()[0].currency(ccy2);
             adouble notionalInFirstCcy = notionalInSecondCcy * fwdPrice;
             this->leg().addRedemption(Cashflow<adouble>(endDate, notionalInFirstCcy));
-            this->leg().redemptions()[1].currencyContext(ccy1);
+            this->leg().redemptions()[1].currency(ccy1);
         }
 
         /**
@@ -56,8 +56,8 @@ namespace Atlas {
          * @example FxForward(Date(1, 1, 2020), Date(1, 1, 2021), 823, CLP, USD, 100_000, Side::BUY, discountCurve)  // Buying USD 100K forward at
          * 823 CLP, collateralized at discountCurve (e.g. CLP overnight curve)
          */
-        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const CurrencyContext<adouble>& curr1,
-                  const CurrencyContext<adouble>& curr2, double notionalInSecondCcy, Side side, const CurveContext<adouble>& discountCurve)
+        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& curr1, const Currency& curr2,
+                  double notionalInSecondCcy, Side side, const Context<YieldTermStructure<adouble>>& discountCurve)
         : FxForward(startDate, endDate, fwdPrice, curr1, curr2, notionalInSecondCcy, side) {
             this->leg().redemptions()[0].discountCurveContext(discountCurve);
             this->leg().redemptions()[1].discountCurveContext(discountCurve);

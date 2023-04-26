@@ -22,6 +22,9 @@
 #include <atlas/rates/interestrate.hpp>
 #include <iostream>
 
+/**
+ * @brief Atlas namespace
+ */
 namespace Atlas {
 
     // QuantLib types, to be replaced with our own types

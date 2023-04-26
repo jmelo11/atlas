@@ -34,7 +34,7 @@ namespace Atlas {
          * @param rate The interest rate of the coupon
          */
         FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
-                        const CurveContext<adouble>& discountCurveContext)
+                        const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : Coupon<adouble>(startDate, endDate, notional, discountCurveContext), rate_(rate) {
             this->amount_ = accruedAmount(startDate, endDate);
         };

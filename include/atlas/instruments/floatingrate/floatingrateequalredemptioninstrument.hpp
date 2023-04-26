@@ -21,9 +21,9 @@ namespace Atlas {
          * @param forecastCurveContext forecast curve context of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const CurveContext<adouble>& forecastCurveContext)
+                                              const Context<RateIndex<adouble>>& forecastCurveContext)
         : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread) {
-            const auto& index = forecastCurveContext.index();
+            const auto& index = forecastCurveContext.object();
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
             const auto& dates = schedule.dates();
             std::vector<double> redemptions(schedule.size() - 1, notional / (schedule.size() - 1));
@@ -50,7 +50,8 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const CurveContext<adouble>& forecastCurveContext, const CurveContext<adouble>& discountCurveContext)
+                                              const Context<RateIndex<adouble>>& forecastCurveContext,
+                                              const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);

@@ -65,8 +65,8 @@ namespace Atlas {
             const auto& strikeCashflow = inst.leg().redemptions().at(0);
             const auto& mktCashflow    = inst.leg().redemptions().at(1);
             adouble df                 = marketData_.dfs.at(strikeCashflow.dfIdx());
-            adouble fwdPrice           = marketData_.fx.at(strikeCashflow.fxIdx());
-            adouble localCcy           = marketData_.fx.at(mktCashflow.fxIdx());
+            adouble fwdPrice           = marketData_.fxs.at(strikeCashflow.fxIdx());
+            adouble localCcy           = marketData_.fxs.at(mktCashflow.fxIdx());
             adouble strike             = strikeCashflow.amount();  // fwdPrice*notional
             adouble mkt                = mktCashflow.amount();     // notional
             int side                   = (int)inst.side();

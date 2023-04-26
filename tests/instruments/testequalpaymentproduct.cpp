@@ -1,12 +1,11 @@
-#include "../pch.hpp"
 #include "general.hpp"
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 
 TEST(Instrument, EqualPaymentInstrument) {
-    FixedInstrumentVars<double> vars;
-    EqualPaymentInstrument<double> prod(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate);
+    TestSetup<double> vars;
+    EqualPaymentInstrument<double> prod(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.atlasRate);
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
-    testInterest<double>(prod, schedule, vars.rate);
+    testInterest<double>(prod, schedule, vars.atlasRate);
 
     const auto& leg         = prod.leg();
     const auto& coupons     = leg.coupons();
@@ -31,10 +30,10 @@ TEST(Instrument, EqualPaymentInstrument) {
 }
 
 TEST(Instrument, EqualPaymentInstrumentDual) {
-    FixedInstrumentVars<dual> vars;
-    EqualPaymentInstrument<dual> prod(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate);
+    TestSetup<dual> vars;
+    EqualPaymentInstrument<dual> prod(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.atlasRate);
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
-    testInterest<dual>(prod, schedule, vars.rate);
+    testInterest<dual>(prod, schedule, vars.atlasRate);
 
     const auto& leg         = prod.leg();
     const auto& coupons     = leg.coupons();

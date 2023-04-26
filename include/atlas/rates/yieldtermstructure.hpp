@@ -5,6 +5,12 @@
 
 namespace Atlas {
 
+    /**
+     * @brief A class representing a yield term structure. The strategy pattern is used to allow for different
+     * implementations of the yield term structure.
+     *
+     * @tparam adouble
+     */
     template <typename adouble>
     class YieldTermStructureStrategy {
        public:
@@ -30,7 +36,8 @@ namespace Atlas {
 
     /**
      * @class YieldTermStructure
-     * @brief A yield term structure.
+     * @brief A yield term structure. The strategy pattern is used to allow for different implementations of the yield
+     * term structure.
      */
     template <typename adouble>
     class YieldTermStructure {
@@ -49,6 +56,15 @@ namespace Atlas {
         };
 
         std::unique_ptr<YieldTermStructure> clone() const { return std::make_unique<YieldTermStructure>(strategy_->clone()); }
+
+        // copy constructor
+        YieldTermStructure(const YieldTermStructure& other) : strategy_(other.strategy_->clone()) {}
+
+        // copy assignment
+        YieldTermStructure& operator=(const YieldTermStructure& other) {
+            if (this != &other) { strategy_ = other.strategy_->clone(); }
+            return *this;
+        }
 
        private:
         std::unique_ptr<YieldTermStructureStrategy<adouble>> strategy_;

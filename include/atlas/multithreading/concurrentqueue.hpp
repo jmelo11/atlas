@@ -11,12 +11,12 @@
 #include <mutex>
 #include <queue>
 
-/**
- * @brief A concurrent queue. Taken from A. Savine's book, AAD and parallel simulation.
- * 
- */
 namespace Atlas {
 
+    /**
+     * @brief A concurrent queue. Taken from A. Savine's book, AAD and parallel simulation.
+     *
+     */
     template <class T>
     class ConcurrentQueue {
         std::queue<T> myQueue;

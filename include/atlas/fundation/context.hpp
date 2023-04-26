@@ -32,9 +32,6 @@ namespace Atlas {
          */
         const T& object() const { return *obj_; }
 
-        Context(const Context& other)            = delete;
-        Context& operator=(const Context& other) = delete;
-
        private:
         /**
          * @brief Construct a new Context object
@@ -45,41 +42,17 @@ namespace Atlas {
         Context(std::unique_ptr<T>& obj, size_t idx) : obj_(std::move(obj)), idx_(idx) {}
 
         /**
-         * @brief Construct a new Context object
+         * @brief clone the context
          *
-         * @param other
-         */
-        Context(Context&& other) : obj_(std::move(other.obj_)), idx_(other.idx_) {
-            other.obj_ = nullptr;
-            other.idx_ = 0;
-        }
-
-        /**
-         * @brief Copy assignment operator
-         *
-         * @param other
-         * @return Context&
-         */
-        Context& operator=(Context&& other) {
-            if (this != &other) {
-                obj_       = move(other.obj_);
-                idx_       = other.idx_;
-                other.obj_ = nullptr;
-                other.idx_ = 0;
-            }
-            return *this;
-        }
-
-        /**
-         * @brief Copy assignment operator
-         *
-         * @param other
-         * @return Context&
+         * @return Context<T>
          */
         Context<T> clone() const { return Context<T>(std::make_unique<T>(*obj_), idx_); }
 
         std::unique_ptr<T> obj_;
         size_t idx_;
+
+        friend class std::vector<Context<T>>;
+
         friend class ContextManager<T>;
     };
 }  // namespace Atlas

@@ -29,7 +29,7 @@ namespace Atlas {
          * @param obj
          */
         void createContext(const std::string& name, const T& obj) {
-            if (!obj.refDate() != refDate()) { throw std::invalid_argument("Error: object ref date does not match manager's ref date."); }
+            if (obj.refDate() != refDate()) { throw std::invalid_argument("Error: object ref date does not match manager's ref date."); }
             map_[name] = createContext(obj);
         }
 
@@ -80,7 +80,7 @@ namespace Atlas {
             managerClone->map_ = map_;
 
             for (const auto& context : contexts_) {
-                auto objClone = context.obj->clone();
+                auto objClone = context.object().clone();  // Use object() instead of accessing obj directly
                 managerClone->createContext(*objClone);
             }
             return managerClone;
@@ -103,9 +103,10 @@ namespace Atlas {
          * @return size_t
          */
         inline size_t createContext(const T& obj) {
-            std::unique_ptr<T> obj_ptr = make_unique<T>(obj);
-            size_t idx                 = contexts_.size();
-            contexts_.push_back(Context<T>(obj_ptr, idx));
+            size_t idx    = contexts_.size();
+            auto objClone = obj.clone();
+            Context<T> context(objClone, idx);
+            contexts_.push_back(std::move(context));
             return idx;
         }
 

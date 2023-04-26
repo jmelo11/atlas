@@ -2,11 +2,17 @@
 #define FB3CE86C_B207_47DE_B110_DA337769FAF4
 
 #include <atlas/atlasconfig.hpp>
-#include <atlas/fundation/currencycontext.hpp>
+// #include <atlas/fundation/currencycontext.hpp>
 #include <atlas/fundation/indexable.hpp>
-#include <atlas/rates/curvecontext.hpp>
+// #include <atlas/rates/curvecontext.hpp>
+#include <atlas/fundation/context.hpp>
 
 namespace Atlas {
+    template <typename adouble>
+    class YieldTermStructure;
+
+    template <typename adouble>
+    using CurveContext = Context<YieldTermStructure<adouble>>;
 
     template <typename adouble>
     class Instrument;
@@ -22,10 +28,10 @@ namespace Atlas {
 
         /**
          * @brief Construct a new Cashflow object
-         *
          * @param discountCurveContext The discount curve context
          */
-        Cashflow(const CurveContext<adouble>& discountCurveContext) : hasDiscountContext_(true), discountContextIdx_(discountCurveContext.idx()){};
+        Cashflow(const Context<YieldTermStructure<adouble>>& discountCurveContext)
+        : hasDiscountContext_(true), discountContextIdx_(discountCurveContext.idx()){};
 
         /**
          * Constructor
@@ -38,8 +44,9 @@ namespace Atlas {
          * Constructor
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
+         * @param discountCurveContext The discount curve context
          */
-        Cashflow(const Date& paymentDate, adouble amount, const CurveContext<adouble>& discountCurveContext)
+        Cashflow(const Date& paymentDate, adouble amount, const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : amount_(amount), paymentDate_(paymentDate), hasDiscountContext_(true), discountContextIdx_(discountCurveContext.idx()){};
 
         virtual ~Cashflow(){};
@@ -70,7 +77,7 @@ namespace Atlas {
          * Sets the discount curve context
          * @param context The discount curve context
          */
-        inline void discountCurveContext(const CurveContext<adouble>& context) {
+        inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& context) {
             discountContextIdx_ = context.idx();
             hasDiscountContext_ = true;
         }
@@ -91,15 +98,20 @@ namespace Atlas {
          * @brief Sets the currency context
          * @param context The currency context
          */
-        inline void currencyContext(const CurrencyContext<adouble>& context) { currencyContextIdx_ = context.idx(); }
+        inline void currency(const Currency& ccy) { ccyCode_ = ccy.numericCode(); }
 
-        inline size_t currencyContextIdx() const { return currencyContextIdx_; }
+        inline size_t currencyCode() const { return ccyCode_; }
+
+        inline bool applyCcy() const { return applyCcy_; }
+
+        inline void applyCcy(bool applyCcy) { applyCcy_ = applyCcy; }
 
        protected:
-        adouble amount_            = 0;
-        Date paymentDate_          = Date();
-        bool hasDiscountContext_   = false;
-        size_t currencyContextIdx_ = 0;
+        adouble amount_          = 0;
+        Date paymentDate_        = Date();
+        bool hasDiscountContext_ = false;
+        size_t ccyCode_          = 0;
+        bool applyCcy_           = false;
         size_t discountContextIdx_;
 
        private:

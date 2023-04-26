@@ -1,6 +1,7 @@
 #ifndef A48CDCC5_BB81_4A85_AA59_E7D536EFAC4B
 #define A48CDCC5_BB81_4A85_AA59_E7D536EFAC4B
 
+#include "../testsetup.hpp"
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/fundation/marketstore.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
@@ -10,40 +11,6 @@
 using namespace Atlas;
 
 enum PaymentStructure { BulletOrZero, EqualRedemptions };
-
-template <typename adouble>
-struct FixedInstrumentVars {
-    Date startDate             = Date(1, Month::Aug, 2020);
-    Date endDate               = Date(1, Month::Aug, 2021);
-    Frequency paymentFrequency = Frequency::Semiannual;
-    double notional            = 100;
-    adouble rateValue          = 0.03;
-    InterestRate<adouble> rate = InterestRate<adouble>(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
-    MarketStore<adouble> store_;
-    FixedInstrumentVars() {
-        FlatForwardStrategy<adouble> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
-        YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
-        RateIndex index("TEST", Frequency::Annual, Actual360());
-        store_.createCurveContext("TEST", curve, index);
-    };
-};
-
-template <typename adouble>
-struct FloatingInstrumentVars {
-    Date startDate             = Date(1, Month::Aug, 2020);
-    Date endDate               = Date(1, Month::Aug, 2021);
-    Frequency paymentFrequency = Frequency::Semiannual;
-    double notional            = 100;
-    adouble spread             = 0.01;
-    adouble rateValue          = 0.03;
-    MarketStore<adouble> store_;
-    FloatingInstrumentVars() {
-        FlatForwardStrategy<adouble> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
-        YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
-        RateIndex index("TEST", Frequency::Annual, Actual360());
-        store_.createCurveContext("TEST", curve, index);
-    };
-};
 
 template <class T, typename adouble>
 void inline testStructure(const T& instrument, const Schedule& schedule, PaymentStructure structure) {

@@ -2,10 +2,15 @@
 #define C8964333_99C5_4B58_B60E_1881A7E5EE1F
 
 #include <atlas/rates/interestrate.hpp>
-#include <atlas/rates/yieldtermstructure/yieldtermstructure.hpp>
+#include <atlas/rates/yieldtermstructure.hpp>
 
 namespace Atlas {
 
+    /**
+     * @brief A class representing a flat forward curve
+     *
+     * @tparam adouble
+     */
     template <typename adouble>
     class FlatForwardStrategy : public YieldTermStructureStrategy<adouble> {
        public:
@@ -15,9 +20,7 @@ namespace Atlas {
             this->refDate_ = refDate;
         }
 
-        FlatForwardStrategy(const Date& refDate, const InterestRate<adouble>& rate) : rate_(rate) {
-            this->refDate_ = refDate;
-        }
+        FlatForwardStrategy(const Date& refDate, const InterestRate<adouble>& rate) : rate_(rate) { this->refDate_ = refDate; }
 
         adouble discount(const Date& date) const override {
             if (date < this->refDate_) { throw std::invalid_argument("Date is before reference date"); }

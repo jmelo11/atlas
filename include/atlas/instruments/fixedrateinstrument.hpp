@@ -71,7 +71,7 @@ namespace Atlas {
          *
          * @param context
          */
-        inline void discountCurveContext(const CurveContext<adouble>& context) {
+        inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& context) {
             this->leg().discountCurveContext(context);
             disbursement_.discountCurveContext(context);
         };

@@ -1,18 +1,16 @@
-
-#include "../pch.hpp"
 #include "general.hpp"
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <numeric>
 
 TEST(Instrument, CustomFloatingRateInstrument) {
-    FloatingInstrumentVars<double> vars;
+    TestSetup<double> vars;
 
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
     std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
 
     auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
 
-    CustomFloatingRateInstrument<double> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store_.curveContext("TEST"));
+    CustomFloatingRateInstrument<double> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store.rateIndexContext("TEST"));
 
     auto& leg         = prod.leg();
     auto& coupons     = leg.coupons();
@@ -24,14 +22,14 @@ TEST(Instrument, CustomFloatingRateInstrument) {
 }
 
 TEST(Instrument, CustomFloatingRateInstrumentDual) {
-    FloatingInstrumentVars<dual> vars;
+    TestSetup<dual> vars;
 
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
     std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
 
     auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
 
-    CustomFloatingRateInstrument<dual> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store_.curveContext("TEST"));
+    CustomFloatingRateInstrument<dual> prod(schedule.dates(), redemptionAmounts, vars.spread, vars.store.rateIndexContext("TEST"));
 
     auto& leg         = prod.leg();
     auto& coupons     = leg.coupons();

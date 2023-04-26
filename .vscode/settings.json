@@ -115,6 +115,8 @@
         "execution": "cpp",
         "cstdbool": "cpp",
         "version": "cpp",
-        "__memory": "cpp"
+        "__memory": "cpp",
+        "*.ipp": "cpp",
+        "hash_map": "cpp"
     }
 }

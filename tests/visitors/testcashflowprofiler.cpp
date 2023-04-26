@@ -1,5 +1,4 @@
-#include "../pch.hpp"
-#include "general.hpp"
+#include "../testsetup.hpp"
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/visitors/cashflowprofiler.hpp>
@@ -8,9 +7,9 @@
 using namespace Atlas;
 
 TEST(CashflowProfiler, FixedRateInstrument) {
-    FixedInstrumentVars<double> vars;
-    FixedRateBulletInstrument<double> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate);
+    TestSetup<double> vars;
     CashflowProfiler<double> profiler;
+    auto& fixedInst = *vars.atlasFixBond;
     profiler.visit(fixedInst);
 
     const auto& interestProfile   = profiler.interests();
@@ -21,9 +20,9 @@ TEST(CashflowProfiler, FixedRateInstrument) {
 }
 
 TEST(CashflowProfiler, FixedRateInstrumentDual) {
-    FixedInstrumentVars<dual> vars;
-    FixedRateBulletInstrument<dual> fixedInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate);
+    TestSetup<dual> vars;
     CashflowProfiler<dual> profiler;
+    auto& fixedInst = *vars.atlasFixBond;
     profiler.visit(fixedInst);
 
     const auto& interestProfile   = profiler.interests();
@@ -34,9 +33,8 @@ TEST(CashflowProfiler, FixedRateInstrumentDual) {
 }
 
 TEST(CashflowProfiler, FloatingRateInstrument) {
-    FloatingInstrumentVars<double> vars;
-    const auto& context = vars.store_.curveContext("TEST");
-    FloatingRateBulletInstrument<double> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, vars.store_.curveContext("TEST"));
+    TestSetup<double> vars;
+    auto& floatInst = *vars.atlasFloatBond;
     CashflowProfiler<double> profiler;
     profiler.visit(floatInst);
 
@@ -47,11 +45,9 @@ TEST(CashflowProfiler, FloatingRateInstrument) {
     for (const auto& redemption : floatInst.leg().redemptions()) { EXPECT_EQ(redemptionProfile.at(redemption.paymentDate()), redemption.amount()); }
 }
 
-
 TEST(CashflowProfiler, FloatingRateInstrumentDual) {
-    FloatingInstrumentVars<dual> vars;
-    auto& context = vars.store_.curveContext("TEST");
-    FloatingRateBulletInstrument<dual> floatInst(vars.startDate, vars.endDate, vars.notional, vars.spread, context, vars.store_.curveContext("TEST"));
+    TestSetup<dual> vars;
+    auto& floatInst = *vars.atlasFloatBond;
     CashflowProfiler<dual> profiler;
     profiler.visit(floatInst);
 
