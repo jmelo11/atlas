@@ -44,8 +44,8 @@ namespace Atlas {
                              .notional(notional)
                              .rate(rate)
                              .build();
-
-            this->disbursement(Cashflow<adouble>(startDate, -notional));
+            adouble disbursement = -notional;
+            this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 
         /**

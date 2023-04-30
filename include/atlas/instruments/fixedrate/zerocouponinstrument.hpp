@@ -28,7 +28,8 @@ namespace Atlas {
 
             this->leg().addCoupon(coupon);
             this->leg().addRedemption(redemption);
-            this->disbursement(Cashflow<adouble>(startDate, -notional));
+            adouble disbursement = -notional;
+            this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 
         /**

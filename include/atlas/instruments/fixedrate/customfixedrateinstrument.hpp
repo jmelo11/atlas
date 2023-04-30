@@ -26,7 +26,8 @@ namespace Atlas {
             }
             this->notional_ = std::reduce(redemptions.begin(), redemptions.end());
             this->calculateNotionals(dates, rate);
-            this->disbursement(Cashflow<adouble>(dates.front(), -this->notional_));
+            adouble disbursement = -this->notional_;
+            this->disbursement(Cashflow<adouble>(dates.front(), disbursement));
         };
 
         /**

@@ -2,9 +2,9 @@
 #define EA82B4A2_2A5C_4B6E_A0A0_0807E93983BE
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
-#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/visitors/visitor.hpp>
 #include <iostream>
 
@@ -56,10 +56,8 @@ namespace Atlas {
          * @param inst
          */
         void visit(FloatingRateInstrument<adouble>& inst) override {
-            adouble npv = 0.0;
-            npv += floatingLegNPV(inst.leg());
-            npv += redemptionsNPV(inst.leg());
-            adouble fx = marketData_.fxs.at(inst.disbursement().fxIdx());
+            adouble npv = floatingLegNPV(inst.leg()) + redemptionsNPV(inst.leg());
+            adouble fx  = marketData_.fxs.at(inst.disbursement().fxIdx());
             npv_ += npv / fx;
         };
 
@@ -78,6 +76,17 @@ namespace Atlas {
             adouble spot = marketData_.fxs.at(cashflows.at(1).fxIdx());
             npv_ += (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
         };
+
+        void visit(VanillaSwap<adouble>& inst) override {
+            int side    = inst.side();
+            adouble npv = 0.0;
+            npv += fixedLegNPV(inst.firstLeg()) * side;
+            npv += floatingLegNPV(inst.secondLeg()) * side;
+            npv += redemptionsNPV(inst.firstLeg()) * side * -1;
+            npv += redemptionsNPV(inst.secondLeg()) * side * -1;
+            adouble fx = marketData_.fxs.at(inst.firstLeg().coupons().at(0).fxIdx());
+            npv_ += npv / fx;
+        }
 
        private:
         /**

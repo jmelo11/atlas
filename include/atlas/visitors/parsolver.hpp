@@ -45,8 +45,7 @@ namespace Atlas {
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 NewtonRaphsonSolver solver_;
-                auto g = [&](adouble r) { return pow(f(r), 2); };
-                value_ = solver_.solve(g, guess_, accuracy_, maxIter_);
+                value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
             }
         };
 
@@ -55,16 +54,16 @@ namespace Atlas {
         void evalFixedRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator<adouble> calc(marketData_);
-            size_t pos      = evalInst.disbursement().dfIdx();
-            adouble startDf = marketData_.dfs.at(pos);
+            size_t pos           = evalInst.disbursement().dfIdx();
+            adouble startDf      = marketData_.dfs.at(pos);
+            adouble disbursement = evalInst.disbursement().amount();
 
             auto f = [&](adouble r) {
                 calc.clear();
                 evalInst.rate(r);
                 calc.visit(evalInst);
-                adouble npv      = calc.results();
-                adouble notional = evalInst.disbursement().amount();
-                adouble results  = npv + notional * startDf;
+                adouble npv     = calc.results();
+                adouble results = npv + disbursement * startDf;
                 return results;
             };
             if constexpr (std::is_same_v<adouble, double>) {
@@ -72,25 +71,25 @@ namespace Atlas {
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 NewtonRaphsonSolver solver_;
-                auto g = [&](adouble r) { return pow(f(r), 2); };
-                value_ = solver_.solve(g, guess_, accuracy_, maxIter_);
+                value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
             }
         };
 
         template <typename T>
         void evalFloatingRateProd(const T& inst) const {
             T evalInst(inst);
-            NPVCalculator calc(marketData_);
-            size_t pos      = evalInst.disbursement().dfIdx();
-            adouble startDf = marketData_.dfs.at(pos);
+            NPVCalculator<adouble> calc(marketData_);
+            size_t pos           = evalInst.disbursement().dfIdx();
+            adouble startDf      = marketData_.dfs.at(pos);
+            adouble disbursement = evalInst.disbursement().amount();
 
-            auto f = [&](adouble s) {
+            std::function<adouble(adouble)> f = [&](adouble s) {
                 calc.clear();
                 evalInst.spread(s);
                 calc.visit(evalInst);
-                adouble npv      = calc.results();
-                adouble notional = evalInst.disbursement().amount();
-                return npv + notional * startDf;
+                adouble npv = calc.results();
+                adouble result = npv + disbursement * startDf;
+                return result;
             };
 
             if constexpr (std::is_same_v<adouble, double>) {
@@ -98,8 +97,7 @@ namespace Atlas {
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 NewtonRaphsonSolver solver_;
-                auto g = [&](adouble s) { return pow(f(s), 2); };
-                value_ = solver_.solve(g, guess_, accuracy_, maxIter_);
+                value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
             }
         };
 

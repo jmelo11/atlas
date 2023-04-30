@@ -36,7 +36,7 @@ namespace Atlas {
             return *this;
         }
 
-        MakeLeg& discountCurveContext(const Context<YieldTermStructure<adouble>>& discountCurve) {
+        MakeLeg& discountCurveContext(const Context<YieldTermStructure<adouble>>* discountCurve) {
             discountCurveContext_ = discountCurve;
             return *this;
         }
@@ -68,7 +68,7 @@ namespace Atlas {
             return *this;
         }
 
-        MakeLeg& rateIndexContext(const Context<RateIndex<adouble>>& index) {
+        MakeLeg& rateIndexContext(const Context<RateIndex<adouble>>* index) {
             static_assert(std::is_same_v<LegType, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
             rateIndexContext_ = index;
             return *this;
@@ -101,12 +101,12 @@ namespace Atlas {
             } else if constexpr (std::is_same_v<LegType, FloatingRateLeg<adouble>>) {
                 for (size_t i = 0; i < dates.size() - 1; i++) {
                     double amount = 0.0;
-                    if constexpr (!std::is_same_v<adouble, double>) {
+                    if constexpr (std::is_same_v<adouble, double>) {
                         amount = couponNotionals[i];
                     } else {
                         amount = val(couponNotionals[i]);
                     }
-                    FloatingRateCoupon<adouble> coupon(dates[i], dates[i + 1], amount, spread_, rateIndexContext_);
+                    FloatingRateCoupon<adouble> coupon(dates[i], dates[i + 1], amount, spread_, *rateIndexContext_);
                     setFlow(coupon);
                     leg.addCoupon(coupon);
                 }
@@ -153,8 +153,8 @@ namespace Atlas {
         Frequency paymentFrequency_;
         Date startDate_;
         Date endDate_;
-        Context<RateIndex<adouble>>* rateIndexContext_;
-        Context<YieldTermStructure<adouble>>* discountCurveContext_;
+        const Context<RateIndex<adouble>>* rateIndexContext_ = nullptr;
+        const Context<YieldTermStructure<adouble>>* discountCurveContext_ = nullptr;
         BusinessDayConvention paymentConvention_ = BusinessDayConvention::Unadjusted;
         Calendar calendar_                       = NullCalendar();
         Currency currency_                       = Currency();

@@ -37,7 +37,8 @@ namespace Atlas {
                 outstanding -= redemptions.at(i);
             }
 
-            this->disbursement(Cashflow<adouble>(startDate, -notional));
+            adouble disbursement = -notional;
+            this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
         /**
          * @brief Construct a new Floating Rate Equal Redemption Instrument object

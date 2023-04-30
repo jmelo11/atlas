@@ -1,15 +1,13 @@
-// QuantLib
-#include <ql/termstructures/yield/discountcurve.hpp>
-#include <ql/termstructures/yield/flatforward.hpp>
+// fundation
+#include <atlas/fundation/context.hpp>
 
 // data
 #include <atlas/data/marketdata.hpp>
 
 // models
-#include <atlas/models/staticcurvemodel.hpp>
+#include <atlas/models/spotmarketdatamodel.hpp>
 
 // curves
-#include <atlas/rates/curvecontext.hpp>
 #include <atlas/rates/yieldtermstructure/discountcurve.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/rates/yieldtermstructure/yieldtermstructure.hpp>
@@ -65,12 +63,12 @@
 #define exportFixedRateInstrument(name)                                                          \
     py::class_<name<dual>, FixedRateInstrument<dual>>(m, #name)                                  \
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&>()) \
-        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, const CurveContext<dual>&>())
+        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&>())
 
-#define exportFloatingRateInstrument(name)                                                                             \
-    py::class_<name<dual>, FloatingRateInstrument<dual>>(m, #name)                                                     \
-        .def(py::init<const Date&, const Date&, double, dual, const CurveContext<dual>&, const CurveContext<dual>&>()) \
-        .def(py::init<const Date&, const Date&, double, dual, const CurveContext<dual>&>())
+#define exportFloatingRateInstrument(name)                                                                                                  \
+    py::class_<name<dual>, FloatingRateInstrument<dual>>(m, #name)                                                                          \
+        .def(py::init<const Date&, const Date&, double, dual, const Context<RateIndex<dual>>&, const Context<YieldTermStructure<dual>>&>()) \
+        .def(py::init<const Date&, const Date&, double, dual, const Context<RateIndex<dual>>&>())
 
 namespace py = pybind11;
 using namespace Atlas;
@@ -128,36 +126,12 @@ namespace Aux {
     class PyModel : public Model<dual> {
         using Model<dual>::Model;
 
-        void simulate(const std::vector<Date>& evalDates, Scenario<dual>& scenario) const override {
-            PYBIND11_OVERRIDE_PURE(void,        /* Return type */
-                                   Model<dual>, /* Parent class */
-                                   simulate,    /* Name of function in C++ (must match Python name) */
-                                   evalDates,   /* Argument(s) */
-                                   scenario);
-        };
-
-        void simulateDiscounts(const Date& evalDate, MarketData<dual>& md) const override {
-            PYBIND11_OVERRIDE_PURE(void,              /* Return type */
-                                   Model<dual>,       /* Parent class */
-                                   simulateDiscounts, /* Name of function in C++ (must match Python name) */
-                                   evalDate,          /* Argument(s) */
-                                   md);
-        };
-
-        void simulateForwards(const Date& evalDate, MarketData<dual>& md) const override {
-            PYBIND11_OVERRIDE_PURE(void,             /* Return type */
+        MarketData<dual> marketData(const Date& evalDate = Date()) const override {
+            PYBIND11_OVERRIDE_PURE(MarketData<dual>, /* Return type */
                                    Model<dual>,      /* Parent class */
-                                   simulateForwards, /* Name of function in C++ (must match Python name) */
-                                   evalDate,         /* Argument(s) */
-                                   md);
-        };
-
-        void simulateSpots(const Date& evalDate, MarketData<dual>& md) const override {
-            PYBIND11_OVERRIDE_PURE(void,          /* Return type */
-                                   Model<dual>,   /* Parent class */
-                                   simulateSpots, /* Name of function in C++ (must match Python name) */
-                                   evalDate,      /* Argument(s) */
-                                   md);
+                                   marketData,       /* Name of function in C++ (must match Python name) */
+                                   evalDate          /* Argument(s) */
+            );
         };
     };
 };  // namespace Aux
@@ -266,7 +240,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("name", &Currency::name)
         .def("code", &Currency::code)
         .def("numericCode", &Currency::numericCode)
-        .def("symbol", &Currency::symbol)   
+        .def("symbol", &Currency::symbol)
         .def("rounding", &Currency::rounding);
 
     py::class_<USD, Currency>(m, "USD").def(py::init<>());
@@ -334,23 +308,29 @@ PYBIND11_MODULE(Atlas, m) {
         .def("backwards", &MakeSchedule::backwards)
         .def("endOfMonth", &MakeSchedule::endOfMonth);
 
-    // Curve
-    py::class_<CurveContext<dual>>(m, "CurveContext")
-        .def("curve", &CurveContext<dual>::curve)
-        .def("index", &CurveContext<dual>::index)
-        .def("idx", &CurveContext<dual>::idx);
+    // Context
+    py::class_<Context<YieldTermStructure<dual>>>(m, "CurveContext")
+        .def("object", &Context<YieldTermStructure<dual>>::object)
+        .def("idx", &Context<YieldTermStructure<dual>>::idx);
+
+    py::class_<Context<RateIndex<dual>>>(m, "RateIndexContext")
+        .def("object", &Context<RateIndex<dual>>::object)
+        .def("idx", &Context<RateIndex<dual>>::idx);
 
     py::class_<MarketStore<dual>>(m, "MarketStore")
-        .def(py::init<>())
         .def(py::init<const Date&, Currency>())
-        .def("createCurveContext", &MarketStore<dual>::createCurveContext)
+        .def("addCurve", &MarketStore<dual>::addCurve)
         .def("curveContext", py::overload_cast<const std::string&>(&MarketStore<dual>::curveContext, py::const_), "Get a curve context by name")
         .def("curveContext", py::overload_cast<size_t>(&MarketStore<dual>::curveContext, py::const_), "Get a curve context by index")
-        .def("hasCurveContext", &MarketStore<dual>::hasCurveContext)
+        .def("rateIndexContext", py::overload_cast<const std::string&>(&MarketStore<dual>::rateIndexContext, py::const_),
+             "Get a rate index context by name")
+        .def("rateIndexContext", py::overload_cast<size_t>(&MarketStore<dual>::rateIndexContext, py::const_), "Get a rate index context by index")
         .def("cloneFromStore", &MarketStore<dual>::cloneFromStore)
-        .def("createCurrencyContext", &MarketStore<dual>::createCurrencyContext)
-        .def("currencyContext", py::overload_cast<const std::string&>(&MarketStore<dual>::currencyContext, py::const_), "Get a curve context by name")
-        .def("currencyContext", py::overload_cast<size_t>(&MarketStore<dual>::currencyContext, py::const_), "Get a curve context by name");
+        .def("addExchangeRate", &MarketStore<dual>::addExchangeRate)
+        .def("exchange", py::overload_cast<const Currency&, const Currency&>(&MarketStore<dual>::exchange, py::const_),
+             "Get the exchange rate between two currencies")
+        .def("riskFreeCurveIdx", py::overload_cast<const Currency&>(&MarketStore<dual>::riskFreeCurveIdx, py::const_),
+             "Set the risk free curve index for a currency");
 
     py::class_<YieldTermStructureStrategy<dual>>(m, "YieldTermStructureStrategy")
         .def("discount", py::overload_cast<const Date&>(&YieldTermStructureStrategy<dual>::discount, py::const_))
@@ -371,19 +351,20 @@ PYBIND11_MODULE(Atlas, m) {
     // Cashflows
     py::class_<Cashflow<dual>>(m, "Cashflow")
         .def(py::init<>())
-        .def(py::init<const CurveContext<dual>&>())
+        .def(py::init<const Context<YieldTermStructure<dual>>&>())
         .def(py::init<const Date&, dual>())
-        .def(py::init<const Date&, dual, const CurveContext<dual>&>())
+        .def(py::init<const Date&, dual, const Context<YieldTermStructure<dual>>&>())
         .def("paymentDate", &Cashflow<dual>::paymentDate)
         .def("amount", py::overload_cast<>(&Cashflow<dual>::amount, py::const_))
         .def("hasOcurred", &Cashflow<dual>::hasOcurred)
         .def("discountCurveContext", &Cashflow<dual>::discountCurveContext)
         .def("hasDiscountContext", &Cashflow<dual>::hasDiscountContext)
-        .def("discountContextIdx", &Cashflow<dual>::discountContextIdx);
+        .def("discountContextIdx", &Cashflow<dual>::discountContextIdx)
+        .def("currency", &Cashflow<dual>::currency);
 
     py::class_<Coupon<dual>, Aux::PyCoupon, Cashflow<dual>>(m, "Coupon")
         .def(py::init<const Date&, const Date&, double>())
-        .def(py::init<const Date&, const Date&, double, const CurveContext<dual>&>())
+        .def(py::init<const Date&, const Date&, double, const Context<YieldTermStructure<dual>>&>())
         .def("notional", &Coupon<dual>::notional)
         .def("startDate", &Coupon<dual>::startDate)
         .def("endDate", &Coupon<dual>::endDate)
@@ -393,7 +374,7 @@ PYBIND11_MODULE(Atlas, m) {
 
     py::class_<FixedRateCoupon<dual>, Coupon<dual>>(m, "FixedRateCoupon")
         .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&>())
-        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, const CurveContext<dual>&>())
+        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&>())
         .def("rate", py::overload_cast<>(&FixedRateCoupon<dual>::rate, py::const_))
         .def("rate", py::overload_cast<const InterestRate<dual>&>(&FixedRateCoupon<dual>::rate))
         .def("accruedPeriod", &FixedRateCoupon<dual>::accruedPeriod)
@@ -401,8 +382,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def("dayCounter", &FixedRateCoupon<dual>::dayCounter);
 
     py::class_<FloatingRateCoupon<dual>, Coupon<dual>>(m, "FloatingRateCoupon")
-        .def(py::init<const Date&, const Date&, double, dual, const CurveContext<dual>&>())
-        .def(py::init<const Date&, const Date&, double, dual, const CurveContext<dual>&, const CurveContext<dual>&>())
+        .def(py::init<const Date&, const Date&, double, dual, const Context<RateIndex<dual>>&>())
+        .def(py::init<const Date&, const Date&, double, dual, const Context<RateIndex<dual>>&, const Context<YieldTermStructure<dual>>&>())
         .def("spread", py::overload_cast<>(&FloatingRateCoupon<dual>::spread, py::const_))
         .def("spread", py::overload_cast<dual>(&FloatingRateCoupon<dual>::spread))
         .def("fixing", py::overload_cast<>(&FloatingRateCoupon<dual>::fixing, py::const_))
@@ -479,34 +460,37 @@ PYBIND11_MODULE(Atlas, m) {
 
     py::class_<ZeroCouponInstrument<dual>, FixedRateInstrument<dual>>(m, "ZeroCouponInstrument")
         .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&>())
-        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, const CurveContext<dual>&>());
+        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&>());
 
     py::class_<EqualPaymentInstrument<dual>, FixedRateInstrument<dual>>(m, "EqualPaymentInstrument")
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, bool>())
-        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, const CurveContext<dual>&, bool>());
+        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&, bool>());
 
     py::class_<CustomFixedRateInstrument<dual>, FixedRateInstrument<dual>>(m, "CustomFixedRateInstrument")
         .def(py::init<const std::vector<Date>&, const std::vector<double>&, const InterestRate<dual>&>())
-        .def(py::init<const std::vector<Date>&, const std::vector<double>&, const InterestRate<dual>&, const CurveContext<dual>&>());
+        .def(py::init<const std::vector<Date>&, const std::vector<double>&, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&>());
 
     // Floating rate instruments
     exportFloatingRateInstrument(FloatingRateBulletInstrument);
     exportFloatingRateInstrument(FloatingRateEqualRedemptionInstrument);
 
     py::class_<CustomFloatingRateInstrument<dual>, FloatingRateInstrument<dual>>(m, "CustomFloatingRateInstrument")
-        .def(py::init<const std::vector<Date>&, const std::vector<double>&, dual, const CurveContext<dual>&>())
-        .def(py::init<const std::vector<Date>&, const std::vector<double>&, dual, const CurveContext<dual>&>());
+        .def(py::init<const std::vector<Date>&, const std::vector<double>&, dual, const Context<RateIndex<dual>>&>())
+        .def(py::init<const std::vector<Date>&, const std::vector<double>&, dual, const Context<RateIndex<dual>>&,
+                      const Context<YieldTermStructure<dual>>&>());
 
     // Visitors
     py::class_<Visitor<dual>>(m, "Visitor")
         .def("visit", py::overload_cast<FloatingRateInstrument<dual>&>(&Visitor<dual>::visit))
         .def("visit", py::overload_cast<FixedRateInstrument<dual>&>(&Visitor<dual>::visit))
-        .def("visit", py::overload_cast<FxForward<dual>&>(&Visitor<dual>::visit));
+        .def("visit", py::overload_cast<FxForward<dual>&>(&Visitor<dual>::visit))
+        .def("visit", py::overload_cast<VanillaSwap<dual>&>(&Visitor<dual>::visit));
 
     py::class_<ConstVisitor<dual>>(m, "ConstVisitor")
         .def("visit", py::overload_cast<const FloatingRateInstrument<dual>&>(&ConstVisitor<dual>::visit, py::const_))
         .def("visit", py::overload_cast<const FixedRateInstrument<dual>&>(&ConstVisitor<dual>::visit, py::const_))
-        .def("visit", py::overload_cast<const FxForward<dual>&>(&ConstVisitor<dual>::visit, py::const_));
+        .def("visit", py::overload_cast<const FxForward<dual>&>(&ConstVisitor<dual>::visit, py::const_))
+        .def("visit", py::overload_cast<const VanillaSwap<dual>&>(&ConstVisitor<dual>::visit, py::const_));
 
     py::class_<NPVCalculator<dual>, Visitor<dual>>(m, "NPVCalculator")
         .def(py::init<const MarketData<dual>&>())
@@ -540,9 +524,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("clear", &DurationCalculator<dual>::clear);
 
     // Models
-    py::class_<Model<dual>, Aux::PyModel>(m, "Model").def("simulate", &Model<dual>::simulate);
+    py::class_<Model<dual>, Aux::PyModel>(m, "Model").def("marketData", &Model<dual>::marketData);
 
-    py::class_<StaticCurveModel<dual>>(m, "StaticCurveModel")
-        .def(py::init<const MarketRequest&, const MarketStore<dual>&>())
-        .def("setRequest", &StaticCurveModel<dual>::setRequest);
+    py::class_<SpotMarketDataModel<dual>>(m, "SpotMarketDataModel").def(py::init<const MarketRequest&, const MarketStore<dual>&>());
 }

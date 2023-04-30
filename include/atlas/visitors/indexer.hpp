@@ -67,7 +67,8 @@ namespace Atlas {
 
             for (auto& coupon : secondLeg.coupons()) { indexCashflow(coupon); }
             for (auto& redemption : secondLeg.redemptions()) { indexCashflow(redemption); }
-            
+
+            indexExchangeRate(firstLeg.coupons()[0], false);            
         }
 
         void setRequest(MarketRequest& request) {

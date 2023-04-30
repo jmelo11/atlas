@@ -33,7 +33,8 @@ namespace Atlas {
                 outstanding -= redemptions.at(i);
             }
 
-            this->disbursement(Cashflow<adouble>(dates.front(), -this->notional_));
+            adouble disbursement = -this->notional_;
+            this->disbursement(Cashflow<adouble>(dates.front(), disbursement));
         };
         ;
         /**

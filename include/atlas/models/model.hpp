@@ -33,7 +33,7 @@ namespace Atlas {
     };
 
     template <typename adouble>
-    class MontCarloEngine {
+    class MonteCarloEngine {
         virtual bool nextScenario(const std::vector<Date>& evalDates, Scenario<adouble>& scenario) const = 0;
     };
 

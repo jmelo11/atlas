@@ -36,7 +36,8 @@ namespace Atlas {
 
             // calculate each corresponding notional
             this->calculateNotionals(this->dates_, rate);
-            this->disbursement(Cashflow<adouble>(startDate, -notional));
+            adouble disbursement = -notional;
+            this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
         /**
          * @brief Construct a new Equal Payment Instrument object

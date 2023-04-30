@@ -47,7 +47,8 @@ namespace Atlas {
                              .redemptions(redemptions)
                              .build();
                              
-            this->disbursement(Cashflow<adouble>(startDate, -notional));
+            adouble disbursement = -notional;
+            this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 
         /**

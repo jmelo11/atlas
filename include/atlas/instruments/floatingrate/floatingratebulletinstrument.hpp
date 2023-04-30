@@ -23,7 +23,8 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                     const Context<RateIndex<adouble>>& forecastCurveContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
+                                     const Context<RateIndex<adouble>>& forecastCurveContext,
+                                     const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FloatingRateBulletInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
@@ -54,7 +55,9 @@ namespace Atlas {
 
             Redemption<adouble> redemption(schedule.endDate(), notional);
             this->leg().addRedemption(redemption);
-            this->disbursement(Cashflow<adouble>(startDate, -notional));
+
+            adouble disbursement = -notional;
+            this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
     };
 }  // namespace Atlas

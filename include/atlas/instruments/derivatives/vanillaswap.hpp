@@ -35,7 +35,7 @@ namespace Atlas {
                                   .rate(rate)
                                   .paymentFrequency(fixFreq)
                                   .build();
-                                  
+
             this->secondLeg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
                                    .startDate(startDate)
                                    .endDate(endDate)
@@ -48,6 +48,8 @@ namespace Atlas {
         void accept(Visitor<adouble>& visitor) override { visitor.visit(*this); }
 
         void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); }
+
+        Side side() const { return side_; }
 
        private:
         Side side_;
