@@ -106,13 +106,12 @@ namespace Atlas {
          */
         size_t riskFreeCurveIdx(const Currency& ccy) const { return riskFreeCurveIdx(ccy.numericCode()); };
 
-        /**
-         * @brief return the currency associated risk free curve
-         *
-         * @param ccyCode
-         * @return size_t
-         */
         size_t riskFreeCurveIdx(size_t ccyCode) const { return fxManager_->riskFreeCurveIdx(translateCcyCode(ccyCode)); };
+
+        void riskFreeCurveIdx(const Currency& ccy, const std::string& name) {
+            auto& context = curveManager_->getContext(name);
+            fxManager_->riskFreeCurveIdx(ccy, context);
+        };
 
         /**
          * @brief gets the currency set as local

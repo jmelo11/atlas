@@ -186,6 +186,7 @@ namespace Atlas {
                 } catch (std::runtime_error& e) { return false; }
                 return false;
             }
+            return true;
         }
 
         /**

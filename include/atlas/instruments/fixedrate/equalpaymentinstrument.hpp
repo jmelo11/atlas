@@ -36,7 +36,7 @@ namespace Atlas {
 
             // calculate each corresponding notional
             this->calculateNotionals(this->dates_, rate);
-            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+            this->disbursement(Cashflow<adouble>(startDate, -notional));
         };
         /**
          * @brief Construct a new Equal Payment Instrument object
@@ -53,7 +53,7 @@ namespace Atlas {
                                const Context<YieldTermStructure<adouble>>& discountCurveContext, bool recalcNotionals = false)
         : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, recalcNotionals) {
             this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement_.discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
 
         void rate(const InterestRate<adouble>& r) override {

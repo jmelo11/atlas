@@ -13,7 +13,7 @@ namespace Atlas {
      * @tparam adouble
      */
     template <typename adouble>
-    class FxForward : public Instrument<adouble>, public OneLegMixin<Leg<adouble>> {
+    class FxForward : public Instrument<adouble>, public OneLegMixin<adouble, Leg<adouble>> {
        public:
         enum Side { BUY = 1, SELL = -1 };
 
@@ -23,9 +23,10 @@ namespace Atlas {
          * @param startDate start date of the instrument
          * @param endDate end date of the instrument
          * @param fwdPrice units of second currency per unit of first currency
-         * @param curr1 currency context for first currency
-         * @param curr2 currency context for second currency
+         * @param ccy1 currency context for first currency
+         * @param ccy2 currency context for second currency
          * @param notionalInSecondCcy notional in first currency
+         * @param side BUY or SELL
          * @example FxForward(Date(1, 1, 2020), Date(1, 1, 2021), 823, CLP , USD, 100_000, Side::BUY)  // Buying USD 100K forward @ 823 CLP
          */
         FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& ccy1, const Currency& ccy2,
@@ -35,11 +36,15 @@ namespace Atlas {
             this->endDate_   = endDate;
             this->notional_  = notionalInSecondCcy;
 
-            this->leg().addRedemption(Cashflow<adouble>(endDate, notionalInSecondCcy));
-            this->leg().redemptions()[0].currency(ccy2);
+            Cashflow<adouble> cf1(endDate, notionalInSecondCcy);
+            cf1.currency(ccy1);
+
             adouble notionalInFirstCcy = notionalInSecondCcy * fwdPrice;
-            this->leg().addRedemption(Cashflow<adouble>(endDate, notionalInFirstCcy));
-            this->leg().redemptions()[1].currency(ccy1);
+            Cashflow<adouble> cf2(endDate, notionalInFirstCcy);
+            cf2.currency(ccy2);
+
+            this->leg().addRedemption(cf1);
+            this->leg().addRedemption(cf2);
         }
 
         /**

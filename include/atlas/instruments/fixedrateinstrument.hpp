@@ -3,8 +3,8 @@
 
 #include <ql/interestrate.hpp>
 #include <atlas/cashflows/legs/fixedrateleg.hpp>
+#include <atlas/instruments/instrument.hpp>
 #include <atlas/instruments/mixins/onelegmixin.hpp>
-#include <atlas/instruments/singleleginstrument.hpp>
 
 namespace Atlas {
 
@@ -13,7 +13,7 @@ namespace Atlas {
      * @brief An class for fixed-rate-single-legged instruments.
      */
     template <typename adouble>
-    class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<FixedRateLeg<adouble>> {
+    class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FixedRateLeg<adouble>> {
        public:
         /**
          * @brief Construct a new Fixed Rate Instrument object
@@ -26,10 +26,10 @@ namespace Atlas {
          */
         FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, double notional = 0.0,
                             const FixedRateLeg<adouble>& leg = FixedRateLeg<adouble>())
-        : OneLegMixin<FixedRateLeg<adouble>>(leg), rate_(rate){
+        : OneLegMixin<adouble, FixedRateLeg<adouble>>(leg), rate_(rate) {
             this->startDate_ = startDate;
-            this->endDate_ = endDate;
-            this->notional_ = notional;
+            this->endDate_   = endDate;
+            this->notional_  = notional;
             for (auto& coupon : this->leg().coupons()) { coupon.rate(rate); }
         };
 
@@ -67,16 +67,6 @@ namespace Atlas {
         InterestRate<adouble> rate() const { return rate_; };
 
         /**
-         * @brief Sets the discount curve context of the instrument.
-         *
-         * @param context
-         */
-        inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& context) {
-            this->leg().discountCurveContext(context);
-            disbursement_.discountCurveContext(context);
-        };
-
-        /**
          * @brief accepts a visitor.
          *
          * @param visitor
@@ -89,20 +79,6 @@ namespace Atlas {
          * @param visitor
          */
         virtual void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
-
-        /**
-         * @brief Returns the disbursement of the instrument.
-         *
-         * @return Cashflow
-         */
-        inline Cashflow<adouble>& disbursement() { return disbursement_; };
-
-        /**
-         * @brief Sets the disbursement of the instrument.
-         *
-         * @param disbursement Cashflow to be set
-         */
-        inline void disbursement(const Cashflow<adouble>& disbursement) { disbursement_ = disbursement; }
 
        protected:
         /**
@@ -132,9 +108,7 @@ namespace Atlas {
             }
         };
 
-        // FixedRateLeg<adouble> leg_;
         InterestRate<adouble> rate_;
-        Cashflow<adouble> disbursement_;
     };
 }  // namespace Atlas
 

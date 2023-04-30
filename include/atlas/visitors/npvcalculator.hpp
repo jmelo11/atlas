@@ -4,6 +4,7 @@
 #include <atlas/data/marketdata.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/visitors/visitor.hpp>
 #include <iostream>
 
@@ -68,7 +69,14 @@ namespace Atlas {
          * @param inst
          */
         void visit(FxForward<adouble>& inst) override {
-            
+            const auto& cashflows = inst.leg().redemptions();
+            int side              = inst.side();
+
+            adouble fwd = marketData_.fxs.at(cashflows.at(0).fxIdx());
+            adouble df  = marketData_.dfs.at(cashflows.at(0).dfIdx());
+
+            adouble spot = marketData_.fxs.at(cashflows.at(1).fxIdx());
+            npv_ += (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
         };
 
        private:

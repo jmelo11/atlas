@@ -26,7 +26,7 @@ namespace Atlas {
                                      const Context<RateIndex<adouble>>& forecastCurveContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FloatingRateBulletInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
             this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement_.discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
 
         /**
@@ -47,14 +47,14 @@ namespace Atlas {
             for (const auto& endDate : schedule.dates()) {
                 if (firstDate != Date()) {
                     FloatingRateCoupon<adouble> coupon(firstDate, endDate, notional, spread, forecastCurveContext);
-                    this->leg_.addCoupon(coupon);
+                    this->leg().addCoupon(coupon);
                 }
                 firstDate = endDate;
             }
 
             Redemption<adouble> redemption(schedule.endDate(), notional);
-            this->leg_.addRedemption(redemption);
-            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+            this->leg().addRedemption(redemption);
+            this->disbursement(Cashflow<adouble>(startDate, -notional));
         };
     };
 }  // namespace Atlas

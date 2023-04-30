@@ -31,13 +31,13 @@ namespace Atlas {
             double outstanding = notional;
             for (size_t i = 0; i < dates.size() - 1; ++i) {
                 FloatingRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, spread, forecastCurveContext);
-                this->leg_.addCoupon(coupon);
+                this->leg().addCoupon(coupon);
                 Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg_.addRedemption(redemption);
+                this->leg().addRedemption(redemption);
                 outstanding -= redemptions.at(i);
             }
 
-            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+            this->disbursement(Cashflow<adouble>(startDate, -notional));
         };
         /**
          * @brief Construct a new Floating Rate Equal Redemption Instrument object
@@ -54,7 +54,7 @@ namespace Atlas {
                                               const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
             this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement_.discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
     };
 }  // namespace Atlas

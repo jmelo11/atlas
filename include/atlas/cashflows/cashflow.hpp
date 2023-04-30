@@ -116,6 +116,7 @@ namespace Atlas {
 
        private:
         void amount(adouble amount) { amount_ = amount; }
+        
         friend class Instrument<adouble>;
     };
 

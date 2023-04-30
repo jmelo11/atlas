@@ -21,9 +21,10 @@ Algunas características técnicas que se buscan incorporar en Atlas son:
 - [x] Paralelización CPU
 - [ ] Port a Python
 - [ ] Compresión de portafolio
+- [x] Transformación a moneda local
 - [ ] Precisión monedas
 - [ ] Paralelización GPU (depende de factibilidad)
-- [ ] Calendarios avanzados (incorporar parámetros QL)
+- [ ] Customización instrumentos (incorporar parámetros QL)
 
 ### Funcionalidades
 
@@ -43,7 +44,7 @@ Algunas características técnicas que se buscan incorporar en Atlas son:
         - [x] Loans tasa flotante (perfil de pagos custom)
         - [x] Loans tasa mixta
     - [ ] Derivados
-        - [ ] Forward
+        - [x] Forward
         - [ ] Swaps vanilla
         - [ ] Xccy
     - [ ] OIS

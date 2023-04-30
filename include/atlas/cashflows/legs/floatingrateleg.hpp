@@ -58,12 +58,12 @@ namespace Atlas {
             this->sortCashflows(coupons_);
         }
 
-        inline void discountCurveContext(const CurveContext<adouble>& discountCurveContext) {
+        inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& discountCurveContext) {
             this->setDiscountCurveContext(coupons_, discountCurveContext);
             this->setDiscountCurveContext(this->redemptions_, discountCurveContext);
         }
 
-        inline void forecastCurveContext(const CurveContext<adouble>& forecastCurveContext) {
+        inline void forecastCurveContext(const Context<RateIndex<adouble>>& forecastCurveContext) {
             for (auto& coupon : coupons_) { coupon.forecastCurveContext(forecastCurveContext); }
         }
 

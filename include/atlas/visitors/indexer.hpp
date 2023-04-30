@@ -5,6 +5,7 @@
 #include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/derivatives/vanillaswap.hpp>
 #include <atlas/visitors/visitor.hpp>
 #include <set>
 #include <unordered_map>
@@ -38,27 +39,36 @@ namespace Atlas {
             for (auto& redemption : redemptions) { indexCashflow(redemption); }
         };
 
-        void visit(FxForward<adouble>& inst) override{
+        void visit(FxForward<adouble>& inst) override {
             // npv = (strikePrice (823 CLP/USD) -fwdPrice (835 CLP/USD))*notional (100_000 USD) * dfLocal (CLP) * localCcy (CLP/CLP)-> OK
-            // npv = (strikePrice (1.1 USD/EUR) -fwdPrice (1.02 USD/EUR))*notional (100_000 EUR) *  dfLocal (CLP) * localCcy (CLP/USD) -> OK
-            // auto& strikeCashflow = inst.leg().redemptions()[0];
-            // auto& mktCashflow    = inst.leg().redemptions()[1];
-            // size_t ccy1          = strikeCashflow.currencyContextIdx();
-            // size_t ccy2          = mktCashflow.currencyContextIdx();
-            // MarketRequest::FxPrice fwdPrice(ccy1, ccy2, inst.endDate());
-            // MarketRequest::FxPrice spotPrice(ccy1, 0, Date());
-            // if (fxPricesMap_.find(fwdPrice) == fxPricesMap_.end()) {
-            //     fxPricesVector_.push_back(fwdPrice);
-            //     fxPricesMap_[fwdPrice] = fxPricesVector_.size() - 1;
-            // }
-            // if (fxPricesMap_.find(spotPrice) == fxPricesMap_.end()) {
-            //     fxPricesVector_.push_back(spotPrice);
-            //     fxPricesMap_[spotPrice] = fxPricesVector_.size() - 1;
-            // }
-            // strikeCashflow.fxIdx(fxPricesMap_[fwdPrice]);
-            // mktCashflow.fxIdx(fxPricesMap_[spotPrice]);
-            // indexCashflow(strikeCashflow);
+            auto& ccy1Cashflow = inst.leg().redemptions()[0];
+            auto& ccy2Cashlfow = inst.leg().redemptions()[1];
+            MarketRequest::ExchangeRate fwdPrice(ccy1Cashflow.currencyCode(), ccy2Cashlfow.currencyCode(), inst.endDate());
+            MarketRequest::ExchangeRate spotPrice(ccy1Cashflow.currencyCode(), 0, Date());
+            if (fxPricesMap_.find(fwdPrice) == fxPricesMap_.end()) {
+                fxPricesVector_.push_back(fwdPrice);
+                fxPricesMap_[fwdPrice] = fxPricesVector_.size() - 1;
+            }
+            if (fxPricesMap_.find(spotPrice) == fxPricesMap_.end()) {
+                fxPricesVector_.push_back(spotPrice);
+                fxPricesMap_[spotPrice] = fxPricesVector_.size() - 1;
+            }
+            ccy1Cashflow.fxIdx(fxPricesMap_[fwdPrice]);
+            ccy2Cashlfow.fxIdx(fxPricesMap_[spotPrice]);
+            indexCashflow(ccy1Cashflow);
         };
+
+        void visit(VanillaSwap<adouble>& inst) override {
+            auto& firstLeg  = inst.firstLeg();
+            auto& secondLeg = inst.secondLeg();
+
+            for (auto& coupon : firstLeg.coupons()) { indexCashflow(coupon); }
+            for (auto& redemption : firstLeg.redemptions()) { indexCashflow(redemption); }
+
+            for (auto& coupon : secondLeg.coupons()) { indexCashflow(coupon); }
+            for (auto& redemption : secondLeg.redemptions()) { indexCashflow(redemption); }
+            
+        }
 
         void setRequest(MarketRequest& request) {
             request.dfs    = dfsVector_;
@@ -105,7 +115,7 @@ namespace Atlas {
             }
             cashflow.dfIdx(dfsMap_[df]);
 
-            //fwd rate
+            // fwd rate
             if constexpr (std::is_same_v<Flow, FloatingRateCoupon<adouble>>) {
                 if (!cashflow.hasForecastContext()) { throw std::runtime_error("Cashflow does not have a forecast curve context."); }
                 size_t curveIdx = cashflow.forecastContextIdx();
@@ -117,7 +127,7 @@ namespace Atlas {
                 cashflow.fwdIdx(fwdsMap_[fwd]);
             }
 
-            //fx
+            // fx
             if (cashflow.applyCcy()) { indexExchangeRate(cashflow, true); }
         };
 

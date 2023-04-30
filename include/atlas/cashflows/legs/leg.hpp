@@ -19,7 +19,7 @@ namespace Atlas {
         /**
          * @brief Default constructor
          */
-        Leg(){};
+        Leg() = default;
 
         /**
          * @brief Constructor that initializes a Leg object with a vector of Redemption objects
@@ -83,7 +83,7 @@ namespace Atlas {
      * @class Leg2, testing template parameters
      * @brief Testing template parameters, represents a leg of a financial instrument, containing a vector of Redemption objects
      */
-    template <typename adouble, template <typename> class Flow>
+    template <typename adouble, class Flow>
     class Leg2 {
        public:
         /**
@@ -96,7 +96,7 @@ namespace Atlas {
          * @param redemptions The vector of Redemption objects
          * @param sort Flag indicating whether to sort the redemptions by payment date
          */
-        Leg2(std::vector<Flow<adouble>>& coupons, std::vector<Redemption<adouble>>& redemptions, bool sorting = false)
+        Leg2(std::vector<Flow>& coupons, std::vector<Redemption<adouble>>& redemptions, bool sorting = false)
         : coupons_(coupons), redemptions_(redemptions) {
             if (sorting) { sort(); }
         };
@@ -121,12 +121,12 @@ namespace Atlas {
         /**
          * @brief Returns a reference to the vector of coupons in the leg.
          */
-        inline std::vector<Flow<adouble>>& coupons() { return coupons_; }
+        inline std::vector<Flow>& coupons() { return coupons_; }
 
         /**
          * @brief Returns a const reference to the vector of coupons in the leg.
          */
-        inline const std::vector<Flow<adouble>>& coupons() const { return coupons_; }
+        inline const std::vector<Flow>& coupons() const { return coupons_; }
 
         /**
          * @brief Adds a coupon to the leg.
@@ -134,7 +134,7 @@ namespace Atlas {
          * @param coupon a reference to a FloatingRateCoupon object representing the coupon to be added.
          * @param sort boolean indicating whether the cashflows should be sorted by date.
          */
-        inline void addCoupon(Flow<adouble>& coupon, bool sort = false) {
+        inline void addCoupon(Flow& coupon, bool sort = false) {
             coupons_.push_back(coupon);
             if (sort) sortCashflows(coupons_);
         }
@@ -165,7 +165,7 @@ namespace Atlas {
          * @param forecastCurveContext
          * @return void
          */
-        std::enable_if_t<std::is_same_v<Flow<adouble>, FloatingRateCoupon<adouble>>, void> inline forecastCurveContext(
+        std::enable_if_t<std::is_same_v<Flow, FloatingRateCoupon<adouble>>, void> inline forecastCurveContext(
             const CurveContext<adouble>& forecastCurveContext) {
             for (auto& coupon : coupons_) { coupon.forecastCurveContext(forecastCurveContext); }
         }
@@ -188,16 +188,16 @@ namespace Atlas {
          * @param cashflows The vector of cashflows to be sorted
          */
 
-        void sortCashflows(std::vector<Flow<adouble>>& cashflows) {
-            auto f = [](const Flow<adouble>& lhs, const Flow<adouble>& rhs) { return lhs.paymentDate() < rhs.paymentDate(); };
+        void sortCashflows(std::vector<Flow>& cashflows) {
+            auto f = [](const Flow& lhs, const Flow& rhs) { return lhs.paymentDate() < rhs.paymentDate(); };
             std::sort(cashflows.begin(), cashflows.end(), f);
         }
 
-        void setDiscountCurveContext(std::vector<Flow<adouble>>& cashflows, const CurveContext<adouble>& context) {
+        void setDiscountCurveContext(std::vector<Flow>& cashflows, const CurveContext<adouble>& context) {
             for (auto& cashflow : cashflows) { cashflow.discountCurveContext(context); }
         }
 
-        std::vector<Flow<adouble>> coupons_;
+        std::vector<Flow> coupons_;
         std::vector<Redemption<adouble>> redemptions_;  // Vector of Redemption objects contained in the Leg object
     };
 }  // namespace Atlas

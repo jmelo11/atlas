@@ -37,9 +37,9 @@ struct TestSetup {
     adouble spread  = 0.0;
     adouble rate    = 0.03;
 
-    DayCounter dayCounter      = Actual365Fixed();
+    DayCounter dayCounter      = Actual360();
     Frequency frequency        = Frequency::Annual;
-    Compounding compounding    = Compounding::Compounded;
+    Compounding compounding    = Compounding::Simple;
     Frequency paymentFrequency = Frequency::Semiannual;
 
     QuantLib::InterestRate qlRate;
@@ -48,8 +48,9 @@ struct TestSetup {
     // curve parameters
     Date curveRefDate            = evalDate;
     adouble curveRate            = 0.05;
-    DayCounter curveDayCounter   = Actual365Fixed();
-    Compounding curveCompounding = Compounding::Compounded;
+    adouble usdCurveRate         = 0.03;
+    DayCounter curveDayCounter   = Actual360();
+    Compounding curveCompounding = Compounding::Simple;
     Frequency curveFrequency     = Frequency::Annual;
 
     // atlas curves & indexes
@@ -75,6 +76,17 @@ struct TestSetup {
         YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
         RateIndex<adouble> index(curveRefDate, curveFrequency, curveDayCounter);
         store.addCurve("TEST", curve, index);
+
+        FlatForwardStrategy<adouble> usdCurveStrategy(curveRefDate, usdCurveRate, curveDayCounter, curveCompounding, curveFrequency);
+        YieldTermStructure<adouble> usdCurve(std::make_unique<FlatForwardStrategy<adouble>>(usdCurveStrategy));
+        store.addCurve("CLP", curve, index);
+        store.addCurve("USD", usdCurve, index);
+
+        // for fx testing
+        adouble exchange = 800;
+        store.addExchangeRate(CLP(), USD(), exchange);
+        store.riskFreeCurveIdx(CLP(), "CLP");
+        store.riskFreeCurveIdx(USD(), "USD");
 
         // create ql curves
         boost::shared_ptr<QuantLib::YieldTermStructure> qlCurve;
@@ -120,7 +132,7 @@ struct TestSetup {
         pricer->setCapletVolatility(vol);
         QuantLib::setCouponPricer(qlFloatBond->cashflows(), pricer);
         qlFloatBond->setPricingEngine(bondEngine);
-        
+
         // create atlas instruments
         atlasFixBond = new FixedRateBulletInstrument<adouble>(startDate, endDate, paymentFrequency, notional, atlasRate, store.curveContext("TEST"));
         atlasFloatBond = new FloatingRateBulletInstrument<adouble>(startDate, endDate, notional, spread, store.rateIndexContext("TEST"),

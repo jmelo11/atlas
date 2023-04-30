@@ -12,7 +12,7 @@ namespace Atlas {
      * @brief An class for floating, single-legged, rate instruments.
      */
     template <typename adouble>
-    class FloatingRateInstrument : public Instrument<adouble> {
+    class FloatingRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FloatingRateLeg<adouble>> {
        public:
         /**
          * @brief Construct a new Floating Rate Instrument object
@@ -25,27 +25,13 @@ namespace Atlas {
          */
         FloatingRateInstrument(const Date& startDate, const Date& endDate, double notional = 0.0, adouble spread = 0.0,
                                const FloatingRateLeg<adouble>& leg = FloatingRateLeg<adouble>())
-        : leg_(leg), spread_(spread) {
+        : OneLegMixin<adouble, FloatingRateLeg<adouble>>(leg), spread_(spread) {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->notional_  = notional;
         };
 
         virtual ~FloatingRateInstrument(){};
-
-        /**
-         * @brief Returns the leg (const) of the instrument.
-         *
-         * @return const FloatingRateLeg&
-         */
-        inline const FloatingRateLeg<adouble>& leg() const { return leg_; };
-
-        /**
-         * @brief Returns the leg of the instrument.
-         *
-         * @return FloatingRateLeg&
-         */
-        inline FloatingRateLeg<adouble>& leg() { return leg_; };
 
         /**
          * @brief Returns the spread of the instrument.
@@ -61,25 +47,8 @@ namespace Atlas {
          */
         inline void spread(adouble s) {
             spread_ = s;
-            for (auto& coupon : leg_.coupons()) { coupon.spread(s); }
+            for (auto& coupon : this->leg().coupons()) { coupon.spread(s); }
         };
-
-        /**
-         * @brief Sets the discount curve context of the instrument.
-         *
-         * @param context
-         */
-        inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& context) {
-            leg_.discountCurveContext(context);
-            disbursement_.discountCurveContext(context);
-        }
-
-        /**
-         * @brief Sets the forecast curve context of the instrument.
-         *
-         * @param context
-         */
-        inline void forecastCurveContext(const Context<YieldTermStructure<adouble>>& context) { leg_.forecastCurveContext(context); }
 
         /**
          * @brief  Accepts a visitor.
@@ -95,23 +64,7 @@ namespace Atlas {
          */
         virtual void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
-        /**
-         * @brief Returns the disbursement of the instrument.
-         *
-         * @return Cashflow
-         */
-        inline Cashflow<adouble>& disbursement() { return disbursement_; };
-
-        /**
-         * @brief Sets the disbursement of the instrument.
-         *
-         * @param disbursement
-         */
-        inline void disbursement(const Cashflow<adouble>& disbursement) { disbursement_ = disbursement; }
-
        protected:
-        FloatingRateLeg<adouble> leg_;
-        Cashflow<adouble> disbursement_;
         adouble spread_;
     };
 }  // namespace Atlas

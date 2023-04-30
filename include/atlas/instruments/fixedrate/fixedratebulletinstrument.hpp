@@ -2,6 +2,7 @@
 #define D00AFD6C_AA3F_43AC_B12A_E9BC237A26AE
 
 #include <ql/interestrate.hpp>
+#include <atlas/cashflows/legs/makeleg.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 
 namespace Atlas {
@@ -23,21 +24,28 @@ namespace Atlas {
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, notional) {
-            Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+            // Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
-            Date firstDate = Date();
-            for (const auto& lastDate : schedule.dates()) {
-                if (firstDate != Date()) {
-                    FixedRateCoupon<adouble> coupon(firstDate, lastDate, notional, rate);
-                    this->leg().addCoupon(coupon);
-                }
-                firstDate = lastDate;
-            }
+            // Date firstDate = Date();
+            // for (const auto& lastDate : schedule.dates()) {
+            //     if (firstDate != Date()) {
+            //         FixedRateCoupon<adouble> coupon(firstDate, lastDate, notional, rate);
+            //         this->leg().addCoupon(coupon);
+            //     }
+            //     firstDate = lastDate;
+            // }
 
-            Redemption<adouble> redemption(schedule.endDate(), notional);
-            this->leg().addRedemption(redemption);
+            // Redemption<adouble> redemption(schedule.endDate(), notional);
+            // this->leg().addRedemption(redemption);
+            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
+                             .startDate(startDate)
+                             .endDate(endDate)
+                             .paymentFrequency(freq)
+                             .notional(notional)
+                             .rate(rate)
+                             .build();
 
-            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+            this->disbursement(Cashflow<adouble>(startDate, -notional));
         };
 
         /**
@@ -54,7 +62,7 @@ namespace Atlas {
                                   const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate) {
             this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement_.discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
     };
 }  // namespace Atlas

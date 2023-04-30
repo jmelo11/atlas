@@ -12,6 +12,8 @@ namespace Atlas {
     template <class FirstLeg, class SecondLeg>
     class TwoLegMixin {
        public:
+        TwoLegMixin() = default;
+
         TwoLegMixin(const FirstLeg& firstLeg, const SecondLeg& secondLeg) : firstLeg_(firstLeg), secondLeg_(secondLeg) {}
 
         const FirstLeg& firstLeg() const { return firstLeg_; }

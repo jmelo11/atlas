@@ -10,6 +10,7 @@
 #include <ql/termstructures/yield/discountcurve.hpp>
 #include <ql/time/businessdayconvention.hpp>
 #include <ql/time/calendar.hpp>
+#include <ql/time/calendars/all.hpp>
 #include <ql/time/date.hpp>
 #include <ql/time/daycounter.hpp>
 #include <ql/time/daycounters/actual360.hpp>
@@ -81,6 +82,31 @@ namespace Atlas {
     using COP      = QuantLib::COPCurrency;
     using ARS      = QuantLib::ARSCurrency;
 
+    // calendars
+    using NullCalendar = QuantLib::NullCalendar;
+    using UnitedStates = QuantLib::UnitedStates;
+    using UnitedKingdom = QuantLib::UnitedKingdom;
+    using TARGET = QuantLib::TARGET;
+    using Chile = QuantLib::Chile;
+    using Japan = QuantLib::Japan;
+    using Canada = QuantLib::Canada;
+    using Australia = QuantLib::Australia;
+    using NewZealand = QuantLib::NewZealand;
+    using Sweden = QuantLib::Sweden;
+    using Norway = QuantLib::Norway;
+    using Denmark = QuantLib::Denmark;
+    using HongKong = QuantLib::HongKong;
+    using Singapore = QuantLib::Singapore;
+    using SouthKorea = QuantLib::SouthKorea;
+    using Mexico = QuantLib::Mexico;
+    using Brazil = QuantLib::Brazil;
+    using Turkey = QuantLib::Turkey;
+    using Russia = QuantLib::Russia;
+    using India = QuantLib::India;
+    using China = QuantLib::China;
+    using Taiwan = QuantLib::Taiwan;
+    using Thailand = QuantLib::Thailand;
+    
 }  // namespace Atlas
 
 #endif /* AC3D1435_E543_466D_8A3E_A4DD7B9D5E8D */

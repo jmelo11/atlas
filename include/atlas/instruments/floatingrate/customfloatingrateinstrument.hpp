@@ -26,14 +26,14 @@ namespace Atlas {
             double outstanding = this->notional_;
             for (size_t i = 0; i < redemptions.size(); i++) {
                 Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg_.addRedemption(redemption);
+                this->leg().addRedemption(redemption);
 
                 FloatingRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, spread, forecastCurveContext);
-                this->leg_.addCoupon(coupon);
+                this->leg().addCoupon(coupon);
                 outstanding -= redemptions.at(i);
             }
 
-            this->disbursement_ = Cashflow<adouble>(dates.front(), -this->notional_);
+            this->disbursement(Cashflow<adouble>(dates.front(), -this->notional_));
         };
         ;
         /**

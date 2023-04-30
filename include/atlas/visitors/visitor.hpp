@@ -27,6 +27,9 @@ namespace Atlas {
     class FxForward;
 
     template <typename adouble>
+    class VanillaSwap;
+
+    template <typename adouble>
     class Visitor {
        public:
         virtual ~Visitor() = default;
@@ -36,6 +39,8 @@ namespace Atlas {
         virtual void visit(FixedRateInstrument<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
 
         virtual void visit(FxForward<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
+        virtual void visit(VanillaSwap<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
     template <typename adouble>
@@ -48,6 +53,8 @@ namespace Atlas {
         virtual void visit(const FixedRateInstrument<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
 
         virtual void visit(const FxForward<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
+        virtual void visit(const VanillaSwap<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
 }  // namespace Atlas

@@ -80,7 +80,6 @@ TEST(ParSolver, FloatingRateInstrument) {
 }
 
 TEST(ParSolver, FloatingRateInstrumentDual) {
-    // Create a fixed rate instrument
     TestSetup<dual> vars;
     auto& instrument = *vars.atlasFloatBond;
     auto& qlBond     = *vars.qlFloatBond;

@@ -28,7 +28,7 @@ namespace Atlas {
 
             this->leg().addCoupon(coupon);
             this->leg().addRedemption(redemption);
-            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+            this->disbursement(Cashflow<adouble>(startDate, -notional));
         };
 
         /**
@@ -44,7 +44,7 @@ namespace Atlas {
                              const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : ZeroCouponInstrument(startDate, endDate, notional, rate) {
             this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement_.discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
     };
 }  // namespace Atlas

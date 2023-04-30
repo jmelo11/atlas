@@ -23,21 +23,31 @@ namespace Atlas {
         FixedRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
                                            const InterestRate<adouble>& rate)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, notional) {
-            Schedule schedule       = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
-            std::vector<Date> dates = schedule.dates();
-            std::vector<double> redemptions(dates.size() - 1, notional / (dates.size() - 1));
+            Schedule schedule        = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+            std::vector<Date> dates  = schedule.dates();
+            adouble redemptionAmount = notional / (dates.size() - 1);
+            std::vector<adouble> redemptions(dates.size() - 1, redemptionAmount);
 
-            double outstanding = notional;
-            for (size_t i = 0; i < redemptions.size(); ++i) {
-                FixedRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, rate);
-                this->leg().addCoupon(coupon);
+            // double outstanding = notional;
+            // for (size_t i = 0; i < redemptions.size(); ++i) {
+            //     FixedRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, rate);
+            //     this->leg().addCoupon(coupon);
 
-                Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg().addRedemption(redemption);
-                outstanding -= redemptions.at(i);
-            }
+            //     Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
+            //     this->leg().addRedemption(redemption);
+            //     outstanding -= redemptions.at(i);
+            // }
 
-            this->disbursement_ = Cashflow<adouble>(startDate, -notional);
+            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
+                             .startDate(startDate)
+                             .endDate(endDate)
+                             .paymentFrequency(freq)
+                             .notional(notional)
+                             .rate(rate)
+                             .redemptions(redemptions)
+                             .build();
+                             
+            this->disbursement(Cashflow<adouble>(startDate, -notional));
         };
 
         /**
@@ -54,7 +64,7 @@ namespace Atlas {
                                            const InterestRate<adouble>& rate, const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : FixedRateEqualRedemptionInstrument(startDate, endDate, freq, notional, rate) {
             this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement_.discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
     };
 }  // namespace Atlas

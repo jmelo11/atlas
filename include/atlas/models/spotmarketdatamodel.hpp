@@ -120,7 +120,7 @@ namespace Atlas {
                     size_t ccy2RFC                               = marketStore_.riskFreeCurveIdx(ccy2);
                     const YieldTermStructure<adouble>& ccy1Curve = marketStore_.curveContext(ccy1RFC).object();
                     const YieldTermStructure<adouble>& ccy2Curve = marketStore_.curveContext(ccy2RFC).object();
-                    fx *= ccy1Curve.discount(date) / ccy2Curve.discount(date);
+                    fx *= ccy2Curve.discount(date) / ccy1Curve.discount(date);
                 }
                 md.fxs.push_back(fx);
             }

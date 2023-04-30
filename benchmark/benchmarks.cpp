@@ -11,7 +11,7 @@
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <algorithm>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/models/staticcurvemodel.hpp>
+#include <atlas/models/spotmarketdatamodel.hpp>
 #include <atlas/multithreading/threadpool.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
@@ -148,12 +148,17 @@ void bechmarkFloatingRateCoupons() {
     NumType spread    = 0.01;
     NumType rateValue = 0.03;
     // Atlas index and curve settings
-    MarketStore<NumType> mainStore_;
-    FlatForwardStrategy<NumType> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
-    YieldTermStructure<NumType> curve_(std::make_unique<FlatForwardStrategy<NumType>>(curveStrategy));
-    RateIndex index("TEST", Frequency::Annual, Actual360());
-    mainStore_.createCurveContext("TEST", curve_, index);
-    auto& context = mainStore_.curveContext("TEST");
+    DayCounter dayCounter   = Actual360();
+    Frequency frequency     = Frequency::Annual;
+    Compounding compounding = Compounding::Simple;
+
+    MarketStore<NumType> store_(startDate);
+    FlatForwardStrategy<NumType> strategy(startDate, rateValue, dayCounter, compounding, frequency);
+    YieldTermStructure<NumType> curve(std::make_unique<FlatForwardStrategy<NumType>>(strategy));
+    RateIndex<NumType> index(startDate, frequency);
+    store_.addCurve("TEST", curve, index);
+
+    auto& indexContext = store_.rateIndexContext("TEST");
 
     // QuantLib index
     QuantLib::Handle<QuantLib::YieldTermStructure> curveHandle(boost::make_shared<QuantLib::FlatForward>(startDate, 0.03, Actual360()));
@@ -174,7 +179,9 @@ void bechmarkFloatingRateCoupons() {
     // Slices of Atlas coupons
     std::vector<std::vector<FloatingRateCoupon<NumType>>> slices(numThreads);
     for (size_t i = 0; i < numThreads; ++i) {
-        for (size_t j = 0; j < sliceSize; ++j) { slices[i].push_back(FloatingRateCoupon<NumType>(startDate, endDate, notional, spread, context)); }
+        for (size_t j = 0; j < sliceSize; ++j) {
+            slices[i].push_back(FloatingRateCoupon<NumType>(startDate, endDate, notional, spread, indexContext));
+        }
     }
 
     // benchmark
@@ -288,11 +295,15 @@ void pricingBenchmark() {
         qlInterestRate = QuantLib::InterestRate(val(rateValue), QuantLib::Actual360(), Compounding::Simple, Frequency::Annual);
     }
     // market data
-    MarketStore<NumType> mainStore_;
-    FlatForwardStrategy<NumType> curveStrategy(startDate, rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
-    YieldTermStructure<NumType> curve_(std::make_unique<FlatForwardStrategy<NumType>>(curveStrategy));
-    RateIndex index("TEST", Frequency::Annual, Actual360());
-    mainStore_.createCurveContext("TEST", curve_, index);
+    DayCounter dayCounter   = Actual360();
+    Frequency frequency     = Frequency::Annual;
+    Compounding compounding = Compounding::Simple;
+    MarketStore<NumType> mainStore_(startDate);
+    FlatForwardStrategy<NumType> strategy(startDate, rateValue, dayCounter, compounding, frequency);
+    YieldTermStructure<NumType> curve_(std::make_unique<FlatForwardStrategy<NumType>>(strategy));
+    RateIndex<NumType> index(startDate, frequency);
+    mainStore_.addCurve("TEST", curve_, index);
+
     auto& context = mainStore_.curveContext("TEST");
 
     // slices of atlas instruments
@@ -316,16 +327,16 @@ void pricingBenchmark() {
         NumType npv = 0;
         for (auto& slice : slices) {
             auto task = [&]() {
-                MarketStore<NumType> store;
+                MarketStore<NumType> store(startDate);
                 store.cloneFromStore(mainStore_);
 
                 Indexer<NumType> indexer;
                 for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(indexer); }
 
                 MarketRequest request = indexer.request();
-                StaticCurveModel<NumType> model(request, store);
+                SpotMarketDataModel<NumType> model(request, store);
 
-                MarketData<NumType> marketData = model.simulate(startDate);
+                MarketData<NumType> marketData = model.marketData();
 
                 NPVCalculator<NumType> calculator(marketData);
                 for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(calculator); }
@@ -347,16 +358,16 @@ void pricingBenchmark() {
             auto task = [&]() {
                 // std::cout << pool->threadNum() << std::endl;
 
-                MarketStore<NumType> store;
+                MarketStore<NumType> store(startDate);
                 store.cloneFromStore(mainStore_);
 
                 Indexer<NumType> indexer;
                 for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(indexer); }
 
                 MarketRequest request = indexer.request();
-                StaticCurveModel<NumType> model(request, store);
+                SpotMarketDataModel<NumType> model(request, store);
 
-                MarketData<NumType> marketData = model.simulate(startDate);
+                MarketData<NumType> marketData = model.marketData();
 
                 NPVCalculator<NumType> calculator(marketData);
                 for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(calculator); }

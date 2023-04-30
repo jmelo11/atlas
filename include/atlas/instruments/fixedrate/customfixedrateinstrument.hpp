@@ -26,7 +26,7 @@ namespace Atlas {
             }
             this->notional_ = std::reduce(redemptions.begin(), redemptions.end());
             this->calculateNotionals(dates, rate);
-            this->disbursement_ = Cashflow<adouble>(dates.front(), -this->notional_);
+            this->disbursement(Cashflow<adouble>(dates.front(), -this->notional_));
         };
 
         /**
@@ -41,7 +41,7 @@ namespace Atlas {
                                   const Context<YieldTermStructure<adouble>>& discountCurveContext)
         : CustomFixedRateInstrument(dates, redemptions, rate) {
             this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement_.discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
     };
 }  // namespace Atlas

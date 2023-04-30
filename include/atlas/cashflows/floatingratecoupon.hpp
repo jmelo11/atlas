@@ -78,11 +78,12 @@ namespace Atlas {
          * Sets the forecast CurveContext of the coupon
          * @param forecastCurveContext The forecast CurveContext of the coupon
          */
-        void forecastCurveContext(const Context<YieldTermStructure<adouble>>& context) {
+        void forecastCurveContext(const Context<RateIndex<adouble>>& context) {
             forecastContextIdx_ = context.idx();
+            auto& index = context.object();
             if (!context.hasIndex())
                 throw std::runtime_error("FloatingRateCoupon::forecastCurveContext: The forecast CurveContext does not have an index");
-            rateDef_            = {context.index().dayCounter(), context.index().rateFrequency(), context.index().rateCompounding()};
+            rateDef_            = {index.dayCounter(), index.rateFrequency(), index.rateCompounding()};
             hasForecastContext_ = true;
         }
 
