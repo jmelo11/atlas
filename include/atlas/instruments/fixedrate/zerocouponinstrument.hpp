@@ -23,7 +23,7 @@ namespace Atlas {
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, notional) {
-            FixedRateCoupon<adouble> coupon(startDate, endDate, notional, rate);  // interest coupon
+            FixedRateCoupon<adouble> coupon(startDate, endDate, notional, this->rate_);  // interest coupon
             Redemption<adouble> redemption(endDate, notional);                    // notinal payment at the end
 
             this->leg().addCoupon(coupon);

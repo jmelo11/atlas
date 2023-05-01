@@ -30,7 +30,7 @@ else:
     include_dirs += [str(LIB_DIR / 'include')]
     library_dirs += [str(LIB_DIR / 'lib')]
 
-    libraries += ['QuantLib', 'Atlas']
+    libraries += ['QuantLib', 'Atlas','xad']
 
 extra_compile_args = ['-std=c++20']
 

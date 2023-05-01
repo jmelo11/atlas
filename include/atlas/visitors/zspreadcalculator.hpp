@@ -89,8 +89,7 @@ namespace Atlas {
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 NewtonRaphsonSolver solver_;
-                auto g = [&](adouble r) { return pow(f(r), 2); };
-                value_ = solver_.solve(g, guess_, accuracy_, maxIter_);
+                value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
             }
         };
 

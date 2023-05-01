@@ -30,7 +30,7 @@ namespace Atlas {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->notional_  = notional;
-            for (auto& coupon : this->leg().coupons()) { coupon.rate(rate); }
+            for (auto& coupon : this->leg().coupons()) { coupon.rate(rate_); }
         };
 
         /**

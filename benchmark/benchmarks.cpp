@@ -366,9 +366,7 @@ void pricingBenchmark() {
 
                 MarketRequest request = indexer.request();
                 SpotMarketDataModel<NumType> model(request, store);
-
                 MarketData<NumType> marketData = model.marketData();
-
                 NPVCalculator<NumType> calculator(marketData);
                 for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(calculator); }
                 npv += calculator.results();

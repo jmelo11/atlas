@@ -6,11 +6,20 @@
 #undef __ARM_NEON__
 #endif
 
-#include <autodiff/forward/dual.hpp>
-#include <autodiff/forward/dual/eigen.hpp>
+#include <XAD/XAD.hpp>
+// #include <autodiff/forward/dual.hpp>
+// #include <autodiff/forward/dual/eigen.hpp>
 
 namespace Atlas {
-    using dual = autodiff::dual;
+    // using dual = autodiff::dual;
+    using dual = xad::AD;
+    typedef xad::adj<double> mode;
+    typedef mode::tape_type tape_type;
+    //typedef mode::active_type AD;
+
+    inline double val(const dual& x) {
+        return x.value();
+    };
 
 }  // namespace Atlas
 

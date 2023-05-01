@@ -42,7 +42,7 @@ namespace Atlas {
                 adouble npv_ = f(rate.rate() + delta_);
                 results_     = (npv_ - npv) / npv / delta_;
             } else {
-                results_ = derivative(f, wrt(rateValue), at(rateValue)) / 100.0;
+                //results_ = derivative(f, wrt(rateValue), at(rateValue)) / 100.0;
             }
         };
 
@@ -64,7 +64,7 @@ namespace Atlas {
                 adouble npv_ = f(spread + delta_);
                 results_     = (npv_ - npv) / npv / delta_;
             } else {
-                results_ = derivative(f, wrt(spread), at(spread)) / 100.0;
+                //results_ = derivative(f, wrt(spread), at(spread)) / 100.0;
             }
         };
 

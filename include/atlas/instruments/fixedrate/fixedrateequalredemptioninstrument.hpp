@@ -43,7 +43,7 @@ namespace Atlas {
                              .endDate(endDate)
                              .paymentFrequency(freq)
                              .notional(notional)
-                             .rate(rate)
+                             .rate(this->rate_)
                              .redemptions(redemptions)
                              .build();
                              

@@ -42,7 +42,7 @@ namespace Atlas {
                              .endDate(endDate)
                              .paymentFrequency(freq)
                              .notional(notional)
-                             .rate(rate)
+                             .rate(this->rate_)
                              .build();
             adouble disbursement = -notional;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));

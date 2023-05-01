@@ -47,13 +47,15 @@ target_include_directories(
 
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-find_package(autodiff REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(XAD REQUIRED)
+#find_package(autodiff REQUIRED)
+#find_package(Eigen3 REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}  PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME}  PUBLIC Boost::boost)
-target_link_libraries(${PROJECT_NAME}  PUBLIC autodiff::autodiff)
-target_link_libraries(${PROJECT_NAME}  PUBLIC Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME}  PUBLIC XAD::xad)
+#target_link_libraries(${PROJECT_NAME}  PUBLIC autodiff::autodiff)
+#target_link_libraries(${PROJECT_NAME}  PUBLIC Eigen3::Eigen)
 #link_libraries(${PROJECT_NAME} "${CMAKE_INSTALL_PREFIX}/lib/libcppad_lib.dylib")
 
 #link cppad

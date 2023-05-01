@@ -1,6 +1,6 @@
 // fundation
+#include <atlas/atlasdefine.hpp>
 #include <atlas/fundation/context.hpp>
-
 // data
 #include <atlas/data/marketdata.hpp>
 
@@ -140,10 +140,20 @@ PYBIND11_MODULE(Atlas, m) {
     m.doc() = "Atlas";  // optional module docstring
 
     // autodiff
-    py::class_<dual>(m, "dual").def(py::init<double>());
     m.def("getValue", [](const dual& d) { return val(d); });
 
-    m.def("derivative", &autodiff::detail::derivative);
+    py::class_<dual>(m, "dual")
+        .def(py::init<double>())
+        .def("__float__", [](const dual& d) { return val(d); })
+        .def("setDerivative", py::overload_cast<double>(&dual::setDerivative))
+        .def("getDerivative", py::overload_cast<>(&dual::getDerivative, py::const_));
+
+    py::class_<tape_type>(m, "Tape")
+        .def(py::init())
+        .def("registerInput", py::overload_cast<dual&>(&tape_type::registerInput))
+        .def("registerOutput", py::overload_cast<dual&>(&tape_type::registerOutput))
+        .def("computeAdjoints", &tape_type::computeAdjoints)
+        .def("newRecording", &tape_type::newRecording);
 
     // QL Types
     // Date

@@ -32,10 +32,10 @@ namespace Atlas {
             this->dates_ = schedule.dates();
 
             // calculate redemptions for a equal payment structure
-            calculateRedemptions(this->dates_, rate, notional);
+            calculateRedemptions(this->dates_, this->rate_, notional);
 
             // calculate each corresponding notional
-            this->calculateNotionals(this->dates_, rate);
+            this->calculateNotionals(this->dates_, this->rate_);
             adouble disbursement = -notional;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
