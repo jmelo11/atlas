@@ -148,8 +148,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def("setDerivative", py::overload_cast<double>(&dual::setDerivative))
         .def("getDerivative", py::overload_cast<>(&dual::getDerivative, py::const_));
 
-    py::class_<tape_type>(m, "Tape")
-        .def(py::init())
+    py::class_<tape_type, std::shared_ptr<tape_type>>(m, "Tape")
+        .def(py::init<>())
         .def("registerInput", py::overload_cast<dual&>(&tape_type::registerInput))
         .def("registerOutput", py::overload_cast<dual&>(&tape_type::registerOutput))
         .def("computeAdjoints", &tape_type::computeAdjoints)

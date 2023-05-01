@@ -40,9 +40,12 @@ namespace Atlas {
         // };
 
         dual solve(std::function<dual(dual)> f, double x0 = 0.0, double tol = 1e-6, int max_iter = 100) {
-            tape_type* tape = tape_type::getActive();
-            if (tape == nullptr) { tape = new tape_type(); }
-
+            tape_type* tape  = tape_type::getActive();
+            bool destroyTape = false;
+            if (tape == nullptr) {
+                tape        = new tape_type();
+                destroyTape = true;
+            }
             dual x = x0;
             tape->registerInput(x);
             tape->newRecording();
@@ -64,6 +67,7 @@ namespace Atlas {
                 tape->newRecording();
                 y = f(x);
             }
+            if (destroyTape) { delete tape; }
             return val(x);
         };
     };
