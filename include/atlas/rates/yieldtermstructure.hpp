@@ -48,7 +48,7 @@ namespace Atlas {
 
         adouble discount(const Date& date) const { return strategy_->discount(date); };
 
-        adouble discount(adouble t) const { return strategy_->discount(t); };
+        adouble discount(double t) const { return strategy_->discount(t); };
 
         adouble forwardRate(const Date& startDate, const Date& endDate, const DayCounter& dayCounter = Actual360(),
                             Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual) const {

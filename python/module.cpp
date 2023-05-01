@@ -143,6 +143,8 @@ PYBIND11_MODULE(Atlas, m) {
     py::class_<dual>(m, "dual").def(py::init<double>());
     m.def("getValue", [](const dual& d) { return val(d); });
 
+    m.def("derivative", &autodiff::detail::derivative);
+
     // QL Types
     // Date
     py::class_<Date>(m, "Date")
@@ -275,7 +277,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("yearFraction", &Actual365Fixed::yearFraction);
 
     py::class_<Thirty360, DayCounter>(m, "Thirty360")
-        .def(py::init<Thirty360::Convention, const Date&>())
+        .def(py::init([]() { return Thirty360(Thirty360::BondBasis); }))
         .def("dayCount", &Thirty360::dayCount)
         .def("yearFraction", &Thirty360::yearFraction);
 
@@ -332,21 +334,39 @@ PYBIND11_MODULE(Atlas, m) {
         .def("riskFreeCurveIdx", py::overload_cast<const Currency&>(&MarketStore<dual>::riskFreeCurveIdx, py::const_),
              "Set the risk free curve index for a currency");
 
-    py::class_<YieldTermStructureStrategy<dual>>(m, "YieldTermStructureStrategy")
+    py::class_<YieldTermStructureStrategy<dual>, std::shared_ptr<YieldTermStructureStrategy<dual>>>(m, "YieldTermStructureStrategy")
         .def("discount", py::overload_cast<const Date&>(&YieldTermStructureStrategy<dual>::discount, py::const_))
         .def("discount", py::overload_cast<double>(&YieldTermStructureStrategy<dual>::discount, py::const_))
-        .def("forwardRate", &YieldTermStructureStrategy<dual>::forwardRate)
-        .def("clone", &YieldTermStructureStrategy<dual>::clone);
+        .def("forwardRate", &YieldTermStructureStrategy<dual>::forwardRate);
 
-    py::class_<DiscountStrategy<dual, LogLinearInterpolator<dual>>, YieldTermStructureStrategy<dual>>(m, "DiscountLogLinearStrategy")
+    py::class_<YieldTermStructure<dual>>(m, "YieldTermStructure")
+        .def(py::init([](std::shared_ptr<YieldTermStructureStrategy<dual>> strat) { return YieldTermStructure<dual>(strat->clone()); }))
+        .def("discount", py::overload_cast<const Date&>(&YieldTermStructure<dual>::discount, py::const_))
+        .def("discount", py::overload_cast<double>(&YieldTermStructure<dual>::discount, py::const_))
+        .def("forwardRate", &YieldTermStructure<dual>::forwardRate)
+        .def("refDate", &YieldTermStructure<dual>::refDate);
+
+    py::class_<DiscountStrategy<dual, LogLinearInterpolator<dual>>, YieldTermStructureStrategy<dual>,
+               std::shared_ptr<DiscountStrategy<dual, LogLinearInterpolator<dual>>>>(m, "DiscountLogLinearStrategy")
         .def(py::init<const std::vector<Date>&, const std::vector<dual>&, const DayCounter&>())
         .def(py::init<const DiscountStrategy<dual, LogLinearInterpolator<dual>>&>())
         .def("clone", &DiscountStrategy<dual, LogLinearInterpolator<dual>>::clone);
 
-    py::class_<FlatForwardStrategy<dual>, YieldTermStructureStrategy<dual>>(m, "FlatForwardStrategy")
+    py::class_<FlatForwardStrategy<dual>, YieldTermStructureStrategy<dual>, std::shared_ptr<FlatForwardStrategy<dual>>>(m, "FlatForwardStrategy")
         .def(py::init<const Date&, dual, const DayCounter&, Compounding, Frequency>())
         .def(py::init<const FlatForwardStrategy<dual>&>())
         .def("clone", &FlatForwardStrategy<dual>::clone);
+
+    // RateIndex
+    py::class_<RateIndex<dual>>(m, "RateIndex")
+        .def(py::init<const Date&, Frequency, DayCounter, Frequency, Compounding>())
+        .def("addFixing", &RateIndex<dual>::addFixing)
+        .def("getFixing", &RateIndex<dual>::getFixing);
+
+    // MarketData & MarketRequest
+    py::class_<MarketData<dual>>(m, "MarketData").def(py::init<>());
+
+    py::class_<MarketRequest>(m, "MarketRequest").def(py::init<>());
 
     // Cashflows
     py::class_<Cashflow<dual>>(m, "Cashflow")
@@ -508,7 +528,7 @@ PYBIND11_MODULE(Atlas, m) {
         .def("clear", &ParSolver<dual>::clear);
 
     py::class_<ZSpreadCalculator<dual>, ConstVisitor<dual>>(m, "ZSpreadCalculator")
-        .def(py::init<const MarketData<dual>&, dual, const DayCounter&, Compounding, Frequency, double>())
+        .def(py::init<const MarketData<dual>&, dual, const DayCounter&, Compounding, Frequency>())
         .def("results", &ZSpreadCalculator<dual>::results)
         .def("clear", &ZSpreadCalculator<dual>::clear);
 
@@ -526,5 +546,5 @@ PYBIND11_MODULE(Atlas, m) {
     // Models
     py::class_<Model<dual>, Aux::PyModel>(m, "Model").def("marketData", &Model<dual>::marketData);
 
-    py::class_<SpotMarketDataModel<dual>>(m, "SpotMarketDataModel").def(py::init<const MarketRequest&, const MarketStore<dual>&>());
+    py::class_<SpotMarketDataModel<dual>, Model<dual>>(m, "SpotMarketDataModel").def(py::init<const MarketRequest&, const MarketStore<dual>&>());
 }

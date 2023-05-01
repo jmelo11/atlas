@@ -32,6 +32,8 @@ namespace Atlas {
          */
         const T& object() const { return *obj_; }
 
+        Context(const Context<T>& other) : obj_(other.obj_->clone()), idx_(other.idx_) {}
+
        private:
         /**
          * @brief Construct a new Context object
