@@ -3,7 +3,7 @@
 #include "pricefixedinstrument.hpp"
 #include "pricefloatinginstrument.hpp"
 #include "senscalculation.hpp"
-
+#include "test.hpp"
 using namespace Atlas;
 
 // void rateSens() {
@@ -189,9 +189,13 @@ using namespace Atlas;
 // };
 
 int main() {
-    pricingFixedRateInstruments();
-    pricingFloatingRateInstruments();
-    currencyConversion();
+    // pricingFixedRateInstruments();
+    // pricingFloatingRateInstruments();
+    // currencyConversion();
+    // int n        = 1000000;
+    // double x     = 0.0;
+    // double x_adj = 0.0;
+    // repeated_sin_checkpointed(n, x, x_adj);
     sensCalculation();
     return 0;
 }

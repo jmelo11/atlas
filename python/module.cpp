@@ -390,7 +390,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def("discountCurveContext", &Cashflow<dual>::discountCurveContext)
         .def("hasDiscountContext", &Cashflow<dual>::hasDiscountContext)
         .def("discountContextIdx", &Cashflow<dual>::discountContextIdx)
-        .def("currency", &Cashflow<dual>::currency);
+        .def("currency", &Cashflow<dual>::currency)
+        .def("currencyCode", &Cashflow<dual>::currencyCode);
 
     py::class_<Coupon<dual>, Aux::PyCoupon, Cashflow<dual>>(m, "Coupon")
         .def(py::init<const Date&, const Date&, double>())
@@ -469,7 +470,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def("accept", py::overload_cast<Visitor<dual>&>(&FloatingRateInstrument<dual>::accept))
         .def("accept", py::overload_cast<ConstVisitor<dual>&>(&FloatingRateInstrument<dual>::accept, py::const_))
         .def("disbursement", py::overload_cast<>(&FloatingRateInstrument<dual>::disbursement))
-        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&FloatingRateInstrument<dual>::disbursement));
+        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&FloatingRateInstrument<dual>::disbursement))
+        .def("currency", &FloatingRateInstrument<dual>::currency);
 
     py::class_<FixedRateInstrument<dual>, Instrument<dual>>(m, "FixedRateInstrument")
         .def(py::init<const Date&, const Date&, const InterestRate<dual>&, double, const FixedRateLeg<dual>&>())
@@ -482,7 +484,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def("rate", py::overload_cast<dual>(&FixedRateInstrument<dual>::rate))
         .def("rate", py::overload_cast<const InterestRate<dual>&>(&FixedRateInstrument<dual>::rate))
         .def("disbursement", py::overload_cast<>(&FixedRateInstrument<dual>::disbursement))
-        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&FixedRateInstrument<dual>::disbursement));
+        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&FixedRateInstrument<dual>::disbursement))
+        .def("currency", &FixedRateInstrument<dual>::currency);
 
     // Fixed rate instruments
     exportFixedRateInstrument(FixedRateBulletInstrument);

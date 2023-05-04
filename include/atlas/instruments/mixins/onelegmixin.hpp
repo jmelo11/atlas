@@ -60,6 +60,17 @@ namespace Atlas {
          */
         inline void disbursement(const Cashflow<adouble>& disbursement) { disbursement_ = disbursement; }
 
+        /**
+         * @brief Sets the currency of the instrument.
+         *
+         * @param currency
+         */
+        inline void currency(const Currency& currency) {
+            for (auto& coupon : leg_.coupons()) coupon.currency(currency);
+            for (auto& redemption : leg_.redemptions()) redemption.currency(currency);
+            disbursement_.currency(currency);
+        }
+
        protected:
         Cashflow<adouble> disbursement_;
         FirstLeg leg_;

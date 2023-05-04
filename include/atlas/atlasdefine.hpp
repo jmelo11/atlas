@@ -13,9 +13,10 @@
 namespace Atlas {
     // using dual = autodiff::dual;
     using dual = xad::AD;
+    using fwdDual = xad::FReal<double>;
+
     typedef xad::adj<double> mode;
     typedef mode::tape_type tape_type;
-    //typedef mode::active_type AD;
 
     inline double val(const dual& x) {
         return x.value();
