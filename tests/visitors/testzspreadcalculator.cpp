@@ -48,7 +48,7 @@ TEST(ZSpreadSolver, FixedRateInstrumentDual) {
 
     SpotMarketDataModel<dual> model(request, vars.store);
     MarketData<dual> marketData = model.marketData();
-    ZSpreadCalculator<dual> calculator(marketData, 100.0, vars.dayCounter, vars.compounding, vars.frequency);
+    ZSpreadCalculator<dual> calculator(marketData, 100.0, vars.dayCounter, vars.compounding, vars.frequency, 0.0001, 1e-6, 1000);
     calculator.visit(instrument);
 
     double zspread = QuantLib::CashFlows::zSpread(qlBond.cashflows(), *vars.discountingTermStructure, 100, vars.dayCounter, vars.compounding,

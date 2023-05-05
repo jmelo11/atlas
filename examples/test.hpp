@@ -131,4 +131,43 @@ void repeated_sin_checkpointed(int n, double& x, double& x_adj) {
     x     = value(x_ad);       // set return value
 }
 
+void test() {
+    auto f = [](dual x) {
+        dual eq = x * x * x - 8;
+        return eq;
+    };
+
+    double x0 = 1.0;
+    double results = 0;
+    tape_type tape;
+
+    int it     = 100;
+    double tol = 1e-6;
+
+    for (int i = 0; i < it; ++i) {
+        dual x = x0;
+        tape.registerInput(x);
+        tape.newRecording();
+
+        dual y = f(x);
+        tape.registerOutput(y);
+        derivative(y) = 1.0;
+
+        if (std::isnan(val(x)) || std::isnan(val(y))) { throw std::runtime_error("NaN encountered"); }
+        if (std::abs(val(y)) < tol) { results = x0; }
+
+        tape.computeAdjoints();
+        double dfdx = derivative(x);
+        x0          = val(x) - val(y) / dfdx;
+
+        if (abs(dfdx) < tol) { throw std::runtime_error("Division by zero"); }
+
+        // y = f(x);
+
+        // derivative(y) = 1.0;
+    }
+
+    std::cout << "x = " << results << std::endl;
+}
+
 #endif /* A46DE159_0278_41AA_A838_F1EBE6D9422E */

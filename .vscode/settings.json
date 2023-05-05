@@ -117,6 +117,7 @@
         "version": "cpp",
         "__memory": "cpp",
         "*.ipp": "cpp",
-        "hash_map": "cpp"
+        "hash_map": "cpp",
+        "nnls": "cpp"
     }
 }

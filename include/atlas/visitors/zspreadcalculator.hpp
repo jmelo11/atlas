@@ -3,6 +3,7 @@
 
 #include <ql/math/solvers1d/brent.hpp>
 #include <atlas/atlasconfig.hpp>
+#include <atlas/others/brentsolver.hpp>
 #include <atlas/others/newtonraphsonsolver.hpp>
 #include <atlas/visitors/forwardrateforecaster.hpp>
 #include <type_traits>
@@ -30,7 +31,7 @@ namespace Atlas {
          * @param maxIter maximum iterations
          */
         ZSpreadCalculator(const MarketData<adouble>& marketData, adouble targetNPV, const DayCounter& dayCounter = Actual360(),
-                          Compounding comp = Compounding::Compounded, Frequency freq = Frequency::Semiannual, double guess = 0.0,
+                          Compounding comp = Compounding::Compounded, Frequency freq = Frequency::Semiannual, double guess = 0.01,
                           double accuracy = 1e-8, size_t maxIter = 100)
         : marketData_(marketData),
           targetNPV_(targetNPV),
@@ -67,9 +68,7 @@ namespace Atlas {
                     adouble r =
                         InterestRate<adouble>::impliedRate(1 / df, dayCounter_, comp_, freq_, marketData_.refDate, coupon.paymentDate()).rate();
                     r += z;
-
-                    InterestRate<adouble> rate(r, dayCounter_, comp_, freq_);
-                    npv += coupon.amount() * rate.discountFactor(marketData_.refDate, coupon.paymentDate());
+                    npv += coupon.amount() / fastCompoundFactor(r, dayCounter_, comp_, freq_, marketData_.refDate, coupon.paymentDate());
                 }
 
                 for (auto& redemption : leg.redemptions()) {
@@ -77,19 +76,17 @@ namespace Atlas {
                     adouble r =
                         InterestRate<adouble>::impliedRate(1 / df, dayCounter_, comp_, freq_, marketData_.refDate, redemption.paymentDate()).rate();
                     r += z;
-
-                    InterestRate<adouble> rate(r, dayCounter_, comp_, freq_);
-                    npv += redemption.amount() * rate.discountFactor(marketData_.refDate, redemption.paymentDate());
+                    npv += redemption.amount() / fastCompoundFactor(r, dayCounter_, comp_, freq_, marketData_.refDate, redemption.paymentDate());
                 }
-                return npv - targetNPV_;
+                return targetNPV_ - npv;
             };
 
+            QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
-                QuantLib::Brent solver_;
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
-                NewtonRaphsonSolver solver_;
-                value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
+                auto g = [&](double x) { return val(f(x)); };
+                value_ = solver_.solve(g, accuracy_, guess_, 0.0001);
             }
         };
 

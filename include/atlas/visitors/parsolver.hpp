@@ -66,12 +66,13 @@ namespace Atlas {
                 adouble results = npv + disbursement * startDf;
                 return results;
             };
+
+            QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
-                QuantLib::Brent solver_;
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
-                NewtonRaphsonSolver solver_;
-                value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
+                auto g = [&](double r) { return val(f(r)); };
+                value_ = solver_.solve(g, accuracy_, guess_, 0.0001);
             }
         };
 
@@ -87,17 +88,17 @@ namespace Atlas {
                 calc.clear();
                 evalInst.spread(s);
                 calc.visit(evalInst);
-                adouble npv = calc.results();
+                adouble npv    = calc.results();
                 adouble result = npv + disbursement * startDf;
                 return result;
             };
 
+            QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
-                QuantLib::Brent solver_;
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
-                NewtonRaphsonSolver solver_;
-                value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
+                auto g = [&](double s) { return val(f(s)); };
+                value_ = solver_.solve(g, accuracy_, guess_, 0.0001);
             }
         };
 
