@@ -1,4 +1,5 @@
 module.cpp
+pyproject.toml
 setup.py
 atlas_finance.egg-info/PKG-INFO
 atlas_finance.egg-info/SOURCES.txt

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.0)
-project(AtlasPython VERSION 2.0.0)
+project(AtlasPython VERSION 2.0.1)
 
 include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 17)
@@ -24,7 +24,20 @@ target_include_directories(${PROJECT_NAME}
     ${XAD_INCLUDE_DIRS}
     ${Atlas_INCLUDE_DIRS}
 )
- 
+
+string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
+if(build_type_upper STREQUAL "RELEASE")
+  get_target_property(XAD_LIB_LOCATION XAD::xad IMPORTED_LOCATION_RELEASE)
+elseif(build_type_upper STREQUAL "RELWITHDEBINFO")
+  get_target_property(XAD_LIB_LOCATION XAD::xad IMPORTED_LOCATION_RELWITHDEBINFO)
+elseif(build_type_upper STREQUAL "DEBUG")
+  get_target_property(XAD_LIB_LOCATION XAD::xad IMPORTED_LOCATION_DEBUG)
+elseif(build_type_upper STREQUAL "MINSIZEREL")
+  get_target_property(XAD_LIB_LOCATION XAD::xad IMPORTED_LOCATION_MINSIZEREL)
+endif()
+
+get_filename_component(XAD_LIB_NAME ${XAD_LIB_LOCATION} NAME_WE)
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
                ${CMAKE_CURRENT_SOURCE_DIR}/setup.py
                @ONLY)

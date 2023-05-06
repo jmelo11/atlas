@@ -10,7 +10,7 @@ LIB_DIR = Path("@CMAKE_INSTALL_PREFIX@")
 include_dirs = [str(LIB_DIR / 'include'), '@Boost_INCLUDE_DIR@']
 library_dirs = [str(LIB_DIR / 'lib')]
 
-libraries = ["QuantLib", "xad", "Atlas"]
+libraries = ["QuantLib", "Atlas", "@XAD_LIB_NAME@"]
 extra_compile_args = ['-std=c++17', '/std:c++17']
 
 ext_modules = [
