@@ -19,10 +19,10 @@ Algunas características técnicas que se buscan incorporar en Atlas son:
 - [x] Estructura básica de las clases (en desarrollo)
 - [x] Diferenciacion automatica
 - [x] Paralelización CPU
-- [ ] Port a Python
+- [x] Port a Python
 - [ ] Compresión de portafolio
 - [x] Transformación a moneda local
-- [ ] Precisión monedas
+- [x] Precisión monedas
 - [ ] Paralelización GPU (depende de factibilidad)
 - [ ] Customización instrumentos (incorporar parámetros QL)
 
@@ -65,18 +65,75 @@ Algunas características técnicas que se buscan incorporar en Atlas son:
 - [ ] LGM para generación de trayectorias de mercado
 
 
-## Como compilar el proyecto 
+### Requisitos previos
 
-Para poder compilar el proyecto es necesario tener una version de Boost y QuantLib descargadas y compiladas, ya que esta libreria se apalacan aun en algunas herramientas ya desarrolladas en estas dos librerias. El plan a futuro es ir remplazando por versiones internas consistentes con los objetivos del proyecto. Algunas cosas son:
+Antes de compilar el proyecto, es necesario instalar las siguientes bibliotecas:
 
-- Date
-- DayCounter, Calendar, Frequency
-- DiscountCurve, FlatForward
+- Boost: https://www.boost.org/
+- QuantLib: https://github.com/lballabio/quantlib
+- XAD: https://github.com/xcelerit/xad/
 
-Tambien, es necesario contar con CMAKE. A continuacion se presenta un script de ejemplo para poder compilar:
- 
-```
-    mkdir build && cd build
-    cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<your/quantlib/install/path>' -DBoost_INCLUDE_DIR='<your/boost/path>'
-    cmake --build . --target INSTALL --config Release
-```
+El objetivo futuro es reemplazar estas dependencias por versiones internas del proyecto.
+
+#### Estructura de directorios recomendada
+
+Para facilitar el proceso de compilación, se sugiere organizar los directorios de la siguiente manera:
+
+- builds
+    - release
+    - debug
+- libs
+    - QuantLib
+    - XAD
+    - boost
+
+#### Compilación de QuantLib con CMake
+
+1. Dentro del directorio libs/QuantLib, cree una carpeta llamada build.
+2. Abra una terminal y navegue hasta la carpeta build recién creada.
+3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
+
+´´´
+cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+cmake --build . --target INSTALL --config <config>
+´´´
+
+Donde <config> puede ser Debug o Release, dependiendo de la configuración que desee compilar.
+
+#### Compilación de XAD con CMake
+
+1. Dentro del directorio libs/XAD, cree una carpeta llamada build.
+2. Abra una terminal y navegue hasta la carpeta build recién creada.
+3. Ejecute los siguientes comandos, teniendo en cuenta las siguientes opciones:
+
+- XAD_STATIC_MSVC_RUNTIME: Cambia la biblioteca de tiempo de ejecución en Windows. Si está utilizando Windows y QuantLib tiene el runtime estático, configure esta opción en ON.
+- XAD_SIMD_OPTION: Ajusta la configuración para usar instrucciones de vectorización avanzadas en procesadores Intel. Modifíquelo según las necesidades del usuario.
+
+´´´
+cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DXAD_STATIC_MSVC_RUNTIME=ON
+cmake --build . --target INSTALL --config <config>
+Donde <config> puede ser Debug o Release.
+´´´
+
+#### Instalación de Boost
+Boost incluye un instalador. Siga las instrucciones en https://www.boost.org/doc/libs/1_82_0/more/getting_started/windows.html para instalarlo en su sistema.
+
+#### Compilación de Atlas
+1. Dentro del directorio del proyecto Atlas, cree una carpeta llamada build.
+2. Abra una terminal y navegue hasta la carpeta build recién creada.
+3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
+
+´´´
+cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+cmake --build . --target INSTALL --config <config>
+´´´
+
+#### Instalación modulo Python.
+
+En el caso de querer instalar el paquete desde este repositorio, una vez instaladas las librerias, debe:
+1. Ir con la terminal a la carpeta <python>
+2. Ejectura el comando ´´´pip install .´´´
+
+Tambien es posible instalar el paquete estandar a travez de PYPI:
+´´´pip instal atlas-finance´´´
+

@@ -1,0 +1,7 @@
+module.cpp
+setup.py
+atlas_finance.egg-info/PKG-INFO
+atlas_finance.egg-info/SOURCES.txt
+atlas_finance.egg-info/dependency_links.txt
+atlas_finance.egg-info/not-zip-safe
+atlas_finance.egg-info/top_level.txt

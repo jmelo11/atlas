@@ -1,7 +1,7 @@
 #ifndef A4801BB0_4300_4C89_9784_55E269E00A56
 #define A4801BB0_4300_4C89_9784_55E269E00A56
 
-#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 
 namespace Atlas {
     /**
@@ -46,7 +46,7 @@ namespace Atlas {
                              .rate(this->rate_)
                              .redemptions(redemptions)
                              .build();
-                             
+
             adouble disbursement = -notional;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };

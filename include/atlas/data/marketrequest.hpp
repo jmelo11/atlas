@@ -4,6 +4,11 @@
 #include <atlas/atlasconfig.hpp>
 
 namespace Atlas {
+
+    /**
+     * @brief A struct representing a market request.
+     * 
+     */
     struct MarketRequest {
         /**
          * @brief A struct representing a rate request.

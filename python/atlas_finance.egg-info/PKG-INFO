@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: atlas-finance
+Version: 2.0.0
+Summary: Pricing library for Python
+Author: Jose Melo
+Author-email: jmelo@live.cl
+Requires-Python: >=3.7

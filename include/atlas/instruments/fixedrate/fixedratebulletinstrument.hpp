@@ -3,7 +3,7 @@
 
 #include <ql/interestrate.hpp>
 #include <atlas/cashflows/legs/makeleg.hpp>
-#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 
 namespace Atlas {
     /**

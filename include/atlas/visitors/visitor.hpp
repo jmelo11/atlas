@@ -11,9 +11,10 @@
 #include <atlas/cashflows/legs/fixedrateleg.hpp>
 #include <atlas/cashflows/legs/floatingrateleg.hpp>
 #include <iostream>
+#include <mutex>
 #include <type_traits>
 
-#define ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED std::cerr << "Warning: Visitor not implemented for " << __PRETTY_FUNCTION__ << std::endl;
+#define ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED std::cerr << "Warning: Visitor not implemented for " << __FUNCTION__ << std::endl;
 
 namespace Atlas {
 

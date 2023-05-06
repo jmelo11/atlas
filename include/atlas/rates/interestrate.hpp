@@ -50,36 +50,20 @@ namespace Atlas {
                 case Compounding::Simple:
                     return 1.0 + r_ * t;
                 case Compounding::Compounded:
-                    if constexpr (std::is_same_v<adouble, double>) {
-                        return std::pow(1.0 + r_ / freq_, freq_ * t);
-                    } else {
-                        return pow(1.0 + r_ / freq_, freq_ * t);
-                    }
+                    return pow(1.0 + r_ / freq_, freq_ * t);
                 case Compounding::Continuous:
-                    if constexpr (std::is_same_v<adouble, double>) {
-                        return std::exp(r_ * t);
-                    } else {
-                        return exp(r_ * t);
-                    }
+                    return exp(r_ * t);
                 case Compounding::SimpleThenCompounded:
                     if (t <= 1.0 / freq_) {
                         return 1.0 + r_ * t;
                     } else {
-                        if constexpr (std::is_same_v<adouble, double>) {
-                            return std::pow(1.0 + r_ / freq_, freq_ * t);
-                        } else {
-                            return pow(1.0 + r_ / freq_, freq_ * t);
-                        }
+                        return pow(1.0 + r_ / freq_, freq_ * t);
                     }
                 case Compounding::CompoundedThenSimple:
                     if (t > 1.0 / freq_) {
                         return 1.0 + r_ * t;
                     } else {
-                        if constexpr (std::is_same_v<adouble, double>) {
-                            return std::pow(1.0 + r_ / freq_, freq_ * t);
-                        } else {
-                            return pow(1.0 + r_ / freq_, freq_ * t);
-                        }
+                        return pow(1.0 + r_ / freq_, freq_ * t);
                     }
                 default:
                     QL_FAIL("unknown compounding convention");
@@ -147,14 +131,6 @@ namespace Atlas {
         double freq_;
     };
 
-    /**
-     * @brief operator<<
-     *
-     * @return std::ostream&
-     */
-    template <typename adouble>
-    std::ostream& operator<<(std::ostream&, const InterestRate<adouble>&);
-
     template <typename adouble>
     inline adouble fastCompoundFactor(adouble r, const QuantLib::DayCounter& dc, QuantLib::Compounding comp, QuantLib::Frequency freq_,
                                       const QuantLib::Date& d1, const QuantLib::Date& d2) {
@@ -164,36 +140,22 @@ namespace Atlas {
             case QuantLib::Compounding::Simple:
                 return 1.0 + r * t;
             case QuantLib::Compounding::Compounded:
-                if constexpr (std::is_same_v<adouble, double>) {
-                    return std::pow(1.0 + r / freq, freq * t);
-                } else {
-                    return pow(1.0 + r / freq, freq * t);
-                }
+                return pow(1.0 + r / freq, freq * t);
+
             case QuantLib::Compounding::Continuous:
-                if constexpr (std::is_same_v<adouble, double>) {
-                    return std::exp(r * t);
-                } else {
-                    return exp(r * t);
-                }
+                return exp(r * t);
+
             case QuantLib::Compounding::SimpleThenCompounded:
                 if (t <= 1.0 / freq) {
                     return 1.0 + r * t;
                 } else {
-                    if constexpr (std::is_same_v<adouble, double>) {
-                        return std::pow(1.0 + r / freq, freq * t);
-                    } else {
-                        return pow(1.0 + r / freq, freq * t);
-                    }
+                    return pow(1.0 + r / freq, freq * t);
                 }
             case QuantLib::Compounding::CompoundedThenSimple:
                 if (t > 1.0 / freq) {
                     return 1.0 + r * t;
                 } else {
-                    if constexpr (std::is_same_v<adouble, double>) {
-                        return std::pow(1.0 + r / freq, freq * t);
-                    } else {
-                        return pow(1.0 + r / freq, freq * t);
-                    }
+                    return pow(1.0 + r / freq, freq * t);
                 }
             default:
                 QL_FAIL("unknown compounding convention");

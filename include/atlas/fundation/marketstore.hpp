@@ -8,6 +8,11 @@
 #include <atlas/rates/yieldtermstructure.hpp>
 namespace Atlas {
 
+    /**
+     * @brief A class representing a set of market information and market-related objects like curves, currencies and so on.
+     * 
+     * @tparam adouble 
+     */
     template <typename adouble>
     class MarketStore {
        public:

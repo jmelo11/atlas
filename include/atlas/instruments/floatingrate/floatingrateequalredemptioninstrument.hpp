@@ -1,7 +1,7 @@
 #ifndef F4126FFB_083C_4F17_8D47_AFE69F5C4B5A
 #define F4126FFB_083C_4F17_8D47_AFE69F5C4B5A
 
-#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 
 namespace Atlas {
     /**

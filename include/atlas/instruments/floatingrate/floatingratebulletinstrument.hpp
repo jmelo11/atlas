@@ -1,7 +1,7 @@
 #ifndef BF2714F9_8C95_4D44_B693_CA617F9C3A64
 #define BF2714F9_8C95_4D44_B693_CA617F9C3A64
 
-#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 
 namespace Atlas {
 

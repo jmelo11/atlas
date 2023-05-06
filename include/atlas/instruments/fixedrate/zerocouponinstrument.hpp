@@ -2,7 +2,7 @@
 #define B50701D3_345F_46BA_A774_CC39E13E6595
 
 #include <ql/interestrate.hpp>
-#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 
 namespace Atlas {
 

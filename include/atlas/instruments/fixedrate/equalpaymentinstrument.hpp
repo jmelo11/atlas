@@ -2,7 +2,7 @@
 #define AC01F282_C361_4B38_B915_0868E05A75BC
 
 #include <ql/interestrate.hpp>
-#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 #include <type_traits>
 
 namespace Atlas {
