@@ -93,10 +93,10 @@ Para facilitar el proceso de compilación, se sugiere organizar los directorios 
 2. Abra una terminal y navegue hasta la carpeta build recién creada.
 3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
 
-´´´
+```
 cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
 cmake --build . --target INSTALL --config <config>
-´´´
+```
 
 Donde <config> puede ser Debug o Release, dependiendo de la configuración que desee compilar.
 
@@ -109,11 +109,11 @@ Donde <config> puede ser Debug o Release, dependiendo de la configuración que d
 - XAD_STATIC_MSVC_RUNTIME: Cambia la biblioteca de tiempo de ejecución en Windows. Si está utilizando Windows y QuantLib tiene el runtime estático, configure esta opción en ON.
 - XAD_SIMD_OPTION: Ajusta la configuración para usar instrucciones de vectorización avanzadas en procesadores Intel. Modifíquelo según las necesidades del usuario.
 
-´´´
+```
 cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DXAD_STATIC_MSVC_RUNTIME=ON
 cmake --build . --target INSTALL --config <config>
 Donde <config> puede ser Debug o Release.
-´´´
+```
 
 #### Instalación de Boost
 Boost incluye un instalador. Siga las instrucciones en https://www.boost.org/doc/libs/1_82_0/more/getting_started/windows.html para instalarlo en su sistema.
@@ -123,17 +123,17 @@ Boost incluye un instalador. Siga las instrucciones en https://www.boost.org/doc
 2. Abra una terminal y navegue hasta la carpeta build recién creada.
 3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
 
-´´´
+```
 cmake .. -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
 cmake --build . --target INSTALL --config <config>
-´´´
+```
 
 #### Instalación modulo Python.
 
 En el caso de querer instalar el paquete desde este repositorio, una vez instaladas las librerias, debe:
 1. Ir con la terminal a la carpeta <python>
-2. Ejectura el comando ´´´pip install .´´´
+2. Ejectura el comando ```pip install .```
 
 Tambien es posible instalar el paquete estandar a travez de PYPI:
-´´´pip instal atlas-finance´´´
+```pip instal atlas-finance```
 
