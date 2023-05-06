@@ -30,6 +30,11 @@ namespace Atlas {
     template <typename adouble>
     class VanillaSwap;
 
+    /**
+     * @brief Visitor class
+     * 
+     * @tparam adouble 
+     */
     template <typename adouble>
     class Visitor {
        public:
@@ -44,6 +49,11 @@ namespace Atlas {
         virtual void visit(VanillaSwap<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
     };
 
+    /**
+     * @brief ConstVisitor class
+     * 
+     * @tparam adouble 
+     */
     template <typename adouble>
     class ConstVisitor {
        public:

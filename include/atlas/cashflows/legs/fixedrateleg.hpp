@@ -6,8 +6,10 @@
 
 namespace Atlas {
 
-    /***
-     * Fixed rate leg class
+    /**
+     * @brief Fixed rate leg class
+     * 
+     * @tparam adouble 
      */
     template <typename adouble>
     class FixedRateLeg : public Leg<adouble> {

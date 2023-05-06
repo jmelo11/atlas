@@ -6,6 +6,12 @@
 
 namespace Atlas {
 
+    /**
+     * @brief MakeLeg class, used to build legs
+     * 
+     * @tparam adouble 
+     * @tparam LegType 
+     */
     template <typename adouble, class LegType>
     class MakeLeg {
        public:

@@ -91,7 +91,7 @@ namespace Atlas {
          */
         inline DayCounter dayCounter() const override { return rateDef_.dayCounter; };
 
-        /***
+        /**
          * Gets the accrued period of the coupon
          * @param start The start date of the coupon
          * @param end The end date of the coupon

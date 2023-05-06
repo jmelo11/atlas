@@ -6,9 +6,8 @@
 
 namespace Atlas {
 
-    /***
-     *@brief Fixed rate coupon class
-     *
+    /**
+     * @brief Fixed rate coupon class
      * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>

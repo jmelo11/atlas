@@ -2,9 +2,7 @@
 #define FB3CE86C_B207_47DE_B110_DA337769FAF4
 
 #include <atlas/atlasconfig.hpp>
-// #include <atlas/fundation/currencycontext.hpp>
 #include <atlas/fundation/indexable.hpp>
-// #include <atlas/rates/curvecontext.hpp>
 #include <atlas/fundation/context.hpp>
 
 namespace Atlas {
@@ -18,7 +16,6 @@ namespace Atlas {
     class Instrument;
     /**
      * @brief A class representing a cashflow
-     *
      * @tparam adouble The type of the cashflow amount
      */
     template <typename adouble>
@@ -116,7 +113,7 @@ namespace Atlas {
 
        private:
         void amount(adouble amount) { amount_ = amount; }
-        
+
         friend class Instrument<adouble>;
     };
 
