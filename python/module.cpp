@@ -10,7 +10,7 @@
 // curves
 #include <atlas/rates/yieldtermstructure/discountcurve.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
-#include <atlas/rates/yieldtermstructure/yieldtermstructure.hpp>
+#include <atlas/rates/yieldtermstructure.hpp>
 #include <atlas/rates/yieldtermstructure/zeroratecurve.hpp>
 
 // othres

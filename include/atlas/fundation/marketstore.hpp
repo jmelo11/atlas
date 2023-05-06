@@ -6,6 +6,7 @@
 #include <atlas/fundation/exchangeratemanager.hpp>
 #include <atlas/rates/rateindex.hpp>
 #include <atlas/rates/yieldtermstructure.hpp>
+
 namespace Atlas {
 
     /**

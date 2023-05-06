@@ -13,13 +13,13 @@ TEST(Coupons, FixedRateCoupon) {
     EXPECT_EQ(vars.endDate, coupon.paymentDate());
 
     double yf = vars.atlasRate.dayCounter().yearFraction(vars.startDate, vars.endDate);
-    EXPECT_FLOAT_EQ(yf * vars.atlasRate.rate() * vars.notional, coupon.accruedAmount(vars.startDate, vars.endDate));
-    EXPECT_FLOAT_EQ(yf * vars.atlasRate.rate() * vars.notional, coupon.amount());
+    EXPECT_NEAR(yf * vars.atlasRate.rate() * vars.notional, coupon.accruedAmount(vars.startDate, vars.endDate), 1e-6);
+    EXPECT_NEAR(yf * vars.atlasRate.rate() * vars.notional, coupon.amount(), 1e-6);
 
     coupon.rate(vars.atlasRate);
 
-    EXPECT_FLOAT_EQ(yf * vars.atlasRate.rate() * vars.notional, coupon.amount());
-    EXPECT_FLOAT_EQ(yf * vars.atlasRate.rate() * vars.notional, coupon.accruedAmount(vars.startDate, vars.endDate));
+    EXPECT_NEAR(yf * vars.atlasRate.rate() * vars.notional, coupon.amount(), 1e-6);
+    EXPECT_NEAR(yf * vars.atlasRate.rate() * vars.notional, coupon.accruedAmount(vars.startDate, vars.endDate), 1e-6);
 }
 
 TEST(Coupons, FloatingRateCoupon) {
@@ -29,7 +29,7 @@ TEST(Coupons, FloatingRateCoupon) {
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
     EXPECT_EQ(vars.endDate, coupon.paymentDate());
-    EXPECT_FLOAT_EQ(vars.spread, coupon.spread());
+    EXPECT_NEAR(vars.spread, coupon.spread(), 1e-6);
 }
 
 TEST(Coupons, FixedRateCouponDual) {
@@ -41,13 +41,13 @@ TEST(Coupons, FixedRateCouponDual) {
     EXPECT_EQ(vars.endDate, coupon.paymentDate());
 
     double yf = vars.atlasRate.dayCounter().yearFraction(vars.startDate, vars.endDate);
-    EXPECT_FLOAT_EQ(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.accruedAmount(vars.startDate, vars.endDate)));
-    EXPECT_FLOAT_EQ(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.amount()));
+    EXPECT_NEAR(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.accruedAmount(vars.startDate, vars.endDate)), 1e-6);
+    EXPECT_NEAR(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.amount()), 1e-6);
 
     coupon.rate(vars.atlasRate);
 
-    EXPECT_FLOAT_EQ(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.amount()));
-    EXPECT_FLOAT_EQ(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.accruedAmount(vars.startDate, vars.endDate)));
+    EXPECT_NEAR(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.amount()), 1e-6);
+    EXPECT_NEAR(yf * val(vars.atlasRate.rate()) * vars.notional, val(coupon.accruedAmount(vars.startDate, vars.endDate)), 1e-6);
 }
 
 TEST(Coupons, FloatingRateCouponDual) {
@@ -57,5 +57,5 @@ TEST(Coupons, FloatingRateCouponDual) {
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
     EXPECT_EQ(vars.endDate, coupon.paymentDate());
-    EXPECT_FLOAT_EQ(val(vars.spread), val(coupon.spread()));
+    EXPECT_NEAR(val(vars.spread), val(coupon.spread()), 1e-6);
 }

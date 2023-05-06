@@ -3,7 +3,6 @@
 
 #include <ql/math/solvers1d/brent.hpp>
 #include <atlas/atlasconfig.hpp>
-#include <atlas/others/brentsolver.hpp>
 #include <atlas/others/newtonraphsonsolver.hpp>
 #include <atlas/visitors/forwardrateforecaster.hpp>
 #include <type_traits>

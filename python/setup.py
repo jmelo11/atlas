@@ -6,17 +6,12 @@ from sys import platform
 
 __version__ = "2.0.0"
 
-LIB_DIR = Path("/Users/josemelo/desktop/dev/builds")
-include_dirs = [str(LIB_DIR / 'include'), '/opt/homebrew/include']
+LIB_DIR = Path("C:/Users/jmelo/Desktop/Desarrollo/c++/builds/release")
+include_dirs = [str(LIB_DIR / 'include'), 'C:/Users/jmelo/Desktop/Desarrollo/c++/builds/release/boost']
 library_dirs = [str(LIB_DIR / 'lib')]
 
-if platform == "win32":
-    libraries = ["QuantLib-x64-md", "xad", "Atlas"]
-    extra_compile_args = ['-std=c++20']
-
-else:
-    libraries = ["QuantLib", "xad", "Atlas"]
-    extra_compile_args = ['-std=c++20']
+libraries = ["QuantLib", "xad", "Atlas"]
+extra_compile_args = ['-std=c++17', '/std:c++17']
 
 ext_modules = [
     Pybind11Extension("Atlas",

@@ -183,7 +183,7 @@ namespace Atlas {
                 try {
                     exchange(weak, strong);
                     return true;
-                } catch (std::runtime_error& e) { return false; }
+                } catch (std::runtime_error&) { return false; }
                 return false;
             }
             return true;

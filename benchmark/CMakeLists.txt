@@ -22,8 +22,9 @@ find_package(XAD REQUIRED)
 # parent folder
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
                                                   "${CMAKE_SOURCE_DIR}/src")
-target_link_libraries(${PROJECT_NAME}
-                      PUBLIC "${CMAKE_SOURCE_DIR}/build/libatlas.dylib")
+
+link_directories("${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}")
+target_link_libraries(${PROJECT_NAME} PUBLIC Atlas)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
