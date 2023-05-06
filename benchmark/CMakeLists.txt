@@ -5,14 +5,11 @@ project(
   VERSION 1.0.0
   LANGUAGES CXX)
 
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(GNUInstallDirs)
-
 file(GLOB SOURCES "*.cpp")
-
 file(GLOB INCLUDES "*.hpp")
 
 add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES})
@@ -20,12 +17,9 @@ add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES})
 find_package(nanobench REQUIRED)
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-find_package(autodiff REQUIRED)
-find_package(Eigen3 REQUIRED)
 find_package(XAD REQUIRED)
 
 # parent folder
-message(STATUS "Using this folder for test building: ${CMAKE_SOURCE_DIR}")
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
                                                   "${CMAKE_SOURCE_DIR}/src")
 target_link_libraries(${PROJECT_NAME}
@@ -34,6 +28,4 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 target_link_libraries(${PROJECT_NAME} PUBLIC nanobench::nanobench)
-target_link_libraries(${PROJECT_NAME} PUBLIC autodiff::autodiff)
-target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
-target_link_libraries(${PROJECT_NAME}  PUBLIC XAD::xad)
+target_link_libraries(${PROJECT_NAME} PUBLIC XAD::xad)
