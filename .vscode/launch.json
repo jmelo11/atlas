@@ -6,11 +6,10 @@
             "request": "launch",
             "args": [],
             "program": "${command:cmake.launchTargetPath}",
-            "stopAtEntry": false,
             "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb"
+            "osx": {
+                "MIMode": "lldb"
+            }
         },
         {
             "name": "(lldb) Python Debug",

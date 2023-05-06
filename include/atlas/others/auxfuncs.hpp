@@ -7,19 +7,11 @@
 #ifndef A1E6F5B0_6F4A_4460_9F42_A14B525D8447
 #define A1E6F5B0_6F4A_4460_9F42_A14B525D8447
 
-#include <atlas/curves/curve.hpp>
 #include <chrono>
 #include <iostream>
 #include <vector>
 
 namespace Atlas {
-
-    template <class Interp>
-    static ZeroRateCurve<Interp> buildFlatCurve(const Date& refDate, double rate) {
-        std::vector<Date> dates{refDate, refDate + Period(50, TimeUnit::Years)};
-        std::vector<double> rates(2, rate);
-        return ZeroRateCurve<Interp>(dates, rates);
-    }
 
     class Timer {
        public:
@@ -56,6 +48,6 @@ namespace Atlas {
         int year  = std::stoi(date.substr(4, 4));
         return Date(day, (Month)month, year);
     }
-}  // namespace atlas
+}  // namespace Atlas
 
 #endif /* A1E6F5B0_6F4A_4460_9F42_A14B525D8447 */

@@ -5,57 +5,41 @@
 #include <atlas/cashflows/legs/leg.hpp>
 
 namespace Atlas {
-    class FixedRateLeg : public Leg {
-       public:
-        FixedRateLeg() : Leg(){};
 
-        FixedRateLeg(std::vector<FixedRateCoupon> coupons, std::vector<Redemption> redemptions) : Leg(redemptions), coupons_(coupons) {
-            startDate_ = coupons_.at(0).startDate();
+    /***
+     * Fixed rate leg class
+     */
+    template <typename adouble>
+    class FixedRateLeg : public Leg<adouble> {
+       public:
+        FixedRateLeg() : Leg<adouble>(){};
+
+        FixedRateLeg(std::vector<FixedRateCoupon<adouble>>& coupons, std::vector<Redemption<adouble>>& redemptions, bool sort = false)
+        : Leg<adouble>(redemptions, sort), coupons_(coupons) {
+            if (sort) this->sortCashflows(coupons_);
         };
 
-        std::vector<FixedRateCoupon>& coupons() { return coupons_; }
+        inline std::vector<FixedRateCoupon<adouble>>& coupons() { return coupons_; }
 
-        const std::vector<FixedRateCoupon>& constCoupons() const { return coupons_; }
+        inline const std::vector<FixedRateCoupon<adouble>>& coupons() const { return coupons_; }
 
-        void addCoupon(FixedRateCoupon& coupon) {
+        inline void addCoupon(FixedRateCoupon<adouble>& coupon, bool sort = false) {
             coupons_.push_back(coupon);
-            if (startDate() == Date() || startDate() > coupon.startDate()) { startDate_ = coupon.startDate(); }
+            if (sort) this->sortCashflows(coupons_);
+        }
+
+        inline void sort() {
+            this->sortCashflows(this->redemptions_);
+            this->sortCashflows(coupons_);
+        }
+
+        inline void discountCurveContext(const CurveContext<adouble>& context) {
+            this->setDiscountCurveContext(this->redemptions_, context);
+            this->setDiscountCurveContext(coupons_, context);
         }
 
        private:
-        std::vector<FixedRateCoupon> coupons_;
-    };
-
-    class FixedRateLeg2 : public Leg2 {
-       public:
-        FixedRateLeg2() : Leg2(){};
-
-        FixedRateLeg2(std::vector<FixedRateCoupon> coupons, std::vector<Redemption2> redemptions, bool sort = false)
-        : Leg2(redemptions, sort), coupons_(coupons) {
-            if (sort) sortCashflows(coupons_);
-        };
-
-        std::vector<FixedRateCoupon>& coupons() { return coupons_; }
-
-        const std::vector<FixedRateCoupon>& constCoupons() const { return coupons_; }
-
-        void addCoupon(FixedRateCoupon& coupon, bool sort = false) {
-            coupons_.push_back(coupon);
-            if (sort) sortCashflows(coupons_);
-        }
-
-        void sort() {
-            sortCashflows(redemptions_);
-            sortCashflows(coupons_);
-        }
-
-        void discountCurveIdx(size_t idx) {
-            for (auto& coupon : coupons_) { coupon.discountCurveIdx(idx); }
-            for (auto& redemptions_ : redemptions_) { redemptions_.discountCurveIdx(idx); }
-        }
-
-       private:
-        std::vector<FixedRateCoupon> coupons_;
+        std::vector<FixedRateCoupon<adouble>> coupons_;
     };
 }  // namespace Atlas
 

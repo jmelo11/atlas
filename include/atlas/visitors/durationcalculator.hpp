@@ -1,64 +1,75 @@
 #ifndef FEEC155C_A524_4B89_99CA_672817BB79CD
 #define FEEC155C_A524_4B89_99CA_672817BB79CD
 
-#include <ql/cashflows/cashflows.hpp>
-#include <ql/cashflows/fixedratecoupon.hpp>
-#include <ql/cashflows/simplecashflow.hpp>
-#include <atlas/visitors/cashflowindexer.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <type_traits>
 
 namespace Atlas {
-    class DurationCalculator : public ConstVisitor {
+    template <typename adouble>
+    class DurationCalculator : public ConstVisitor<adouble> {
        public:
-        DurationCalculator(const MarketData& marketData = MarketData(), double delta = 0.0001);
+        DurationCalculator(const MarketData<adouble>& marketData = MarketData<adouble>(), double delta = 0.0001)
+        : marketData_(marketData), delta_(delta){};
 
         double results() const { return results_; }
 
         void clear() { results_ = 0.0; }
 
-        void visit(const Deposit& inst) const override;
-        void visit(const FixedRateBulletProduct& inst) const override;
-        void visit(const EqualPaymentProduct& inst) const override;
-        void visit(const FixedRateEqualRedemptionProduct& inst) const override;
-        void visit(const FloatingRateBulletProduct& inst) const override;
-        void visit(const FloatingRateEqualRedemptionProduct& inst) const override;
-        void visit(const CustomFixedRateProduct& inst) const override;
-        void visit(const CustomFloatingRateProduct& inst) const override;
+        void visit(const FloatingRateInstrument<adouble>& inst) const override { floatingInstSens(inst); };
+
+        void visit(const FixedRateInstrument<adouble>& inst) const override { fixedInstSens(inst); };
 
        private:
         template <typename T>
-        void calculateFixedProductSens(const T& inst) const {
+        void fixedInstSens(const T& inst) const {
             T tmpProd = inst;
-            NPVCalculator npvCacl(marketData_);
-            npvCacl.visit(tmpProd);
-            double npv = npvCacl.results();
-            npvCacl.clear();
-            
-            auto rate = tmpProd.rate();
-            tmpProd.rate(rate.rate() + delta_);
-            npvCacl.visit(tmpProd);
-            double npv_ = npvCacl.results();
+            NPVCalculator<adouble> npvCacl(marketData_);
+            InterestRate<adouble> rate = tmpProd.rate();
+            adouble rateValue          = rate.rate();
 
-            results_ = (npv_ - npv) / npv / delta_;
+            auto f = [&](adouble r) {
+                npvCacl.clear();
+                tmpProd.rate(r);
+                npvCacl.visit(tmpProd);
+                return npvCacl.results();
+            };
+
+            if constexpr (std::is_same_v<adouble, double>) {
+                adouble npv  = f(rate.rate());
+                adouble npv_ = f(rate.rate() + delta_);
+                results_     = (npv_ - npv) / npv / delta_;
+            } else {
+                //results_ = derivative(f, wrt(rateValue), at(rateValue)) / 100.0;
+            }
         };
 
         template <typename T>
-        void calculateFloatingProductSens(const T& inst) const {
-            T tmpProd = inst;
-            NPVCalculator npvCacl(marketData_);
-            npvCacl.visit(tmpProd);
-            double npv = npvCacl.results();
-            npvCacl.clear();
-            tmpProd.spread(tmpProd.spread() + delta_);
-            npvCacl.visit(tmpProd);
-            double npv_ = npvCacl.results();
+        void floatingInstSens(const T& inst) const {
+            T tmpProd      = inst;
+            adouble spread = tmpProd.spread();
 
-            results_ = (npv_ - npv) / npv / delta_;
+            NPVCalculator<adouble> npvCacl(marketData_);
+            auto f = [&](adouble s) {
+                npvCacl.clear();
+                tmpProd.spread(s);
+                npvCacl.visit(tmpProd);
+                return npvCacl.results();
+            };
+
+            if constexpr (std::is_same_v<adouble, double>) {
+                adouble npv  = f(spread);
+                adouble npv_ = f(spread + delta_);
+                results_     = (npv_ - npv) / npv / delta_;
+            } else {
+                //results_ = derivative(f, wrt(spread), at(spread)) / 100.0;
+            }
         };
 
+        const MarketData<adouble>& marketData_;
         double delta_;
-        const MarketData& marketData_;
         mutable double results_ = 0.0;
     };
 

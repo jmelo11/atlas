@@ -2,43 +2,146 @@
 #define EA82B4A2_2A5C_4B6E_A0A0_0807E93983BE
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/derivatives/fxforward.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
 #include <iostream>
 
 namespace Atlas {
-
-    class NPVCalculator : public Visitor {
+    /**
+     * @brief  A class for calculating the net present value of an instrument.
+     *
+     * @tparam adouble
+     */
+    template <typename adouble>
+    class NPVCalculator : public Visitor<adouble> {
        public:
-        NPVCalculator(const MarketData& marketData) : marketData_(marketData){};
+        /**
+         * @brief Construct a new NPV Calculator object
+         *
+         * @param marketData market data for the instrument
+         */
+        NPVCalculator(const MarketData<adouble>& marketData) : marketData_(marketData){};
 
-        void clear() {
-            npv_        = 0.0;
-            nonSensNPV_ = 0.0;
+        /**
+         * @brief Clear the net present value of the instrument
+         *
+         */
+        void clear() { npv_ = 0.0; };
+
+        /**
+         * @brief Returns the net present value of the instrument
+         *
+         * @return adouble
+         */
+        inline adouble results() const { return npv_; };
+
+        /**
+         * @brief Visit a fixed rate instrument
+         *
+         * @param inst
+         */
+        void visit(FixedRateInstrument<adouble>& inst) override {
+            adouble npv = 0.0;
+            npv += fixedLegNPV(inst.leg());
+            npv += redemptionsNPV(inst.leg());
+            adouble fx = marketData_.fxs.at(inst.disbursement().fxIdx());
+            npv_ += npv / fx;
         };
 
-        double results() const { return npv_ + nonSensNPV_; };
+        /**
+         * @brief Visit a floating rate instrument
+         *
+         * @param inst
+         */
+        void visit(FloatingRateInstrument<adouble>& inst) override {
+            adouble npv = floatingLegNPV(inst.leg()) + redemptionsNPV(inst.leg());
+            adouble fx  = marketData_.fxs.at(inst.disbursement().fxIdx());
+            npv_ += npv / fx;
+        };
 
-        double sensNPV() const { return npv_; };
+        /**
+         * @brief Visit a FxForward
+         *
+         * @param inst
+         */
+        void visit(FxForward<adouble>& inst) override {
+            const auto& cashflows = inst.leg().redemptions();
+            int side              = inst.side();
 
-        double nonSensNPV() const { return nonSensNPV_; };
+            adouble fwd = marketData_.fxs.at(cashflows.at(0).fxIdx());
+            adouble df  = marketData_.dfs.at(cashflows.at(0).dfIdx());
 
-        void visit(Deposit& inst) override;
-        void visit(FixedRateBulletProduct& inst) override;
-        void visit(EqualPaymentProduct& inst) override;
-        void visit(FixedRateEqualRedemptionProduct& inst) override;
-        void visit(FloatingRateBulletProduct& inst) override;
-        void visit(FloatingRateEqualRedemptionProduct& inst) override;
-        void visit(CustomFixedRateProduct& inst) override;
-        void visit(CustomFloatingRateProduct& inst) override;
+            adouble spot = marketData_.fxs.at(cashflows.at(1).fxIdx());
+
+            npv_ += (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
+        };
+
+        void visit(VanillaSwap<adouble>& inst) override {
+            int side    = inst.side();
+            adouble npv = 0.0;
+            npv += fixedLegNPV(inst.firstLeg()) * side;
+            npv += floatingLegNPV(inst.secondLeg()) * side;
+            npv += redemptionsNPV(inst.firstLeg()) * side * -1;
+            npv += redemptionsNPV(inst.secondLeg()) * side * -1;
+            adouble fx = marketData_.fxs.at(inst.firstLeg().coupons().at(0).fxIdx());
+
+            npv_ += npv / fx;
+        }
 
        private:
-        void redemptionsNPV(const Leg& leg);
-        void fixedLegNPV(const FixedRateLeg& leg);
-        void floatingLegNPV(FloatingRateLeg& leg);
+        /**
+         * @brief Calculate the net present value of the redemptions
+         *
+         * @param leg
+         * @return adouble
+         */
+        adouble redemptionsNPV(const Leg<adouble>& leg) {
+            adouble npv = 0.0;
+            for (const auto& redemption : leg.redemptions()) {
+                adouble df = marketData_.dfs.at(redemption.dfIdx());
+                npv += redemption.amount() * df;
+            }
+            return npv;
+        };
+        /**
+         * @brief Calculate the net present value of the fixed rate leg
+         *
+         * @param leg
+         * @return adouble
+         */
+        adouble fixedLegNPV(const FixedRateLeg<adouble>& leg) {
+            adouble npv = 0.0;
+            adouble df  = 0.0;
+            for (auto& coupon : leg.coupons()) {
+                df = marketData_.dfs.at(coupon.dfIdx());
+                npv += coupon.amount() * df;
+            }
+            return npv;
+        };
 
-        double npv_        = 0.0;
-        double nonSensNPV_ = 0.0;
-        const MarketData& marketData_;
+        /**
+         * @brief Calculate the net present value of the floating rate leg
+         *
+         * @param leg
+         * @return adouble
+         */
+        adouble floatingLegNPV(FloatingRateLeg<adouble>& leg) {
+            adouble npv = 0.0;
+            adouble df  = 0.0;
+            adouble fwd = 0.0;
+            for (FloatingRateCoupon<adouble>& coupon : leg.coupons()) {
+                df  = marketData_.dfs.at(coupon.dfIdx());
+                fwd = marketData_.fwds.at(coupon.fwdIdx());
+                coupon.fixing(fwd);
+                npv += coupon.amount() * df;
+            }
+            return npv;
+        };
+
+        adouble npv_ = 0.0;
+        const MarketData<adouble>& marketData_;
     };
 }  // namespace Atlas
 

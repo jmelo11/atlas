@@ -4,36 +4,19 @@ from setuptools import setup
 from pathlib import Path
 from sys import platform
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
-BASE_DIR = Path(__file__).absolute().parent.resolve()
+LIB_DIR = Path("/Users/josemelo/desktop/dev/builds")
+include_dirs = [str(LIB_DIR / 'include'), '/opt/homebrew/include']
+library_dirs = [str(LIB_DIR / 'lib')]
 
-include_dirs = []
-library_dirs = []
-libraries = []
 if platform == "win32":
-    LIB_DIR = Path('C:/Users/bloomberg/Desktop/Desarrollo/builds')
-    include_dirs += [str(LIB_DIR / 'include'), str(LIB_DIR / 'boost')]
-    library_dirs += [str(LIB_DIR / 'lib')]
-
-    libraries += ['QuantLib-x64-mt', 'QuantLibParser',
-                  'nlohmann_json_schema_validator', 'Atlas']
+    libraries = ["QuantLib-x64-md", "xad", "Atlas"]
+    extra_compile_args = ['-std=c++20']
 
 else:
-    if platform == "linux" or platform == "linux2":
-        LIB_DIR = Path('/usr/local')
-    else:
-        LIB_DIR = Path('/Users/josemelo/Desktop/dev/builds')
-        include_dirs += ['/opt/homebrew/opt/boost/include']
-        library_dirs += ['/opt/homebrew/opt/boost/lib']
-
-    include_dirs += [str(LIB_DIR / 'include')]
-    library_dirs += [str(LIB_DIR / 'lib')]
-
-    libraries += ['QuantLib', 'QuantLibParser',
-                  'nlohmann_json_schema_validator', 'Atlas']
-
-extra_compile_args = ['-std=c++20']
+    libraries = ["QuantLib", "xad", "Atlas"]
+    extra_compile_args = ['-std=c++20']
 
 ext_modules = [
     Pybind11Extension("Atlas",
@@ -42,17 +25,15 @@ ext_modules = [
                       library_dirs=library_dirs,
                       libraries=libraries,
                       define_macros=[('VERSION_INFO', __version__)],
-                      extra_compile_args=extra_compile_args,
-                      language="c++20"
-                      ),
+                      extra_compile_args=extra_compile_args),
 ]
 
 setup(
-    name="Atlas",
+    name="atlas-finance",
     version=__version__,
-    author="Itau",
-    author_email="jose.melo@itau.cl",
-    description="pricers using pybind11",
+    author="Jose Melo",
+    author_email="jmelo@live.cl",
+    description="Pricing library for Python",
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
     zip_safe=False,

@@ -6,98 +6,116 @@
 
 namespace Atlas {
 
-    /***
-     * A rate index.
+    /**
+     * @brief A rate index.
      */
+    template <typename adouble>
     class RateIndex {
        public:
         RateIndex() = default;
 
-        /***
-         * Create a new rate index.
-         * @param name The name of the index.
-         * @param dayCounter The day counter used to calculate the accrued amount.
-         * @param fixingFreq The frequency of fixing.
-         * @param rateFreq The frequency of the rate.
-         * @param rateComp The compounding of the rate.
-         * @param fixingHistory The history of fixing values.
+        /**
+         * @brief Constructs a rate index.
+         * @param name The name of the rate index.
+         * @param fixingFreq The fixing frequency.
+         * @param dayCounter The day counter.
+         * @param rateFreq The rate frequency.
+         * @param rateComp The rate compounding.
          */
-        RateIndex(const std::string& name, DayCounter dayCounter, Frequency fixingFreq, Frequency rateFreq = Frequency::Annual,
-                  Compounding rateComp = Compounding::Simple, std::map<Date, double> fixingHistory = std::map<Date, double>())
-        : name_(name), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateComp_(rateComp), fixingHistory_(fixingHistory){};
+        RateIndex(const Date& refDate, Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
+                  Compounding rateComp = Compounding::Simple)
+        : refDate_(refDate), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateFreq_(rateFreq), rateComp_(rateComp){};
 
-        const std::string& name() const { return name_; }
+        /**
+         * @brief Returns the day counter.
+         */
+        inline const DayCounter& dayCounter() const { return dayCounter_; };
 
-        DayCounter dayCounter() const { return dayCounter_; }
+        /**
+         * @brief Returns the fixing frequency.
+         */
+        inline Frequency fixingFrequency() const { return fixingFreq_; };
 
-        Frequency rateFrequency() const { return rateFreq_; }
+        /**
+         * @brief Returns the rate frequency.
+         */
+        inline Frequency rateFrequency() const { return rateFreq_; };
 
-        Compounding rateCompounding() const { return rateComp_; }
+        /**
+         * @brief Returns the rate compounding.
+         */
+        inline Compounding rateCompounding() const { return rateComp_; };
 
-        Frequency fixingFrequency() const { return fixingFreq_; }
+        /**
+         * @brief Adds a fixing to the history.
+         * @param date The date of the fixing.
+         * @param value The value of the fixing.
+         */
+        inline void addFixing(const Date& date, double value) { fixingHistory_[date] = value; };
 
-        void addFixing(const Date& date, double value) { fixingHistory_[date] = value; }  // how does it work with simulations?
+        /**
+         * @brief Returns the fixing for a given date.
+         * @param date The date of the fixing.
+         */
+        adouble getFixing(const Date& date) const {
+            if (date >= refDate_) {
+                auto it = simFixings_.find(date);
+                if (it != simFixings_.end()) { return it->second; }
+                {
+                    // ql date to string
+                    std::string d   = std::to_string(date.year()) + "-" + std::to_string(date.month()) + "-" + std::to_string(date.dayOfMonth());
+                    std::string msg = "No fixing found for date " + d;
 
-        double getFixing(const Date& date) const {
-            auto it = fixingHistory_.find(date);
-            if (it != fixingHistory_.end()) { return it->second; }
-            {
-                std::string msg = "No fixing found for date";
-                throw std::runtime_error(msg);
+                    throw std::runtime_error(msg);
+                }
+            } else {
+                auto it = fixingHistory_.find(date);
+                if (it != fixingHistory_.end()) { return it->second; }
+                {
+                    std::string d   = std::to_string(date.year()) + "-" + std::to_string(date.month()) + "-" + std::to_string(date.dayOfMonth());
+                    std::string msg = "No fixing found for date " + d;
+                    throw std::runtime_error(msg);
+                }
             }
-        }
+        };
+
+        /**
+         * @brief Clones the rate index.
+         * @return std::unique_ptr<RateIndex>
+         */
+        std::unique_ptr<RateIndex> clone() const {
+            auto copy            = std::make_unique<RateIndex>(refDate_, fixingFreq_, dayCounter_, rateFreq_, rateComp_);
+            copy->fixingHistory_ = fixingHistory_;
+            copy->simFixings_    = simFixings_;
+            return copy;
+        };
+
+        /**
+         * @brief Adds a simulated fixing.
+         *
+         * @param date
+         * @param value
+         */
+        inline void addSimFixing(const Date& date, double value) { simFixings_[date] = value; };
+
+        /**
+         * @brief Clears the simulated fixing for a given date.
+         *
+         * @param date
+         * @return void
+         */
+        inline void clearSimFixings() { simFixings_.clear(); };
+
+        Date refDate() const { return refDate_; };
 
        private:
-        std::string name_      = "undefined";
+        Date refDate_;
         DayCounter dayCounter_ = DayCounter();
         Frequency fixingFreq_  = Frequency::NoFrequency;
         Frequency rateFreq_    = Frequency::NoFrequency;
         Compounding rateComp_  = Compounding::Simple;
         std::map<Date, double> fixingHistory_;
-    };
-
-    /***
-     * Common rate indexes.
-     */
-    class LIBOR3M : public RateIndex {
-       public:
-        LIBOR3M() : RateIndex("LIBOR3M", Actual360(), Frequency::Quarterly) {}
-    };
-    class LIBOR1M : public RateIndex {
-       public:
-        LIBOR1M() : RateIndex("LIBOR1M", Actual360(), Frequency::Monthly) {}
-    };
-    class LIBOR6M : public RateIndex {
-       public:
-        LIBOR6M() : RateIndex("LIBOR6M", Actual360(), Frequency::Semiannual) {}
-    };
-    class LIBOR12M : public RateIndex {
-       public:
-        LIBOR12M() : RateIndex("LIBOR12M", Actual360(), Frequency::Annual) {}
-    };
-    class ICP : public RateIndex {
-       public:
-        ICP() : RateIndex("ICP", Actual360(), Frequency::Daily) {}
-    };
-    class SOFR : public RateIndex {
-       public:
-        SOFR() : RateIndex("SOFR", Actual360(), Frequency::Daily) {}
-    };
-    class TERMSOFR1M : public RateIndex {
-       public:
-        TERMSOFR1M() : RateIndex("TERMSOFR1M", Actual360(), Frequency::Monthly) {}
-    };
-    class TERMSOFR3M : public RateIndex {
-       public:
-        TERMSOFR3M() : RateIndex("TERMSOFR3M", Actual360(), Frequency::Quarterly) {}
-    };
-    class TERMSOFR6M : public RateIndex {
-       public:
-        TERMSOFR6M() : RateIndex("TERMSOFR6M", Actual360(), Frequency::Semiannual) {}
-    };
-    class TERMSOFR12M : public RateIndex {
-       public:
-        TERMSOFR12M() : RateIndex("TERMSOFR12M", Actual360(), Frequency::Annual) {}
+        mutable std::map<Date, adouble> simFixings_;  // adouble
     };
 
 }  // namespace Atlas

@@ -2,25 +2,26 @@
 #define B9BF3F35_DABD_4ACD_8301_6BF2FADC4C31
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
-    class ForwardRateForecaster : public Visitor {
+    template <typename adouble>
+    class ForwardRateForecaster : public Visitor<adouble> {
        public:
-        ForwardRateForecaster(const MarketData& marketData) : marketData_(marketData){};
+        ForwardRateForecaster(const MarketData<adouble>& marketData) : marketData_(marketData){};
 
-        void visit(Deposit& inst) override;
-        void visit(FixedRateBulletProduct& inst) override;
-        void visit(EqualPaymentProduct& inst) override;
-        void visit(FixedRateEqualRedemptionProduct& inst) override;
-        void visit(FloatingRateBulletProduct& inst) override;
-        void visit(FloatingRateEqualRedemptionProduct& inst) override;
-        void visit(CustomFixedRateProduct& inst) override;
-        void visit(CustomFloatingRateProduct& inst) override;
+        void visit(FloatingRateInstrument<adouble>& inst) override {
+            auto& leg = inst.leg();
+            for (auto& coupon : leg.coupons()) {
+                adouble fwd = marketData_.fwds.at(coupon.fwdIdx());
+                coupon.fixing(fwd);
+            }
+        };
 
        private:
-        void fixFloatingCoupons(FloatingRateLeg& leg);
-        const MarketData& marketData_;
+        const MarketData<adouble>& marketData_;
     };
 }  // namespace Atlas
 

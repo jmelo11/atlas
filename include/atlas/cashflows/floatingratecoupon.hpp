@@ -1,125 +1,143 @@
 #ifndef C5139B34_BABA_4D42_B2D5_CD375677E6A8
 #define C5139B34_BABA_4D42_B2D5_CD375677E6A8
 
-#include <atlas/rates/rateindex.hpp>
 #include <atlas/cashflows/coupon.hpp>
+#include <atlas/rates/rateindex.hpp>
 
 namespace Atlas {
 
     /***
-     * Floating rate coupon class
+     * @brief A class representing a floating rate coupon
+     * @details A floating rate coupon has a start date, an end date, a notional amount, a spread, and a rate index
+     * @tparam adouble The type of the floating point number used in the coupon
      */
-    class FloatingRateCoupon : public Coupon {
+    template <typename adouble>
+    class FloatingRateCoupon : public Coupon<adouble> {
        public:
-        /***
+        /**
          * Constructor
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          * @param spread The spread of the coupon
-         * @param index The rate index of the coupon
+         * @param forecastCurveContext The forecast CurveContext of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, double spread, const RateIndex& index);
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
+                           const Context<RateIndex<adouble>>& forecastCurveContext)
+        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), forecastContextIdx_(forecastCurveContext.idx()), hasForecastContext_(true) {
+            rateDef_ = {forecastCurveContext.object().dayCounter(), forecastCurveContext.object().rateFrequency(),
+                        forecastCurveContext.object().rateCompounding()};
+        };
+
+        /**
+         * Constructor
+         * @param startDate The start date of the coupon
+         * @param endDate The end date of the coupon
+         * @param notional The notional amount of the coupon
+         * @param spread The spread of the coupon
+         * @param forecastCurveContext The forecast CurveContext of the coupon
+         * @param discountCurveContext The discount CurveContext of the coupon
+         */
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
+                           const Context<RateIndex<adouble>>& forecastCurveContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
+        : FloatingRateCoupon(startDate, endDate, notional, spread, forecastCurveContext) {
+            this->discountContextIdx_ = discountCurveContext.idx();
+            this->hasDiscountContext_ = true;
+        };
 
         /***
          * @return The spread of the coupon
          */
-        double spread() const { return spread_; }
+        inline adouble spread() const { return spread_; }
 
         /***
          * Sets the spread of the coupon
          * @param spread The spread of the coupon
          */
-        void spread(double spread) {
-            spread_ = spread;
-            amount_ = accruedAmount(startDate(), endDate());
+        inline void spread(adouble spread) {
+            spread_       = spread;
+            this->amount_ = accruedAmount(this->startDate(), this->endDate());
         }
 
         /***
-         * Sets the base fixing of the coupon and calculates the accrued amount
-         * @param value The fixing of the coupon
+         * Sets the fixing of the coupon
+         * @param fixing The fixing of the coupon
          */
-        void fixing(double value) {
-            fixing_ = value;
-            amount_ = accruedAmount(startDate(), endDate());  // should be lazy?
-        }
+        inline void fixing(adouble fixing) {
+            fixing_       = fixing;
+            this->amount_ = accruedAmount(this->startDate(), this->endDate());
+        };
 
         /***
+         * Gets the fixing of the coupon
          * @return The fixing of the coupon
          */
-        double fixing() const { return fixing_; }
-
-        double accruedAmount(const Date& start, const Date& end) const;
-
-        DayCounter dayCounter() const;
+        inline adouble fixing() const { return fixing_; }
 
         /***
-         * @return The rate index of the coupon
+         * Sets the forecast CurveContext of the coupon
+         * @param forecastCurveContext The forecast CurveContext of the coupon
          */
-        const RateIndex& index() const { return index_; }
+        void forecastCurveContext(const Context<RateIndex<adouble>>& context) {
+            forecastContextIdx_ = context.idx();
+            auto& index         = context.object();
+            rateDef_            = {index.dayCounter(), index.rateFrequency(), index.rateCompounding()};
+            hasForecastContext_ = true;
+        }
 
         /***
-         * Checks if the coupon is still floating
-         * @return True if the coupon is still floating
+         * Gets the day counter of the coupon
+         * @return The day counter of the coupon
          */
-        bool isFloating() const { return isFloating_; }
+        inline DayCounter dayCounter() const override { return rateDef_.dayCounter; };
 
         /***
-         * Sets the coupon to fixed coupon
+         * Gets the accrued period of the coupon
+         * @param start The start date of the coupon
+         * @param end The end date of the coupon
+         * @return The accrued period of the coupon
          */
-        void fix() { isFloating_ = false; }
+        inline double accruedPeriod(const Date& start, const Date& end) const override { return dayCounter().yearFraction(start, end); };
+
+        /***
+         * Gets the accrued amount of the coupon
+         * @param start The start date of the coupon
+         * @param end The end date of the coupon
+         * @return The accrued amount of the coupon
+         */
+        inline adouble accruedAmount(const Date& start, const Date& end) const override {
+            adouble totalRate  = fixing_ + spread_;
+            adouble compFactor = fastCompoundFactor<adouble>(totalRate, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq, start, end);
+            return this->notional() * (compFactor - 1.0);
+        };
+
+        /**
+         * @brief Checks if the coupon has a forecast CurveContext
+         *
+         * @return true If the coupon has a forecast CurveContext
+         */
+        inline bool hasForecastContext() const { return hasForecastContext_; }
+
+        /**
+         * @brief Gets the forecast curve context idx
+         *
+         * @return size_t The forecast curve context idx
+         */
+        inline size_t forecastContextIdx() const { return forecastContextIdx_; }
 
        private:
-        double fixing_   = 0.0;
-        double spread_   = 0.0;
-        bool isFloating_ = true;  // 1 byte, might cause padding
-        RateIndex index_;
-    };
+        struct RateDef {
+            DayCounter dayCounter;
+            Frequency freq;
+            Compounding comp;
+        };
 
-    /***
-     * This class attemps to remove RateIndex from FloatingRateCoupon as a member variable, using a pointer instead to the IndexStore and an index
-     * size_t to retrieve the RateIndex from the IndexStore. This is to avoid the need to copy the RateIndex object when copying the
-     * FloatingRateCoupon object.
-     *
-     * Also removed the isFloating_ member variable, with the idea that models should handle the fixing status.
-     */
+        adouble spread_ = 0.0;
+        adouble fixing_ = 0.0;
+        RateDef rateDef_;
 
-    class FloatingRateCoupon2 : public Coupon {
-       public:
-        /***
-         * Constructor
-         * @param startDate The start date of the coupon
-         * @param endDate The end date of the coupon
-         * @param notional The notional amount of the coupon
-         * @param spread The spread of the coupon
-         * @param index Pointer to the rate index of the coupon
-         */
-        FloatingRateCoupon2(const Date& startDate, const Date& endDate, double notional, double spread)  // two parameters for the same thing
-        : Coupon(startDate, endDate, notional), spread_(spread){};
-
-        /***
-         * @return The spread of the coupon
-         */
-        double spread() const { return spread_; }
-
-        /***
-         * Sets the spread of the coupon
-         * @param spread The spread of the coupon
-         */
-        void spread(double spread) { spread_ = spread; }
-
-        /***
-         * Sets amount of the coupon since it is not calculated by the coupon itself
-         */
-        void amount(double amount) { amount_ = amount; }
-
-        void forecastCurveIdx(size_t forecastCurveIdx) { forecastCurveIdx_ = forecastCurveIdx; }
-
-        size_t forecastCurveIdx() const { return forecastCurveIdx_; }
-
-       private:
-        double spread_ = 0.0;   
-        size_t forecastCurveIdx_;
+        size_t forecastContextIdx_;
+        bool hasForecastContext_ = false;
     };
 }  // namespace Atlas
 

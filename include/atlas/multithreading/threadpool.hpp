@@ -7,14 +7,14 @@
 #ifndef C35B7E8D_253B_4C4B_B4AD_4ECF13926073
 #define C35B7E8D_253B_4C4B_B4AD_4ECF13926073
 
-#include <atlas/data/concurrentqueue.hpp>
+#include <atlas/multithreading/concurrentqueue.hpp>
 #include <functional>
 #include <future>
 #include <thread>
 
 namespace Atlas {
 
-    //  Thread pool of chapter 3 - add
+    //  Thread pool of chapter 3 - aad savine
     typedef std::packaged_task<bool(void)> Task;
     typedef std::future<bool> TaskHandle;
 
@@ -108,8 +108,11 @@ namespace Atlas {
 
         //	Forbid copies etc
         ThreadPool(const ThreadPool& rhs)            = delete;
+
         ThreadPool& operator=(const ThreadPool& rhs) = delete;
+
         ThreadPool(ThreadPool&& rhs)                 = delete;
+        
         ThreadPool& operator=(ThreadPool&& rhs)      = delete;
 
         //	Spawn task
