@@ -11,6 +11,9 @@ Algunas características técnicas que se buscan incorporar en Atlas son:
 - Multithreading: contar con una estructura que permita utilizar la librería de forma thread-safe es crucial para poder sacarle el máximo de rendimiento.
 - Diferenciación automática: AAD se ha convertido en un estándar para el cálculo de sensibilidades en el mundo financiero, habilitando la posibilidad de contar con riesgos de forma automática sin tener que recalcular todos nuestros instrumentos. Esta funcionalidad es crucial si, por ejemplo, se busca calcular XVAs u otras métricas.
 
+### Documentación
+
+Es posible encontrar la documentación disponible hasta hoy en https://jmelo11.github.io/atlasdocs/
 
 ## Roadmap 
 
