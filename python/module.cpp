@@ -167,7 +167,10 @@ PYBIND11_MODULE(Atlas, m) {
         .def("registerInput", py::overload_cast<dual&>(&tape_type::registerInput))
         .def("registerOutput", py::overload_cast<dual&>(&tape_type::registerOutput))
         .def("computeAdjoints", &tape_type::computeAdjoints)
-        .def("newRecording", &tape_type::newRecording);
+        .def("newRecording", &tape_type::newRecording)
+        .def("clearAll", &tape_type::clearAll)
+        .def("getMemory", &tape_type::getMemory)
+        .def("clearDerivatives", &tape_type::clearDerivatives);
 
     // QL Types
     // Date
