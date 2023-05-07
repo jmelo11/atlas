@@ -4,7 +4,7 @@ from setuptools import setup
 from pathlib import Path
 from sys import platform
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 
 LIB_DIR = Path("C:/Users/jmelo/Desktop/Desarrollo/c++/builds/release")
 include_dirs = [str(LIB_DIR / 'include'), 'C:/Users/jmelo/Desktop/Desarrollo/c++/builds/release/boost']

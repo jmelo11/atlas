@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.0)
-project(AtlasPython VERSION 2.0.1)
+project(AtlasPython VERSION ${PROJECT_VERSION})
 
 include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 17)
