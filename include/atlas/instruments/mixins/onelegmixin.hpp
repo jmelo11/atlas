@@ -32,7 +32,9 @@ namespace Atlas {
          * @param context
          */
         inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& context) {
-            leg_.discountCurveContext(context);
+            if constexpr (std::is_same_v<FirstLeg, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>) {
+                for (auto& coupon : leg_.coupons()) coupon.discountCurveContext(context);
+            }
             disbursement_.discountCurveContext(context);
         };
 
@@ -66,7 +68,9 @@ namespace Atlas {
          * @param currency
          */
         inline void currency(const Currency& currency) {
-            for (auto& coupon : leg_.coupons()) coupon.currency(currency);
+            if constexpr (std::is_same_v<FirstLeg, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>) {
+                for (auto& coupon : leg_.coupons()) coupon.currency(currency);
+            }
             for (auto& redemption : leg_.redemptions()) redemption.currency(currency);
             disbursement_.currency(currency);
         }

@@ -2,6 +2,7 @@
 #define B9BF3F35_DABD_4ACD_8301_6BF2FADC4C31
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/derivatives/fixfloatswap.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
@@ -14,6 +15,14 @@ namespace Atlas {
 
         void visit(FloatingRateInstrument<adouble>& inst) override {
             auto& leg = inst.leg();
+            for (auto& coupon : leg.coupons()) {
+                adouble fwd = marketData_.fwds.at(coupon.fwdIdx());
+                coupon.fixing(fwd);
+            }
+        };
+
+        void visit(FixFloatSwap<adouble>& inst) override {
+            auto& leg = inst.secondLeg();
             for (auto& coupon : leg.coupons()) {
                 adouble fwd = marketData_.fwds.at(coupon.fwdIdx());
                 coupon.fixing(fwd);

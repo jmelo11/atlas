@@ -8,9 +8,9 @@ namespace Atlas {
 
     /**
      * @brief MakeLeg class, used to build legs
-     * 
-     * @tparam adouble 
-     * @tparam LegType 
+     *
+     * @tparam adouble
+     * @tparam LegType
      */
     template <typename adouble, class LegType>
     class MakeLeg {
@@ -77,6 +77,12 @@ namespace Atlas {
         MakeLeg& rateIndexContext(const Context<RateIndex<adouble>>* index) {
             static_assert(std::is_same_v<LegType, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
             rateIndexContext_ = index;
+            paymentFrequency_ = index->object().fixingFrequency();
+            return *this;
+        }
+
+        MakeLeg& createRedemptions(bool createRedemptions = true) {
+            createRedemptions_ = createRedemptions;
             return *this;
         }
 
@@ -132,42 +138,47 @@ namespace Atlas {
             size_t n_dates = dates.size();
 
             if (redemptions_.size() == 0) {
-                Redemption<adouble> redemption(endDate_, notional_);
-                setFlow(redemption);
-                leg.addRedemption(redemption);
                 couponAmounts.resize(n_dates - 1, notional_);
+                if (createRedemptions_) {
+                    Redemption<adouble> redemption(endDate_, notional_);
+                    setFlow(redemption);
+                    leg.addRedemption(redemption);
+                }
+                return couponAmounts;
             } else if (redemptions_.size() == n_dates - 1) {
                 adouble totalRedemption = notional_;
                 couponAmounts.reserve(n_dates);
                 couponAmounts.push_back(notional_);
 
                 for (size_t i = 1; i < n_dates; i++) {
-                    Redemption<adouble> redemption(dates[i], redemptions_[i - 1]);
                     totalRedemption -= redemptions_[i - 1];
                     couponAmounts.push_back(totalRedemption);
-                    setFlow(redemption);
-                    leg.addRedemption(redemption);
+                    if (createRedemptions_) {
+                        Redemption<adouble> redemption(dates[i], redemptions_[i - 1]);
+                        setFlow(redemption);
+                        leg.addRedemption(redemption);
+                    }
                 }
+                return couponAmounts;
             } else {
-                throw std::runtime_error("Redemptions size does not match schedule size");
+                throw std::runtime_error("Redemptions must be empty or have the same size as the number of coupons.");
             }
-
-            return couponAmounts;
         }
 
         adouble notional_;
         Frequency paymentFrequency_;
         Date startDate_;
         Date endDate_;
-        const Context<RateIndex<adouble>>* rateIndexContext_ = nullptr;
+        const Context<RateIndex<adouble>>* rateIndexContext_              = nullptr;
         const Context<YieldTermStructure<adouble>>* discountCurveContext_ = nullptr;
-        BusinessDayConvention paymentConvention_ = BusinessDayConvention::Unadjusted;
-        Calendar calendar_                       = NullCalendar();
-        Currency currency_                       = Currency();
+        BusinessDayConvention paymentConvention_                          = BusinessDayConvention::Unadjusted;
+        Calendar calendar_                                                = NullCalendar();
+        Currency currency_                                                = Currency();
         std::vector<adouble> redemptions_;
         LegType leg_;
         InterestRate<adouble> rate_;
         adouble spread_;
+        bool createRedemptions_ = true;
     };
 }  // namespace Atlas
 

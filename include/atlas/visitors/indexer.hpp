@@ -2,21 +2,31 @@
 #define EDA3136B_5C3D_4D8A_8F4A_AE6D1B5AC406
 
 #include <atlas/data/marketdata.hpp>
+#include <atlas/instruments/derivatives/fixfloatswap.hpp>
 #include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
-#include <atlas/instruments/derivatives/vanillaswap.hpp>
 #include <atlas/visitors/visitor.hpp>
 #include <set>
 #include <unordered_map>
 
 namespace Atlas {
 
+    /**
+     * @brief A class for indexing the cashflows of an instrument.
+     *
+     * @tparam adouble
+     */
     template <typename adouble>
     class Indexer : public Visitor<adouble> {
        public:
         Indexer(){};
 
+        /**
+         * @brief Indexes the cashflows of a fixed rate instrument.
+         *
+         * @param inst
+         */
         void visit(FixedRateInstrument<adouble>& inst) override {
             indexCashflow(inst.disbursement());
             indexExchangeRate(inst.disbursement(), false);
@@ -28,6 +38,11 @@ namespace Atlas {
             for (auto& redemption : redemptions) { indexCashflow(redemption); }
         };
 
+        /**
+         * @brief Indexes the cashflows of a floating rate instrument.
+         *
+         * @param inst
+         */
         void visit(FloatingRateInstrument<adouble>& inst) override {
             indexCashflow(inst.disbursement());
             indexExchangeRate(inst.disbursement(), false);
@@ -39,28 +54,38 @@ namespace Atlas {
             for (auto& redemption : redemptions) { indexCashflow(redemption); }
         };
 
+        /**
+         * @brief Indexes the cashflows of an FX forward.
+         *
+         * @param inst
+         */
         void visit(FxForward<adouble>& inst) override {
-            // npv = (strikePrice (823 CLP/USD) -fwdPrice (835 CLP/USD))*notional (100_000 USD) * dfLocal (CLP) * localCcy (CLP/CLP)-> OK
             auto& ccy1Cashflow = inst.leg().redemptions()[0];
             auto& ccy2Cashlfow = inst.leg().redemptions()[1];
             MarketRequest::ExchangeRate fwdPrice(ccy1Cashflow.currencyCode(), ccy2Cashlfow.currencyCode(), inst.endDate());
             MarketRequest::ExchangeRate spotPrice(ccy1Cashflow.currencyCode(), 0, Date());
 
-            std::lock_guard<std::mutex> lock(mtx_);
             if (fxPricesMap_.find(fwdPrice) == fxPricesMap_.end()) {
+                std::lock_guard<std::mutex> lock(mtx_);
                 fxPricesVector_.push_back(fwdPrice);
                 fxPricesMap_[fwdPrice] = fxPricesVector_.size() - 1;
             }
             if (fxPricesMap_.find(spotPrice) == fxPricesMap_.end()) {
+                std::lock_guard<std::mutex> lock(mtx_);
                 fxPricesVector_.push_back(spotPrice);
                 fxPricesMap_[spotPrice] = fxPricesVector_.size() - 1;
             }
-            ccy1Cashflow.fxIdx(fxPricesMap_[fwdPrice]);
-            ccy2Cashlfow.fxIdx(fxPricesMap_[spotPrice]);
+            ccy1Cashflow.fxIdx(fxPricesMap_.at(fwdPrice));
+            ccy2Cashlfow.fxIdx(fxPricesMap_.at(spotPrice));
             indexCashflow(ccy1Cashflow);
         };
 
-        void visit(VanillaSwap<adouble>& inst) override {
+        /**
+         * @brief Indexes the cashflows of a fixed float swap.
+         *
+         * @param inst
+         */
+        void visit(FixFloatSwap<adouble>& inst) override {
             auto& firstLeg  = inst.firstLeg();
             auto& secondLeg = inst.secondLeg();
 
@@ -70,9 +95,14 @@ namespace Atlas {
             for (auto& coupon : secondLeg.coupons()) { indexCashflow(coupon); }
             for (auto& redemption : secondLeg.redemptions()) { indexCashflow(redemption); }
 
-            indexExchangeRate(firstLeg.coupons()[0], false);            
+            indexExchangeRate(firstLeg.coupons()[0], false);
         }
 
+        /**
+         * @brief Set the Request object
+         *
+         * @param request
+         */
         void setRequest(MarketRequest& request) {
             request.dfs    = dfsVector_;
             request.fwds   = fwdsVector_;
@@ -80,12 +110,21 @@ namespace Atlas {
             request.fxs    = fxPricesVector_;
         };
 
+        /**
+         * @brief Get the Request object
+         *
+         * @return MarketRequest
+         */
         MarketRequest request() {
             MarketRequest request;
             setRequest(request);
             return request;
         };
 
+        /**
+         * @brief Clears the indexer.
+         *
+         */
         void clear() {
             dfsMap_.clear();
             dfsVector_.clear();
@@ -108,7 +147,7 @@ namespace Atlas {
 
             size_t curveIdx         = cashflow.discountContextIdx();
             const Date& paymentDate = cashflow.paymentDate();
-            
+
             std::lock_guard<std::mutex> lock(mtx_);
             evaluationDates_.insert(paymentDate);
 
@@ -137,7 +176,13 @@ namespace Atlas {
             if (cashflow.applyCcy()) { indexExchangeRate(cashflow, true); }
         };
 
-        void indexExchangeRate(Cashflow<adouble>& cashflow, bool atPaymentDate = false) {        
+        /**
+         * @brief Indexes an exchange rate.
+         * 
+         * @param cashflow 
+         * @param atPaymentDate if true, the exchange rate is indexed at the payment date of the cashflow, otherwise is set to Date() (evaluation date).
+         */
+        void indexExchangeRate(Cashflow<adouble>& cashflow, bool atPaymentDate = false) {
             Date fxDate;
             if (atPaymentDate) {
                 fxDate = cashflow.paymentDate();
@@ -145,7 +190,7 @@ namespace Atlas {
                 fxDate = Date();
             }
             MarketRequest::ExchangeRate fx(cashflow.currencyCode(), 0, fxDate);  // cashflow ccy to local ccy
-            
+
             std::lock_guard<std::mutex> lock(mtx_);
             if (fxPricesMap_.find(fx) == fxPricesMap_.end()) {
                 fxPricesVector_.push_back(fx);

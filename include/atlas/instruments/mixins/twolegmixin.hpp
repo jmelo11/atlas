@@ -24,7 +24,7 @@ namespace Atlas {
 
         SecondLeg& secondLeg() { return secondLeg_; }
 
-       private:
+       protected:
         FirstLeg firstLeg_;
         SecondLeg secondLeg_;
     };

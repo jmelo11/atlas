@@ -12,22 +12,22 @@ namespace Atlas {
        public:
         LinearInterpolator() = default;
 
-        LinearInterpolator(const std::vector<adouble>& x, const std::vector<adouble>& y, bool extrapolate = false)
+        LinearInterpolator(const std::vector<double>& x, const std::vector<adouble>& y, bool extrapolate = false)
         : x_(x), y_(y), extrapolate_(extrapolate) {
             if (x_.size() != y_.size()) { throw std::invalid_argument("x_ and y_ should have the same size."); }
         }
 
-        adouble operator()(adouble x) const override { return linearInterpolation(x); }
+        adouble operator()(double x) const override { return linearInterpolation(x); }
 
         void enableExtrapolation() { extrapolate_ = true; }
 
        private:
-        adouble linearInterpolation(adouble x) const {
+        adouble linearInterpolation(double x) const {
             auto it      = std::lower_bound(x_.begin(), x_.end(), x);
             size_t index = std::distance(x_.begin(), it);
 
             if (!extrapolate_) {
-                if (index == 0 || index == x_.size()) {
+                if (x < x_.front() || x > x_.back()) {
                     throw std::out_of_range("Extrapolation is not enabled, and the provided value is outside the range.");
                 }
             }
@@ -40,7 +40,7 @@ namespace Atlas {
 
             return y_[index - 1] + (x - x_[index - 1]) * (y_[index] - y_[index - 1]) / (x_[index] - x_[index - 1]);
         }
-        std::vector<adouble> x_;
+        std::vector<double> x_;
         std::vector<adouble> y_;
         bool extrapolate_;
     };

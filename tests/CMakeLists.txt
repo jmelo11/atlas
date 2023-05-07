@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
-
-project(AtlasTest VERSION 1.0.0 LANGUAGES CXX)
-
+project(AtlasTest VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 include(GNUInstallDirs)
 
 file(GLOB SOURCES "*.cpp" "coupons/*.cpp" "instruments/*.cpp" "visitors/*.cpp" "others/*.cpp" "rates/*.cpp")
-
 file(GLOB INCLUDES "*.hpp")
 
 include(FetchContent)

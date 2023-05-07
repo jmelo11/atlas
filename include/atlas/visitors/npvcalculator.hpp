@@ -3,6 +3,7 @@
 
 #include <atlas/data/marketdata.hpp>
 #include <atlas/instruments/derivatives/fxforward.hpp>
+#include <atlas/instruments/derivatives/fixfloatswap.hpp>
 #include <atlas/instruments/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
@@ -78,17 +79,28 @@ namespace Atlas {
             adouble df  = marketData_.dfs.at(cashflows.at(0).dfIdx());
 
             adouble spot = marketData_.fxs.at(cashflows.at(1).fxIdx());
+            adouble npv = (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
+            
             std::lock_guard<std::mutex> lock(mtx_);
-            npv_ += (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
+            npv_ += npv;
         };
 
-        void visit(VanillaSwap<adouble>& inst) override {
+        /**
+         * @brief Visit a VanillaSwap
+         *
+         * @param inst
+         */
+        void visit(FixFloatSwap<adouble>& inst) override {
             int side    = inst.side();
-            adouble npv = 0.0;
-            npv += fixedLegNPV(inst.firstLeg()) * side;
-            npv += floatingLegNPV(inst.secondLeg()) * side;
-            npv += redemptionsNPV(inst.firstLeg()) * side * -1;
-            npv += redemptionsNPV(inst.secondLeg()) * side * -1;
+            adouble fixNPV = 0.0;
+            adouble floatNPV = 0.0;
+            fixNPV += fixedLegNPV(inst.firstLeg());
+            fixNPV += redemptionsNPV(inst.firstLeg());
+
+            floatNPV += floatingLegNPV(inst.secondLeg());
+            floatNPV += redemptionsNPV(inst.secondLeg());
+            adouble npv = (fixNPV - floatNPV) * side;
+
             adouble fx = marketData_.fxs.at(inst.firstLeg().coupons().at(0).fxIdx());
             std::lock_guard<std::mutex> lock(mtx_);
             npv_ += npv / fx;
@@ -109,6 +121,7 @@ namespace Atlas {
             }
             return npv;
         };
+
         /**
          * @brief Calculate the net present value of the fixed rate leg
          *

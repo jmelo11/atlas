@@ -13,7 +13,7 @@ namespace Atlas {
      * @tparam Interpol 
      */
     template <typename adouble, typename Interpol>
-    class ZeroRateStrategy : public YieldTermStructureStrategy<dual> {
+    class ZeroRateStrategy : public YieldTermStructureStrategy<adouble> {
        public:
         ZeroRateStrategy(const std::vector<Date>& dates, const std::vector<adouble>& zeroRates, const DayCounter& dayCounter,
                          Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual)
@@ -33,7 +33,7 @@ namespace Atlas {
             interpol_      = Interpol(times_, zeroRates_);
         }
 
-        adouble discount(const Date& date) const override {
+        adouble discount(const Date& date) const override  {
             double t = dayCounter_.yearFraction(this->refDate_, date);
             if (t < 0) throw std::invalid_argument("date must be greater than reference date");
             InterestRate<adouble> rate(interpol_(t), dayCounter_, comp_, freq_);

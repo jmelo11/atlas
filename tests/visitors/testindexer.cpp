@@ -40,7 +40,16 @@ TEST(Indexer, MultipleInstruments) {
     auto& fixedInst = *vars.atlasFixBond;
     auto& floatInst = *vars.atlasFloatBond;
 
-    size_t dfSize  = fixedInst.leg().coupons().size() + 1;  // +2 for the disbursement, equal payment structure
+    std::vector<Date> paymentDates;
+    for (auto& coupon : fixedInst.leg().coupons()) {
+        paymentDates.push_back(coupon.paymentDate());
+    }
+    for (auto& coupon : floatInst.leg().coupons()) {
+        if (std::find(paymentDates.begin(), paymentDates.end(), coupon.paymentDate()) == paymentDates.end()) {
+            paymentDates.push_back(coupon.paymentDate());
+        }
+    }
+    size_t dfSize = paymentDates.size() + 1;
     size_t fwdSize = floatInst.leg().coupons().size();
 
     Indexer<double> indexer;
@@ -84,7 +93,16 @@ TEST(Indexer, MultipleInstrumentsDual) {
     auto& fixedInst = *vars.atlasFixBond;
     auto& floatInst = *vars.atlasFloatBond;
 
-    size_t dfSize  = fixedInst.leg().coupons().size() + 1;
+    std::vector<Date> paymentDates;
+    for (auto& coupon : fixedInst.leg().coupons()) {
+        paymentDates.push_back(coupon.paymentDate());
+    }
+    for (auto& coupon : floatInst.leg().coupons()) {
+        if (std::find(paymentDates.begin(), paymentDates.end(), coupon.paymentDate()) == paymentDates.end()) {
+            paymentDates.push_back(coupon.paymentDate());
+        }
+    }
+    size_t dfSize = paymentDates.size() + 1;
     size_t fwdSize = floatInst.leg().coupons().size();
 
     Indexer<dual> indexer;

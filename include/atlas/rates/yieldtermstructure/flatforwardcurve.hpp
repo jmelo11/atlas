@@ -36,7 +36,7 @@ namespace Atlas {
         adouble forwardRate(const Date& startDate, const Date& endDate, const DayCounter& dayCounter, Compounding comp,
                             Frequency freq) const override {
             if (startDate < this->refDate_) { throw std::invalid_argument("Start date is before reference date"); }
-            adouble compound = rate_.compoundFactor(startDate, endDate);
+            adouble compound = discount(startDate) / discount(endDate);
             return InterestRate<adouble>::impliedRate(compound, dayCounter, comp, freq, startDate, endDate).rate();
         };
 

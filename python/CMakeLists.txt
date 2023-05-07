@@ -36,7 +36,11 @@ elseif(build_type_upper STREQUAL "MINSIZEREL")
   get_target_property(XAD_LIB_LOCATION XAD::xad IMPORTED_LOCATION_MINSIZEREL)
 endif()
 
-get_filename_component(XAD_LIB_NAME ${XAD_LIB_LOCATION} NAME_WE)
+if (MSVC)
+  get_filename_component(XAD_LIB_NAME ${XAD_LIB_LOCATION} NAME_WE)
+else()
+  set(XAD_LIB_NAME xad)
+endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
                ${CMAKE_CURRENT_SOURCE_DIR}/setup.py

@@ -522,36 +522,36 @@ void pricingBenchmark2() {
     std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(indexer); });
     });
 
-    indexer.clear();
-    bench.run("Indexer using for_each (parallel)", [&]() {
-    std::for_each(std::execution::par, instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(indexer); });
-    });
+    // indexer.clear();
+    // bench.run("Indexer using for_each (parallel)", [&]() {
+    // std::for_each(std::execution::par, instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(indexer); });
+    // });
 
-    MarketRequest request = indexer.request();
-    SpotMarketDataModel<NumType> model(request, mainStore_);
-    MarketData<NumType> marketData = model.marketData();
-    NPVCalculator<NumType> calculator(marketData);
+    // MarketRequest request = indexer.request();
+    // SpotMarketDataModel<NumType> model(request, mainStore_);
+    // MarketData<NumType> marketData = model.marketData();
+    // NPVCalculator<NumType> calculator(marketData);
 
-    bench.run("NPVCalculator using for_each", [&]() {
-    std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(calculator); });
-    });
+    // bench.run("NPVCalculator using for_each", [&]() {
+    // std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(calculator); });
+    // });
 
-    if constexpr (std::is_same_v<NumType, double>) {
-        std::cout << "NPV: " << calculator.results() << std::endl;
-    } else {
-        std::cout << "NPV: " << val(calculator.results()) << std::endl;
-    }
+    // if constexpr (std::is_same_v<NumType, double>) {
+    //     std::cout << "NPV: " << calculator.results() << std::endl;
+    // } else {
+    //     std::cout << "NPV: " << val(calculator.results()) << std::endl;
+    // }
 
-    calculator.clear();
-    bench.run("NPVCalculator using for_each (parallel)", [&]() {
-    std::for_each(std::execution::par, instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(calculator); });
-    });
+    // calculator.clear();
+    // bench.run("NPVCalculator using for_each (parallel)", [&]() {
+    // std::for_each(std::execution::par, instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(calculator); });
+    // });
     
-    if constexpr (std::is_same_v<NumType, double>) {
-        std::cout << "NPV: " << calculator.results() << std::endl;
-    } else {
-        std::cout << "NPV: " << val(calculator.results()) << std::endl;
-    }
+    // if constexpr (std::is_same_v<NumType, double>) {
+    //     std::cout << "NPV: " << calculator.results() << std::endl;
+    // } else {
+    //     std::cout << "NPV: " << val(calculator.results()) << std::endl;
+    // }
 }
 
 int main() {

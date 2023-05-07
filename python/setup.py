@@ -4,14 +4,18 @@ from setuptools import setup
 from pathlib import Path
 from sys import platform
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 
-LIB_DIR = Path("C:/Users/jmelo/Desktop/Desarrollo/c++/builds/release")
-include_dirs = [str(LIB_DIR / 'include'), 'C:/Users/jmelo/Desktop/Desarrollo/c++/builds/release/boost']
+LIB_DIR = Path("/Users/josemelo/desktop/dev/builds")
+include_dirs = [str(LIB_DIR / 'include'), '/opt/homebrew/include']
 library_dirs = [str(LIB_DIR / 'lib')]
 
-libraries = ["QuantLib", "Atlas", "xad64_vc142_md"]
-extra_compile_args = ['-std=c++17', '/std:c++17']
+libraries = ["QuantLib", "Atlas", "xad"]
+if platform == 'win32':
+    extra_compile_args = ['/std:c++17']
+else:
+    extra_compile_args = ['-std=c++17']
+
 
 ext_modules = [
     Pybind11Extension("Atlas",

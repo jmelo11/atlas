@@ -11,7 +11,11 @@ include_dirs = [str(LIB_DIR / 'include'), '@Boost_INCLUDE_DIR@']
 library_dirs = [str(LIB_DIR / 'lib')]
 
 libraries = ["QuantLib", "Atlas", "@XAD_LIB_NAME@"]
-extra_compile_args = ['-std=c++17', '/std:c++17']
+if platform == 'win32':
+    extra_compile_args = ['/std:c++17']
+else:
+    extra_compile_args = ['-std=c++17']
+
 
 ext_modules = [
     Pybind11Extension("Atlas",

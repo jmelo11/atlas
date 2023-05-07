@@ -8,9 +8,9 @@
 #include <atlas/models/spotmarketdatamodel.hpp>
 
 // curves
+#include <atlas/rates/yieldtermstructure.hpp>
 #include <atlas/rates/yieldtermstructure/discountcurve.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
-#include <atlas/rates/yieldtermstructure.hpp>
 #include <atlas/rates/yieldtermstructure/zeroratecurve.hpp>
 
 // othres
@@ -58,6 +58,7 @@
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
 
 // derivatives
+#include <atlas/instruments/derivatives/fixfloatswap.hpp>
 #include <atlas/instruments/derivatives/fxforward.hpp>
 
 #define exportFixedRateInstrument(name)                                                                                                    \
@@ -81,10 +82,22 @@ using namespace Atlas;
 
 namespace Aux {
 
-    inline std::string dateToStr(const Date& d) {
-        if (d == Date()) return "None";
-        std::string s = std::to_string(d.year()) + "-" + std::to_string(d.month()) + "-" + std::to_string(d.dayOfMonth());
-        return s;
+    inline std::string dateToStr(const Date& date) {
+        if (date == Date()) return "None";
+        std::string d, m, y;
+        if (date.dayOfMonth() < 10) {
+            d = "0" + std::to_string(date.dayOfMonth());
+        } else {
+            d = std::to_string(date.dayOfMonth());
+        }
+
+        if (date.month() < 10) {
+            m = "0" + std::to_string(date.month());
+        } else {
+            m = std::to_string(date.month());
+        }
+        y = std::to_string(date.year());
+        return d + "-" + m + "-" + y;
     }
 
     class PyCoupon : public Coupon<dual> {
@@ -158,6 +171,7 @@ PYBIND11_MODULE(Atlas, m) {
     py::class_<dual>(m, "Dual")
         .def(py::init<double>())
         .def("__str__", [](const dual& d) { return "Dual(" + std::to_string(val(d)) + ")"; })
+        .def("__repr__", [](const dual& d) { return "Dual(" + std::to_string(val(d)) + ")"; })
         .def("__float__", [](const dual& d) { return val(d); })
         .def("setDerivative", py::overload_cast<double>(&dual::setDerivative))
         .def("getDerivative", py::overload_cast<>(&dual::getDerivative, py::const_));
@@ -183,7 +197,19 @@ PYBIND11_MODULE(Atlas, m) {
         .def("month", &Date::month)
         .def("year", &Date::year)
         .def("__str__", [](const Date& d) { return Aux::dateToStr(d); })
-        .def("__repr__", [](const Date& d) { return Aux::dateToStr(d); });
+        .def("__repr__", [](const Date& d) { return Aux::dateToStr(d); })
+        .def(py::self + int())
+        .def(py::self - int())
+        .def(py::self - py::self)
+        .def(py::self += int())
+        .def(py::self -= int())
+        .def("__lt__", [](const Date& d1, const Date& d2) { return d1 < d2; })
+        .def("__le__", [](const Date& d1, const Date& d2) { return d1 <= d2; })
+        .def("__gt__", [](const Date& d1, const Date& d2) { return d1 > d2; })
+        .def("__ge__", [](const Date& d1, const Date& d2) { return d1 >= d2; })
+        .def("__eq__", [](const Date& d1, const Date& d2) { return d1 == d2; })
+        .def("__ne__", [](const Date& d1, const Date& d2) { return d1 != d2; })
+        .def("__hash__", [](const Date& d) { return std::hash<Date>()(d); });
 
     // enums
     py::enum_<Compounding>(m, "Compounding")
@@ -376,12 +402,21 @@ PYBIND11_MODULE(Atlas, m) {
 
     py::class_<DiscountStrategy<dual, LogLinearInterpolator<dual>>, YieldTermStructureStrategy<dual>,
                std::shared_ptr<DiscountStrategy<dual, LogLinearInterpolator<dual>>>>(m, "DiscountLogLinearStrategy")
-        .def(py::init<const std::vector<Date>&, const std::vector<dual>&, const DayCounter&>())
+        .def(py::init<const std::vector<Date>&, const std::vector<dual>&, const DayCounter&>(), py::arg("dates"), py::arg("discounts"),
+             py::arg("dayCounter") = Actual360())
         .def(py::init<const DiscountStrategy<dual, LogLinearInterpolator<dual>>&>());
 
     py::class_<FlatForwardStrategy<dual>, YieldTermStructureStrategy<dual>, std::shared_ptr<FlatForwardStrategy<dual>>>(m, "FlatForwardStrategy")
-        .def(py::init<const Date&, dual, const DayCounter&, Compounding, Frequency>())
+        .def(py::init<const Date&, dual, const DayCounter&, Compounding, Frequency>(), py::arg("refDate"), py::arg("rate"),
+             py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Simple, py::arg("frequency") = Frequency::Annual)
         .def(py::init<const FlatForwardStrategy<dual>&>());
+
+    py::class_<ZeroRateStrategy<dual, LinearInterpolator<dual>>, YieldTermStructureStrategy<dual>,
+               std::shared_ptr<ZeroRateStrategy<dual, LinearInterpolator<dual>>>>(m, "ZeroRateLinearStrategy")
+        .def(py::init<const std::vector<Date>&, const std::vector<dual>&, const DayCounter&, Compounding, Frequency>(), py::arg("dates"),
+             py::arg("zeroRates"), py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Simple,
+             py::arg("frequency") = Frequency::Annual)
+        .def(py::init<const ZeroRateStrategy<dual, LinearInterpolator<dual>>&>());
 
     // RateIndex
     py::class_<RateIndex<dual>>(m, "RateIndex")
@@ -470,23 +505,23 @@ PYBIND11_MODULE(Atlas, m) {
     // Legs
     py::class_<Leg<dual>>(m, "Leg")
         .def(py::init<std::vector<Redemption<dual>>&, bool>())
-        .def("redemptions", py::overload_cast<>(&Leg<dual>::redemptions, py::const_))
-        .def("redemptions", py::overload_cast<>(&Leg<dual>::redemptions))
+        .def("redemptions", py::overload_cast<>(&Leg<dual>::redemptions, py::const_), py::return_value_policy::reference)
+        .def("redemptions", py::overload_cast<>(&Leg<dual>::redemptions), py::return_value_policy::reference)
         .def("addRedemption", &Leg<dual>::addRedemption)
         .def("sortRedemptions", &Leg<dual>::sortRedemptions);
 
     py::class_<FixedRateLeg<dual>, Leg<dual>>(m, "FixedRateLeg")
         .def(py::init<std::vector<FixedRateCoupon<dual>>&, std::vector<Redemption<dual>>&, bool>())
-        .def("coupons", py::overload_cast<>(&FixedRateLeg<dual>::coupons, py::const_))
-        .def("coupons", py::overload_cast<>(&FixedRateLeg<dual>::coupons))
+        .def("coupons", py::overload_cast<>(&FixedRateLeg<dual>::coupons, py::const_), py::return_value_policy::reference)
+        .def("coupons", py::overload_cast<>(&FixedRateLeg<dual>::coupons), py::return_value_policy::reference)
         .def("addCoupon", &FixedRateLeg<dual>::addCoupon)
         .def("sort", &FixedRateLeg<dual>::sort)
         .def("discountCurveContext", &FixedRateLeg<dual>::discountCurveContext);
 
     py::class_<FloatingRateLeg<dual>, Leg<dual>>(m, "FloatingRateLeg")
         .def(py::init<std::vector<FloatingRateCoupon<dual>>&, std::vector<Redemption<dual>>&, bool>())
-        .def("coupons", py::overload_cast<>(&FloatingRateLeg<dual>::coupons, py::const_))
-        .def("coupons", py::overload_cast<>(&FloatingRateLeg<dual>::coupons))
+        .def("coupons", py::overload_cast<>(&FloatingRateLeg<dual>::coupons, py::const_), py::return_value_policy::reference)
+        .def("coupons", py::overload_cast<>(&FloatingRateLeg<dual>::coupons), py::return_value_policy::reference)
         .def("addCoupon", &FloatingRateLeg<dual>::addCoupon)
         .def("sort", &FloatingRateLeg<dual>::sort)
         .def("discountCurveContext", &FloatingRateLeg<dual>::discountCurveContext)
@@ -562,18 +597,59 @@ PYBIND11_MODULE(Atlas, m) {
                       const Context<YieldTermStructure<dual>>&>(),
              py::arg("dates"), py::arg("notionals"), py::arg("spread"), py::arg("rateIndexContext"), py::arg("discountCurveContext"));
 
+    // Derivatives
+    py::class_<OneLegMixin<dual, Leg<dual>>>(m, "OneLegMixin")
+        .def("leg", py::overload_cast<>(&OneLegMixin<dual, Leg<dual>>::leg, py::const_), py::return_value_policy::reference)
+        .def("leg", py::overload_cast<>(&OneLegMixin<dual, Leg<dual>>::leg), py::return_value_policy::reference)
+        .def("discountCurveContext", &OneLegMixin<dual, Leg<dual>>::discountCurveContext)
+        .def("disbursement", py::overload_cast<>(&OneLegMixin<dual, Leg<dual>>::disbursement), py::return_value_policy::reference)
+        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&OneLegMixin<dual, Leg<dual>>::disbursement))
+        .def("currency", &OneLegMixin<dual, Leg<dual>>::currency);
+
+    py::class_<FxForward<dual>, Instrument<dual>, OneLegMixin<dual, Leg<dual>>>(m, "FxForward")
+        .def(py::init<const Date&, const Date&, dual, const Currency&, const Currency&, double, FxForward<dual>::Side>(), py::arg("startDate"),
+             py::arg("endDate"), py::arg("fwdPrice"), py::arg("currency1"), py::arg("currency2"), py::arg("notional"), py::arg("side"));
+
+    py::enum_<FxForward<dual>::Side>(m, "FxForwardSide")
+        .value("Buy", FxForward<dual>::Side::BUY)
+        .value("Sell", FxForward<dual>::Side::SELL)
+        .export_values();
+
+    py::class_<TwoLegMixin<FixedRateLeg<dual>, FloatingRateLeg<dual>>>(m, "FixFloatLegMixin")
+        .def("firstLeg", py::overload_cast<>(&TwoLegMixin<FixedRateLeg<dual>, FloatingRateLeg<dual>>::firstLeg, py::const_),
+             py::return_value_policy::reference)
+        .def("firstLeg", py::overload_cast<>(&TwoLegMixin<FixedRateLeg<dual>, FloatingRateLeg<dual>>::firstLeg), py::return_value_policy::reference)
+        .def("secondLeg", py::overload_cast<>(&TwoLegMixin<FixedRateLeg<dual>, FloatingRateLeg<dual>>::secondLeg, py::const_),
+             py::return_value_policy::reference)
+        .def("secondLeg", py::overload_cast<>(&TwoLegMixin<FixedRateLeg<dual>, FloatingRateLeg<dual>>::secondLeg),
+             py::return_value_policy::reference);
+
+    py::class_<FixFloatSwap<dual>, Instrument<dual>, TwoLegMixin<FixedRateLeg<dual>, FloatingRateLeg<dual>>>(m, "FixFloatSwap")
+        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, dual, Frequency, const Context<RateIndex<dual>>&,
+                      FixFloatSwap<dual>::Side>(),
+             py::arg("startDate"), py::arg("endDate"), py::arg("notional"), py::arg("fixedRate"), py::arg("spread"), py::arg("fixLegFreq"),
+             py::arg("rateIndexContext"), py::arg("side"))
+        .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, dual, Frequency, const Context<RateIndex<dual>>&,
+                      FixFloatSwap<dual>::Side, const Context<YieldTermStructure<dual>>&>(),
+             py::arg("startDate"), py::arg("endDate"), py::arg("notional"), py::arg("fixedRate"), py::arg("spread"), py::arg("fixLegFreq"),
+             py::arg("rateIndexContext"), py::arg("side"), py::arg("discountCurveContext"));
+
+    py::enum_<FixFloatSwap<dual>::Side>(m, "FixFloatSwapSide")
+        .value("Payer", FixFloatSwap<dual>::Side::PAY)
+        .value("Receiver", FixFloatSwap<dual>::Side::RECIEVE)
+        .export_values();
     // Visitors
     py::class_<Visitor<dual>>(m, "Visitor")
         .def("visit", py::overload_cast<FloatingRateInstrument<dual>&>(&Visitor<dual>::visit))
         .def("visit", py::overload_cast<FixedRateInstrument<dual>&>(&Visitor<dual>::visit))
         .def("visit", py::overload_cast<FxForward<dual>&>(&Visitor<dual>::visit))
-        .def("visit", py::overload_cast<VanillaSwap<dual>&>(&Visitor<dual>::visit));
+        .def("visit", py::overload_cast<FixFloatSwap<dual>&>(&Visitor<dual>::visit));
 
     py::class_<ConstVisitor<dual>>(m, "ConstVisitor")
         .def("visit", py::overload_cast<const FloatingRateInstrument<dual>&>(&ConstVisitor<dual>::visit, py::const_))
         .def("visit", py::overload_cast<const FixedRateInstrument<dual>&>(&ConstVisitor<dual>::visit, py::const_))
         .def("visit", py::overload_cast<const FxForward<dual>&>(&ConstVisitor<dual>::visit, py::const_))
-        .def("visit", py::overload_cast<const VanillaSwap<dual>&>(&ConstVisitor<dual>::visit, py::const_));
+        .def("visit", py::overload_cast<const FixFloatSwap<dual>&>(&ConstVisitor<dual>::visit, py::const_));
 
     py::class_<NPVCalculator<dual>, Visitor<dual>>(m, "NPVCalculator")
         .def(py::init<const MarketData<dual>&>(), py::arg("marketData"))

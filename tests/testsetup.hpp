@@ -52,6 +52,7 @@ struct TestSetup {
     DayCounter curveDayCounter   = Actual360();
     Compounding curveCompounding = Compounding::Simple;
     Frequency curveFrequency     = Frequency::Annual;
+    Frequency indexFrequency     = Frequency::Quarterly;
 
     // atlas curves & indexes
     MarketStore<adouble> store = MarketStore<adouble>(evalDate);
@@ -74,7 +75,7 @@ struct TestSetup {
         // create atlas curves
         FlatForwardStrategy<adouble> curveStrategy(curveRefDate, curveRate, curveDayCounter, curveCompounding, curveFrequency);
         YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
-        RateIndex<adouble> index(curveRefDate, curveFrequency, curveDayCounter);
+        RateIndex<adouble> index(curveRefDate, indexFrequency, curveDayCounter);
         store.addCurve("TEST", curve, index);
 
         FlatForwardStrategy<adouble> usdCurveStrategy(curveRefDate, usdCurveRate, curveDayCounter, curveCompounding, curveFrequency);
@@ -100,7 +101,7 @@ struct TestSetup {
     }
 
     void createQuantLibIndex() {
-        qlIndex = boost::make_shared<QuantLib::IborIndex>("TEST", Period(1, QuantLib::Months), 0, QuantLib::USDCurrency(), QuantLib::NullCalendar(),
+        qlIndex = boost::make_shared<QuantLib::IborIndex>("TEST", Period(3, QuantLib::Months), 0, QuantLib::USDCurrency(), QuantLib::NullCalendar(),
                                                           BusinessDayConvention::Unadjusted, false, curveDayCounter, forecastTermStructure);
         qlIndex->addFixing(Date(30, Month::July, 2020), 0.03);
     }
@@ -116,13 +117,16 @@ struct TestSetup {
 
     void createInstruments() {
         // create ql instruments
-        Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
-        qlFixBond         = new QuantLib::FixedRateBond(0, notional, schedule, {qlRate});
+        Schedule fixSchedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
+        qlFixBond            = new QuantLib::FixedRateBond(0, notional, fixSchedule, {qlRate});
 
         boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
         qlFixBond->setPricingEngine(bondEngine);
 
-        qlFloatBond                     = new QuantLib::FloatingRateBond(0, notional, schedule, qlIndex, dayCounter);
+        Schedule floatSchedule = MakeSchedule().from(startDate).to(endDate).withFrequency(indexFrequency);
+
+        qlFloatBond = new QuantLib::FloatingRateBond(0, notional, floatSchedule, qlIndex, curveDayCounter, QuantLib::Unadjusted, 0);
+
         QuantLib::Volatility volatility = 0.0;
         QuantLib::Handle<QuantLib::OptionletVolatilityStructure> vol;
         vol = QuantLib::Handle<QuantLib::OptionletVolatilityStructure>(boost::shared_ptr<QuantLib::OptionletVolatilityStructure>(
@@ -132,7 +136,6 @@ struct TestSetup {
         pricer->setCapletVolatility(vol);
         QuantLib::setCouponPricer(qlFloatBond->cashflows(), pricer);
         qlFloatBond->setPricingEngine(bondEngine);
-
         // create atlas instruments
         atlasFixBond = new FixedRateBulletInstrument<adouble>(startDate, endDate, paymentFrequency, notional, atlasRate, store.curveContext("TEST"));
         atlasFloatBond = new FloatingRateBulletInstrument<adouble>(startDate, endDate, notional, spread, store.rateIndexContext("TEST"),
