@@ -127,11 +127,11 @@ Boost incluye un instalador. Siga las instrucciones en https://www.boost.org/doc
 3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
 
 ```
-cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+cmake -S .. -B . -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
 cmake --build . --target INSTALL --config <config>
 ```
 
-#### Instalación modulo Python.
+#### Instalación modulo Python
 
 En el caso de querer instalar el paquete desde este repositorio, es necesario configurar el archivo ```setup.py```. En este caso, sera necesario tambien contar con pybind11 instalado. Por consistencia se recomienda utilizar CMAKE para esto, ya que de esta forma funcionará el comando ```find_package```. Una vez instalada y seleccionada la opcion ```BUID_PYTHON=ON``` al configurar Atlas, bastara con:
 
