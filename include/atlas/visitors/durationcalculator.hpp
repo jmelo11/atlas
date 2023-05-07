@@ -29,43 +29,31 @@ namespace Atlas {
             NPVCalculator<adouble> npvCacl(marketData_);
             InterestRate<adouble> rate = tmpProd.rate();
             adouble rateValue          = rate.rate();
-
             auto f = [&](adouble r) {
                 npvCacl.clear();
                 tmpProd.rate(r);
                 npvCacl.visit(tmpProd);
                 return npvCacl.results();
-            };
-
-            if constexpr (std::is_same_v<adouble, double>) {
-                adouble npv  = f(rate.rate());
-                adouble npv_ = f(rate.rate() + delta_);
-                results_     = (npv_ - npv) / npv / delta_;
-            } else {
-                //results_ = derivative(f, wrt(rateValue), at(rateValue)) / 100.0;
-            }
+            };        
+            adouble npv  = f(rate.rate());
+            adouble npv_ = f(rate.rate() + delta_);
+            results_     = (npv_ - npv) / npv / delta_;          
         };
 
         template <typename T>
         void floatingInstSens(const T& inst) const {
             T tmpProd      = inst;
             adouble spread = tmpProd.spread();
-
             NPVCalculator<adouble> npvCacl(marketData_);
             auto f = [&](adouble s) {
                 npvCacl.clear();
                 tmpProd.spread(s);
                 npvCacl.visit(tmpProd);
                 return npvCacl.results();
-            };
-
-            if constexpr (std::is_same_v<adouble, double>) {
-                adouble npv  = f(spread);
-                adouble npv_ = f(spread + delta_);
-                results_     = (npv_ - npv) / npv / delta_;
-            } else {
-                //results_ = derivative(f, wrt(spread), at(spread)) / 100.0;
-            }
+            };           
+            adouble npv  = f(spread);
+            adouble npv_ = f(spread + delta_);
+            results_     = (npv_ - npv) / npv / delta_;          
         };
 
         const MarketData<adouble>& marketData_;

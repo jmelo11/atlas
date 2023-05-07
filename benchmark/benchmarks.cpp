@@ -12,12 +12,13 @@
 #include <algorithm>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/models/spotmarketdatamodel.hpp>
+#include <atlas/multithreading/BS_thread_pool.hpp>
 #include <atlas/multithreading/threadpool.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <nanobench.h>
-
+#include <execution>
 using namespace Atlas;
 
 template <typename NumType>
@@ -96,13 +97,33 @@ void bechmarkFixedRateCoupons() {
         std::vector<TaskHandle> futures;
         for (auto& slice : slices) {
             auto task = [&]() {
-                for (size_t i = 0; i < slice.size(); ++i) { sum += slice[i].amount(); }
+                NumType sum_ = 0.0;
+                for (size_t i = 0; i < slice.size(); ++i) { sum_ += slice[i].amount(); }
+                sum += sum_;
                 return true;
             };
             futures.push_back(pool->spawnTask(task));
         }
         for (auto& future : futures) { pool->activeWait(future); }
         pool->stop();
+    });
+
+    BS::thread_pool pool2;
+    bench.run("Parallel 2 Amount: Atlas FixedRateCoupon", [&]() {
+        NumType sum = 0;
+        // parallel for each
+
+        BS::multi_future<bool> futures;
+        for (auto& slice : slices) {
+            auto task = [&]() {
+                NumType sum_ = 0.0;
+                for (size_t i = 0; i < slice.size(); ++i) { sum_ += slice[i].amount(); }
+                sum += sum_;
+                return true;
+            };
+            futures.push_back(pool2.submit(task));
+        }
+        futures.wait();
     });
 
     bench.run("Amount: QuantLib FixedRateCoupon", [&]() {
@@ -351,7 +372,6 @@ void pricingBenchmark() {
 
     bench.run("Parallel Price: Atlas FixedRateBulletInstrument", [&]() {
         pool->start();
-
         std::vector<TaskHandle> futures;
         NumType npv = 0;
         for (auto& slice : slices) {
@@ -377,6 +397,33 @@ void pricingBenchmark() {
 
         for (auto& future : futures) { pool->activeWait(future); }
         pool->stop();
+    });
+
+    BS::thread_pool pool2;
+    bench.run("Parallel Price: Atlas FixedRateBulletInstrument", [&]() {
+        NumType npv = 0;
+        BS::multi_future<bool> futures;
+        for (auto& slice : slices) {
+            auto task = [&]() {
+                // std::cout << pool->threadNum() << std::endl;
+
+                MarketStore<NumType> store(startDate);
+                store.cloneFromStore(mainStore_);
+
+                Indexer<NumType> indexer;
+                for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(indexer); }
+
+                MarketRequest request = indexer.request();
+                SpotMarketDataModel<NumType> model(request, store);
+                MarketData<NumType> marketData = model.marketData();
+                NPVCalculator<NumType> calculator(marketData);
+                for (size_t i = 0; i < slice.size(); i++) { slice[i].accept(calculator); }
+                npv += calculator.results();
+                return true;
+            };
+            futures.push_back(pool2.submit(task));
+        }
+        futures.wait();
     });
 
     // slices of quantlib instruments
@@ -434,12 +481,87 @@ void pricingBenchmark() {
     });
 }
 
+template <typename NumType>
+void pricingBenchmark2() {
+    ankerl::nanobench::Bench bench;
+
+    if constexpr (std::is_same_v<NumType, double>) {
+        bench.title("(double) Pricing 2 Instruments").warmup(200).relative(true);
+    } else {
+        bench.title("(dual) Pricing 2 Instruments").warmup(200).relative(true);
+    }
+    bench.performanceCounters(true);
+
+    // parameters
+    size_t numInstruments = 10000;
+    Date startDate(1, Month::Aug, 2020);
+    QuantLib::Settings::instance().evaluationDate() = startDate;
+    Date endDate(1, Month::September, 2025);
+    Frequency paymentFreq = Frequency::Semiannual;
+    double notional       = 100;
+    NumType rateValue     = 0.03;
+
+    DayCounter dayCounter   = Actual360();
+    Frequency frequency     = Frequency::Annual;
+    Compounding compounding = Compounding::Simple;
+    MarketStore<NumType> mainStore_(startDate);
+    FlatForwardStrategy<NumType> strategy(startDate, rateValue, dayCounter, compounding, frequency);
+    YieldTermStructure<NumType> curve_(std::make_unique<FlatForwardStrategy<NumType>>(strategy));
+    RateIndex<NumType> index(startDate, frequency);
+    mainStore_.addCurve("TEST", curve_, index);
+
+    auto& context = mainStore_.curveContext("TEST");
+
+    std::vector<FixedRateBulletInstrument<NumType>> instruments;
+    for (size_t i = 0; i < numInstruments; ++i) {
+        InterestRate<NumType> interestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+        instruments.push_back(FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, context));
+    }
+    Indexer<NumType> indexer;
+    bench.run("Indexer using for_each", [&]() {
+    std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(indexer); });
+    });
+
+    indexer.clear();
+    bench.run("Indexer using for_each (parallel)", [&]() {
+    std::for_each(std::execution::par, instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(indexer); });
+    });
+
+    MarketRequest request = indexer.request();
+    SpotMarketDataModel<NumType> model(request, mainStore_);
+    MarketData<NumType> marketData = model.marketData();
+    NPVCalculator<NumType> calculator(marketData);
+
+    bench.run("NPVCalculator using for_each", [&]() {
+    std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(calculator); });
+    });
+
+    if constexpr (std::is_same_v<NumType, double>) {
+        std::cout << "NPV: " << calculator.results() << std::endl;
+    } else {
+        std::cout << "NPV: " << val(calculator.results()) << std::endl;
+    }
+
+    calculator.clear();
+    bench.run("NPVCalculator using for_each (parallel)", [&]() {
+    std::for_each(std::execution::par, instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(calculator); });
+    });
+    
+    if constexpr (std::is_same_v<NumType, double>) {
+        std::cout << "NPV: " << calculator.results() << std::endl;
+    } else {
+        std::cout << "NPV: " << val(calculator.results()) << std::endl;
+    }
+}
+
 int main() {
     bechmarkFixedRateCoupons<double>();
-    bechmarkFloatingRateCoupons<double>();
+    //bechmarkFloatingRateCoupons<double>();
     pricingBenchmark<double>();
+    pricingBenchmark2<double>();
 
     bechmarkFixedRateCoupons<dual>();
-    bechmarkFloatingRateCoupons<dual>();
+    //bechmarkFloatingRateCoupons<dual>();
     pricingBenchmark<dual>();
+    pricingBenchmark2<dual>();
 }

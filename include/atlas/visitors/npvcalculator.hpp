@@ -47,6 +47,8 @@ namespace Atlas {
             npv += fixedLegNPV(inst.leg());
             npv += redemptionsNPV(inst.leg());
             adouble fx = marketData_.fxs.at(inst.disbursement().fxIdx());
+
+            std::lock_guard<std::mutex> lock(mtx_);
             npv_ += npv / fx;
         };
 
@@ -58,6 +60,8 @@ namespace Atlas {
         void visit(FloatingRateInstrument<adouble>& inst) override {
             adouble npv = floatingLegNPV(inst.leg()) + redemptionsNPV(inst.leg());
             adouble fx  = marketData_.fxs.at(inst.disbursement().fxIdx());
+
+            std::lock_guard<std::mutex> lock(mtx_);
             npv_ += npv / fx;
         };
 
@@ -74,7 +78,7 @@ namespace Atlas {
             adouble df  = marketData_.dfs.at(cashflows.at(0).dfIdx());
 
             adouble spot = marketData_.fxs.at(cashflows.at(1).fxIdx());
-
+            std::lock_guard<std::mutex> lock(mtx_);
             npv_ += (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
         };
 
@@ -86,7 +90,7 @@ namespace Atlas {
             npv += redemptionsNPV(inst.firstLeg()) * side * -1;
             npv += redemptionsNPV(inst.secondLeg()) * side * -1;
             adouble fx = marketData_.fxs.at(inst.firstLeg().coupons().at(0).fxIdx());
-
+            std::lock_guard<std::mutex> lock(mtx_);
             npv_ += npv / fx;
         }
 
@@ -139,7 +143,7 @@ namespace Atlas {
             }
             return npv;
         };
-
+        std::mutex mtx_;
         adouble npv_ = 0.0;
         const MarketData<adouble>& marketData_;
     };

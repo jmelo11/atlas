@@ -101,7 +101,7 @@ cmake -S .. -B . -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH='<path/to/builds/co
 cmake --build . --target INSTALL --config <config>
 ```
 
-Donde <config> puede ser Debug o Release, dependiendo de la configuración que desee compilar.
+Donde config puede ser Debug o Release, dependiendo de la configuración que desee compilar.
 
 #### Compilación de XAD con CMake
 
@@ -116,7 +116,6 @@ Donde <config> puede ser Debug o Release, dependiendo de la configuración que d
 cmake -S .. -B . -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DXAD_STATIC_MSVC_RUNTIME=OFF -DXAD_SIMD_OPTION='AVX2' 
 cmake --build . --target INSTALL --config <config>
 ```
-Donde <config> puede ser Debug o Release.
 
 #### Instalación de Boost
 Boost incluye un instalador. Siga las instrucciones en https://www.boost.org/doc/libs/1_82_0/more/getting_started/windows.html para instalarlo en su sistema.

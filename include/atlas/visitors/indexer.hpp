@@ -45,6 +45,8 @@ namespace Atlas {
             auto& ccy2Cashlfow = inst.leg().redemptions()[1];
             MarketRequest::ExchangeRate fwdPrice(ccy1Cashflow.currencyCode(), ccy2Cashlfow.currencyCode(), inst.endDate());
             MarketRequest::ExchangeRate spotPrice(ccy1Cashflow.currencyCode(), 0, Date());
+
+            std::lock_guard<std::mutex> lock(mtx_);
             if (fxPricesMap_.find(fwdPrice) == fxPricesMap_.end()) {
                 fxPricesVector_.push_back(fwdPrice);
                 fxPricesMap_[fwdPrice] = fxPricesVector_.size() - 1;
@@ -103,8 +105,11 @@ namespace Atlas {
         template <typename Flow>
         void indexCashflow(Flow& cashflow) {
             if (!cashflow.hasDiscountContext()) { throw std::runtime_error("Cashflow does not have a discount curve context."); }
+
             size_t curveIdx         = cashflow.discountContextIdx();
             const Date& paymentDate = cashflow.paymentDate();
+            
+            std::lock_guard<std::mutex> lock(mtx_);
             evaluationDates_.insert(paymentDate);
 
             MarketRequest::DiscountFactor df(curveIdx, paymentDate);
@@ -132,7 +137,7 @@ namespace Atlas {
             if (cashflow.applyCcy()) { indexExchangeRate(cashflow, true); }
         };
 
-        void indexExchangeRate(Cashflow<adouble>& cashflow, bool atPaymentDate = false) {
+        void indexExchangeRate(Cashflow<adouble>& cashflow, bool atPaymentDate = false) {        
             Date fxDate;
             if (atPaymentDate) {
                 fxDate = cashflow.paymentDate();
@@ -140,6 +145,8 @@ namespace Atlas {
                 fxDate = Date();
             }
             MarketRequest::ExchangeRate fx(cashflow.currencyCode(), 0, fxDate);  // cashflow ccy to local ccy
+            
+            std::lock_guard<std::mutex> lock(mtx_);
             if (fxPricesMap_.find(fx) == fxPricesMap_.end()) {
                 fxPricesVector_.push_back(fx);
                 fxPricesMap_[fx] = fxPricesVector_.size() - 1;
@@ -160,6 +167,7 @@ namespace Atlas {
         std::unordered_map<MarketRequest::ExchangeRate, size_t> fxPricesMap_;
 
         std::set<Date> evaluationDates_;
+        std::mutex mtx_;
     };
 }  // namespace Atlas
 
