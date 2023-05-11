@@ -4,7 +4,7 @@ from setuptools import setup
 from pathlib import Path
 from sys import platform
 
-__version__ = "2.0.3"
+__version__ = "2.0.4"
 
 LIB_DIR = Path("/Users/josemelo/desktop/dev/builds")
 include_dirs = [str(LIB_DIR / 'include'), '/opt/homebrew/include']

@@ -58,7 +58,7 @@ TEST(DiscountCurve, ForwardRateTest) {
     std::vector<double> discounts = {1, 0.9, 0.85};
     DayCounter dayCounter         = Actual360();
     DiscountStrategy<double, LogLinearInterpolator<double>> curve(dates, discounts, dayCounter);
-    curve.enableExtrapolation();
+    curve.enableExtrapolation(true);
     QuantLib::Settings::instance().evaluationDate() = dates[0];
     QuantLib::DiscountCurve qlCurve(dates, discounts, dayCounter);
 

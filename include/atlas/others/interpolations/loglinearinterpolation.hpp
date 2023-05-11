@@ -19,7 +19,7 @@ namespace Atlas {
 
         adouble operator()(double x) const override { return logLinearInterpolation(x); }
 
-        void enableExtrapolation() { extrapolate_ = true; }
+        void enableExtrapolation(bool e) { extrapolate_ = e; }
        private:
         adouble logLinearInterpolation(double x) const {
             auto it      = std::lower_bound(x_.begin(), x_.end(), x);

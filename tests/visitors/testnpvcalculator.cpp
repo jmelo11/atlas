@@ -8,13 +8,13 @@
 #include <ql/pricingengines/swap/discountingswapengine.hpp>
 #include <ql/termstructures/volatility/optionlet/constantoptionletvol.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
+#include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateequalredemptioninstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/models/spotmarketdatamodel.hpp>
-#include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
-
 using namespace Atlas;
 
 TEST(NPVCalculator, FixedRateInstrument) {
@@ -22,6 +22,31 @@ TEST(NPVCalculator, FixedRateInstrument) {
     TestSetup<double> vars;
     auto& instrument = *vars.atlasFixBond;
     auto& qlBond     = *vars.qlFixBond;
+
+    Indexer<double> indexer;
+    indexer.visit(instrument);
+    MarketRequest request;
+    indexer.setRequest(request);
+    SpotMarketDataModel<double> model(request, vars.store);
+    MarketData<double> marketData = model.marketData();
+    NPVCalculator<double> npvCalculator(marketData);
+    npvCalculator.visit(instrument);
+
+    EXPECT_NEAR(npvCalculator.results(), qlBond.NPV(), 1e-6);
+}
+
+TEST(NPVCalculator, EqualPaymentInstrument) {
+    // Create a fixed rate instrument
+    TestSetup<double> vars;
+    auto& store = vars.store;
+
+    
+    auto context = store.curveContext("Zero");
+    Date startDate = Date(1, Month::Aug, 2017);
+    Date endDate   = Date(1, Month::Aug, 2024);
+    Frequency freq = Frequency::Monthly;
+    EqualPaymentInstrument instrument(startDate, endDate, freq, vars.notional, vars.atlasRate, context);
+    auto& qlBond = *vars.qlFixBond;
 
     Indexer<double> indexer;
     indexer.visit(instrument);
@@ -145,7 +170,7 @@ TEST(NPVCalculator, FixFloatSwap) {
     auto& store                = vars.store;
     Frequency paymentFrequency = Frequency::Quarterly;
     FixFloatSwap<double> swap(vars.startDate, vars.endDate, vars.notional, vars.atlasRate, vars.spread, paymentFrequency,
-                             store.rateIndexContext("TEST"), FixFloatSwap<double>::Side::PAY);
+                              store.rateIndexContext("TEST"), FixFloatSwap<double>::Side::PAY);
 
     swap.firstLeg().discountCurveContext(store.curveContext("TEST"));
     swap.secondLeg().discountCurveContext(store.curveContext("TEST"));
@@ -163,8 +188,8 @@ TEST(NPVCalculator, FixFloatSwap) {
     Calendar calendar      = QuantLib::NullCalendar();
     Schedule fixSchedule   = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(paymentFrequency).withCalendar(calendar);
     Schedule floatSchedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.indexFrequency).withCalendar(calendar);
-    QuantLib::VanillaSwap qlSwap(QuantLib::VanillaSwap::Payer, vars.notional, fixSchedule, vars.qlRate, vars.dayCounter, floatSchedule,
-                                      vars.qlIndex, 0, vars.curveDayCounter);
+    QuantLib::VanillaSwap qlSwap(QuantLib::VanillaSwap::Payer, vars.notional, fixSchedule, vars.qlRate, vars.dayCounter, floatSchedule, vars.qlIndex,
+                                 0, vars.curveDayCounter);
 
     boost::shared_ptr<QuantLib::PricingEngine> engine(new QuantLib::DiscountingSwapEngine(vars.discountingTermStructure));
     qlSwap.setPricingEngine(engine);

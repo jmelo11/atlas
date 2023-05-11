@@ -1,7 +1,7 @@
 #ifndef AC01F282_C361_4B38_B915_0868E05A75BC
 #define AC01F282_C361_4B38_B915_0868E05A75BC
 
-#include <ql/interestrate.hpp>
+#include <ql/math/solvers1d/brent.hpp>
 #include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 #include <type_traits>
 
@@ -14,6 +14,7 @@ namespace Atlas {
     template <typename adouble>
     class EqualPaymentInstrument : public FixedRateInstrument<adouble> {
        public:
+        enum BuildType { Fast, Precise };
         /**
          * @brief Construct a new Equal Payment Instrument object
          *
@@ -25,14 +26,24 @@ namespace Atlas {
          * @param recalcNotionals recalculate notionals based on the given rate
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               bool recalcNotionals = false)
+                               bool recalcNotionals = false, BuildType buildType = BuildType::Fast)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, notional), recalcNotionals_(recalcNotionals) {
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
             this->dates_ = schedule.dates();
 
             // calculate redemptions for a equal payment structure
-            calculateRedemptions(this->dates_, this->rate_, notional);
+            switch (buildType) {
+                case BuildType::Fast:
+                    calculateRedemptions2(this->dates_, this->rate_, this->notional_);
+                    break;
+                case BuildType::Precise:
+                    calculateRedemptions(this->dates_, this->rate_, this->notional_);
+                    break;
+                default:
+                    calculateRedemptions(this->dates_, this->rate_, this->notional_);
+                    break;
+            }
 
             // calculate each corresponding notional
             this->calculateNotionals(this->dates_, this->rate_);
@@ -51,7 +62,8 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               const Context<YieldTermStructure<adouble>>& discountCurveContext, bool recalcNotionals = false)
+                               const Context<YieldTermStructure<adouble>>& discountCurveContext, bool recalcNotionals = false,
+                               BuildType buildType = BuildType::Fast)
         : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, recalcNotionals) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
@@ -131,6 +143,48 @@ namespace Atlas {
             }
         };
 
+        void calculateRedemptions2(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional) {
+            auto k = [&](double payment) {
+                double totalAmount = notional;
+                for (size_t i = 1; i < dates.size(); i++) {
+                    if constexpr (std::is_same_v<adouble, double>) {
+                        double I = totalAmount * (rate.compoundFactor(dates[i - 1], dates[i]) - 1);
+                        totalAmount -= payment - I;
+                    } else {
+                        double I = totalAmount * (val(rate.compoundFactor(dates[i - 1], dates[i])) - 1);
+                        totalAmount -= payment - I;
+                    }
+                }
+                return totalAmount;
+            };
+
+            double r_;
+            if constexpr (std::is_same_v<adouble, double>) {
+                r_ = rate.rate() / 12;
+            } else {
+                r_ = val(rate.rate()) / 12;
+            }
+            int p        = dates.size() - 1;
+            double guess = r_ / (1 - pow(1 + r_, -p)) * notional;
+            // double guess = 1;
+            QuantLib::Brent solver_;
+            double payment = solver_.solve(k, 1e-4, guess, 0.1);
+
+            double totalAmount = notional;
+            for (size_t i = 1; i < dates.size(); i++) {
+                double k = 0.0;
+                if constexpr (std::is_same_v<adouble, double>) {
+                    double I = totalAmount * (rate.compoundFactor(dates[i - 1], dates[i]) - 1);
+                    k        = payment - I;
+                } else {
+                    double I = totalAmount * (val(rate.compoundFactor(dates[i - 1], dates[i])) - 1);
+                    k        = payment - I;
+                }
+                totalAmount -= k;
+                Redemption<adouble> redemption(dates[i], k);
+                this->leg().addRedemption(redemption);
+            }
+        }
         bool recalcNotionals_;
         std::vector<Date> dates_;
     };

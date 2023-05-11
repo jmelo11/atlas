@@ -14,6 +14,8 @@
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/rates/rateindex.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
+#include <atlas/rates/yieldtermstructure/zeroratecurve.hpp>
+#include <atlas/others/interpolations/linearinterpolation.hpp>
 
 using namespace Atlas;
 
@@ -82,6 +84,13 @@ struct TestSetup {
         YieldTermStructure<adouble> usdCurve(std::make_unique<FlatForwardStrategy<adouble>>(usdCurveStrategy));
         store.addCurve("CLP", curve, index);
         store.addCurve("USD", usdCurve, index);
+
+        std::vector<adouble> rates = {0.01, 0.02, 0.03, 0.04, 0.05};
+        std::vector<Date> dates   = {Date(1, Month::Aug, 2020), Date(1, Month::Aug, 2021), Date(1, Month::Aug, 2023), Date(1, Month::Aug, 2025),
+                                     Date(1, Month::Aug, 2030)};
+        ZeroRateStrategy<adouble, LinearInterpolator<adouble>> strategy(dates, rates, curveDayCounter);
+        YieldTermStructure<adouble> zeroCurve(std::make_unique<ZeroRateStrategy<adouble, LinearInterpolator<adouble>>>(strategy));
+        store.addCurve("Zero", zeroCurve, index);
 
         // for fx testing
         adouble exchange = 800;

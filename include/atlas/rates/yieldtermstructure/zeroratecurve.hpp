@@ -8,9 +8,9 @@ namespace Atlas {
 
     /**
      * @brief A class representing a zero rate curve
-     * 
-     * @tparam adouble 
-     * @tparam Interpol 
+     *
+     * @tparam adouble
+     * @tparam Interpol
      */
     template <typename adouble, typename Interpol>
     class ZeroRateStrategy : public YieldTermStructureStrategy<adouble> {
@@ -23,7 +23,7 @@ namespace Atlas {
             times_    = std::vector<double>(dates.size());
             times_[0] = 0.0;
 
-            for (auto i = 1; i < dates.size(); ++i) {
+            for (size_t i = 1; i < dates.size(); ++i) {
                 if (dates[i] < dates[i - 1]) { throw std::invalid_argument("dates must be sorted"); }
                 double t = dayCounter.yearFraction(dates[0], dates[i]);
                 if (t < 0) throw std::invalid_argument("dates must be greater than reference date");
@@ -33,7 +33,7 @@ namespace Atlas {
             interpol_      = Interpol(times_, zeroRates_);
         }
 
-        adouble discount(const Date& date) const override  {
+        adouble discount(const Date& date) const override {
             double t = dayCounter_.yearFraction(this->refDate_, date);
             if (t < 0) throw std::invalid_argument("date must be greater than reference date");
             InterestRate<adouble> rate(interpol_(t), dayCounter_, comp_, freq_);
@@ -57,6 +57,8 @@ namespace Atlas {
         std::unique_ptr<YieldTermStructureStrategy<adouble>> clone() const override {
             return std::make_unique<ZeroRateStrategy<adouble, Interpol>>(*this);
         };
+
+        void enableExtrapolation(bool e) { interpol_.enableExtrapolation(e); };
 
        private:
         DayCounter dayCounter_;

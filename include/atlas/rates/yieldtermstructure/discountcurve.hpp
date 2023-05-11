@@ -53,7 +53,7 @@ namespace Atlas {
             return std::make_unique<DiscountStrategy<adouble, Interpol>>(dates_, dfs_, dayCounter_);
         };
 
-        void enableExtrapolation() { interpol_.enableExtrapolation(); }
+        void enableExtrapolation(bool e) { interpol_.enableExtrapolation(e); };
 
        private:
         DayCounter dayCounter_;

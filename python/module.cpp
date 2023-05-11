@@ -97,7 +97,7 @@ namespace Aux {
             m = std::to_string(date.month());
         }
         y = std::to_string(date.year());
-        return d + "-" + m + "-" + y;
+        return y + "-" + m + "-" + d;
     }
 
     class PyCoupon : public Coupon<dual> {
@@ -173,6 +173,13 @@ PYBIND11_MODULE(Atlas, m) {
         .def("__str__", [](const dual& d) { return "Dual(" + std::to_string(val(d)) + ")"; })
         .def("__repr__", [](const dual& d) { return "Dual(" + std::to_string(val(d)) + ")"; })
         .def("__float__", [](const dual& d) { return val(d); })
+        .def(py::self == py::self)
+        .def(py::self != py::self)
+        .def(py::self < py::self)
+        .def(py::self <= py::self)
+        .def(py::self > py::self)
+        .def(py::self >= py::self)
+        .def("__add__", [](const dual& d1, const dual& d2) { return d1 + d2; })
         .def("setDerivative", py::overload_cast<double>(&dual::setDerivative))
         .def("getDerivative", py::overload_cast<>(&dual::getDerivative, py::const_));
 
@@ -184,7 +191,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def("newRecording", &tape_type::newRecording)
         .def("clearAll", &tape_type::clearAll)
         .def("getMemory", &tape_type::getMemory)
-        .def("clearDerivatives", &tape_type::clearDerivatives);
+        .def("clearDerivatives", &tape_type::clearDerivatives)
+        .def("printStatus", &tape_type::printStatus);
 
     // QL Types
     // Date
@@ -203,12 +211,12 @@ PYBIND11_MODULE(Atlas, m) {
         .def(py::self - py::self)
         .def(py::self += int())
         .def(py::self -= int())
-        .def("__lt__", [](const Date& d1, const Date& d2) { return d1 < d2; })
-        .def("__le__", [](const Date& d1, const Date& d2) { return d1 <= d2; })
-        .def("__gt__", [](const Date& d1, const Date& d2) { return d1 > d2; })
-        .def("__ge__", [](const Date& d1, const Date& d2) { return d1 >= d2; })
-        .def("__eq__", [](const Date& d1, const Date& d2) { return d1 == d2; })
-        .def("__ne__", [](const Date& d1, const Date& d2) { return d1 != d2; })
+        .def(py::self == py::self)
+        .def(py::self != py::self)
+        .def(py::self < py::self)
+        .def(py::self <= py::self)
+        .def(py::self > py::self)
+        .def(py::self >= py::self)
         .def("__hash__", [](const Date& d) { return std::hash<Date>()(d); });
 
     // enums
@@ -404,7 +412,8 @@ PYBIND11_MODULE(Atlas, m) {
                std::shared_ptr<DiscountStrategy<dual, LogLinearInterpolator<dual>>>>(m, "DiscountLogLinearStrategy")
         .def(py::init<const std::vector<Date>&, const std::vector<dual>&, const DayCounter&>(), py::arg("dates"), py::arg("discounts"),
              py::arg("dayCounter") = Actual360())
-        .def(py::init<const DiscountStrategy<dual, LogLinearInterpolator<dual>>&>());
+        .def(py::init<const DiscountStrategy<dual, LogLinearInterpolator<dual>>&>())
+        .def("enableExtrapolation", &DiscountStrategy<dual, LogLinearInterpolator<dual>>::enableExtrapolation);
 
     py::class_<FlatForwardStrategy<dual>, YieldTermStructureStrategy<dual>, std::shared_ptr<FlatForwardStrategy<dual>>>(m, "FlatForwardStrategy")
         .def(py::init<const Date&, dual, const DayCounter&, Compounding, Frequency>(), py::arg("refDate"), py::arg("rate"),
@@ -416,7 +425,8 @@ PYBIND11_MODULE(Atlas, m) {
         .def(py::init<const std::vector<Date>&, const std::vector<dual>&, const DayCounter&, Compounding, Frequency>(), py::arg("dates"),
              py::arg("zeroRates"), py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Simple,
              py::arg("frequency") = Frequency::Annual)
-        .def(py::init<const ZeroRateStrategy<dual, LinearInterpolator<dual>>&>());
+        .def(py::init<const ZeroRateStrategy<dual, LinearInterpolator<dual>>&>())
+        .def("enableExtrapolation", &ZeroRateStrategy<dual, LinearInterpolator<dual>>::enableExtrapolation);
 
     // RateIndex
     py::class_<RateIndex<dual>>(m, "RateIndex")
@@ -574,11 +584,18 @@ PYBIND11_MODULE(Atlas, m) {
              py::arg("endDate"), py::arg("notional"), py::arg("rate"), py::arg("discountCurveContext"));
 
     py::class_<EqualPaymentInstrument<dual>, FixedRateInstrument<dual>>(m, "EqualPaymentInstrument")
-        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, bool>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("recalculateNotionals") = false)
-        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&, bool>(),
+        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, bool, EqualPaymentInstrument<dual>::BuildType>(),
+             py::arg("startDate"), py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"),
+             py::arg("recalculateNotionals") = false, py::arg("buildType") = EqualPaymentInstrument<dual>::BuildType::Fast)
+        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&, bool,
+                      EqualPaymentInstrument<dual>::BuildType>(),
              py::arg("startDate"), py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("discountCurveContext"),
-             py::arg("recalculateNotionals") = false);
+             py::arg("recalculateNotionals") = false, py::arg("buildType") = EqualPaymentInstrument<dual>::BuildType::Fast);
+
+    py::enum_<EqualPaymentInstrument<dual>::BuildType>(m, "EqualPaymentInstrumentBuildType")
+        .value("Fast", EqualPaymentInstrument<dual>::BuildType::Fast)
+        .value("Precise", EqualPaymentInstrument<dual>::BuildType::Precise)
+        .export_values();
 
     py::class_<CustomFixedRateInstrument<dual>, FixedRateInstrument<dual>>(m, "CustomFixedRateInstrument")
         .def(py::init<const std::vector<Date>&, const std::vector<double>&, const InterestRate<dual>&>(), py::arg("dates"), py::arg("notionals"),

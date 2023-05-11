@@ -19,7 +19,7 @@ namespace Atlas {
 
         adouble operator()(double x) const override { return linearInterpolation(x); }
 
-        void enableExtrapolation() { extrapolate_ = true; }
+        void enableExtrapolation(bool e) { extrapolate_ = e; }
 
        private:
         adouble linearInterpolation(double x) const {
