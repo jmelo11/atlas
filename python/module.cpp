@@ -583,6 +583,11 @@ PYBIND11_MODULE(Atlas, m) {
         .def(py::init<const Date&, const Date&, double, const InterestRate<dual>&, const Context<YieldTermStructure<dual>>&>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("notional"), py::arg("rate"), py::arg("discountCurveContext"));
 
+    py::enum_<EqualPaymentInstrument<dual>::BuildType>(m, "EqualPaymentInstrumentBuildType")
+        .value("Fast", EqualPaymentInstrument<dual>::BuildType::Fast)
+        .value("Precise", EqualPaymentInstrument<dual>::BuildType::Precise)
+        .export_values();
+        
     py::class_<EqualPaymentInstrument<dual>, FixedRateInstrument<dual>>(m, "EqualPaymentInstrument")
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<dual>&, bool, EqualPaymentInstrument<dual>::BuildType>(),
              py::arg("startDate"), py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"),
@@ -591,11 +596,6 @@ PYBIND11_MODULE(Atlas, m) {
                       EqualPaymentInstrument<dual>::BuildType>(),
              py::arg("startDate"), py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("discountCurveContext"),
              py::arg("recalculateNotionals") = false, py::arg("buildType") = EqualPaymentInstrument<dual>::BuildType::Fast);
-
-    py::enum_<EqualPaymentInstrument<dual>::BuildType>(m, "EqualPaymentInstrumentBuildType")
-        .value("Fast", EqualPaymentInstrument<dual>::BuildType::Fast)
-        .value("Precise", EqualPaymentInstrument<dual>::BuildType::Precise)
-        .export_values();
 
     py::class_<CustomFixedRateInstrument<dual>, FixedRateInstrument<dual>>(m, "CustomFixedRateInstrument")
         .def(py::init<const std::vector<Date>&, const std::vector<double>&, const InterestRate<dual>&>(), py::arg("dates"), py::arg("notionals"),
