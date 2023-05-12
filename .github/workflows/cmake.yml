@@ -29,12 +29,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Boost
-        run: sudo apt-get -y update && sudo apt-get -y install libboost-dev
+      - name: Install build dependencies
+        run: sudo apt-get -y update && sudo apt-get -y install build-essential g++ python-dev autotools-dev libicu-dev build-essential libbz2-dev libboost-all-dev
+      - name: Download Boost
+        run: wget https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.tar.bz2
+      - name: Extract Boost
+        run: tar --bzip2 -xf boost_1_75_0.tar.bz2
+      - name: Build and Install Boost
+        run: |
+          cd boost_1_75_0
+          ./bootstrap.sh --prefix=${{github.workspace}}/${{env.INSTALL_DIR}}
+          ./b2 install
       - name: Cache Boost
         uses: actions/cache@v2
         with:
-          path: usr/include/boost
+          path: ${{github.workspace}}/${{env.INSTALL_DIR}}
           key: boost-cache
           
   build_XAD:
@@ -98,7 +107,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get_repos, build_boost, build_ql, build_XAD]
     steps:
-    - uses: actions/checkout@v3          
+    - uses: actions/checkout@v3
+    - name: Cache Boost
+      uses: actions/cache@v2
+      with:
+        path: ${{github.workspace}}/${{env.INSTALL_DIR}}
+        key: boost-cache
+    - name: Cache Boost
+      uses: actions/cache@v2
+      with:
+        path: ${{github.workspace}}/${{env.INSTALL_DIR}}
+        key: boost-cache
+    - name: Cache XAD
+      uses: actions/cache@v2
+      with:
+        path: ${{github.workspace}}/${{env.INSTALL_DIR}}
+        key: xad-cache
+    - name: Cache QL
+      uses: actions/cache@v2
+      with:
+        path: ${{github.workspace}}/${{env.INSTALL_DIR}}
+        key: ql-cache
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
     - name: Build    
