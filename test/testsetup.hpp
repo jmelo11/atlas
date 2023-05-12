@@ -127,7 +127,7 @@ struct TestSetup {
     void createInstruments() {
         // create ql instruments
         Schedule fixSchedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
-        qlFixBond            = new QuantLib::FixedRateBond(0, notional, fixSchedule, {qlRate});
+        qlFixBond            = new QuantLib::FixedRateBond(0, notional, fixSchedule, {qlRate.rate()}, dayCounter);
 
         boost::shared_ptr<QuantLib::PricingEngine> bondEngine(new QuantLib::DiscountingBondEngine(discountingTermStructure));
         qlFixBond->setPricingEngine(bondEngine);

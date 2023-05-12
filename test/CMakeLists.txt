@@ -15,6 +15,9 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+include (CTest)
+enable_testing()
+
 add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC gtest_main)
 
@@ -28,3 +31,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Atlas)
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad)
 
 include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")
+
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
