@@ -1,4 +1,4 @@
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include "../testsetup.hpp"
 #include <ql/cashflows/iborcoupon.hpp>
 #include <atlas/cashflows/legs/makeleg.hpp>

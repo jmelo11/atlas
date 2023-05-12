@@ -1,5 +1,5 @@
 
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 

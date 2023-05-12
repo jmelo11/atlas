@@ -1,4 +1,4 @@
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include <ql/termstructures/yield/discountcurve.hpp>
 #include <atlas/others/interpolations/linearinterpolation.hpp>
 #include <atlas/others/interpolations/loglinearinterpolation.hpp>

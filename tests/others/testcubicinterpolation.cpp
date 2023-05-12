@@ -1,4 +1,4 @@
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include <atlas/others/interpolations/cubicinterpolation.hpp>
 
 using namespace Atlas;

@@ -1,5 +1,5 @@
 
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include <ql/math/interpolations/linearinterpolation.hpp>
 #include <ql/termstructures/yield/zerocurve.hpp>
 #include <atlas/others/interpolations/linearinterpolation.hpp>

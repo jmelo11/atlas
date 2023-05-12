@@ -9,8 +9,8 @@
 #include <ql/termstructures/volatility/optionlet/constantoptionletvol.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
-#include <atlas/instruments/fixedrate/fixedrateequalredemptioninstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateequalredemptioninstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/models/spotmarketdatamodel.hpp>
 #include <atlas/visitors/indexer.hpp>
@@ -40,24 +40,32 @@ TEST(NPVCalculator, EqualPaymentInstrument) {
     TestSetup<double> vars;
     auto& store = vars.store;
 
-    
-    auto context = store.curveContext("Zero");
+    auto context   = store.curveContext("Zero");
     Date startDate = Date(1, Month::Aug, 2017);
     Date endDate   = Date(1, Month::Aug, 2024);
     Frequency freq = Frequency::Monthly;
-    EqualPaymentInstrument instrument(startDate, endDate, freq, vars.notional, vars.atlasRate, context);
-    auto& qlBond = *vars.qlFixBond;
+    EqualPaymentInstrument<double> instrument(startDate, endDate, freq, vars.notional, vars.atlasRate, context, false,
+                                      EqualPaymentInstrument<double>::BuildType::Precise);
+    EqualPaymentInstrument<double> instrument2(startDate, endDate, freq, vars.notional, vars.atlasRate, context, false,
+                                       EqualPaymentInstrument<double>::BuildType::Fast);
 
     Indexer<double> indexer;
     indexer.visit(instrument);
+    indexer.visit(instrument2);
     MarketRequest request;
     indexer.setRequest(request);
+
     SpotMarketDataModel<double> model(request, vars.store);
     MarketData<double> marketData = model.marketData();
     NPVCalculator<double> npvCalculator(marketData);
     npvCalculator.visit(instrument);
+    double npv1 = npvCalculator.results();
 
-    EXPECT_NEAR(npvCalculator.results(), qlBond.NPV(), 1e-6);
+    npvCalculator.clear();
+    npvCalculator.visit(instrument2);
+    double npv2 = npvCalculator.results();
+
+    EXPECT_NEAR(npv1, npv2, 1e-8);
 }
 
 TEST(NPVCalculator, FixedRateInstrumentDual) {

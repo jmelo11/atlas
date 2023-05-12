@@ -1,7 +1,7 @@
 #ifndef ED4FE09D_1DB6_49CB_AD5A_B4C22DD2A839
 #define ED4FE09D_1DB6_49CB_AD5A_B4C22DD2A839
 
-#include "pch.hpp"
+#include <gtest/gtest.h>
 #include <ql/cashflows/couponpricer.hpp>
 #include <ql/indexes/ibor/usdlibor.hpp>
 #include <ql/instruments/bonds/fixedratebond.hpp>

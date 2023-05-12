@@ -1,7 +1,7 @@
 #ifndef CDF79660_C142_4893_AE44_D9D945717DDB
 #define CDF79660_C142_4893_AE44_D9D945717DDB
 
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include <atlas/atlasconfig.hpp>
 #include <atlas/fundation/marketstore.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>

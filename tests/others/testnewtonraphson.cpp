@@ -1,4 +1,4 @@
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include <atlas/others/newtonraphsonsolver.hpp>
 using namespace Atlas;
 

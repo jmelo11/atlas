@@ -1,4 +1,4 @@
-#include "../pch.hpp"
+#include <gtest/gtest.h>
 #include <atlas/atlasconfig.hpp>
 #include <atlas/fundation/exchangeratemanager.hpp>
 
