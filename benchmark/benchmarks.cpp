@@ -432,7 +432,7 @@ void pricingBenchmark() {
     Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFreq);
     for (size_t i = 0; i < numThreads; ++i) {
         std::vector<QuantLib::FixedRateBond> slice;
-        for (size_t j = 0; j < sliceSize; ++j) { slice.push_back(QuantLib::FixedRateBond(0, notional, schedule, {qlInterestRate})); }
+        for (size_t j = 0; j < sliceSize; ++j) { slice.push_back(QuantLib::FixedRateBond(0, notional, schedule, {qlInterestRate.rate()}, Actual360())); }
         qlSlices.push_back(slice);
     }
 
