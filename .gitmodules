@@ -1,0 +1,6 @@
+[submodule "repos/QuantLib"]
+	path = repos/QuantLib
+	url = https://github.com/lballabio/QuantLib.git
+[submodule "repos/XAD"]
+	path = repos/XAD
+	url = https://github.com/xcelerit/XAD.git
