@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DXAD_SIMD_OPTION='SSE' -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}} -DXAD_ENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_DIR}}
+          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DXAD_SIMD_OPTION='SSE'  -DXAD_ENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/${{env.INSTALL_DIR}} -DCMAKE_PREFIX_PATH=${{github.workspace}}/${{env.INSTALL_DIR}}
       - name: Build XAD
         working-directory: ${{github.workspace}}/repos/XAD/build
         run: cmake --build . --config ${{env.BUILD_TYPE}} --target install    
@@ -37,12 +37,15 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DQL_TAGGED_LAYOUT=OFF -DBOOST_ROOT=/usr -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}}  -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_DIR}}
+          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DQL_TAGGED_LAYOUT=OFF -DBOOST_ROOT=/usr -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/${{env.INSTALL_DIR}} -DCMAKE_PREFIX_PATH=${{github.workspace}}/${{env.INSTALL_DIR}}
       - name: Build QL
         working-directory: ${{github.workspace}}/repos/QuantLib/build
         run: cmake --build . --config ${{env.BUILD_TYPE}} --target install  
       - name: Configure Atlas
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}} -DCMAKE_INSTALL_PREFIX=${{env.INSTALL_DIR}}
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/${{env.INSTALL_DIR}} -DCMAKE_PREFIX_PATH=${{github.workspace}}/${{env.INSTALL_DIR}}
       - name: Build Atlas
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target INSTALL
       - name: Test
