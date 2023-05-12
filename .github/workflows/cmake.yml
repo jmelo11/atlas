@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DXAD_SIMD_OPTION='SSE' -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}}
+          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DXAD_SIMD_OPTION='SSE' -DCMAKE_PREFIX_PATH=${{env.INSTALL_DIR}} -DXAD_ENABLE_TESTS=OFF
       - name: Build XAD
         working-directory: ${{github.workspace}}/repos/XAD/build
         run: cmake --build . --config ${{env.BUILD_TYPE}} --target install    
