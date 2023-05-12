@@ -36,8 +36,8 @@ jobs:
       run: cmake --build . --config ${{env.BUILD_TYPE}}
 
     - name: Configure XAD
-      working-directory: ${{github.workspace}}/repos/XAD/build
-      run: cmake -S .. -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DXAD_SIMD_OPTION='SSE' 
+      working-directory: ${{github.workspace}}/repos/XAD
+      run: mkdir build && cd build && cmake -S .. -B . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DXAD_SIMD_OPTION='SSE' 
     
     - name: Build XAD
       working-directory: ${{github.workspace}}/repos/XAD/build
