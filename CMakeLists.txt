@@ -8,14 +8,10 @@ set(BUILD_PYTHON ON)
 set(BUILD_TESTS ON)
 set(BUILD_BENCHMARK ON)
 set(BUILD_EXAMPLES ON)
-set(BUILD_REPOS ON)
+
 
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD /EHsc /MP")
-endif()
-
-if(BUILD_REPOS)
-  add_subdirectory(repos)
 endif()
 
 file(
@@ -111,10 +107,6 @@ if(BUILD_PYTHON)
   add_subdirectory(python)
 endif()
 
-if(BUILD_TESTS)
-  add_subdirectory(test)
-endif()
-
 if(BUILD_BENCHMARK)
   add_subdirectory(benchmark)
 endif()
@@ -123,4 +115,7 @@ if(BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(test)
+endif()
