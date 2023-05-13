@@ -7,23 +7,23 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB SOURCES "*.cpp")
 file(GLOB INCLUDES "*.hpp")
 
-find_package(pybind11 REQUIRED)
-find_package(Boost REQUIRED)
-find_package(QuantLib REQUIRED)
+# find_package(pybind11 REQUIRED)
+# find_package(Boost REQUIRED)
+# find_package(QuantLib REQUIRED)
 find_package(XAD REQUIRED)
-find_package(Atlas REQUIRED)
+# find_package(Atlas REQUIRED)
 
-pybind11_add_module(${PROJECT_NAME} MODULE ${SOURCES} ${INCLUDES})
-target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad Atlas::Atlas pybind11::module)
+# pybind11_add_module(${PROJECT_NAME} MODULE ${SOURCES} ${INCLUDES})
+# target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad Atlas::Atlas pybind11::module)
 
-target_include_directories(${PROJECT_NAME}
-  PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${Boost_INCLUDE_DIRS}
-    ${QuantLib_INCLUDE_DIRS}
-    ${XAD_INCLUDE_DIRS}
-    ${Atlas_INCLUDE_DIRS}
-)
+# target_include_directories(${PROJECT_NAME}
+#   PUBLIC
+#     ${CMAKE_CURRENT_SOURCE_DIR}/include
+#     ${Boost_INCLUDE_DIRS}
+#     ${QuantLib_INCLUDE_DIRS}
+#     ${XAD_INCLUDE_DIRS}
+#     ${Atlas_INCLUDE_DIRS}
+# )
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
 if(build_type_upper STREQUAL "RELEASE")

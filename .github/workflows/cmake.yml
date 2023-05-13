@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/${{env.INSTALL_DIR}} -DCMAKE_PREFIX_PATH=${{github.workspace}}/${{env.INSTALL_DIR}}
+          cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/${{env.INSTALL_DIR}} -DCMAKE_PREFIX_PATH=${{github.workspace}}/${{env.INSTALL_DIR}} -DBUILD_BENCHMARK=OFF -DBUILD_EXAMPLES=OFF
       - name: Build Atlas
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target INSTALL
       - name: Test

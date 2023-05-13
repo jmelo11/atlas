@@ -17,7 +17,6 @@ FetchContent_MakeAvailable(googletest)
 
 include(GoogleTest)
 
-
 add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC gtest_main)
 
