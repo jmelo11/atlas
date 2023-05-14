@@ -13,7 +13,7 @@ RUN apt-get update && \
 
 
 # Install Python dependencies
-RUN pip3 install setuptools wheel twine pybind11
+RUN pip3 install setuptools wheel twine pybind11 cibuildwheel==2.12.3
 
 # Set the build type and install directory as build arguments
 ARG BUILD_TYPE=Release
@@ -21,6 +21,9 @@ ARG INSTALL_DIR=/install
 
 # Copy the source code to the container
 COPY . /app
+
+# Add the install directory to the path
+ENV PATH="${INSTALL_DIR}:${PATH}"
 
 # Set the working directory
 WORKDIR /app
@@ -72,3 +75,5 @@ RUN ctest -C ${BUILD_TYPE}
 # Build and upload Python package
 WORKDIR /app/python
 RUN pip3 install .
+
+

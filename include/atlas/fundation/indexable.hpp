@@ -1,6 +1,9 @@
 #ifndef D41E427D_25EB_4AB1_89A1_415A80BBF4BF
 #define D41E427D_25EB_4AB1_89A1_415A80BBF4BF
 
+#include <climits>
+#include <cstddef>
+
 namespace Atlas {
 
     /**
@@ -12,7 +15,8 @@ namespace Atlas {
      */
     class Indexable {
        public:
-        virtual ~Indexable(){};
+        
+        virtual ~Indexable() = default;
 
         /**
          * Returns the index of the discount factor.
@@ -63,7 +67,7 @@ namespace Atlas {
         void fxIdx(size_t idx) { idx_[3] = idx; }
 
        private:
-        size_t idx_[4]; /**< An array of indices representing the discount factor index (0), forward index (1), price index (2) and fx price (3). */
+        size_t idx_[4] = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
     };
 
 }  // namespace Atlas
