@@ -1,8 +1,9 @@
-# Start with a base image
+# # Start with a base image
 FROM amazonlinux:latest
 
+
 # Install dependencies
-RUN yum update -y && \
+RUN yum update -y && \   
     yum install -y \
         boost-devel \
         ninja-build \
@@ -12,8 +13,9 @@ RUN yum update -y && \
         cmake \
         gcc-c++
 
+
 # Install Python dependencies
-RUN pip3 install setuptools wheel twine pybind11 cibuildwheel==2.12.3
+RUN pip3 install setuptools wheel twine pybind11
 
 # Set the build type and install directory as build arguments
 ARG BUILD_TYPE=Release
@@ -23,7 +25,8 @@ ARG INSTALL_DIR=/install
 COPY . /app
 
 # Add the install directory to the path
-ENV PATH="${INSTALL_DIR}:${PATH}"
+ENV LIBRARY_PATH=${INSTALL_DIR}:$LIBRARY_PATH
+ENV LD_LIBRARY_PATH=${INSTALL_DIR}:$LD_LIBRARY_PATH
 
 # Set the working directory
 WORKDIR /app
@@ -59,7 +62,7 @@ RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
 
 # Build Atlas
 WORKDIR /app/build
-RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+RUN ldconfig && rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
              -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
              -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
              -DBUILD_BENCHMARK=OFF \
@@ -73,8 +76,8 @@ WORKDIR /app/build/test
 RUN ctest -C ${BUILD_TYPE}
 
 # Build and upload Python package
-# WORKDIR /app/python
-# RUN python3 setup.py build && python3 setup.py install
+WORKDIR /app/python
+RUN python3 setup.py build && python3 setup.py install
 CMD ["bash"]
 
 
