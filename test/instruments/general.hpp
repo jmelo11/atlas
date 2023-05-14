@@ -4,8 +4,8 @@
 #include "../testsetup.hpp"
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/fundation/marketstore.hpp>
-#include <atlas/instruments/fixedrateinstrument.hpp>
-#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 
 using namespace Atlas;

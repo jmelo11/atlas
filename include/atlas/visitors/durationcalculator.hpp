@@ -1,8 +1,8 @@
 #ifndef FEEC155C_A524_4B89_99CA_672817BB79CD
 #define FEEC155C_A524_4B89_99CA_672817BB79CD
 
-#include <atlas/instruments/fixedrateinstrument.hpp>
-#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <type_traits>

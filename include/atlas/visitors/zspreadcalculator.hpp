@@ -5,6 +5,8 @@
 #include <atlas/atlasconfig.hpp>
 #include <atlas/others/newtonraphsonsolver.hpp>
 #include <atlas/visitors/forwardrateforecaster.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 #include <type_traits>
 
 namespace Atlas {

@@ -120,7 +120,7 @@ namespace Atlas {
         TaskHandle spawnTask(Callable c) {
             Task t(std::move(c));
             TaskHandle f = t.get_future();
-            myQueue.push(move(t));
+            myQueue.push(std::move(t));
             return f;
         }
 

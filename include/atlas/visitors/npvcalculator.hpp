@@ -4,8 +4,8 @@
 #include <atlas/data/marketdata.hpp>
 #include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/derivatives/fixfloatswap.hpp>
-#include <atlas/instruments/fixedrateinstrument.hpp>
-#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
 #include <iostream>
 
