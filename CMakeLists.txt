@@ -4,10 +4,10 @@ project(Atlas VERSION 2.0.4)
 include(GNUInstallDirs)
 
 set(CMAKE_CXX_STANDARD 17)
-set(BUILD_PYTHON ON)
-set(BUILD_TESTS ON)
-set(BUILD_BENCHMARK ON)
-set(BUILD_EXAMPLES ON)
+option(BUILD_PYTHON "Build python module" ON)
+option(BUILD_TESTS "Build test suite" ON)
+option(BUILD_BENCHMARK "Build benchmark suite" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
 
 
 if (MSVC)
