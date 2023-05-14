@@ -37,8 +37,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Checkout submodules
-          working-directory: ${{github.workspace}}
-          run: git submodule update --init --recursive
+        working-directory: ${{github.workspace}}
+        run: git submodule update --init --recursive
       - name: Setup
         run: |
           sudo apt update
