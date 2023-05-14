@@ -11,6 +11,7 @@ RUN yum update -y && \
         python3-devel \
         python3-pip \
         cmake \
+        git \
         gcc-c++
 
 
@@ -25,11 +26,14 @@ ARG INSTALL_DIR=/install
 COPY . /app
 
 # Add the install directory to the path
-ENV LIBRARY_PATH=${INSTALL_DIR}:$LIBRARY_PATH
-ENV LD_LIBRARY_PATH=${INSTALL_DIR}:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH=${INSTALL_DIR}/lib:$LIBRARY_PATH
+ENV LD_LIBRARY_PATH=${INSTALL_DIR}/lib:$LD_LIBRARY_PATH
 
 # Set the working directory
 WORKDIR /app
+
+# Get repos
+RUN git submodule update --init --recursive
 
 # Build and install pybind11
 WORKDIR /app/repos/pybind11/build
