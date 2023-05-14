@@ -1,16 +1,16 @@
 # Start with a base image
-FROM ubuntu:latest
+FROM amazonlinux:latest
 
 # Install dependencies
-RUN apt-get update && \
-    apt-get install -y \
-        libboost-dev \
-        ccache \
+RUN yum update -y && \
+    yum install -y \
+        boost-devel \
         ninja-build \
         python3 \
+        python3-devel \
         python3-pip \
-        cmake
-
+        cmake \
+        gcc-c++
 
 # Install Python dependencies
 RUN pip3 install setuptools wheel twine pybind11 cibuildwheel==2.12.3
@@ -73,7 +73,8 @@ WORKDIR /app/build/test
 RUN ctest -C ${BUILD_TYPE}
 
 # Build and upload Python package
-WORKDIR /app/python
-RUN pip3 install .
+# WORKDIR /app/python
+# RUN python3 setup.py build && python3 setup.py install
+CMD ["bash"]
 
 
