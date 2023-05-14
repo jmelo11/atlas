@@ -3,12 +3,19 @@ from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 from pathlib import Path
 from sys import platform
+import os 
 
 __version__ = "@PROJECT_VERSION@"
 
 LIB_DIR = Path("@CMAKE_INSTALL_PREFIX@")
 include_dirs = [str(LIB_DIR / 'include'), '@Boost_INCLUDE_DIR@']
 library_dirs = [str(LIB_DIR / 'lib')]
+
+# get INSTALL_PATH env variable to include and lib paths
+install_path = os.environ.get('INSTALL_DIR')
+if install_path:
+    include_dirs.append(install_path + '/include')
+    library_dirs.append(install_path + '/lib')
 
 libraries = ["QuantLib", "Atlas", "@XAD_LIB_NAME@"]
 if platform == 'win32':

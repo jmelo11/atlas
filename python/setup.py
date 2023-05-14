@@ -3,12 +3,19 @@ from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 from pathlib import Path
 from sys import platform
+import os 
 
 __version__ = "2.0.4"
 
 LIB_DIR = Path("/Users/josemelo/desktop/dev/builds")
 include_dirs = [str(LIB_DIR / 'include'), '/opt/homebrew/include']
 library_dirs = [str(LIB_DIR / 'lib')]
+
+# get INSTALL_PATH env variable to include and lib paths
+install_path = os.environ.get('INSTALL_DIR')
+if install_path:
+    include_dirs.append(install_path + '/include')
+    library_dirs.append(install_path + '/lib')
 
 libraries = ["QuantLib", "Atlas", "xad"]
 if platform == 'win32':
