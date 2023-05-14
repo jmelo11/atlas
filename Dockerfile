@@ -71,5 +71,4 @@ RUN ctest -C ${BUILD_TYPE}
 
 # Build and upload Python package
 WORKDIR /app/python
-RUN python3 setup.py sdist bdist_wheel
-RUN python3 -m twine upload --skip-existing dist/* -u $PYPI_USERNAME -p $PYPI_PASSWORD
+RUN pip3 install .

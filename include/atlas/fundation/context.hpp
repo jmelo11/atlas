@@ -2,6 +2,7 @@
 #define AFC57A36_0A96_4135_BAEB_CA354309F7A8
 
 #include <algorithm>
+#include <memory>
 
 namespace Atlas {
 

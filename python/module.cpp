@@ -41,8 +41,8 @@
 #include <atlas/cashflows/legs/leg.hpp>
 
 // instruments
-#include <atlas/instruments/fixedrateinstrument.hpp>
-#include <atlas/instruments/floatingrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 #include <atlas/instruments/instrument.hpp>
 
 // fixed rate
