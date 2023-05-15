@@ -42,5 +42,5 @@ jobs:
       - name: Build and upload Python package
         working-directory: ${{github.workspace}}
         run: |
-          python3 -m python/setup.py cibuildwheel --output-dir python/wheelhouse  
+          python3 -m cibuildwheel python/ --output-dir python/wheelhouse  
           python3 -m twine upload --skip-existing python/wheelhouse/* -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}      
