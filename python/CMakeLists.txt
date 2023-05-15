@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16.0)
+cmake_minimum_required(VERSION 3.3.0)
 project(AtlasPython VERSION ${PROJECT_VERSION})
 
 include(GNUInstallDirs)
@@ -11,18 +11,18 @@ find_package(pybind11 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
 find_package(XAD REQUIRED)
-find_package(Atlas REQUIRED)
 
 pybind11_add_module(${PROJECT_NAME} MODULE ${SOURCES} ${INCLUDES})
-target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad Atlas::Atlas pybind11::module)
+link_directories("${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}")
+include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")
 
+target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad pybind11::module)
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
     ${QuantLib_INCLUDE_DIRS}
-    ${XAD_INCLUDE_DIRS}
-    ${Atlas_INCLUDE_DIRS}
+    ${XAD_INCLUDE_DIRS}    
 )
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)

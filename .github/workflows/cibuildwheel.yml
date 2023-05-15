@@ -12,20 +12,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       CIBW_BEFORE_BUILD_LINUX: >-
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.gz &&
-        tar xvf ./boost_1_78_0.tar.gz &&
-        cd boost_1_78_0 &&
-        ./bootstrap.sh &&
-        sudo ./b2 --layout=versioned --build-type=complete address-model=64 install -j 16  &&
-        git submodule update --init --recursive &&
-        cd repos/pybind11 && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' -DBUILD_TESTING=OFF &&
-        cmake --build . --config Release --target install && cd ../../../ &&
-        cd repos/XAD && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DXAD_SIMD_OPTION='SSE' -DXAD_ENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' &&
-        cmake --build . --config Release --target install && cd ../../../ &&
+        cd repos/pybind11 && mkdir build && && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' -DBUILD_TESTING=OFF &&
+        cmake --build . --config ${{env.BUILD_TYPE}} --target install && cd ../../ &&
+        cd repos/XAD build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DXAD_SIMD_OPTION='SSE'  -DXAD_ENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' &&
+        cmake --build . --config ${{env.BUILD_TYPE}} --target install && cd ../../ &&
         cd repos/QuantLib && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DQL_TAGGED_LAYOUT=OFF -DBOOST_ROOT=/usr -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' &&
-        cmake --build . --config Release --target install && cd ../../../ &&
+        cmake --build . --config ${{env.BUILD_TYPE}} --target install && cd ../../ &&
         mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' -DBUILD_BENCHMARK=OFF -DBUILD_EXAMPLES=OFF &&
-        cmake --build . --config Release --target install
+        cmake --build . --config ${{env.BUILD_TYPE}} --target install
       
     strategy:
       matrix:
@@ -47,5 +41,18 @@ jobs:
       - name: Build and upload Python package
         working-directory: ${{github.workspace}}
         run: |
-          python3 -m cibuildwheel python/ --output-dir python/wheelhouse  
+          python3 -m python/setup.py cibuildwheel --output-dir python/wheelhouse  
           python3 -m twine upload --skip-existing python/wheelhouse/* -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}      
+        env:          
+          CIBW_ENVIRONMENT: INSTALL_DIR=/host/${{env.INSTALL_DIR}}
+
+cd repos/pybind11 && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' -DBUILD_TESTING=OFF &&
+cmake --build . --config Release --target install && cd ../../../ &&
+cd repos/XAD && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DXAD_SIMD_OPTION='SSE' -DXAD_ENABLE_TESTS=OFF -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' &&
+cmake --build . --config Release --target install && cd ../../../ &&
+cd repos/QuantLib && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DQL_TAGGED_LAYOUT=OFF -DBOOST_ROOT=/usr -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' &&
+cmake --build . --config Release --target install && cd ../../../ &&
+mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' -DBUILD_BENCHMARK=OFF -DBUILD_EXAMPLES=OFF &&
+cmake --build . --config Release --target install
+
+cibuildwheel --platform linux python/

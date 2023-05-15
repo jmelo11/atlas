@@ -1,6 +1,11 @@
-# # Start with a base image
-FROM amazonlinux:latest
+# for the latest Amazon Linux
+#FROM amazonlinux:latest
 
+# for uploading to PyPI/aarch64
+FROM quay.io/pypa/manylinux_2_28_aarch64:latest
+
+# for uploading to PyPI/x86_64
+#FROM quay.io/pypa/manylinux_2_24_x86_64:latest
 
 # Install dependencies
 RUN yum update -y && \   
@@ -11,16 +16,17 @@ RUN yum update -y && \
         python3-devel \
         python3-pip \
         cmake \
-        git \
-        gcc-c++
+        git  \
+        gcc-c++ 
 
 
 # Install Python dependencies
+RUN pip3 install --upgrade pip
 RUN pip3 install setuptools wheel twine pybind11
 
 # Set the build type and install directory as build arguments
 ARG BUILD_TYPE=Release
-ARG INSTALL_DIR=/install
+ARG INSTALL_DIR=install
 
 # Copy the source code to the container
 COPY . /app
@@ -40,7 +46,8 @@ WORKDIR /app/repos/pybind11/build
 RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
              -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
              -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
-             -DBUILD_TESTING=OFF && \
+             -DBUILD_TESTING=OFF \
+             -DCMAKE_INSTALL_LIBDIR=lib && \
     cmake --build . --config ${BUILD_TYPE} --target install -j 12
 
 # Build and install XAD
@@ -61,16 +68,18 @@ RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
              -DQL_TAGGED_LAYOUT=OFF \
              -DBOOST_ROOT=/usr \
              -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
-             -DCMAKE_PREFIX_PATH=${INSTALL_DIR} && \
+             -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+             -DCMAKE_INSTALL_LIBDIR=lib && \
     cmake --build . --config ${BUILD_TYPE} --target install -j 12
 
 # Build Atlas
 WORKDIR /app/build
-RUN ldconfig && rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
              -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
              -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
-             -DBUILD_BENCHMARK=OFF \
-             -DBUILD_EXAMPLES=OFF && \
+             -DBUILD_BENCHMARK=OFF \              
+             -DBUILD_EXAMPLES=OFF \
+             -DCMAKE_INSTALL_LIBDIR=lib && \
     cmake --build . --config ${BUILD_TYPE} --target install -j 12
 
 # Set the working directory for testing
@@ -81,7 +90,7 @@ RUN ctest -C ${BUILD_TYPE}
 
 # Build and upload Python package
 WORKDIR /app/python
-RUN python3 setup.py build && python3 setup.py install
+RUN ldconfig && python3 setup.py build && python3 setup.py install
 CMD ["bash"]
 
 
