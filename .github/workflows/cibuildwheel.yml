@@ -12,6 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       CIBW_BEFORE_BUILD_LINUX: >-
+        sudo apt install -y libboost-dev ninja-build cmake &&
         git submodule update --init --recursive &&
         cd repos/pybind11 && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' -DBUILD_TESTING=OFF &&
         cmake --build . --config Release --target install && cd ../../../ &&
