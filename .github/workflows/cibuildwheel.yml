@@ -12,7 +12,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       CIBW_BEFORE_BUILD_LINUX: >-
-        yum install -y boost-devel  &&
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.gz &&
+        tar xvf ./boost_1_78_0.tar.gz &&
+        cd boost_1_78_0 &&
+        ./bootstrap.sh &&
+        sudo ./b2 --layout=versioned --build-type=complete address-model=64 install -j 16  &&
         git submodule update --init --recursive &&
         cd repos/pybind11 && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='/install' -DCMAKE_PREFIX_PATH='/install' -DBUILD_TESTING=OFF &&
         cmake --build . --config Release --target install && cd ../../../ &&
