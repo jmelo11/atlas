@@ -9,8 +9,8 @@ namespace Atlas {
 
     /**
      * @brief FxForward instrument
-     *
      * @tparam adouble
+     * @ingroup Derivatives
      */
     template <typename adouble>
     class FxForward : public Instrument<adouble>, public OneLegMixin<adouble, Leg<adouble>> {
@@ -26,8 +26,7 @@ namespace Atlas {
          * @param ccy1 currency context for first currency
          * @param ccy2 currency context for second currency
          * @param notionalInSecondCcy notional in first currency
-         * @param side BUY or SELL
-         * @example FxForward(Date(1, 1, 2020), Date(1, 1, 2021), 823, CLP , USD, 100_000, Side::BUY)  // Buying USD 100K forward @ 823 CLP
+         * @param side BUY or SELL         
          */
         FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& ccy1, const Currency& ccy2,
                   double notionalInSecondCcy, Side side)
@@ -57,9 +56,7 @@ namespace Atlas {
          * @param curr1
          * @param curr2
          * @param side
-         * @param discountCurve
-         * @example FxForward(Date(1, 1, 2020), Date(1, 1, 2021), 823, CLP, USD, 100_000, Side::BUY, discountCurve)  // Buying USD 100K forward at
-         * 823 CLP, collateralized at discountCurve (e.g. CLP overnight curve)
+         * @param discountCurve         
          */
         FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& curr1, const Currency& curr2,
                   double notionalInSecondCcy, Side side, const Context<YieldTermStructure<adouble>>& discountCurve)

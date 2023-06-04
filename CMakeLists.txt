@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3.0)
-project(Atlas VERSION 2.0.4)
+project(Atlas VERSION 2.0.5)
 
 include(GNUInstallDirs)
 

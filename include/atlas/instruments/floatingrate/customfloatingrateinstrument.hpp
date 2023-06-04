@@ -6,7 +6,7 @@
 namespace Atlas {
     /**
      * @brief A class for custom floating rate instruments.
-     *
+     * @ingroup FloatingRateInstruments
      */
     template <typename adouble>
     class CustomFloatingRateInstrument : public FloatingRateInstrument<adouble> {

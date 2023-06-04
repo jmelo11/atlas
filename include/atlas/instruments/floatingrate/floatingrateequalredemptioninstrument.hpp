@@ -6,7 +6,7 @@
 namespace Atlas {
     /**
      * @brief A class for floating rate equal redemption instruments.
-     *
+     * @ingroup FloatingRateInstruments
      */
     template <typename adouble>
     class FloatingRateEqualRedemptionInstrument : public FloatingRateInstrument<adouble> {

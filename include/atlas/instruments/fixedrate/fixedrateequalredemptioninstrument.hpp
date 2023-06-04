@@ -6,7 +6,7 @@
 namespace Atlas {
     /**
      * @brief A class for fixed, single-legged, equal redemption instruments.
-     *
+     * @ingroup FixedRateInstruments     
      */
     template <typename adouble>
     class FixedRateEqualRedemptionInstrument : public FixedRateInstrument<adouble> {

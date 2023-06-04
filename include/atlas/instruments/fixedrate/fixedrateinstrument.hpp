@@ -9,8 +9,14 @@
 namespace Atlas {
 
     /**
+     * @defgroup FixedRateInstruments Fixed Rate Instruments
+     * @ingroup Instruments
+     */
+
+    /**
      * @class FixedRateInstrument
      * @brief An class for fixed-rate-single-legged instruments.
+     * @ingroup FixedRateInstruments
      */
     template <typename adouble>
     class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FixedRateLeg<adouble>> {

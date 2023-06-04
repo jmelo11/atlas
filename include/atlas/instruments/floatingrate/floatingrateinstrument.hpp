@@ -6,10 +6,15 @@
 #include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
+    /**
+     * @defgroup FloatingRateInstruments Floating Rate Instruments
+     * @ingroup Instruments
+     */
 
     /**
      * @class FloatingRateInstrument
      * @brief An class for floating, single-legged, rate instruments.
+     * @ingroup FloatingRateInstruments
      */
     template <typename adouble>
     class FloatingRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FloatingRateLeg<adouble>> {

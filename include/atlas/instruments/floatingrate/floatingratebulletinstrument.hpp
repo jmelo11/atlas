@@ -7,7 +7,7 @@ namespace Atlas {
 
     /**
      * @brief A class for floating rate bullet instruments.
-     *
+     * @ingroup FloatingRateInstruments
      */
     template <typename adouble>
     class FloatingRateBulletInstrument : public FloatingRateInstrument<adouble> {

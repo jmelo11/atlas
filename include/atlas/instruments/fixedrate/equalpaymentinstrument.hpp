@@ -9,7 +9,7 @@ namespace Atlas {
 
     /**
      * @brief An class for equalk payment instruments.
-     *
+     * @ingroup FixedRateInstruments
      */
     template <typename adouble>
     class EqualPaymentInstrument : public FixedRateInstrument<adouble> {

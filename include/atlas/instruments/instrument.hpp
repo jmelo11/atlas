@@ -10,10 +10,13 @@ namespace Atlas {
     class ConstVisitor;
 
     /**
+     * @defgroup Instruments Instruments
+     */
+    
+    /**     
      * @class Instrument
      * @brief An abstract class for instruments.
      */
-
     template <typename adouble>
     class Instrument {
        public:

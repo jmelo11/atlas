@@ -8,7 +8,7 @@
 namespace Atlas {
     /**
      * @brief A class for fixed, single-legged, bullet instruments.
-     *
+     * @ingroup FixedRateInstruments
      */
     template <typename adouble>
     class FixedRateBulletInstrument : public FixedRateInstrument<adouble> {
