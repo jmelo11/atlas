@@ -51,7 +51,7 @@ PYBIND11_MODULE(Atlas, m) {
     py_enums(m);
     py_datetime(m);
     py_currencies(m);
-
+    py_couponlegs(m);
     // classes
     py::class_<InterestRate<dual>>(m, "InterestRate")
         .def(py::init<>())
@@ -162,21 +162,12 @@ PYBIND11_MODULE(Atlas, m) {
         .def_readonly("fxs", &MarketRequest::fxs);
 
     // indexable
-    py::class_<Indexable>(m, "Indexable")
-        .def("dfIdx", py::overload_cast<>(&Indexable::dfIdx, py::const_))
-        .def("dfIdx", py::overload_cast<size_t>(&Indexable::dfIdx))
-        .def("fwdIdx", py::overload_cast<>(&Indexable::fwdIdx, py::const_))
-        .def("fwdIdx", py::overload_cast<size_t>(&Indexable::fwdIdx))
-        .def("fxIdx", py::overload_cast<>(&Indexable::fxIdx, py::const_))
-        .def("fxIdx", py::overload_cast<size_t>(&Indexable::fxIdx));
 
-    py_couponlegs(m);
     py_instruments(m);
     py_visitors(m);
 
     // Models
     py::class_<Model<dual>, Aux::PyModel>(m, "Model").def("marketData", &Model<dual>::marketData);
-
     py::class_<SpotMarketDataModel<dual>, Model<dual>>(m, "SpotMarketDataModel")
         .def(py::init<const MarketRequest&, const MarketStore<dual>&>(), py::arg("marketRequest"), py::arg("store"));
 }

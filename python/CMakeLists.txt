@@ -12,18 +12,18 @@ find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
 find_package(XAD REQUIRED)
 
-pybind11_add_module(${PROJECT_NAME} MODULE ${SOURCES} ${INCLUDES})
-link_directories("${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}")
-include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")
+#pybind11_add_module(${PROJECT_NAME} MODULE ${SOURCES} ${INCLUDES})
+#link_directories("${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}")
+#include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")
 
-target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad pybind11::module)
-target_include_directories(${PROJECT_NAME}
-  PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${Boost_INCLUDE_DIRS}
-    ${QuantLib_INCLUDE_DIRS}
-    ${XAD_INCLUDE_DIRS}    
-)
+#target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad pybind11::module)
+# #target_include_directories(${PROJECT_NAME}
+#   PUBLIC
+#     ${CMAKE_CURRENT_SOURCE_DIR}/include
+#     ${Boost_INCLUDE_DIRS}
+#     ${QuantLib_INCLUDE_DIRS}
+#     ${XAD_INCLUDE_DIRS}    
+# )
 
 string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
 if(build_type_upper STREQUAL "RELEASE")

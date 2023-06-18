@@ -50,6 +50,14 @@ namespace Aux {
 }  // namespace Aux
 
 void py_couponlegs(py::module& m) {
+    py::class_<Indexable>(m, "Indexable")
+        .def("dfIdx", py::overload_cast<>(&Indexable::dfIdx, py::const_))
+        .def("dfIdx", py::overload_cast<size_t>(&Indexable::dfIdx))
+        .def("fwdIdx", py::overload_cast<>(&Indexable::fwdIdx, py::const_))
+        .def("fwdIdx", py::overload_cast<size_t>(&Indexable::fwdIdx))
+        .def("fxIdx", py::overload_cast<>(&Indexable::fxIdx, py::const_))
+        .def("fxIdx", py::overload_cast<size_t>(&Indexable::fxIdx));
+
     py::class_<Cashflow<dual>, Indexable>(m, "Cashflow")
         .def(py::init<>())
         .def(py::init<const Context<YieldTermStructure<dual>>&>())
