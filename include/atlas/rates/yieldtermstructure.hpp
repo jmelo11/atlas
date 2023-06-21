@@ -6,6 +6,7 @@
 namespace Atlas {
 
     /**
+     * @class YieldTermStructureStrategy
      * @brief A class representing a yield term structure. The strategy pattern is used to allow for different
      * implementations of the yield term structure.
      *

@@ -6,8 +6,10 @@
 
 namespace Atlas {
     /**
+     * @class FloatingRateLeg
      * @brief A class representing a floating rate leg, which is a collection of floating rate coupons
-     * @details A floating rate leg has a start date, and contains one or more floating rate coupons
+     * @ingroup Legs
+     * @tparam adouble
      */
     template <typename adouble>
     class FloatingRateLeg : public Leg<adouble> {
@@ -18,7 +20,7 @@ namespace Atlas {
         FloatingRateLeg() : Leg<adouble>(){};
 
         /**
-         * @brief Constructor.
+         * @brief Construct a new Floating Rate Leg object
          *
          * @param coupons vector of FloatingRateCoupon objects representing the coupons in the leg.
          * @param redemptions vector of Redemption objects representing the redemptions in the leg.
@@ -31,11 +33,15 @@ namespace Atlas {
 
         /**
          * @brief Returns a reference to the vector of coupons in the leg.
+         *
+         * @return std::vector<FloatingRateCoupon<adouble>>&
          */
         inline std::vector<FloatingRateCoupon<adouble>>& coupons() { return coupons_; }
 
         /**
          * @brief Returns a const reference to the vector of coupons in the leg.
+         *
+         * @return const std::vector<FloatingRateCoupon<adouble>>&
          */
         inline const std::vector<FloatingRateCoupon<adouble>>& coupons() const { return coupons_; }
 
@@ -58,11 +64,21 @@ namespace Atlas {
             this->sortCashflows(coupons_);
         }
 
+        /**
+         * @brief Sets the discount curve context for the leg.
+         *
+         * @param discountCurveContext a reference to a Context object representing the discount curve context.
+         */
         inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& discountCurveContext) {
             this->setDiscountCurveContext(coupons_, discountCurveContext);
             this->setDiscountCurveContext(this->redemptions_, discountCurveContext);
         }
 
+        /**
+         * @brief Sets the forecast curve context for the leg.
+         *
+         * @param forecastCurveContext a reference to a Context object representing the forecast curve context.
+         */
         inline void forecastCurveContext(const Context<RateIndex<adouble>>& forecastCurveContext) {
             for (auto& coupon : coupons_) { coupon.forecastCurveContext(forecastCurveContext); }
         }

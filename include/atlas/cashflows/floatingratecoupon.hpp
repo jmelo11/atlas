@@ -6,9 +6,12 @@
 
 namespace Atlas {
 
-    /***
+    /**
+     * @class FloatingRateCoupon
      * @brief A class representing a floating rate coupon
      * @details A floating rate coupon has a start date, an end date, a notional amount, a spread, and a rate index
+     * @ingroup Cashflows
+     *
      * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>
@@ -30,7 +33,8 @@ namespace Atlas {
         };
 
         /**
-         * Constructor
+         * @brief Construct a new Floating Rate Coupon object
+         *
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
@@ -45,13 +49,16 @@ namespace Atlas {
             this->hasDiscountContext_ = true;
         };
 
-        /***
+        /**
+         * @brief Returns the spread of the coupon
+         *
          * @return The spread of the coupon
          */
         inline adouble spread() const { return spread_; }
 
-        /***
-         * Sets the spread of the coupon
+        /**
+         * @brief Sets the spread of the coupon
+         *
          * @param spread The spread of the coupon
          */
         inline void spread(adouble spread) {
@@ -59,8 +66,9 @@ namespace Atlas {
             this->amount_ = accruedAmount(this->startDate(), this->endDate());
         }
 
-        /***
-         * Sets the fixing of the coupon
+        /**
+         * @brief Sets the fixing of the coupon
+         *
          * @param fixing The fixing of the coupon
          */
         inline void fixing(adouble fixing) {
@@ -68,8 +76,9 @@ namespace Atlas {
             this->amount_ = accruedAmount(this->startDate(), this->endDate());
         };
 
-        /***
-         * Gets the fixing of the coupon
+        /**
+         * @brief Gets the fixing of the coupon
+         *
          * @return The fixing of the coupon
          */
         inline adouble fixing() const { return fixing_; }
@@ -85,22 +94,25 @@ namespace Atlas {
             hasForecastContext_ = true;
         }
 
-        /***
-         * Gets the day counter of the coupon
+        /**
+         * @brief Gets the day counter of the coupon
+         *
          * @return The day counter of the coupon
          */
         inline DayCounter dayCounter() const override { return rateDef_.dayCounter; };
 
         /**
-         * Gets the accrued period of the coupon
+         * @brief Gets the accrued period of the coupon
+         *
          * @param start The start date of the coupon
          * @param end The end date of the coupon
          * @return The accrued period of the coupon
          */
         inline double accruedPeriod(const Date& start, const Date& end) const override { return dayCounter().yearFraction(start, end); };
 
-        /***
-         * Gets the accrued amount of the coupon
+        /**
+         * @brief Gets the accrued amount of the coupon
+         *
          * @param start The start date of the coupon
          * @param end The end date of the coupon
          * @return The accrued amount of the coupon
@@ -125,7 +137,25 @@ namespace Atlas {
          */
         inline size_t forecastContextIdx() const { return forecastContextIdx_; }
 
+        /**
+         * @brief Checks if the fixing rate has been set
+         *
+         * @return true If the fixing rate has been set, false otherwise
+         */
+        inline bool hasFixingSet() const { return hasFixingSet_; }
+
+        /**
+         * @brief Sets if the fixing has been set
+         *
+         * @param fixing The fixing rate
+         */
+        inline void hasFixingSet(bool fixing) { hasFixingSet_ = fixing; }
+
        private:
+        /**
+         * @brief A struct representing the rate definition of the coupon
+         * @details The rate definition of the coupon is the day counter, frequency, and compounding of the coupon
+         */
         struct RateDef {
             DayCounter dayCounter;
             Frequency freq;
@@ -137,6 +167,7 @@ namespace Atlas {
         RateDef rateDef_;
 
         size_t forecastContextIdx_;
+        bool hasFixingSet_       = false;
         bool hasForecastContext_ = false;
     };
 }  // namespace Atlas

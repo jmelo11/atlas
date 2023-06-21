@@ -14,7 +14,8 @@
 namespace Atlas {
 
     /**
-     * @brief MarketDataModel is a model that uses a set of curves and spot currencies to calculate the market data. Uses current information to
+     * @class SpotMarketDataModel
+     * @brief SpotMarketDataModel is a model that uses a set of curves and spot currencies to calculate the market data. Uses current information to
      * generate the spot.
      *
      * @tparam adouble

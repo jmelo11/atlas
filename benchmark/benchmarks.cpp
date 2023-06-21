@@ -10,15 +10,19 @@
 #include <ql/termstructures/volatility/optionlet/constantoptionletvol.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <algorithm>
-#include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+
 #include <atlas/models/spotmarketdatamodel.hpp>
 #include <atlas/multithreading/BS_thread_pool.hpp>
 #include <atlas/multithreading/threadpool.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexer.hpp>
+#include <atlas/visitors/newvisitors/indexingvisitor.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
-#include <nanobench.h>
 #include <execution>
+#include <nanobench.h>
+#include <variant>
+
+
 using namespace Atlas;
 
 template <typename NumType>
@@ -432,7 +436,9 @@ void pricingBenchmark() {
     Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFreq);
     for (size_t i = 0; i < numThreads; ++i) {
         std::vector<QuantLib::FixedRateBond> slice;
-        for (size_t j = 0; j < sliceSize; ++j) { slice.push_back(QuantLib::FixedRateBond(0, notional, schedule, {qlInterestRate.rate()}, Actual360())); }
+        for (size_t j = 0; j < sliceSize; ++j) {
+            slice.push_back(QuantLib::FixedRateBond(0, notional, schedule, {qlInterestRate.rate()}, Actual360()));
+        }
         qlSlices.push_back(slice);
     }
 
@@ -518,9 +524,8 @@ void pricingBenchmark2() {
         instruments.push_back(FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, context));
     }
     Indexer<NumType> indexer;
-    bench.run("Indexer using for_each", [&]() {
-    std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(indexer); });
-    });
+    bench.run("Indexer using for_each",
+              [&]() { std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(indexer); }); });
 
     // indexer.clear();
     // bench.run("Indexer using for_each (parallel)", [&]() {
@@ -546,7 +551,7 @@ void pricingBenchmark2() {
     // bench.run("NPVCalculator using for_each (parallel)", [&]() {
     // std::for_each(std::execution::par, instruments.begin(), instruments.end(), [&](auto& instrument) { instrument.accept(calculator); });
     // });
-    
+
     // if constexpr (std::is_same_v<NumType, double>) {
     //     std::cout << "NPV: " << calculator.results() << std::endl;
     // } else {
@@ -554,14 +559,67 @@ void pricingBenchmark2() {
     // }
 }
 
-int main() {
-    bechmarkFixedRateCoupons<double>();
-    //bechmarkFloatingRateCoupons<double>();
-    pricingBenchmark<double>();
-    pricingBenchmark2<double>();
+template <typename NumType>
+void variantBenchmark() {
+    ankerl::nanobench::Bench bench;
 
-    bechmarkFixedRateCoupons<dual>();
-    //bechmarkFloatingRateCoupons<dual>();
-    pricingBenchmark<dual>();
-    pricingBenchmark2<dual>();
+    if constexpr (std::is_same_v<NumType, double>) {
+        bench.title("(double) Variant Benchmark").warmup(200).relative(true);
+    } else {
+        bench.title("(dual) Variant Benchmark").warmup(200).relative(true);
+    }
+    bench.performanceCounters(true);
+
+    // parameters
+    size_t numInstruments = 10000;
+    Date startDate(1, Month::Aug, 2020);
+    QuantLib::Settings::instance().evaluationDate() = startDate;
+    Date endDate(1, Month::September, 2025);
+    Frequency paymentFreq = Frequency::Semiannual;
+    double notional       = 100;
+    NumType rateValue     = 0.03;
+
+    DayCounter dayCounter   = Actual360();
+    Frequency frequency     = Frequency::Annual;
+    Compounding compounding = Compounding::Simple;
+    MarketStore<NumType> mainStore_(startDate);
+    FlatForwardStrategy<NumType> strategy(startDate, rateValue, dayCounter, compounding, frequency);
+    YieldTermStructure<NumType> curve_(std::make_unique<FlatForwardStrategy<NumType>>(strategy));
+    RateIndex<NumType> index(startDate, frequency);
+    mainStore_.addCurve("TEST", curve_, index);
+
+    auto& context = mainStore_.curveContext("TEST");
+
+    IndexingVisitor<NumType> indexingVisitor;
+    bench.run("Indexer using normal visitor", [&]() {
+        std::vector<FixedRateBulletInstrument<NumType>> instruments;
+        for (size_t i = 0; i < numInstruments; ++i) {
+            InterestRate<NumType> interestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+            instruments.push_back(FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, context));
+        }
+        std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { indexingVisitor(instrument); });
+    });
+
+    bench.run("Indexer using variant visitor", [&]() {
+        std::vector<Instruments<NumType>> instruments;
+        for (size_t i = 0; i < numInstruments; ++i) {
+            InterestRate<NumType> interestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
+            instruments.push_back(FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, context));
+        }
+        std::for_each(instruments.begin(), instruments.end(), [&](auto& instrument) { std::visit(indexingVisitor, instrument); });
+    });
+}
+
+int main() {
+    // bechmarkFixedRateCoupons<double>();
+    //  bechmarkFloatingRateCoupons<double>();
+    // pricingBenchmark<double>();
+    // pricingBenchmark2<double>();
+    variantBenchmark<double>();
+    variantBenchmark<dual>();
+
+    // bechmarkFixedRateCoupons<dual>();
+    //  bechmarkFloatingRateCoupons<dual>();
+    // pricingBenchmark<dual>();
+    // pricingBenchmark2<dual>();
 }

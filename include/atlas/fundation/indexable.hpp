@@ -15,7 +15,6 @@ namespace Atlas {
      */
     class Indexable {
        public:
-        
         virtual ~Indexable() = default;
 
         /**
@@ -66,8 +65,21 @@ namespace Atlas {
          */
         void fxIdx(size_t idx) { idx_[3] = idx; }
 
+        /**
+         * @brief Returns true if the object is indexed.
+         * @return True if the object is indexed.
+         */
+        bool isIndexed() const { return isIndexed_; }
+
+        /**
+         * @brief Sets the object as indexed.
+         * @param isIndexed True if the object is indexed.
+         */
+        void isIndexed(bool isIndexed) { isIndexed_ = isIndexed; }
+
        private:
-        size_t idx_[4] = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
+        bool isIndexed_ = false;
+        size_t idx_[4]  = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
     };
 
 }  // namespace Atlas

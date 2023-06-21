@@ -12,6 +12,12 @@
 
 namespace Atlas {
 
+    /**
+     * @class InterestRate
+     * @brief Interest rate class
+     *
+     * @tparam adouble
+     */
     template <typename adouble>
     class InterestRate {
         using DayCounter  = QuantLib::DayCounter;
@@ -31,20 +37,62 @@ namespace Atlas {
             }
         };
 
+        /**
+         * @brief Returns the rate.
+         *
+         * @return adouble
+         */
         adouble rate() const { return r_; }
 
+        /**
+         * @brief Returns the day counter.
+         *
+         * @return const DayCounter&
+         */
         inline const DayCounter& dayCounter() const { return dc_; }
+
+        /**
+         * @brief Returns the compounding convention.
+         *
+         * @return Compounding
+         */
         inline Compounding compounding() const { return comp_; }
+
+        /**
+         * @brief Returns the frequency.
+         *
+         * @return Frequency
+         */
         inline Frequency frequency() const { return freqMakesSense_ ? Frequency(int(freq_)) : Frequency::NoFrequency; }
 
+        /**
+         * @brief Calculates the discount factor implied by the rate compounded with the given year fraction.
+         *
+         * @param t
+         * @return adouble
+         */
         adouble discountFactor(double t) const { return 1.0 / compoundFactor(t); }
 
-        //! discount factor implied by the rate compounded between two dates
+        /**
+         * @brief Calculates the discount factor implied by the rate compounded between the given dates.
+         *
+         * @param d1
+         * @param d2
+         * @param refStart
+         * @param refEnd
+         * @return adouble
+         */
         adouble discountFactor(const Date& d1, const Date& d2, const Date& refStart = Date(), const Date& refEnd = Date()) const {
             double t = dc_.yearFraction(d1, d2, refStart, refEnd);
             return discountFactor(t);
         }
 
+        /**
+         * @brief Calculates the compound factor implied by the rate compounded with the given year fraction.
+         *
+         * @param t
+         * @return adouble
+         */
         adouble compoundFactor(double t) const {
             switch (comp_) {
                 case Compounding::Simple:
@@ -70,11 +118,30 @@ namespace Atlas {
             }
         };
 
+        /**
+         * @brief Calculates the compound factor implied by the rate compounded between the given dates.
+         *
+         * @param d1
+         * @param d2
+         * @param refStart
+         * @param refEnd
+         * @return adouble
+         */
         adouble compoundFactor(const Date& d1, const Date& d2, const Date& refStart = Date(), const Date& refEnd = Date()) const {
             double t = dc_.yearFraction(d1, d2, refStart, refEnd);
             return compoundFactor(t);
         }
 
+        /**
+         * @brief Calculates the equivalent rate with a different compounding convention.
+         *
+         * @param compound
+         * @param resultDC
+         * @param comp
+         * @param freq
+         * @param t
+         * @return InterestRate
+         */
         static InterestRate impliedRate(adouble compound, const DayCounter& resultDC, Compounding comp, Frequency freq, double t) {
             QL_REQUIRE(compound > 0.0, "positive compound factor required");
 
@@ -113,6 +180,19 @@ namespace Atlas {
             return InterestRate(r, resultDC, comp, freq);
         };
 
+        /**
+         * @brief Calculates the equivalent rate with a different compounding convention.
+         *
+         * @param compound
+         * @param resultDC
+         * @param comp
+         * @param freq
+         * @param d1
+         * @param d2
+         * @param refStart
+         * @param refEnd
+         * @return InterestRate
+         */
         static InterestRate impliedRate(adouble compound, const DayCounter& resultDC, Compounding comp, Frequency freq, const Date& d1,
                                         const Date& d2, const Date& refStart = Date(), const Date& refEnd = Date()) {
             QL_REQUIRE(d2 >= d1, "d1 (" << d1
@@ -131,6 +211,18 @@ namespace Atlas {
         double freq_;
     };
 
+    /**
+     * @brief Calculates the compound factor implied by the rate compounded between the given dates.
+     *
+     * @tparam adouble
+     * @param r
+     * @param dc
+     * @param comp
+     * @param freq_
+     * @param d1
+     * @param d2
+     * @return adouble
+     */
     template <typename adouble>
     inline adouble fastCompoundFactor(adouble r, const QuantLib::DayCounter& dc, QuantLib::Compounding comp, QuantLib::Frequency freq_,
                                       const QuantLib::Date& d1, const QuantLib::Date& d2) {

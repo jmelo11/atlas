@@ -1,7 +1,6 @@
 #ifndef ED4FE09D_1DB6_49CB_AD5A_B4C22DD2A839
 #define ED4FE09D_1DB6_49CB_AD5A_B4C22DD2A839
 
-#include <gtest/gtest.h>
 #include <ql/cashflows/couponpricer.hpp>
 #include <ql/indexes/ibor/usdlibor.hpp>
 #include <ql/instruments/bonds/fixedratebond.hpp>
@@ -12,10 +11,11 @@
 #include <atlas/fundation/marketstore.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
+#include <atlas/others/interpolations/linearinterpolation.hpp>
 #include <atlas/rates/rateindex.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/rates/yieldtermstructure/zeroratecurve.hpp>
-#include <atlas/others/interpolations/linearinterpolation.hpp>
+#include <gtest/gtest.h>
 
 using namespace Atlas;
 
@@ -51,6 +51,7 @@ struct TestSetup {
     Date curveRefDate            = evalDate;
     adouble curveRate            = 0.05;
     adouble usdCurveRate         = 0.03;
+    adouble clpCurveRate         = 0.07;
     DayCounter curveDayCounter   = Actual360();
     Compounding curveCompounding = Compounding::Simple;
     Frequency curveFrequency     = Frequency::Annual;
@@ -62,6 +63,8 @@ struct TestSetup {
     // ql curves & indexes
     QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> forecastTermStructure;
     QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> discountingTermStructure;
+    QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> clpDiscountingTermStructure;
+
     boost::shared_ptr<QuantLib::IborIndex> qlIndex;
 
     // atlas instruments
@@ -80,14 +83,18 @@ struct TestSetup {
         RateIndex<adouble> index(curveRefDate, indexFrequency, curveDayCounter);
         store.addCurve("TEST", curve, index);
 
+        FlatForwardStrategy<adouble> clpCurveStrategy(curveRefDate, clpCurveRate, curveDayCounter, curveCompounding, curveFrequency);
+        YieldTermStructure<adouble> clpCurve(std::make_unique<FlatForwardStrategy<adouble>>(clpCurveStrategy));
+        store.addCurve("CLP", clpCurve, index);
+
         FlatForwardStrategy<adouble> usdCurveStrategy(curveRefDate, usdCurveRate, curveDayCounter, curveCompounding, curveFrequency);
         YieldTermStructure<adouble> usdCurve(std::make_unique<FlatForwardStrategy<adouble>>(usdCurveStrategy));
-        store.addCurve("CLP", curve, index);
+
         store.addCurve("USD", usdCurve, index);
 
         std::vector<adouble> rates = {0.01, 0.02, 0.03, 0.04, 0.05};
-        std::vector<Date> dates   = {Date(1, Month::Aug, 2020), Date(1, Month::Aug, 2021), Date(1, Month::Aug, 2023), Date(1, Month::Aug, 2025),
-                                     Date(1, Month::Aug, 2030)};
+        std::vector<Date> dates    = {Date(1, Month::Aug, 2020), Date(1, Month::Aug, 2021), Date(1, Month::Aug, 2023), Date(1, Month::Aug, 2025),
+                                      Date(1, Month::Aug, 2030)};
         ZeroRateStrategy<adouble, LinearInterpolator<adouble>> strategy(dates, rates, curveDayCounter);
         YieldTermStructure<adouble> zeroCurve(std::make_unique<ZeroRateStrategy<adouble, LinearInterpolator<adouble>>>(strategy));
         store.addCurve("Zero", zeroCurve, index);
@@ -100,13 +107,18 @@ struct TestSetup {
 
         // create ql curves
         boost::shared_ptr<QuantLib::YieldTermStructure> qlCurve;
+        boost::shared_ptr<QuantLib::YieldTermStructure> qlClpCurve;
         if constexpr (std::is_same_v<adouble, double>) {
-            qlCurve = boost::make_shared<QuantLib::FlatForward>(curveRefDate, curveRate, curveDayCounter, curveCompounding, curveFrequency);
+            qlCurve    = boost::make_shared<QuantLib::FlatForward>(curveRefDate, curveRate, curveDayCounter, curveCompounding, curveFrequency);
+            qlClpCurve = boost::make_shared<QuantLib::FlatForward>(curveRefDate, clpCurveRate, curveDayCounter, curveCompounding, curveFrequency);
         } else {
             qlCurve = boost::make_shared<QuantLib::FlatForward>(curveRefDate, val(curveRate), curveDayCounter, curveCompounding, curveFrequency);
+            qlClpCurve =
+                boost::make_shared<QuantLib::FlatForward>(curveRefDate, val(clpCurveRate), curveDayCounter, curveCompounding, curveFrequency);
         }
         discountingTermStructure.linkTo(qlCurve);
         forecastTermStructure.linkTo(qlCurve);
+        clpDiscountingTermStructure.linkTo(qlClpCurve);
     }
 
     void createQuantLibIndex() {

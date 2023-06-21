@@ -7,16 +7,22 @@
 namespace Atlas {
 
     /**
+     * @class RateIndex
      * @brief A rate index.
      */
     template <typename adouble>
     class RateIndex {
        public:
+        /**
+         * @brief Construct a new Rate Index object
+         *
+         */
         RateIndex() = default;
 
         /**
          * @brief Constructs a rate index.
-         * @param name The name of the rate index.
+         *
+         * @param refDate The reference date.
          * @param fixingFreq The fixing frequency.
          * @param dayCounter The day counter.
          * @param rateFreq The rate frequency.
@@ -25,6 +31,19 @@ namespace Atlas {
         RateIndex(const Date& refDate, Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
                   Compounding rateComp = Compounding::Simple)
         : refDate_(refDate), dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateFreq_(rateFreq), rateComp_(rateComp){};
+
+        /**
+         * @brief Construct a new Rate Index object
+         *
+         * @param refDate The reference date.
+         * @param fixingFreq The fixing frequency.
+         * @param dayCounter The day counter.
+         * @param rateFreq The rate frequency.
+         * @param rateComp The rate compounding.
+         */
+        RateIndex(Frequency fixingFreq, DayCounter dayCounter = Actual360(), Frequency rateFreq = Frequency::Annual,
+                  Compounding rateComp = Compounding::Simple)
+        : dayCounter_(dayCounter), fixingFreq_(fixingFreq), rateFreq_(rateFreq), rateComp_(rateComp){};
 
         /**
          * @brief Returns the day counter.
@@ -58,24 +77,14 @@ namespace Atlas {
          * @param date The date of the fixing.
          */
         adouble getFixing(const Date& date) const {
-            if (date >= refDate_) {
-                auto it = simFixings_.find(date);
-                if (it != simFixings_.end()) { return it->second; }
-                {
-                    // ql date to string
-                    std::string d   = std::to_string(date.year()) + "-" + std::to_string(date.month()) + "-" + std::to_string(date.dayOfMonth());
-                    std::string msg = "No fixing found for date " + d;
-
-                    throw std::runtime_error(msg);
-                }
+            if (simFixings_.find(date) != simFixings_.end()) {
+                return simFixings_.at(date);
+            } else if (fixingHistory_.find(date) != fixingHistory_.end()) {
+                return fixingHistory_.at(date);
             } else {
-                auto it = fixingHistory_.find(date);
-                if (it != fixingHistory_.end()) { return it->second; }
-                {
-                    std::string d   = std::to_string(date.year()) + "-" + std::to_string(date.month()) + "-" + std::to_string(date.dayOfMonth());
-                    std::string msg = "No fixing found for date " + d;
-                    throw std::runtime_error(msg);
-                }
+                std::string d   = std::to_string(date.year()) + "-" + std::to_string(date.month()) + "-" + std::to_string(date.dayOfMonth());
+                std::string msg = "No fixing found for date " + d;
+                throw std::runtime_error(msg);
             }
         };
 
@@ -109,7 +118,7 @@ namespace Atlas {
         Date refDate() const { return refDate_; };
 
        private:
-        Date refDate_;
+        Date refDate_          = Date();
         DayCounter dayCounter_ = DayCounter();
         Frequency fixingFreq_  = Frequency::NoFrequency;
         Frequency rateFreq_    = Frequency::NoFrequency;

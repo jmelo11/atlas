@@ -71,6 +71,8 @@ void py_couponlegs(py::module& m) {
         .def("discountContextIdx", &Cashflow<dual>::discountContextIdx)
         .def("currency", &Cashflow<dual>::currency)
         .def("currencyCode", &Cashflow<dual>::currencyCode);
+        .def("applyCcy", py::overload_cast<bool>(&Cashflow<dual>::applyCcy))
+        .def("applyCcy", py::overload_cast<>(&Cashflow<dual>::applyCcy, py::const_))
 
     py::class_<Coupon<dual>, Aux::PyCoupon, Cashflow<dual>>(m, "Coupon")
         .def(py::init<const Date&, const Date&, double>())

@@ -10,12 +10,10 @@
 
 namespace Atlas {
 
-    using Profile = std::map<Date, double>;
-
     template <typename adouble>
     class CashflowProfiler : public ConstVisitor<adouble> {
        public:
-        CashflowProfiler(){};
+        CashflowProfiler() = default;
 
         void visit(const FixedRateInstrument<adouble>& inst) const override { agreggate(inst.leg()); };
         void visit(const FloatingRateInstrument<adouble>& inst) const override { agreggate(inst.leg()); };
@@ -25,8 +23,8 @@ namespace Atlas {
             interests_.clear();
         };
 
-        Profile redemptions() const { return redemptions_; }
-        Profile interests() const { return interests_; }
+        std::map<Date, double> redemptions() const { return redemptions_; }
+        std::map<Date, double> interests() const { return interests_; }
 
        private:
         template <typename T>
@@ -49,8 +47,8 @@ namespace Atlas {
             };
         };
 
-        mutable Profile redemptions_;
-        mutable Profile interests_;
+        mutable std::map<Date, double> redemptions_;
+        mutable std::map<Date, double> interests_;
     };
 }  // namespace Atlas
 

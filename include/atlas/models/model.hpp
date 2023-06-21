@@ -16,6 +16,7 @@ namespace Atlas {
     using Scenario = std::vector<MarketData<adouble>>;
 
     /**
+     * @class Model
      * @brief Model interface
      *
      * @tparam adouble
@@ -28,6 +29,10 @@ namespace Atlas {
         Model(const MarketRequest& marketRequest) : marketRequest_(marketRequest) {}
 
         virtual MarketData<adouble> marketData(const Date& evalDate = Date()) const = 0;
+
+        void marketRequest(const MarketRequest& marketRequest) { marketRequest_ = marketRequest; }
+
+        const MarketRequest& marketRequest() const { return marketRequest_; }
 
         MarketRequest marketRequest_;
     };

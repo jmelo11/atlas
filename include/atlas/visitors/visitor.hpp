@@ -13,6 +13,7 @@
 #include <iostream>
 #include <mutex>
 #include <type_traits>
+#include <variant>
 
 #define ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED std::cerr << "Warning: Visitor not implemented for " << __FUNCTION__ << std::endl;
 
@@ -47,6 +48,7 @@ namespace Atlas {
         virtual void visit(FxForward<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
 
         virtual void visit(FixFloatSwap<adouble>& inst){ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
     };
 
     /**
@@ -66,6 +68,7 @@ namespace Atlas {
         virtual void visit(const FxForward<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
 
         virtual void visit(const FixFloatSwap<adouble>& inst) const {ATLAS_WARNING_VISITOR_NOT_IMPLEMENTED};
+
     };
 
 }  // namespace Atlas

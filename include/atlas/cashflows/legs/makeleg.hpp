@@ -7,7 +7,9 @@
 namespace Atlas {
 
     /**
-     * @brief MakeLeg class, used to build legs
+     * @class MakeLeg
+     * @brief Helper class to build legs with different types of coupons and parameters.
+     * @ingroup Legs
      *
      * @tparam adouble
      * @tparam LegType

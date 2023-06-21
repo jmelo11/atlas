@@ -7,14 +7,18 @@
 namespace Atlas {
 
     /**
+     * @class FixedRateCoupon
      * @brief Fixed rate coupon class
+     * @ingroup Cashflows
+     *
      * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>
     class FixedRateCoupon : public Coupon<adouble> {
        public:
         /**
-         * Constructor
+         * @brief Construct a new Fixed Rate Coupon object
+         *
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
@@ -26,7 +30,8 @@ namespace Atlas {
         };
 
         /**
-         * Constructor
+         * @brief Construct a new Fixed Rate Coupon object
+         *
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
@@ -38,14 +43,16 @@ namespace Atlas {
             this->amount_ = accruedAmount(startDate, endDate);
         };
 
-        /***
-         * Gets the interest rate of the coupon
+        /**
+         * @brief Gets the interest rate of the coupon
+         *
          * @return The interest rate of the coupon
          */
         inline InterestRate<adouble> rate() const { return rate_; };
 
-        /***
-         * Sets the interest rate of the coupon
+        /**
+         * @brief Sets the interest rate of the coupon
+         *
          * @param rate The interest rate of the coupon
          */
         inline void rate(const InterestRate<adouble>& rate) {
@@ -53,28 +60,39 @@ namespace Atlas {
             this->amount_ = accruedAmount(this->startDate(), this->endDate());
         };
 
-        /***
-         * Gets the day counter of the coupon
+        /**
+         * @brief Gets the day counter of the coupon
+         *
          * @return The day counter of the coupon
          */
         inline DayCounter dayCounter() const override { return rate_.dayCounter(); };
 
-        /***
-         * Gets the accrued period of the coupon
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
+        /**
+         * @brief Gets the accrued period of the coupon
+         * @details The accrued period is calculated considering the coupon dates. If the coupon dates are before or after the reference dates, the
+         * accrued period is zero.
+         *
+         * @param refStart The start date of the coupon
+         * @param refEnd The end date of the coupon
          * @return The accrued period of the coupon
          */
-        inline double accruedPeriod(const Date& start, const Date& end) const override { return dayCounter().yearFraction(start, end); };
+        inline double accruedPeriod(const Date& refStart, const Date& refEnd) const override {
+            std::pair<Date, Date> validDates = this->checkDates(refStart, refEnd);
+            return dayCounter().yearFraction(validDates.first, validDates.second);
+        };
 
-        /***
-         * Gets the accrued amount of the coupon
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
+        /**
+         * @brief Gets the accrued amount of the coupon
+         * @details The accrued amount is calculated considering the coupon dates. If the coupon dates are before or after the reference dates, the
+         * accrued amount is zero.
+         *
+         * @param refStart The start date of the coupon
+         * @param refEnd The end date of the coupon
          * @return The accrued amount of the coupon
          */
-        inline adouble accruedAmount(const Date& start, const Date& end) const override {
-            return this->notional() * (rate_.compoundFactor(start, end) - 1.0);
+        inline adouble accruedAmount(const Date& refStart, const Date& refEnd) const override {
+            std::pair<Date, Date> validDates = this->checkDates(refStart, refEnd);
+            return this->notional() * (rate_.compoundFactor(validDates.first, validDates.second) - 1.0);
         };
 
        private:

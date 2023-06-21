@@ -7,7 +7,10 @@
 namespace Atlas {
 
     /**
-     * @brief coupon is a cashflow that is paid periodically, and is based on a notional amount.
+     * @class Coupon
+     * @brief Coupon is a cashflow that is paid periodically, and is based on a notional amount.
+     * @ingroup Cashflows
+     *
      * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>
@@ -26,7 +29,7 @@ namespace Atlas {
         };
 
         /**
-         * Constructor
+         * @brief Construct a new Coupon object
          *
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
@@ -40,45 +43,71 @@ namespace Atlas {
 
         virtual ~Coupon(){};
 
-        /***
-         * Get the notional amount of the coupon
+        /**
+         * @brief Get the notional amount of the coupon
+         *
          * @return The notional amount of the coupon
          */
         inline double notional() const { return notional_; };
 
-        /***
-         * Gets the accrual start date of the coupon
+        /**
+         * @brief Gets the accrual start date of the coupon
+         *
          * @return The accrual start date of the coupon
          */
         inline Date startDate() const { return startDate_; }
 
-        /***
-         * Gets the accrual end date of the coupon
+        /**
+         * @brief Gets the accrual end date of the coupon
+         *
          * @return The accrual end date of the coupon
          */
         inline Date endDate() const { return endDate_; }
 
-        /***
-         * Gets the day counter of the coupon
+        /**
+         * @brief Gets the day counter of the coupon
+         *
          * @return The day counter of the coupon
          */
         virtual DayCounter dayCounter() const = 0;
 
-        /***
-         * Gets the accrued period of the coupon
+        /**
+         * @brief Gets the accrual period of the coupon
+         * @details Values are calculated considering the coupon dates. If dates are before or after the coupon dates, the accrued period is 0. In
+         * other words, the accrued period is the period relevant for the given date interval given.
+         *
          * @param start The start date of the coupon
          * @param end The end date of the coupon
          * @return The accrued period of the coupon
          */
-        virtual double accruedPeriod(const Date& start, const Date& end) const = 0;
+        virtual double accruedPeriod(const Date& refStart, const Date& refEnd) const = 0;
 
-        /***
-         * Gets the accrued amount of the coupon
+        /**
+         * @brief Gets the accrued amount of the coupon
+         * @details Values are calculated considering the coupon dates. If dates are before or after the coupon dates, the accrued amount is 0. In
+         * other words, the accrued amount is the amount relevant for the given date interval given.
+         *
          * @param start The start date of the coupon
          * @param end The end date of the coupon
          * @return The accrued amount of the coupon
          */
-        virtual adouble accruedAmount(const Date& start, const Date& end) const = 0;
+        virtual adouble accruedAmount(const Date& refStart, const Date& refEnd) const = 0;
+
+       protected:
+        /**
+         * @brief Helper function to check dates used in accruals.
+         *
+         * @param start The start date in evaluation.
+         * @param end The end date in evaluation.
+         * @return std::pair<Date, Date> The relevant dates for the accrual.
+         */
+        std::pair<Date, Date> checkDates(const Date& start, const Date& end) const {
+            Date evalStart = start;
+            Date evalEnd   = end;
+            if (start < startDate_) evalStart = startDate_;
+            if (end > endDate_) evalEnd = endDate_;
+            return {evalStart, evalEnd};
+        }
 
        private:
         Date startDate_  = Date();

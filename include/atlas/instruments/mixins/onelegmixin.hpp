@@ -9,6 +9,7 @@ namespace Atlas {
 
     template <typename adouble>
     class YieldTermStructure;
+
     /**
      * @brief A class for single leg instruments.
      *
@@ -54,6 +55,13 @@ namespace Atlas {
          * @return Cashflow
          */
         inline Cashflow<adouble>& disbursement() { return disbursement_; };
+
+        /**
+         * @brief Returns the disbursement of the instrument.
+         *
+         * @return Cashflow
+         */
+        inline Cashflow<adouble> disbursement() const { return disbursement_; };
 
         /**
          * @brief Sets the disbursement of the instrument.

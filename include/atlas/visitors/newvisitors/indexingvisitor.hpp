@@ -1,65 +1,94 @@
-#ifndef EDA3136B_5C3D_4D8A_8F4A_AE6D1B5AC406
-#define EDA3136B_5C3D_4D8A_8F4A_AE6D1B5AC406
+#ifndef D5EF9CD0_8800_48B2_A34D_C398B2C5BF70
+#define D5EF9CD0_8800_48B2_A34D_C398B2C5BF70
 
 #include <atlas/data/marketdata.hpp>
 #include <atlas/instruments/derivatives/fixfloatswap.hpp>
 #include <atlas/instruments/derivatives/fxforward.hpp>
-#include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
-#include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
-#include <atlas/visitors/visitor.hpp>
+#include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
+#include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+#include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
+#include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
+#include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
+#include <atlas/visitors/newvisitors/basevisitor.hpp>
 #include <set>
 #include <unordered_map>
 
 namespace Atlas {
 
     /**
-     * @brief A class for indexing the cashflows of an instrument.
+     * @class IndexingVisitor
+     * @brief A class for indexing the cashflows of an instrument. Indexing is needed to compute all market variables ralated to the instrument's
+     * cashflows.
+     * @details It's a Visitor, so it updates the state of the given instrument with the relevant indices.
+     * @ingroup Visitors
      *
      * @tparam adouble
      */
     template <typename adouble>
-    class Indexer : public Visitor<adouble> {
+    class IndexingVisitor : BaseVisitor<adouble> {
        public:
-        Indexer() = default;
-        
         /**
-         * @brief Indexes the cashflows of a fixed rate instrument.
-         *
-         * @param inst
+         * @brief Construct a new Indexing Visitor object
          */
-        void visit(FixedRateInstrument<adouble>& inst) override {
-            indexCashflow(inst.disbursement());
-            indexExchangeRate(inst.disbursement(), false);
-            auto& leg         = inst.leg();
-            auto& coupons     = leg.coupons();
-            auto& redemptions = leg.redemptions();
-
-            for (auto& coupon : coupons) { indexCashflow(coupon); }
-            for (auto& redemption : redemptions) { indexCashflow(redemption); }
-        };
+        IndexingVisitor() = default;
 
         /**
-         * @brief Indexes the cashflows of a floating rate instrument.
+         * @brief Indexes the cashflows of a CustomFixedRateInstrument.
          *
-         * @param inst
+         * @param inst A CustomFixedRateInstrument.
          */
-        void visit(FloatingRateInstrument<adouble>& inst) override {
-            indexCashflow(inst.disbursement());
-            indexExchangeRate(inst.disbursement(), false);
-            auto& leg         = inst.leg();
-            auto& coupons     = leg.coupons();
-            auto& redemptions = leg.redemptions();
+        void operator()(CustomFixedRateInstrument<adouble>& inst) override { indexFixIncomeInstrument(inst); }
 
-            for (auto& coupon : coupons) { indexCashflow(coupon); }
-            for (auto& redemption : redemptions) { indexCashflow(redemption); }
-        };
+        /**
+         * @brief Indexes the cashflows of an EqualPaymentInstrument.
+         *
+         * @param inst An EqualPaymentInstrument.
+         */
+        void operator()(EqualPaymentInstrument<adouble>& inst) override { indexFixIncomeInstrument(inst); }
+
+        /**
+         * @brief Indexes the cashflows of a FixedRateBulletInstrument.
+         *
+         * @param inst A FixedRateBulletInstrument.
+         */
+        void operator()(FixedRateBulletInstrument<adouble>& inst) override { indexFixIncomeInstrument(inst); }
+
+        /**
+         * @brief Indexes the cashflows of a ZeroCouponInstrument.
+         *
+         * @param inst A ZeroCouponInstrument.
+         */
+        void operator()(ZeroCouponInstrument<adouble>& inst) override { indexFixIncomeInstrument(inst); }
+
+        /**
+         * @brief Indexes the cashflows of a CustomFloatingRateInstrument.
+         *
+         * @param inst A CustomFloatingRateInstrument.
+         */
+        void operator()(CustomFloatingRateInstrument<adouble>& inst) override { indexFixIncomeInstrument(inst); }
+
+        /**
+         * @brief Indexes the cashflows of a FloatingRateBulletInstrument.
+         *
+         * @param inst A FloatingRateBulletInstrument.
+         */
+        void operator()(FloatingRateBulletInstrument<adouble>& inst) override { indexFixIncomeInstrument(inst); }
+
+        /**
+         * @brief Indexes the cashflows of a FloatingRateEqualRedemptionInstrument.
+         *
+         * @param inst A FloatingRateEqualRedemptionInstrument.
+         */
+        void operator()(FloatingRateEqualRedemptionInstrument<adouble>& inst) override { indexFixIncomeInstrument(inst); }
 
         /**
          * @brief Indexes the cashflows of an FX forward.
          *
-         * @param inst
+         * @param inst The FX forward
          */
-        void visit(FxForward<adouble>& inst) override {
+        void operator()(FxForward<adouble>& inst) override {
             auto& ccy1Cashflow = inst.leg().redemptions()[0];
             auto& ccy2Cashlfow = inst.leg().redemptions()[1];
             MarketRequest::ExchangeRate fwdPrice(ccy1Cashflow.currencyCode(), ccy2Cashlfow.currencyCode(), inst.endDate());
@@ -78,14 +107,15 @@ namespace Atlas {
             ccy1Cashflow.fxIdx(fxPricesMap_.at(fwdPrice));
             ccy2Cashlfow.fxIdx(fxPricesMap_.at(spotPrice));
             indexCashflow(ccy1Cashflow);
+            ccy2Cashlfow.isIndexed(true);
         };
 
         /**
          * @brief Indexes the cashflows of a fixed float swap.
          *
-         * @param inst
+         * @param inst The fixed-float swap
          */
-        void visit(FixFloatSwap<adouble>& inst) override {
+        void operator()(FixFloatSwap<adouble>& inst) override {
             auto& firstLeg  = inst.firstLeg();
             auto& secondLeg = inst.secondLeg();
 
@@ -95,29 +125,22 @@ namespace Atlas {
             for (auto& coupon : secondLeg.coupons()) { indexCashflow(coupon); }
             for (auto& redemption : secondLeg.redemptions()) { indexCashflow(redemption); }
 
+            std::lock_guard<std::mutex> lock(mtx_);
             indexExchangeRate(firstLeg.coupons()[0], false);
         }
-
-        /**
-         * @brief Set the Request object
-         *
-         * @param request
-         */
-        void setRequest(MarketRequest& request) {
-            request.dfs    = dfsVector_;
-            request.fwds   = fwdsVector_;
-            request.prices = pricesVector_;
-            request.fxs    = fxPricesVector_;
-        };
 
         /**
          * @brief Get the Request object
          *
          * @return MarketRequest
          */
-        MarketRequest request() {
+
+        MarketRequest getResults() const {
             MarketRequest request;
-            setRequest(request);
+            request.dfs    = dfsVector_;
+            request.fwds   = fwdsVector_;
+            request.prices = pricesVector_;
+            request.fxs    = fxPricesVector_;
             return request;
         };
 
@@ -125,7 +148,7 @@ namespace Atlas {
          * @brief Clears the indexer.
          *
          */
-        void clear() {
+        void reset() {
             dfsMap_.clear();
             dfsVector_.clear();
             fwdsMap_.clear();
@@ -136,10 +159,28 @@ namespace Atlas {
 
        private:
         /**
-         * @brief Indexes a cashflow
+         * @brief Indexes standard fixed income instrument.
          *
-         * @tparam Flow
-         * @param cashflow
+         * @param inst A fixed income instrument with floating rate leg.
+         */
+        template <typename I>
+        void indexFixIncomeInstrument(I& inst) {
+            indexCashflow(inst.disbursement());
+            indexExchangeRate(inst.disbursement(), false);
+            auto& leg         = inst.leg();
+            auto& coupons     = leg.coupons();
+            auto& redemptions = leg.redemptions();
+
+            for (auto& coupon : coupons) { indexCashflow(coupon); }
+            for (auto& redemption : redemptions) { indexCashflow(redemption); }
+        };
+
+        /**
+         * @brief Helper generic function to index an cashflow (either fixed, floating or redemption) in the indexer. It
+         * indexes the discount factor, the forward rate and the exchange rate.
+         *
+         * @tparam Flow A cashflow type.
+         * @param cashflow A cashflow.
          */
         template <typename Flow>
         void indexCashflow(Flow& cashflow) {
@@ -174,13 +215,18 @@ namespace Atlas {
 
             // fx
             if (cashflow.applyCcy()) { indexExchangeRate(cashflow, true); }
+            cashflow.isIndexed(true);
         };
 
         /**
-         * @brief Indexes an exchange rate.
-         * 
-         * @param cashflow 
-         * @param atPaymentDate if true, the exchange rate is indexed at the payment date of the cashflow, otherwise is set to Date() (evaluation date).
+         * @brief Indexes the exchange rate of a cashflow. The exchange rate can be set at the evaluation date, meaning that the rate will be
+         * calculated each time the evaluation date is changed, or at the payment date.
+         * @details The date at which the exchange rate is indexed is set by the atPaymentDate parameter. This might have an effect in the pricing
+         * of the instrument.
+         *
+         * @param cashflow A cashflow.
+         * @param atPaymentDate If true, the exchange rate is indexed at the payment date of the cashflow, otherwise is set to Date() (evaluation
+         * date).
          */
         void indexExchangeRate(Cashflow<adouble>& cashflow, bool atPaymentDate = false) {
             Date fxDate;
@@ -191,12 +237,12 @@ namespace Atlas {
             }
             MarketRequest::ExchangeRate fx(cashflow.currencyCode(), 0, fxDate);  // cashflow ccy to local ccy
 
-            std::lock_guard<std::mutex> lock(mtx_);
             if (fxPricesMap_.find(fx) == fxPricesMap_.end()) {
                 fxPricesVector_.push_back(fx);
                 fxPricesMap_[fx] = fxPricesVector_.size() - 1;
             }
             cashflow.fxIdx(fxPricesMap_[fx]);
+            cashflow.isIndexed(true);
         }
 
         std::unordered_map<MarketRequest::ForwardRate, size_t> fwdsMap_;
@@ -216,4 +262,4 @@ namespace Atlas {
     };
 }  // namespace Atlas
 
-#endif /* EDA3136B_5C3D_4D8A_8F4A_AE6D1B5AC406 */
+#endif /* D5EF9CD0_8800_48B2_A34D_C398B2C5BF70 */
