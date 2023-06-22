@@ -16,6 +16,8 @@ TEST(Instrument, CustomFixedRateInstrument) {
     EXPECT_EQ(redemptions.size(), 2);
 
     for (const auto& redemption : redemptions) { EXPECT_EQ(redemption.amount(), notional / 2); }
+
+    testChangeCurrency<CustomFixedRateInstrument<double>, double>(prod);
 }
 
 TEST(Instrument, CustomFixedRateInstrumentDual) {
@@ -32,4 +34,6 @@ TEST(Instrument, CustomFixedRateInstrumentDual) {
     EXPECT_EQ(redemptions.size(), 2);
 
     for (const auto& redemption : redemptions) { EXPECT_EQ(val(redemption.amount()), notional / 2); }
+
+    testChangeCurrency<CustomFixedRateInstrument<dual>, dual>(prod);
 }

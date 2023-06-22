@@ -7,6 +7,7 @@ TEST(Instrument, FixedRateBulletInstrument) {
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
     testInterest<double>(prod, schedule, vars.atlasRate);
     testStructure<FixedRateBulletInstrument<double>,double>(prod, schedule, PaymentStructure::BulletOrZero);
+    testChangeCurrency<FixedRateBulletInstrument<double>,double>(prod);
 };
 
 TEST(Instrument, FixedRateBulletInstrumentDual) {
@@ -15,4 +16,5 @@ TEST(Instrument, FixedRateBulletInstrumentDual) {
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
     testInterest<dual>(prod, schedule, vars.atlasRate);
     testStructure<FixedRateBulletInstrument<dual>,dual>(prod, schedule, PaymentStructure::BulletOrZero);
+    testChangeCurrency<FixedRateBulletInstrument<dual>,dual>(prod);
 };

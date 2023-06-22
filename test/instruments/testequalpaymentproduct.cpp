@@ -27,6 +27,8 @@ TEST(Instrument, EqualPaymentInstrument) {
         EXPECT_FLOAT_EQ(firstPayment, payment.second);
         firstPayment = payment.second;
     }
+
+    testChangeCurrency<EqualPaymentInstrument<double>,double>(prod);
 }
 
 TEST(Instrument, EqualPaymentInstrumentDual) {
@@ -55,4 +57,6 @@ TEST(Instrument, EqualPaymentInstrumentDual) {
         EXPECT_FLOAT_EQ(firstPayment, payment.second);
         firstPayment = payment.second;
     }
+
+    testChangeCurrency<EqualPaymentInstrument<dual>,dual>(prod);
 }

@@ -8,6 +8,7 @@ TEST(Instrument, FloatingRateBulletInstrument) {
     FloatingRateBulletInstrument<double> inst(vars.startDate, vars.endDate, vars.notional, vars.spread, context);
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(index.fixingFrequency());
     testStructure<FloatingRateBulletInstrument<double>, double>(inst, schedule, PaymentStructure::BulletOrZero);
+    testChangeCurrency<FloatingRateBulletInstrument<double>, double>(inst);
 }
 
 TEST(Instrument, FloatingRateBulletInstrumentDual) {
@@ -17,4 +18,5 @@ TEST(Instrument, FloatingRateBulletInstrumentDual) {
     FloatingRateBulletInstrument<dual> inst(vars.startDate, vars.endDate, vars.notional, vars.spread, context);
     Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(index.fixingFrequency());
     testStructure<FloatingRateBulletInstrument<dual>, dual>(inst, schedule, PaymentStructure::BulletOrZero);
+    testChangeCurrency<FloatingRateBulletInstrument<dual>, dual>(inst);
 }
