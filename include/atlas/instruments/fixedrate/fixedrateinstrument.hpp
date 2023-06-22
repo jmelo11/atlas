@@ -17,6 +17,8 @@ namespace Atlas {
      * @class FixedRateInstrument
      * @brief An class for fixed-rate-single-legged instruments.
      * @ingroup FixedRateInstruments
+     * 
+     * @tparam adouble The type of number used for calculation. It can be either double or an AAD-enabled type.
      */
     template <typename adouble>
     class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FixedRateLeg<adouble>> {
