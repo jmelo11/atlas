@@ -27,12 +27,14 @@ namespace Atlas {
      * @tparam adouble
      */
     template <typename adouble>
-    class IndexingVisitor : BaseVisitor<adouble> {
+    class IndexingVisitor : public BaseVisitor<adouble> {
        public:
         /**
          * @brief Construct a new Indexing Visitor object
          */
-        IndexingVisitor() = default;
+        IndexingVisitor(bool showLogs = false) : BaseVisitor<adouble>(showLogs){};
+
+        void operator()(std::monostate& inst) override { this->template printLogs<IndexingVisitor>(this, "monostate"); }
 
         /**
          * @brief Indexes the cashflows of a CustomFixedRateInstrument.

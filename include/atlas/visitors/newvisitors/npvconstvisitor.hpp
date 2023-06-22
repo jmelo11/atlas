@@ -33,6 +33,8 @@ namespace Atlas {
          */
         NPVConstVisitor(const MarketData<adouble>& marketData) : marketData_(marketData){};
 
+        void operator()(const std::monostate& inst) const override { this->template printLogs<NPVConstVisitor>(this, "monostate"); }
+
         /**
          * @brief Calculate the net present value of a CustomFixedRateInstrument.
          *
@@ -111,16 +113,16 @@ namespace Atlas {
             int side         = inst.side();
             adouble fixNPV   = 0.0;
             adouble floatNPV = 0.0;
-            
+
             const auto& firstCoupon = inst.firstLeg().coupons().at(0);
             if (!firstCoupon.isIndexed()) throw std::runtime_error("FixFloatSwap is not indexed.");
             adouble fx = marketData_.fxs.at(firstCoupon.fxIdx());
             fixNPV += legNPV(inst.firstLeg(), fx);
             floatNPV += legNPV(inst.secondLeg(), fx);
             adouble npv = (fixNPV - floatNPV) * side;
-            
+
             std::lock_guard<std::mutex> lock(mtx_);
-            npv_ += npv ;
+            npv_ += npv;
         }
 
         /**
@@ -147,8 +149,8 @@ namespace Atlas {
         void fixedIncomeNPV(const I& inst) const {
             const auto& disbursement = inst.disbursement();
             if (!disbursement.isIndexed()) throw std::runtime_error("Disbursement is not indexed.");
-            adouble spotFx  = marketData_.fxs.at(disbursement.fxIdx());
-            adouble npv = legNPV(inst.leg(), spotFx);
+            adouble spotFx = marketData_.fxs.at(disbursement.fxIdx());
+            adouble npv    = legNPV(inst.leg(), spotFx);
             std::lock_guard<std::mutex> lock(mtx_);
             npv_ += npv;
         };

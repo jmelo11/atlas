@@ -42,6 +42,8 @@ namespace Atlas {
 
         void setTargetNPV(adouble targetNPV) { targetNPV_ = targetNPV; }
 
+        void operator()(const std::monostate& inst) const override { this->template printLogs<ZSpreadConstVisitor>(this, "monostate"); }
+
         void operator()(const CustomFixedRateInstrument<adouble>& inst) const override { zspread(inst); };
 
         void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { zspread(inst); };

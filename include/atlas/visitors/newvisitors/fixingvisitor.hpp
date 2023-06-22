@@ -32,6 +32,8 @@ namespace Atlas {
          */
         FixingVisitor(const MarketData<adouble>& marketData, bool showLogs = false) : BaseVisitor<adouble>(showLogs), marketData_(marketData){};
 
+        void operator()(std::monostate& inst) override { this->template printLogs<FixingVisitor>(this, "monostate"); }
+
         /**
          * @brief Since the instrument is not a floating rate instrument, the visitor only prints a message.
          *

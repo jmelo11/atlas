@@ -41,9 +41,9 @@ namespace Atlas {
      * @tparam adouble
      */
     template <typename adouble>
-    using Instruments = std::variant<CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>, FixedRateBulletInstrument<adouble>,
-                                     ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>, FloatingRateBulletInstrument<adouble>,
-                                     FxForward<adouble>, FixFloatSwap<adouble>>;
+    using Instruments = std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>,
+                                     FixedRateBulletInstrument<adouble>, ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>,
+                                     FloatingRateBulletInstrument<adouble>, FxForward<adouble>, FixFloatSwap<adouble>>;
 
     /**
      * @defgroup Visitors Visitors
@@ -69,6 +69,7 @@ namespace Atlas {
         virtual void operator()(FloatingRateEqualRedemptionInstrument<adouble>& inst) = 0;
         virtual void operator()(FxForward<adouble>& inst)                             = 0;
         virtual void operator()(FixFloatSwap<adouble>& inst)                          = 0;
+        virtual void operator()(std::monostate& ms)                                   = 0;
 
        protected:
         template <typename T>
@@ -105,6 +106,7 @@ namespace Atlas {
         virtual void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const = 0;
         virtual void operator()(const FxForward<adouble>& inst) const                             = 0;
         virtual void operator()(const FixFloatSwap<adouble>& inst) const                          = 0;
+        virtual void operator()(const std::monostate& ms) const                                   = 0;
 
        protected:
         template <typename T>

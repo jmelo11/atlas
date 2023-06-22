@@ -28,6 +28,8 @@ namespace Atlas {
         ParRateConstVisitor(const MarketData<adouble>& marketData, double guess = 0.0, double accuracy = 0.00001, double maxIter = 100)
         : marketData_(marketData), guess_(guess), accuracy_(accuracy), maxIter_(maxIter){};
 
+        void operator()(const std::monostate& inst) const override { this->template printLogs<ParRateConstVisitor>(this, "monostate"); }
+
         /**
          * @brief Calculates the par fixed rate of the instrument.
          *
