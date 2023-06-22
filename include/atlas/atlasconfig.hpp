@@ -19,10 +19,10 @@
 #include <ql/time/frequency.hpp>
 #include <ql/time/period.hpp>
 #include <ql/time/schedule.hpp>
+#include <ql/utilities/dataparsers.hpp>
 #include <atlas/atlasdefine.hpp>
 #include <atlas/rates/interestrate.hpp>
 #include <iostream>
-
 /**
  * @brief Atlas namespace
  */
@@ -30,6 +30,7 @@ namespace Atlas {
 
     // QuantLib types, to be replaced with our own types
     using Date                  = QuantLib::Date;
+    using DateParser            = QuantLib::DateParser;
     using DayCounter            = QuantLib::DayCounter;
     using Calendar              = QuantLib::Calendar;
     using Period                = QuantLib::Period;
@@ -83,30 +84,30 @@ namespace Atlas {
     using ARS      = QuantLib::ARSCurrency;
 
     // calendars
-    using NullCalendar = QuantLib::NullCalendar;
-    using UnitedStates = QuantLib::UnitedStates;
+    using NullCalendar  = QuantLib::NullCalendar;
+    using UnitedStates  = QuantLib::UnitedStates;
     using UnitedKingdom = QuantLib::UnitedKingdom;
-    using TARGET = QuantLib::TARGET;
-    using Chile = QuantLib::Chile;
-    using Japan = QuantLib::Japan;
-    using Canada = QuantLib::Canada;
-    using Australia = QuantLib::Australia;
-    using NewZealand = QuantLib::NewZealand;
-    using Sweden = QuantLib::Sweden;
-    using Norway = QuantLib::Norway;
-    using Denmark = QuantLib::Denmark;
-    using HongKong = QuantLib::HongKong;
-    using Singapore = QuantLib::Singapore;
-    using SouthKorea = QuantLib::SouthKorea;
-    using Mexico = QuantLib::Mexico;
-    using Brazil = QuantLib::Brazil;
-    using Turkey = QuantLib::Turkey;
-    using Russia = QuantLib::Russia;
-    using India = QuantLib::India;
-    using China = QuantLib::China;
-    using Taiwan = QuantLib::Taiwan;
-    using Thailand = QuantLib::Thailand;
-    
+    using TARGET        = QuantLib::TARGET;
+    using Chile         = QuantLib::Chile;
+    using Japan         = QuantLib::Japan;
+    using Canada        = QuantLib::Canada;
+    using Australia     = QuantLib::Australia;
+    using NewZealand    = QuantLib::NewZealand;
+    using Sweden        = QuantLib::Sweden;
+    using Norway        = QuantLib::Norway;
+    using Denmark       = QuantLib::Denmark;
+    using HongKong      = QuantLib::HongKong;
+    using Singapore     = QuantLib::Singapore;
+    using SouthKorea    = QuantLib::SouthKorea;
+    using Mexico        = QuantLib::Mexico;
+    using Brazil        = QuantLib::Brazil;
+    using Turkey        = QuantLib::Turkey;
+    using Russia        = QuantLib::Russia;
+    using India         = QuantLib::India;
+    using China         = QuantLib::China;
+    using Taiwan        = QuantLib::Taiwan;
+    using Thailand      = QuantLib::Thailand;
+
 }  // namespace Atlas
 
 #endif /* AC3D1435_E543_466D_8A3E_A4DD7B9D5E8D */

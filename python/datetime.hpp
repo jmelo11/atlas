@@ -32,6 +32,8 @@ namespace Aux {
 }  // namespace Aux
 
 void py_datetime(py::module& m) {
+    m.def("parseISODate", [](const std::string& date) { return DateParser::parseISO(date); });
+
     py::class_<Date>(m, "Date")
         .def(py::init<int, Month, int>())
         .def(py::init<const Date&>())
@@ -65,6 +67,8 @@ void py_datetime(py::module& m) {
         .def(py::init<>())
         .def("from", &MakeSchedule::from)
         .def("to", &MakeSchedule::to)
+        .def("withFirstDate", &MakeSchedule::withFirstDate)
+        .def("withNextToLastDate", &MakeSchedule::withNextToLastDate)
         .def("withTenor", &MakeSchedule::withTenor)
         .def("withCalendar", &MakeSchedule::withCalendar)
         .def("withConvention", &MakeSchedule::withConvention)
