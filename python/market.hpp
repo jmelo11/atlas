@@ -10,21 +10,17 @@ namespace py = pybind11;
 using namespace Atlas;
 
 void py_market(py::module& m) {
-    
     py::class_<MarketStore<dual>>(m, "MarketStore")
         .def(py::init<const Date&, Currency>(), py::arg("refDate"), py::arg("localCcy"))
-        .def("addCurve", &MarketStore<dual>::addCurve)
-        .def("curveContext", py::overload_cast<const std::string&>(&MarketStore<dual>::curveContext, py::const_), "Get a curve context by name")
-        .def("curveContext", py::overload_cast<size_t>(&MarketStore<dual>::curveContext, py::const_), "Get a curve context by index")
-        .def("rateIndexContext", py::overload_cast<const std::string&>(&MarketStore<dual>::rateIndexContext, py::const_),
-             "Get a rate index context by name")
-        .def("rateIndexContext", py::overload_cast<size_t>(&MarketStore<dual>::rateIndexContext, py::const_), "Get a rate index context by index")
+        .def("addCurve", &MarketStore<dual>::addCurve, py::arg("name"), py::arg("curve"), py::arg("index"), py::arg("riskFreeCcy") = Currency())
+        .def("curveContext", py::overload_cast<const std::string&>(&MarketStore<dual>::curveContext, py::const_))
+        .def("curveContext", py::overload_cast<size_t>(&MarketStore<dual>::curveContext, py::const_))
+        .def("rateIndexContext", py::overload_cast<const std::string&>(&MarketStore<dual>::rateIndexContext, py::const_))
+        .def("rateIndexContext", py::overload_cast<size_t>(&MarketStore<dual>::rateIndexContext, py::const_))
         .def("cloneFromStore", &MarketStore<dual>::cloneFromStore)
         .def("addExchangeRate", &MarketStore<dual>::addExchangeRate)
-        .def("exchange", py::overload_cast<const Currency&, const Currency&>(&MarketStore<dual>::exchange, py::const_),
-             "Get the exchange rate between two currencies")
-        .def("riskFreeCurveIdx", py::overload_cast<const Currency&>(&MarketStore<dual>::riskFreeCurveIdx, py::const_),
-             "Set the risk free curve index for a currency");
+        .def("exchange", py::overload_cast<const Currency&, const Currency&>(&MarketStore<dual>::exchange, py::const_))
+        .def("riskFreeCurveIdx", py::overload_cast<const Currency&>(&MarketStore<dual>::riskFreeCurveIdx, py::const_));
 
     py::class_<MarketRequest::ForwardRate>(m, "ForwardRateRequest").def("__str__", [](const MarketRequest::ForwardRate& r) {
         std::string rep = "ForwardRateRequest(startDate=" + Aux::dateToStr(r.startDate_) + ", endDate=" + Aux::dateToStr(r.endDate_) +

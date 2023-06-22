@@ -38,7 +38,7 @@
 #define exportFloatingRateInstrument(name)                                                                                                  \
     py::class_<name<dual>, FloatingRateInstrument<dual>>(m, #name)                                                                          \
         .def(py::init<const Date&, const Date&, double, dual, const Context<RateIndex<dual>>&, const Context<YieldTermStructure<dual>>&>(), \
-             py::arg("startDate"), py::arg("endDate"), py::arg("notional"), py::arg("spread"), py::arg("rateIndexContext"),                 \
+             py::arg("startDate"), py::arg("endDate"), py::arg("notional"), py::arg("spread"), py::arg("rateIndexContext"),             \
              py::arg("discountCurveContext"))                                                                                               \
         .def(py::init<const Date&, const Date&, double, dual, const Context<RateIndex<dual>>&>(), py::arg("startDate"), py::arg("endDate"), \
              py::arg("notional"), py::arg("spread"), py::arg("rateIndexContext"))
@@ -77,33 +77,39 @@ void py_instruments(py::module& m) {
         .def("accept", py::overload_cast<Visitor<dual>&>(&Instrument<dual>::accept))
         .def("accept", py::overload_cast<ConstVisitor<dual>&>(&Instrument<dual>::accept, py::const_));
 
-    py::class_<FloatingRateInstrument<dual>, Instrument<dual>>(m, "FloatingRateInstrument")
+    py::class_<OneLegMixin<dual, FixedRateLeg<dual>>>(m, "OneFixRateLegMixin")
+        .def("leg", py::overload_cast<>(&OneLegMixin<dual, FixedRateLeg<dual>>::leg, py::const_), py::return_value_policy::reference)
+        .def("leg", py::overload_cast<>(&OneLegMixin<dual, FixedRateLeg<dual>>::leg), py::return_value_policy::reference)
+        .def("discountCurveContext", &OneLegMixin<dual, FixedRateLeg<dual>>::discountCurveContext)
+        .def("disbursement", py::overload_cast<>(&OneLegMixin<dual, FixedRateLeg<dual>>::disbursement), py::return_value_policy::reference)
+        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&OneLegMixin<dual, FixedRateLeg<dual>>::disbursement))
+        .def("currency", &OneLegMixin<dual, FixedRateLeg<dual>>::currency)
+        .def("applyCcy", &OneLegMixin<dual, FixedRateLeg<dual>>::applyCcy);
+
+    py::class_<OneLegMixin<dual, FloatingRateLeg<dual>>>(m, "OneFloatingRateLegMixin")
+        .def("leg", py::overload_cast<>(&OneLegMixin<dual, FloatingRateLeg<dual>>::leg, py::const_), py::return_value_policy::reference)
+        .def("leg", py::overload_cast<>(&OneLegMixin<dual, FloatingRateLeg<dual>>::leg), py::return_value_policy::reference)
+        .def("discountCurveContext", &OneLegMixin<dual, FloatingRateLeg<dual>>::discountCurveContext)
+        .def("rateIndexContext", &OneLegMixin<dual, FloatingRateLeg<dual>>::rateIndexContext)
+        .def("disbursement", py::overload_cast<>(&OneLegMixin<dual, FloatingRateLeg<dual>>::disbursement), py::return_value_policy::reference)
+        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&OneLegMixin<dual, FloatingRateLeg<dual>>::disbursement))
+        .def("currency", &OneLegMixin<dual, FloatingRateLeg<dual>>::currency)
+        .def("applyCcy", &OneLegMixin<dual, FloatingRateLeg<dual>>::applyCcy);
+
+    py::class_<FloatingRateInstrument<dual>, Instrument<dual>, OneLegMixin<dual, FloatingRateLeg<dual>>>(m, "FloatingRateInstrument")
         .def(py::init<const Date&, const Date&, double, dual, const FloatingRateLeg<dual>&>())
-        .def("leg", py::overload_cast<>(&FloatingRateInstrument<dual>::leg, py::const_))
-        .def("leg", py::overload_cast<>(&FloatingRateInstrument<dual>::leg))
         .def("spread", py::overload_cast<>(&FloatingRateInstrument<dual>::spread, py::const_))
         .def("spread", py::overload_cast<dual>(&FloatingRateInstrument<dual>::spread))
-        .def("discountCurveContext", &FloatingRateInstrument<dual>::discountCurveContext)
-        .def("forecastCurveContext", &FloatingRateInstrument<dual>::forecastCurveContext)
         .def("accept", py::overload_cast<Visitor<dual>&>(&FloatingRateInstrument<dual>::accept))
-        .def("accept", py::overload_cast<ConstVisitor<dual>&>(&FloatingRateInstrument<dual>::accept, py::const_))
-        .def("disbursement", py::overload_cast<>(&FloatingRateInstrument<dual>::disbursement))
-        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&FloatingRateInstrument<dual>::disbursement))
-        .def("currency", &FloatingRateInstrument<dual>::currency);
+        .def("accept", py::overload_cast<ConstVisitor<dual>&>(&FloatingRateInstrument<dual>::accept, py::const_));
 
-    py::class_<FixedRateInstrument<dual>, Instrument<dual>>(m, "FixedRateInstrument")
+    py::class_<FixedRateInstrument<dual>, Instrument<dual>, OneLegMixin<dual, FixedRateLeg<dual>>>(m, "FixedRateInstrument")
         .def(py::init<const Date&, const Date&, const InterestRate<dual>&, double, const FixedRateLeg<dual>&>())
-        .def("leg", py::overload_cast<>(&FixedRateInstrument<dual>::leg, py::const_))
-        .def("leg", py::overload_cast<>(&FixedRateInstrument<dual>::leg))
-        .def("discountCurveContext", &FixedRateInstrument<dual>::discountCurveContext)
         .def("accept", py::overload_cast<Visitor<dual>&>(&FixedRateInstrument<dual>::accept))
         .def("accept", py::overload_cast<ConstVisitor<dual>&>(&FixedRateInstrument<dual>::accept, py::const_))
         .def("rate", py::overload_cast<>(&FixedRateInstrument<dual>::rate, py::const_))
         .def("rate", py::overload_cast<dual>(&FixedRateInstrument<dual>::rate))
-        .def("rate", py::overload_cast<const InterestRate<dual>&>(&FixedRateInstrument<dual>::rate))
-        .def("disbursement", py::overload_cast<>(&FixedRateInstrument<dual>::disbursement))
-        .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&FixedRateInstrument<dual>::disbursement))
-        .def("currency", &FixedRateInstrument<dual>::currency);
+        .def("rate", py::overload_cast<const InterestRate<dual>&>(&FixedRateInstrument<dual>::rate));
 
     // Fixed rate instruments
     exportFixedRateInstrument(FixedRateBulletInstrument);
@@ -153,7 +159,8 @@ void py_instruments(py::module& m) {
         .def("discountCurveContext", &OneLegMixin<dual, Leg<dual>>::discountCurveContext)
         .def("disbursement", py::overload_cast<>(&OneLegMixin<dual, Leg<dual>>::disbursement), py::return_value_policy::reference)
         .def("disbursement", py::overload_cast<const Cashflow<dual>&>(&OneLegMixin<dual, Leg<dual>>::disbursement))
-        .def("currency", &OneLegMixin<dual, Leg<dual>>::currency);
+        .def("currency", &OneLegMixin<dual, Leg<dual>>::currency)
+        .def("applyCcy", &OneLegMixin<dual, Leg<dual>>::applyCcy);
 
     py::class_<FxForward<dual>, Instrument<dual>, OneLegMixin<dual, Leg<dual>>>(m, "FxForward")
         .def(py::init<const Date&, const Date&, dual, const Currency&, const Currency&, double, FxForward<dual>::Side>(), py::arg("startDate"),
