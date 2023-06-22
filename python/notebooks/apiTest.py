@@ -25,7 +25,7 @@ def hello_world():
     paymentFrequency = Atlas.Semiannual
     instrument = Atlas.FixedRateBulletInstrument(
         startDate, endDate, paymentFrequency, notional, rate)
-    print(tape.printStatus())
+    print(tape.getMemory())
     return 'Test'
 
 
