@@ -23,8 +23,18 @@ namespace Atlas {
 
         OneLegMixin(const FirstLeg& leg) : leg_(leg){};
 
+        /**
+         * @brief Returns the leg of the instrument.
+         *
+         * @return const FirstLeg&
+         */
         inline const FirstLeg& leg() const { return leg_; }
 
+        /**
+         * @brief Returns the leg of the instrument.
+         *
+         * @return FirstLeg&
+         */
         inline FirstLeg& leg() { return leg_; }
 
         /**
@@ -36,6 +46,7 @@ namespace Atlas {
             if constexpr (std::is_same_v<FirstLeg, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>) {
                 for (auto& coupon : leg_.coupons()) coupon.discountCurveContext(context);
             }
+            for (auto& redemption : leg_.redemptions()) redemption.discountCurveContext(context);
             disbursement_.discountCurveContext(context);
         };
 
@@ -44,9 +55,9 @@ namespace Atlas {
          *
          * @param context
          */
-        inline void forecastCurveContext(const Context<RateIndex<adouble>>& context) {
+        inline void rateIndexContext(const Context<RateIndex<adouble>>& context) {
             static_assert(std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
-            leg_.forecastCurveContext(context);
+            leg_.rateIndexContext(context);
         }
 
         /**
@@ -81,6 +92,19 @@ namespace Atlas {
             }
             for (auto& redemption : leg_.redemptions()) redemption.currency(currency);
             disbursement_.currency(currency);
+        }
+
+        /**
+         * @brief Flag to apply the currency of each cashflow.
+         *
+         * @param apply true to apply the currency of each cashflow
+         */
+        inline void applyCcy(bool apply) {
+            if constexpr (std::is_same_v<FirstLeg, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>) {
+                for (auto& coupon : leg_.coupons()) coupon.applyCcy(apply);
+            }
+            for (auto& redemption : leg_.redemptions()) redemption.applyCcy(apply);
+            disbursement_.applyCcy(apply);
         }
 
        protected:
