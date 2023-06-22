@@ -23,13 +23,13 @@ namespace Atlas {
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          * @param spread The spread of the coupon
-         * @param forecastCurveContext The forecast CurveContext of the coupon
+         * @param rateIndexContext The forecast CurveContext of the coupon
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                           const Context<RateIndex<adouble>>& forecastCurveContext)
-        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), forecastContextIdx_(forecastCurveContext.idx()), hasForecastContext_(true) {
-            rateDef_ = {forecastCurveContext.object().dayCounter(), forecastCurveContext.object().rateFrequency(),
-                        forecastCurveContext.object().rateCompounding()};
+                           const Context<RateIndex<adouble>>& rateIndexContext)
+        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), rateIndexContextIdx_(rateIndexContext.idx()), hasRateIndexContext_(true) {
+            rateDef_ = {rateIndexContext.object().dayCounter(), rateIndexContext.object().rateFrequency(),
+                        rateIndexContext.object().rateCompounding()};
         };
 
         /**
@@ -39,12 +39,12 @@ namespace Atlas {
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          * @param spread The spread of the coupon
-         * @param forecastCurveContext The forecast CurveContext of the coupon
+         * @param rateIndexContext The forecast CurveContext of the coupon
          * @param discountCurveContext The discount CurveContext of the coupon
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                           const Context<RateIndex<adouble>>& forecastCurveContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FloatingRateCoupon(startDate, endDate, notional, spread, forecastCurveContext) {
+                           const Context<RateIndex<adouble>>& rateIndexContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
+        : FloatingRateCoupon(startDate, endDate, notional, spread, rateIndexContext) {
             this->discountContextIdx_ = discountCurveContext.idx();
             this->hasDiscountContext_ = true;
         };
@@ -85,13 +85,13 @@ namespace Atlas {
 
         /***
          * Sets the forecast CurveContext of the coupon
-         * @param forecastCurveContext The forecast CurveContext of the coupon
+         * @param rateIndexContext The forecast CurveContext of the coupon
          */
-        void forecastCurveContext(const Context<RateIndex<adouble>>& context) {
-            forecastContextIdx_ = context.idx();
+        void rateIndexContext(const Context<RateIndex<adouble>>& context) {
+            rateIndexContextIdx_ = context.idx();
             auto& index         = context.object();
             rateDef_            = {index.dayCounter(), index.rateFrequency(), index.rateCompounding()};
-            hasForecastContext_ = true;
+            hasRateIndexContext_ = true;
         }
 
         /**
@@ -128,14 +128,14 @@ namespace Atlas {
          *
          * @return true If the coupon has a forecast CurveContext
          */
-        inline bool hasForecastContext() const { return hasForecastContext_; }
+        inline bool hasRateIndexContext() const { return hasRateIndexContext_; }
 
         /**
          * @brief Gets the forecast curve context idx
          *
          * @return size_t The forecast curve context idx
          */
-        inline size_t forecastContextIdx() const { return forecastContextIdx_; }
+        inline size_t rateIndexContextIdx() const { return rateIndexContextIdx_; }
 
         /**
          * @brief Checks if the fixing rate has been set
@@ -166,9 +166,9 @@ namespace Atlas {
         adouble fixing_ = 0.0;
         RateDef rateDef_;
 
-        size_t forecastContextIdx_;
+        size_t rateIndexContextIdx_;
         bool hasFixingSet_       = false;
-        bool hasForecastContext_ = false;
+        bool hasRateIndexContext_ = false;
     };
 }  // namespace Atlas
 

@@ -100,12 +100,12 @@ void py_couponlegs(py::module& m) {
         .def("spread", py::overload_cast<dual>(&FloatingRateCoupon<dual>::spread))
         .def("fixing", py::overload_cast<>(&FloatingRateCoupon<dual>::fixing, py::const_))
         .def("fixing", py::overload_cast<dual>(&FloatingRateCoupon<dual>::fixing))
-        .def("forecastCurveContext", &FloatingRateCoupon<dual>::forecastCurveContext)
+        .def("rateIndexContext", &FloatingRateCoupon<dual>::rateIndexContext)
         .def("accruedAmount", &FloatingRateCoupon<dual>::accruedAmount)
         .def("dayCounter", &FloatingRateCoupon<dual>::dayCounter)
         .def("accruedPeriod", &FloatingRateCoupon<dual>::accruedPeriod)
-        .def("forecastContextIdx", &FloatingRateCoupon<dual>::forecastContextIdx)
-        .def("hasForecastContext", &FloatingRateCoupon<dual>::hasForecastContext);
+        .def("rateIndexContextIdx", &FloatingRateCoupon<dual>::rateIndexContextIdx)
+        .def("hasRateIndexContext", &FloatingRateCoupon<dual>::hasRateIndexContext);
 
     // Legs
     py::class_<Leg<dual>>(m, "Leg")
@@ -130,7 +130,7 @@ void py_couponlegs(py::module& m) {
         .def("addCoupon", &FloatingRateLeg<dual>::addCoupon)
         .def("sort", &FloatingRateLeg<dual>::sort)
         .def("discountCurveContext", &FloatingRateLeg<dual>::discountCurveContext)
-        .def("forecastCurveContext", &FloatingRateLeg<dual>::forecastCurveContext);
+        .def("rateIndexContext", &FloatingRateLeg<dual>::rateIndexContext);
 };
 
 #endif /* F01E58DD_C649_4B27_B416_BE9F8F03E002 */

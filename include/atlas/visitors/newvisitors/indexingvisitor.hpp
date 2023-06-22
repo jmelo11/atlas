@@ -205,8 +205,8 @@ namespace Atlas {
 
             // fwd rate
             if constexpr (std::is_same_v<Flow, FloatingRateCoupon<adouble>>) {
-                if (!cashflow.hasForecastContext()) { throw std::runtime_error("Cashflow does not have a forecast curve context."); }
-                size_t curveIdx = cashflow.forecastContextIdx();
+                if (!cashflow.hasRateIndexContext()) { throw std::runtime_error("Cashflow does not have a forecast curve context."); }
+                size_t curveIdx = cashflow.rateIndexContextIdx();
                 MarketRequest::ForwardRate fwd(cashflow.startDate(), cashflow.endDate(), curveIdx);
                 if (fwdsMap_.find(fwd) == fwdsMap_.end()) {
                     fwdsVector_.push_back(fwd);

@@ -79,8 +79,8 @@ namespace Atlas {
          *
          * @param forecastCurveContext a reference to a Context object representing the forecast curve context.
          */
-        inline void forecastCurveContext(const Context<RateIndex<adouble>>& forecastCurveContext) {
-            for (auto& coupon : coupons_) { coupon.forecastCurveContext(forecastCurveContext); }
+        inline void rateIndexContext(const Context<RateIndex<adouble>>& rateIndexContext) {
+            for (auto& coupon : coupons_) { coupon.rateIndexContext(rateIndexContext); }
         }
 
        private:
