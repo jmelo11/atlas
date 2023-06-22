@@ -48,6 +48,27 @@ void inline testStructure(const T& instrument, const Schedule& schedule, Payment
     }
 };
 
+template<class T, typename adouble>
+void inline testChangeCurrency(const T& instrument){
+    T newInstrument = instrument;
+    Currency newCurrency = JPY();
+    newInstrument.currency(newCurrency);
+    const auto& leg = newInstrument.leg();
+    const auto& coupons = leg.coupons();
+    const auto& redemptions = leg.redemptions();
+ 
+    for(const auto& coupon : coupons){
+        EXPECT_EQ(coupon.currencyCode(), newCurrency.numericCode());
+    }
+    for(const auto& redemption : redemptions){
+        EXPECT_EQ(redemption.currencyCode(), newCurrency.numericCode());
+    }
+
+    if constexpr(std::is_base_of_v<FixedRateInstrument<adouble>, T> || std::is_base_of_v<FloatingRateInstrument<adouble>, T>){
+        EXPECT_EQ(newInstrument.disbursement().currencyCode(), newCurrency.numericCode());
+    }
+}
+
 template <typename adouble>
 void inline testInterest(const FixedRateInstrument<adouble>& instrument, const Schedule& schedule, const InterestRate<adouble>& rate) {
     const auto& leg         = instrument.leg();
