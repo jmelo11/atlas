@@ -8,6 +8,7 @@
 
 namespace Atlas {
     /**
+     * @class ContextManager
      * @brief ContextManager is a class that manages a collection of objects of type T.
      *
      * @tparam T

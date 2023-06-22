@@ -12,7 +12,7 @@ namespace Atlas {
      * needed spread, rate or other value that makes the NPV of the instrument equal to zero.
      * @ingroup Visitors
      *
-     * @tparam adouble
+     * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
     template <typename adouble>
     class ParRateConstVisitor : public BaseConstVisitor<adouble> {

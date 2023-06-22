@@ -53,7 +53,7 @@ namespace Atlas {
      * It requires the user to implement the operator() for each childest-instrument type. Each implementation of this visitor could take an
      * instrument by reference and modify it.
      *
-     * @tparam adouble
+     * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
     template <typename adouble>
     class BaseVisitor {

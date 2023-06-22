@@ -1020,7 +1020,8 @@ RECURSIVE              = YES
 EXCLUDE                = ./tests \
                          ./build \
                          ./benchmark \
-                         ./idea
+                         ./idea \
+                         ./repos
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -2468,7 +2469,7 @@ HIDE_UNDOC_RELATIONS   = YES
 # set to NO
 # The default value is: NO.
 
-HAVE_DOT               = YES
+HAVE_DOT               = NO
 
 # The DOT_NUM_THREADS specifies the number of dot invocations doxygen is allowed
 # to run in parallel. When set to 0 doxygen will base this on the number of

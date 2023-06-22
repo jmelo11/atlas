@@ -24,7 +24,7 @@ namespace Atlas {
      * @details It's a Visitor, so it updates the state of the given instrument with the relevant indices.
      * @ingroup Visitors
      *
-     * @tparam adouble
+     * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
     template <typename adouble>
     class IndexingVisitor : public BaseVisitor<adouble> {

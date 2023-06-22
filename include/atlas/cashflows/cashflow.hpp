@@ -14,6 +14,7 @@ namespace Atlas {
 
     template <typename adouble>
     class Instrument;
+   
     /**
      * @class Cashflow
      * @brief Base class representing a simple cashflow.

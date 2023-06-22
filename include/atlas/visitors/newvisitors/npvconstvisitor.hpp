@@ -21,7 +21,7 @@ namespace Atlas {
      * time the visitor is called, so if single values are needed, reset() should be called.
      * @ingroup Visitors
      *
-     * @tparam adouble
+     * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
     template <typename adouble>
     class NPVConstVisitor : public BaseConstVisitor<adouble> {

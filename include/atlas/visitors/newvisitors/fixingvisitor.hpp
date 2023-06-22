@@ -20,7 +20,8 @@ namespace Atlas {
      * @brief A visitor that fixes the coupons of an instrument with floating rate legs. After the fixing, the instrument can be priced.
      * @details sets the variable isFixingSet_ to true after fixing.
      * @ingroup Visitors
-     * @tparam adouble
+     * 
+     * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
     template <typename adouble>
     class FixingVisitor : public BaseVisitor<adouble> {

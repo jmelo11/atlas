@@ -12,6 +12,7 @@ namespace Atlas {
     class YieldTermStructure;
 
     /**
+     * @class ExchangeRateManager
      * @brief ExchangeRateManager is a class that manages a collection of exchange rates.
      *
      * @tparam adouble

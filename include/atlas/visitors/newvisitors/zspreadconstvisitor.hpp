@@ -10,7 +10,7 @@ namespace Atlas {
      * @brief A visitor for calculating the z-spread of an instrument. Only fix income instruments are supported.
      * @ingroup Visitors
      *
-     * @tparam adouble
+     * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
     template <typename adouble>
     class ZSpreadConstVisitor : public BaseConstVisitor<adouble> {

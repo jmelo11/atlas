@@ -8,7 +8,9 @@
 namespace Atlas {
 
     /**
-     * @brief FxForward instrument
+     * @class FxForward
+     * @brief A forward contract on an FX rate
+     *
      * @tparam adouble
      * @ingroup Derivatives
      */
@@ -26,7 +28,7 @@ namespace Atlas {
          * @param ccy1 currency context for first currency
          * @param ccy2 currency context for second currency
          * @param notionalInSecondCcy notional in first currency
-         * @param side BUY or SELL         
+         * @param side BUY or SELL
          */
         FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& ccy1, const Currency& ccy2,
                   double notionalInSecondCcy, Side side)
@@ -49,14 +51,14 @@ namespace Atlas {
         /**
          * @brief Construct a new Fx Forward object
          *
-         * @param startDate
-         * @param endDate
-         * @param fwdPrice
-         * @param notionalInFirstCcy
-         * @param curr1
-         * @param curr2
-         * @param side
-         * @param discountCurve         
+         * @param startDate start date of the instrument
+         * @param endDate end date of the instrument
+         * @param fwdPrice units of second currency per unit of first currency
+         * @param notionalInFirstCcy notional in first currency
+         * @param curr1 first currency
+         * @param curr2 second currency
+         * @param side  BUY or SELL
+         * @param discountCurve discount curve context
          */
         FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& curr1, const Currency& curr2,
                   double notionalInSecondCcy, Side side, const Context<YieldTermStructure<adouble>>& discountCurve)
