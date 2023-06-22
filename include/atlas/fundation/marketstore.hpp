@@ -30,12 +30,15 @@ namespace Atlas {
          * @param curve
          * @param index
          */
-        void addCurve(const std::string& name, const YieldTermStructure<adouble>& curve, const RateIndex<adouble>& index) {
+        void addCurve(const std::string& name, const YieldTermStructure<adouble>& curve, const RateIndex<adouble>& index, Currency riskFreeCcy = Currency()) {
             if (curveManager_->hasContext(name)) {
                 throw std::invalid_argument("A curve context with the given name already exists.");
             } else {
                 curveManager_->createContext(name, curve);
                 rateIndexManager_->createContext(name, index);
+            }
+            if (riskFreeCcy != Currency()) {
+                riskFreeCurveIdx(riskFreeCcy, name);
             }
         };
 
@@ -112,8 +115,20 @@ namespace Atlas {
          */
         size_t riskFreeCurveIdx(const Currency& ccy) const { return riskFreeCurveIdx(ccy.numericCode()); };
 
+        /**
+         * @brief return the currency associated risk free curve
+         * 
+         * @param ccyCode 
+         * @return size_t 
+         */
         size_t riskFreeCurveIdx(size_t ccyCode) const { return fxManager_->riskFreeCurveIdx(translateCcyCode(ccyCode)); };
 
+        /**
+         * @brief Sets the currency associated risk free curve
+         * 
+         * @param ccy 
+         * @param name 
+         */
         void riskFreeCurveIdx(const Currency& ccy, const std::string& name) {
             auto& context = curveManager_->getContext(name);
             fxManager_->riskFreeCurveIdx(ccy, context);
