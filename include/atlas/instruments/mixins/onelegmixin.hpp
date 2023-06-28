@@ -4,6 +4,7 @@
 #include <atlas/cashflows/cashflow.hpp>
 #include <atlas/cashflows/legs/floatingrateleg.hpp>
 #include <atlas/fundation/context.hpp>
+#include <type_traits>
 
 namespace Atlas {
 
@@ -108,6 +109,11 @@ namespace Atlas {
         }
 
        protected:
+        template <typename T = FirstLeg, typename = std::enable_if_t<std::is_default_constructible_v<T>>>
+        inline void reset() {
+            leg_ = FirstLeg();
+        }
+        
         Cashflow<adouble> disbursement_;
         FirstLeg leg_;
     };
