@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 option(BUILD_PYTHON "Build python module" ON)
 option(BUILD_TESTS "Build test suite" ON)
 option(BUILD_BENCHMARK "Build benchmark suite" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
-
+option(BUILD_EXAMPLES "Build examples" OFF)
+option(BUILD_WITH_AD "Build with AD" OFF)
 
 if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD /EHsc /MP")
@@ -35,6 +35,7 @@ file(
   "include/atlas/visitors/*.hpp"
   "include/atlas/rates/*.hpp"
   "include/atlas/others/*.hpp"
+  "include/atlas/parsers/*.hpp"
 )
 
 if(MSVC)
@@ -52,9 +53,8 @@ target_include_directories(
 
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-find_package(XAD REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad)
+target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost)
 
 #link cppad
 
