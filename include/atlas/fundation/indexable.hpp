@@ -1,9 +1,6 @@
 #ifndef D41E427D_25EB_4AB1_89A1_415A80BBF4BF
 #define D41E427D_25EB_4AB1_89A1_415A80BBF4BF
 
-#include <climits>
-#include <cstddef>
-
 namespace Atlas {
 
     /**

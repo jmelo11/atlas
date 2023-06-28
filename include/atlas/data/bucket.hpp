@@ -13,10 +13,10 @@
 namespace Atlas {
 
     /**
+     * @class Bucket
      * @brief A bucket is a time interval with a value
      *
      * @tparam adouble type of the values to be stored (double, dual, etc.)
-     *
      */
     template <typename adouble>
     struct Bucket {
@@ -40,7 +40,7 @@ namespace Atlas {
      */
     template <class adouble>
     std::ostream& operator<<(std::ostream& s, const Bucket<adouble>& bucket) {
-        return s << "(" << bucket.start_ << ", " << bucket.end_ << "," << bucket.value_ << ")";
+        return s << "Bucket(" << bucket.start_ << ", " << bucket.end_ << "," << bucket.value_ << ")";
     }
 }  // namespace Atlas
 
