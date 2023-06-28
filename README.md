@@ -1,4 +1,4 @@
-# Atlas: Libreria Financiera (alpha version)
+# Atlas: Libreria Financiera
 
 El objetivo de Atlas es convertirse en una alternativa real a las herramientas financieras existentes en el mercado, ofreciendo un mayor rendimiento, simplicidad y alcance.
 
@@ -9,6 +9,7 @@ El objetivo de Atlas es convertirse en una alternativa real a las herramientas f
 Algunas características técnicas que se buscan incorporar en Atlas son:
 
 - Multithreading: contar con una estructura que permita utilizar la librería de forma thread-safe es crucial para poder sacarle el máximo de rendimiento.
+
 - Diferenciación automática: AAD se ha convertido en un estándar para el cálculo de sensibilidades en el mundo financiero, habilitando la posibilidad de contar con riesgos de forma automática sin tener que recalcular todos nuestros instrumentos. Esta funcionalidad es crucial si, por ejemplo, se busca calcular XVAs u otras métricas.
 
 ### Documentación
@@ -90,32 +91,27 @@ Para facilitar el proceso de compilación, se sugiere organizar los directorios 
     - XAD
     - boost
 
-#### Compilación de QuantLib con CMake
+#### Compilación de QuantLib con CMake (Windows)
 
 1. Dentro del directorio libs/QuantLib, cree una carpeta llamada build.
 2. Abra una terminal y navegue hasta la carpeta build recién creada.
 3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
 
+##### Debug
+```cmd
+    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MDd /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDebugDLL"
+
+    cmake --build . --target INSTALL --config <config>
 ```
-cmake -S .. -B . -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MD /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF
-cmake --build . --target INSTALL --config <config>
+##### Release
+```cmd
+    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MD /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
+
+    cmake --build . --target INSTALL --config <config>
 ```
+
 
 Donde config puede ser Debug o Release, dependiendo de la configuración que desee compilar.
-
-#### Compilación de XAD con CMake
-
-1. Dentro del directorio libs/XAD, cree una carpeta llamada build.
-2. Abra una terminal y navegue hasta la carpeta build recién creada.
-3. Ejecute los siguientes comandos, teniendo en cuenta las siguientes opciones:
-
-- XAD_STATIC_MSVC_RUNTIME: Cambia la biblioteca de tiempo de ejecución en Windows. Si está utilizando Windows y QuantLib tiene el runtime estático, configure esta opción en OFF.
-- XAD_SIMD_OPTION: Ajusta la configuración para usar instrucciones de vectorización avanzadas en procesadores Intel. Modifíquelo según las necesidades del usuario.
-
-```
-cmake -S .. -B . -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DXAD_STATIC_MSVC_RUNTIME=OFF -DXAD_SIMD_OPTION='AVX2' 
-cmake --build . --target INSTALL --config <config>
-```
 
 #### Instalación de Boost
 Boost incluye un instalador. Siga las instrucciones en https://www.boost.org/doc/libs/1_82_0/more/getting_started/windows.html para instalarlo en su sistema.
@@ -126,7 +122,7 @@ Boost incluye un instalador. Siga las instrucciones en https://www.boost.org/doc
 3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
 
 ```
-cmake -S .. -B . -DCMAKE_CXX_STANDARD=17 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
 cmake --build . --target INSTALL --config <config>
 ```
 
