@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include(GNUInstallDirs)
 
-file(GLOB SOURCES "*.cpp" "coupons/*.cpp" "instruments/*.cpp" "visitors/*.cpp" "others/*.cpp" "rates/*.cpp")
+file(GLOB SOURCES "*.cpp" "coupons/*.cpp" "instruments/*.cpp" "visitors/*.cpp" "others/*.cpp" "rates/*.cpp" "parsers/*.cpp")
 file(GLOB INCLUDES "*.hpp")
 
 include(FetchContent)
