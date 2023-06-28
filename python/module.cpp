@@ -1,5 +1,5 @@
 // modules
-#include "aad.hpp"
+// #include "aad.hpp"
 #include "couponlegs.hpp"
 #include "currencies.hpp"
 #include "datetime.hpp"
@@ -7,6 +7,7 @@
 #include "instruments.hpp"
 #include "market.hpp"
 #include "models.hpp"
+#include "parsers.hpp"
 #include "rates.hpp"
 #include "visitors.hpp"
 
@@ -14,8 +15,8 @@ namespace py = pybind11;
 using namespace Atlas;
 
 PYBIND11_MODULE(Atlas, m) {
-    m.doc() = "Atlas";  // optional module docstring
-    py_aad(m);
+    m.doc() = "Atlas";
+    // py_aad(m);
     py_enums(m);
     py_datetime(m);
     py_currencies(m);
@@ -26,6 +27,9 @@ PYBIND11_MODULE(Atlas, m) {
     py_visitors(m);
     py_models(m);
 
-    py::module_ submodule = m.def_submodule("visitors", "Visitors submodule");
-    py_newvisitors(submodule);
+    py::module_ visitors = m.def_submodule("visitors", "Visitors submodule");
+    py_newvisitors(visitors);
+
+    py::module_ parsers = m.def_submodule("parsers", "Parsers submodule");
+    py_parsers(parsers);
 }

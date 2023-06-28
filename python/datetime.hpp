@@ -1,12 +1,10 @@
 #ifndef D3CB0046_6A6F_4723_B9B6_F86E50B68765
 #define D3CB0046_6A6F_4723_B9B6_F86E50B68765
 
-// pybind11
+#include "config.hpp"
+#include <atlas/atlasconfig.hpp>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
-
-// fundation
-#include <atlas/atlasconfig.hpp>
 
 namespace py = pybind11;
 using namespace Atlas;

@@ -1,12 +1,7 @@
 #ifndef CD9BD627_F812_406D_AEEC_B699240E41D8
 #define CD9BD627_F812_406D_AEEC_B699240E41D8
 
-// pybind11
-#include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
-// visitors
+#include "config.hpp"
 #include <atlas/visitors/cashflowprofiler.hpp>
 #include <atlas/visitors/durationcalculator.hpp>
 #include <atlas/visitors/indexer.hpp>
@@ -19,156 +14,165 @@
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
 #include <atlas/visitors/zspreadcalculator.hpp>
+#include <pybind11/operators.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace py = pybind11;
 using namespace Atlas;
 
 namespace Aux {
 
-    class PyBaseVisitor : public BaseVisitor<dual> {
+    class PyBaseVisitor : public BaseVisitor<NumType> {
        public:
-        using BaseVisitor<dual>::BaseVisitor;
+        using BaseVisitor<NumType>::BaseVisitor;
 
-        void operator()(CustomFixedRateInstrument<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
+        void operator()(CustomFixedRateInstrument<NumType>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst); }
 
-        void operator()(EqualPaymentInstrument<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
+        void operator()(EqualPaymentInstrument<NumType>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst); }
 
-        void operator()(FixedRateBulletInstrument<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
+        void operator()(FixedRateBulletInstrument<NumType>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst); }
 
-        void operator()(ZeroCouponInstrument<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
+        void operator()(ZeroCouponInstrument<NumType>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst); }
 
-        void operator()(CustomFloatingRateInstrument<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
-
-        void operator()(FloatingRateBulletInstrument<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
-
-        void operator()(FloatingRateEqualRedemptionInstrument<dual>& inst) override {
-            PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst);
+        void operator()(CustomFloatingRateInstrument<NumType>& inst) override {
+            PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(FxForward<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
+        void operator()(FloatingRateBulletInstrument<NumType>& inst) override {
+            PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst);
+        }
 
-        void operator()(FixFloatSwap<dual>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<dual>, operator(), inst); }
+        void operator()(FloatingRateEqualRedemptionInstrument<NumType>& inst) override {
+            PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst);
+        }
+
+        void operator()(FxForward<NumType>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst); }
+
+        void operator()(FixFloatSwap<NumType>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst); }
     };
 
-    class PyBaseConstVisitor : public BaseConstVisitor<dual> {
+    class PyBaseConstVisitor : public BaseConstVisitor<NumType> {
        public:
-        using BaseConstVisitor<dual>::BaseConstVisitor;
+        using BaseConstVisitor<NumType>::BaseConstVisitor;
 
-        void operator()(const CustomFixedRateInstrument<dual>& inst) const override {
-            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst);
+        void operator()(const CustomFixedRateInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(const EqualPaymentInstrument<dual>& inst) const override {
-            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst);
+        void operator()(const EqualPaymentInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(const FixedRateBulletInstrument<dual>& inst) const override {
-            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst);
+        void operator()(const FixedRateBulletInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(const ZeroCouponInstrument<dual>& inst) const override {
-            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst);
+        void operator()(const ZeroCouponInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(const CustomFloatingRateInstrument<dual>& inst) const override {
-            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst);
+        void operator()(const CustomFloatingRateInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(const FloatingRateBulletInstrument<dual>& inst) const override {
-            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst);
+        void operator()(const FloatingRateBulletInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(const FloatingRateEqualRedemptionInstrument<dual>& inst) const override {
-            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst);
+        void operator()(const FloatingRateEqualRedemptionInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
-        void operator()(const FxForward<dual>& inst) const override { PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst); }
+        void operator()(const FxForward<NumType>& inst) const override { PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst); }
 
-        void operator()(const FixFloatSwap<dual>& inst) const override { PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<dual>, operator(), inst); }
+        void operator()(const FixFloatSwap<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
+        }
     };
 };  // namespace Aux
 
 void py_visitors(py::module& m) {
-    py::class_<Visitor<dual>>(m, "Visitor")
+    py::class_<Visitor<NumType>>(m, "Visitor")
         .def(py::init<>())
-        .def("visit", py::overload_cast<FloatingRateInstrument<dual>&>(&Visitor<dual>::visit))
-        .def("visit", py::overload_cast<FixedRateInstrument<dual>&>(&Visitor<dual>::visit))
-        .def("visit", py::overload_cast<FxForward<dual>&>(&Visitor<dual>::visit))
-        .def("visit", py::overload_cast<FixFloatSwap<dual>&>(&Visitor<dual>::visit));
+        .def("visit", py::overload_cast<FloatingRateInstrument<NumType>&>(&Visitor<NumType>::visit))
+        .def("visit", py::overload_cast<FixedRateInstrument<NumType>&>(&Visitor<NumType>::visit))
+        .def("visit", py::overload_cast<FxForward<NumType>&>(&Visitor<NumType>::visit))
+        .def("visit", py::overload_cast<FixFloatSwap<NumType>&>(&Visitor<NumType>::visit));
 
-    py::class_<ConstVisitor<dual>>(m, "ConstVisitor")
+    py::class_<ConstVisitor<NumType>>(m, "ConstVisitor")
         .def(py::init<>())
-        .def("visit", py::overload_cast<const FloatingRateInstrument<dual>&>(&ConstVisitor<dual>::visit, py::const_))
-        .def("visit", py::overload_cast<const FixedRateInstrument<dual>&>(&ConstVisitor<dual>::visit, py::const_))
-        .def("visit", py::overload_cast<const FxForward<dual>&>(&ConstVisitor<dual>::visit, py::const_))
-        .def("visit", py::overload_cast<const FixFloatSwap<dual>&>(&ConstVisitor<dual>::visit, py::const_));
+        .def("visit", py::overload_cast<const FloatingRateInstrument<NumType>&>(&ConstVisitor<NumType>::visit, py::const_))
+        .def("visit", py::overload_cast<const FixedRateInstrument<NumType>&>(&ConstVisitor<NumType>::visit, py::const_))
+        .def("visit", py::overload_cast<const FxForward<NumType>&>(&ConstVisitor<NumType>::visit, py::const_))
+        .def("visit", py::overload_cast<const FixFloatSwap<NumType>&>(&ConstVisitor<NumType>::visit, py::const_));
 
-    py::class_<NPVCalculator<dual>, Visitor<dual>>(m, "NPVCalculator")
-        .def(py::init<const MarketData<dual>&>(), py::arg("marketData"))
-        .def("results", &NPVCalculator<dual>::results)
-        .def("clear", &NPVCalculator<dual>::clear);
+    py::class_<NPVCalculator<NumType>, Visitor<NumType>>(m, "NPVCalculator")
+        .def(py::init<const MarketData<NumType>&>(), py::arg("marketData"))
+        .def("results", &NPVCalculator<NumType>::results)
+        .def("clear", &NPVCalculator<NumType>::clear);
 
-    py::class_<Indexer<dual>, Visitor<dual>>(m, "Indexer")
+    py::class_<Indexer<NumType>, Visitor<NumType>>(m, "Indexer")
         .def(py::init<>())
-        .def("request", &Indexer<dual>::request)
-        .def("clear", &Indexer<dual>::clear);
+        .def("request", &Indexer<NumType>::request)
+        .def("clear", &Indexer<NumType>::clear);
 
-    py::class_<ParSolver<dual>, ConstVisitor<dual>>(m, "ParSolver")
-        .def(py::init<const MarketData<dual>&>(), py::arg("marketData"))
-        .def("results", &ParSolver<dual>::results)
-        .def("clear", &ParSolver<dual>::clear);
+    py::class_<ParSolver<NumType>, ConstVisitor<NumType>>(m, "ParSolver")
+        .def(py::init<const MarketData<NumType>&>(), py::arg("marketData"))
+        .def("results", &ParSolver<NumType>::results)
+        .def("clear", &ParSolver<NumType>::clear);
 
-    py::class_<ZSpreadCalculator<dual>, ConstVisitor<dual>>(m, "ZSpreadCalculator")
-        .def(py::init<const MarketData<dual>&, dual, const DayCounter&, Compounding, Frequency>(), py::arg("marketData"), py::arg("targetNpv"),
+    py::class_<ZSpreadCalculator<NumType>, ConstVisitor<NumType>>(m, "ZSpreadCalculator")
+        .def(py::init<const MarketData<NumType>&, NumType, const DayCounter&, Compounding, Frequency>(), py::arg("marketData"), py::arg("targetNpv"),
              py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Compounded, py::arg("frequency") = Frequency::Semiannual)
-        .def("results", &ZSpreadCalculator<dual>::results)
-        .def("clear", &ZSpreadCalculator<dual>::clear);
+        .def("results", &ZSpreadCalculator<NumType>::results)
+        .def("clear", &ZSpreadCalculator<NumType>::clear);
 
-    py::class_<CashflowProfiler<dual>, ConstVisitor<dual>>(m, "CashflowProfiler")
+    py::class_<CashflowProfiler<NumType>, ConstVisitor<NumType>>(m, "CashflowProfiler")
         .def(py::init<>())
-        .def("redemptions", &CashflowProfiler<dual>::redemptions)
-        .def("interests", &CashflowProfiler<dual>::interests)
-        .def("clear", &CashflowProfiler<dual>::clear);
+        .def("redemptions", &CashflowProfiler<NumType>::redemptions)
+        .def("interests", &CashflowProfiler<NumType>::interests)
+        .def("clear", &CashflowProfiler<NumType>::clear);
 }
 
 void py_newvisitors(py::module& m) {
-    py::class_<Instruments<dual>>(m, "Instruments").def(py::init<>());
+    py::class_<InstrumentVariant<NumType>>(m, "InstrumentVariant").def(py::init<>());
 
-    py::class_<BaseVisitor<dual>, Aux::PyBaseVisitor>(m, "BaseVisitor")
-        .def("__call__", py::overload_cast<CustomFixedRateInstrument<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<EqualPaymentInstrument<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<FixedRateBulletInstrument<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<ZeroCouponInstrument<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<CustomFloatingRateInstrument<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<FloatingRateBulletInstrument<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<FloatingRateEqualRedemptionInstrument<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<FxForward<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("__call__", py::overload_cast<FixFloatSwap<dual>&>(&BaseVisitor<dual>::operator()))
-        .def("visit", [](BaseVisitor<dual>& v, Instruments<dual>& i) { std::visit(v, i); });
+    py::class_<BaseVisitor<NumType>, Aux::PyBaseVisitor>(m, "BaseVisitor")
+        .def("__call__", py::overload_cast<CustomFixedRateInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<EqualPaymentInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<FixedRateBulletInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<ZeroCouponInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<CustomFloatingRateInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<FloatingRateBulletInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<FloatingRateEqualRedemptionInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<FxForward<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<FixFloatSwap<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("visit", [](BaseVisitor<NumType>& v, InstrumentVariant<NumType>& i) { std::visit(v, i); });
 
-    py::class_<BaseConstVisitor<dual>, Aux::PyBaseConstVisitor>(m, "BaseConstVisitor")
-        .def("__call__", py::overload_cast<const CustomFixedRateInstrument<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const EqualPaymentInstrument<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const FixedRateBulletInstrument<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const ZeroCouponInstrument<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const CustomFloatingRateInstrument<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const FloatingRateBulletInstrument<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const FloatingRateEqualRedemptionInstrument<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const FxForward<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("__call__", py::overload_cast<const FixFloatSwap<dual>&>(&BaseConstVisitor<dual>::operator(), py::const_))
-        .def("visit", [](BaseConstVisitor<dual>& v, const Instruments<dual>& i) { std::visit(v, i); });
+    py::class_<BaseConstVisitor<NumType>, Aux::PyBaseConstVisitor>(m, "BaseConstVisitor")
+        .def("__call__", py::overload_cast<const CustomFixedRateInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const EqualPaymentInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const FixedRateBulletInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const ZeroCouponInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const CustomFloatingRateInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const FloatingRateBulletInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const FloatingRateEqualRedemptionInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const FxForward<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const FixFloatSwap<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("visit", [](BaseConstVisitor<NumType>& v, const InstrumentVariant<NumType>& i) { std::visit(v, i); });
 
-    py::class_<IndexingVisitor<dual>, BaseVisitor<dual>>(m, "IndexingVisitor")
+    py::class_<IndexingVisitor<NumType>, BaseVisitor<NumType>>(m, "IndexingVisitor")
         .def(py::init<>())
-        .def("getResults", &IndexingVisitor<dual>::getResults)
-        .def("reset", &IndexingVisitor<dual>::reset);
+        .def("getResults", &IndexingVisitor<NumType>::getResults)
+        .def("reset", &IndexingVisitor<NumType>::reset);
 
-    py::class_<FixingVisitor<dual>, BaseVisitor<dual>>(m, "FixingVisitor").def(py::init<const MarketData<dual>&>());
+    py::class_<FixingVisitor<NumType>, BaseVisitor<NumType>>(m, "FixingVisitor").def(py::init<const MarketData<NumType>&>());
 
-    py::class_<NPVConstVisitor<dual>, BaseConstVisitor<dual>>(m, "NPVConstVisitor")
-        .def(py::init<const MarketData<dual>&>(), py::arg("marketData"))
-        .def("getResults", &NPVConstVisitor<dual>::getResults)
-        .def("reset", &NPVConstVisitor<dual>::reset);
+    py::class_<NPVConstVisitor<NumType>, BaseConstVisitor<NumType>>(m, "NPVConstVisitor")
+        .def(py::init<const MarketData<NumType>&>(), py::arg("marketData"))
+        .def("getResults", &NPVConstVisitor<NumType>::getResults)
+        .def("reset", &NPVConstVisitor<NumType>::reset);
 }
 
 #endif /* CD9BD627_F812_406D_AEEC_B699240E41D8 */

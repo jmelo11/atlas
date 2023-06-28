@@ -1,11 +1,9 @@
 #ifndef C9B676D2_7070_4A54_B98A_9F20D364C8C7
 #define C9B676D2_7070_4A54_B98A_9F20D364C8C7
 
-// pybind11
-#include <pybind11/pybind11.h>
-
-// fundation
+#include "config.hpp"
 #include <atlas/atlasconfig.hpp>
+#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace Atlas;

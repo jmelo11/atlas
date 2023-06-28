@@ -41,7 +41,7 @@ namespace Atlas {
      * @tparam adouble
      */
     template <typename adouble>
-    using Instruments = std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>,
+    using InstrumentVariant = std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>,
                                      FixedRateBulletInstrument<adouble>, ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>,
                                      FloatingRateBulletInstrument<adouble>, FxForward<adouble>, FixFloatSwap<adouble>>;
 

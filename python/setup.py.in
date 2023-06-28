@@ -17,7 +17,12 @@ if install_path:
     include_dirs.append(install_path + '/include')
     library_dirs.append(install_path + '/lib')
 
-libraries = ["QuantLib", "Atlas", "@XAD_LIB_NAME@"]
+libraries = ["QuantLib", "Atlas"]
+ad_lib_name = "@AD_LIB_NAME@"
+if ad_lib_name != "":
+    libraries.append(ad_lib_name)
+
+
 if platform == 'win32':
     extra_compile_args = ['/std:c++17']
 else:
@@ -35,7 +40,7 @@ ext_modules = [
 ]
 
 setup(
-    name="atlas-finance",
+    name="@PYTHON_LIB_NAME@",
     version=__version__,
     author="Jose Melo",
     author_email="jmelo@live.cl",

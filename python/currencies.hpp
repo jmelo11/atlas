@@ -1,8 +1,8 @@
 #ifndef E5FDDD37_823C_4981_84F9_793DB88D909E
 #define E5FDDD37_823C_4981_84F9_793DB88D909E
 
+#include "config.hpp"
 #include <atlas/atlasconfig.hpp>
-// pybind11
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
