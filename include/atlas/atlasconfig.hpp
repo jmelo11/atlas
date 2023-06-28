@@ -34,6 +34,7 @@ namespace Atlas {
     using DayCounter            = QuantLib::DayCounter;
     using Calendar              = QuantLib::Calendar;
     using Period                = QuantLib::Period;
+    using PeriodParser          = QuantLib::PeriodParser;
     using Frequency             = QuantLib::Frequency;
     using BusinessDayConvention = QuantLib::BusinessDayConvention;
     using Compounding           = QuantLib::Compounding;
