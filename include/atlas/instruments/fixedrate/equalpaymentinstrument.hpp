@@ -164,7 +164,7 @@ namespace Atlas {
             } else {
                 r_ = val(rate.rate()) / 12;
             }
-            int p        = dates.size() - 1;
+            int p        = (int)dates.size() - 1;
             double guess = r_ / (1 - pow(1 + r_, -p)) * notional;
             // double guess = 1;
             QuantLib::Brent solver_;
