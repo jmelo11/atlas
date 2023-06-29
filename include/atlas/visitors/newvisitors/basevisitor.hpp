@@ -42,14 +42,17 @@ namespace Atlas {
      */
     template <typename adouble>
     using InstrumentVariant = std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>,
-                                     FixedRateBulletInstrument<adouble>, ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>,
-                                     FloatingRateBulletInstrument<adouble>, FxForward<adouble>, FixFloatSwap<adouble>>;
+                                           FixedRateBulletInstrument<adouble>, ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>,
+                                           FloatingRateBulletInstrument<adouble>, FxForward<adouble>, FixFloatSwap<adouble>>;
 
     /**
      * @defgroup Visitors Visitors
+     */
+
+    /**
      * @ingroup Visitors
      * @class BaseVisitor
-     * @brief BaseVisitor class. This class is used to implement the visitor pattern for instruments, using std::variant and std::visit.
+     * @brief This class is used to implement the visitor pattern for instruments, using std::variant and std::visit.
      * It requires the user to implement the operator() for each childest-instrument type. Each implementation of this visitor could take an
      * instrument by reference and modify it.
      *
@@ -86,7 +89,7 @@ namespace Atlas {
     /**
      * @ingroup Visitors
      * @class BaseConstVisitor
-     * @brief ConstVisitor class. This class is used to implement the visitor pattern for instruments, using std::variant and std::visit. It
+     * @brief This class is used to implement the visitor pattern for instruments, using std::variant and std::visit. It
      * requires the user to implement the operator() for each childest-instrument type. Different from BaseVisitor, this class takes an
      * instrument by const reference and can not modify it.
      *
