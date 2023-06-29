@@ -92,12 +92,12 @@ Para facilitar el proceso de compilación, se sugiere organizar los directorios 
 
 1. Dentro del directorio libs/QuantLib, cree una carpeta llamada build.
 2. Abra una terminal y navegue hasta la carpeta build recién creada.
-3. Ejecute los siguientes comandos, reemplazando <path/to/builds/config> y <your/boost/path> con las rutas apropiadas:
+3. Ejecute los siguientes comandos, reemplazando <path/to/installed/libs> y <your/boost/path> con las rutas apropiadas:
 
 ##### Debug
 
 ```cmd
-    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MDd /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDebugDLL"
+    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MDd /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDebugDLL"
 
     cmake --build . --target INSTALL --config <config>
 ```
@@ -105,7 +105,7 @@ Para facilitar el proceso de compilación, se sugiere organizar los directorios 
 ##### Release
 
 ```cmd
-    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MD /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
+    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MD /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
 
     cmake --build . --target INSTALL --config <config>
 ```
@@ -120,10 +120,10 @@ Boost incluye un instalador. Siga las instrucciones en <https://www.boost.org/do
 
 1. Dentro del directorio del proyecto Atlas, cree una carpeta llamada build.
 2. Abra una terminal y navegue hasta la carpeta build recién creada.
-3. Ejecute los siguientes comandos, reemplazando ```path/to/builds/config``` y ```your/boost/path``` con las rutas apropiadas:
+3. Ejecute los siguientes comandos, reemplazando ```path/to/installed/libds``` y ```your/boost/path``` con las rutas apropiadas:
 
 ```cmd
-    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/builds/config>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
     cmake --build . --target INSTALL --config <config>
 ```
 
