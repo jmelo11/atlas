@@ -149,7 +149,15 @@ void py_newvisitors(py::module& m) {
         .def("__call__", py::overload_cast<FloatingRateEqualRedemptionInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
         .def("__call__", py::overload_cast<FxForward<NumType>&>(&BaseVisitor<NumType>::operator()))
         .def("__call__", py::overload_cast<FixFloatSwap<NumType>&>(&BaseVisitor<NumType>::operator()))
-        .def("visit", [](BaseVisitor<NumType>& v, InstrumentVariant<NumType>& i) { std::visit(v, i); });
+        .def("visit", [](BaseVisitor<NumType>& v, CustomFixedRateInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, EqualPaymentInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, FixedRateBulletInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, ZeroCouponInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, CustomFloatingRateInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, FloatingRateBulletInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, FloatingRateEqualRedemptionInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, FxForward<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, FixFloatSwap<NumType>& i) { v(i); });
 
     py::class_<BaseConstVisitor<NumType>, Aux::PyBaseConstVisitor>(m, "BaseConstVisitor")
         .def("__call__", py::overload_cast<const CustomFixedRateInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
@@ -161,7 +169,15 @@ void py_newvisitors(py::module& m) {
         .def("__call__", py::overload_cast<const FloatingRateEqualRedemptionInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
         .def("__call__", py::overload_cast<const FxForward<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
         .def("__call__", py::overload_cast<const FixFloatSwap<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
-        .def("visit", [](BaseConstVisitor<NumType>& v, const InstrumentVariant<NumType>& i) { std::visit(v, i); });
+        .def("visit", [](BaseConstVisitor<NumType>& v, const CustomFixedRateInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const EqualPaymentInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const FixedRateBulletInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const ZeroCouponInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const CustomFloatingRateInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const FloatingRateBulletInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const FloatingRateEqualRedemptionInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const FxForward<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const FixFloatSwap<NumType>& i) { v(i); });
 
     py::class_<IndexingVisitor<NumType>, BaseVisitor<NumType>>(m, "IndexingVisitor")
         .def(py::init<>())
@@ -183,7 +199,7 @@ void py_newvisitors(py::module& m) {
     py::class_<ZSpreadConstVisitor<NumType>, BaseConstVisitor<NumType>>(m, "ZSpreadConstVisitor")
         .def(py::init<const MarketData<NumType>&, NumType, const DayCounter&, Compounding, Frequency, double, double, size_t, bool>(),
              py::arg("marketData"), py::arg("targetNpv"), py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Compounded,
-             py::arg("frequency") = Frequency::Semiannual, py::arg("accuracy") = 1e-6, py::arg("guess") = 0.0, py::arg("maxIterations") = 100,
+             py::arg("frequency") = Frequency::Semiannual, py::arg("guess") = 0.0, py::arg("accuracy") = 1e-6, py::arg("maxIterations") = 100,
              py::arg("showLogs") = false)
         .def("getResults", &ZSpreadConstVisitor<NumType>::getResults)
         .def("reset", &ZSpreadConstVisitor<NumType>::reset);
