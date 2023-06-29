@@ -24,19 +24,19 @@ void py_market(py::module& m) {
         .def("riskFreeCurveIdx", py::overload_cast<const Currency&>(&MarketStore<NumType>::riskFreeCurveIdx, py::const_));
 
     py::class_<MarketRequest::ForwardRate>(m, "ForwardRateRequest").def("__str__", [](const MarketRequest::ForwardRate& r) {
-        std::string rep = "ForwardRateRequest(startDate=" + Aux::dateToStr(r.startDate_) + ", endDate=" + Aux::dateToStr(r.endDate_) +
+        std::string rep = "ForwardRateRequest(startDate=" + parseDate(r.startDate_) + ", endDate=" + parseDate(r.endDate_) +
                           ", idx=" + std::to_string(r.curve_) + ")";
         return rep;
     });
 
     py::class_<MarketRequest::DiscountFactor>(m, "DiscountFactorRequest").def("__str__", [](const MarketRequest::DiscountFactor& r) {
-        std::string rep = "DiscountFactorRequest(date=" + Aux::dateToStr(r.date_) + ", idx=" + std::to_string(r.curve_) + ")";
+        std::string rep = "DiscountFactorRequest(date=" + parseDate(r.date_) + ", idx=" + std::to_string(r.curve_) + ")";
         return rep;
     });
 
     py::class_<MarketRequest::ExchangeRate>(m, "ExchangeRateRequest").def("__str__", [](const MarketRequest::ExchangeRate& r) {
         std::string rep =
-            "ExchangeRateRequest(ccy1=" + std::to_string(r.ccy1_) + ", ccy2=" + std::to_string(r.ccy2_) + ", date=" + Aux::dateToStr(r.date_) + ")";
+            "ExchangeRateRequest(ccy1=" + std::to_string(r.ccy1_) + ", ccy2=" + std::to_string(r.ccy2_) + ", date=" + parseDate(r.date_) + ")";
         return rep;
     });
 
