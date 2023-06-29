@@ -135,4 +135,4 @@ En el caso de querer instalar el paquete desde este repositorio, es necesario co
 2. Ejectura el comando ```pip install .```
 
 Tambien es posible instalar el paquete estandar a travez de PYPI:
-```pip instal atlas-finance```
+```pip instal atlas-finance``` o ```pip instal atlas-finance-noad```
