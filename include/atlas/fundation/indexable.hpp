@@ -74,7 +74,7 @@ namespace Atlas {
 
        private:
         bool isIndexed_ = false;
-        size_t idx_[4]  = {SIZE_T_MAX, SIZE_T_MAX, SIZE_T_MAX, SIZE_T_MAX};
+        size_t idx_[4]  = {SIZE_MAX, SIZE_MAX, SIZE_MAX, SIZE_MAX};
     };
 
 }  // namespace Atlas
