@@ -3,31 +3,12 @@
 
 #include "config.hpp"
 #include <atlas/atlasconfig.hpp>
+#include <atlas/parsers/parsingmethods.hpp>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 using namespace Atlas;
-
-namespace Aux {
-    inline std::string dateToStr(const Date& date) {
-        if (date == Date()) return "None";
-        std::string d, m, y;
-        if (date.dayOfMonth() < 10) {
-            d = "0" + std::to_string(date.dayOfMonth());
-        } else {
-            d = std::to_string(date.dayOfMonth());
-        }
-
-        if (date.month() < 10) {
-            m = "0" + std::to_string(date.month());
-        } else {
-            m = std::to_string(date.month());
-        }
-        y = std::to_string(date.year());
-        return y + "-" + m + "-" + d;
-    }
-}  // namespace Aux
 
 void py_datetime(py::module& m) {
 
@@ -39,8 +20,8 @@ void py_datetime(py::module& m) {
         .def("dayOfMonth", &Date::dayOfMonth)
         .def("month", &Date::month)
         .def("year", &Date::year)
-        .def("__str__", [](const Date& d) { return Aux::dateToStr(d); })
-        .def("__repr__", [](const Date& d) { return Aux::dateToStr(d); })
+        .def("__str__", [](const Date& d) { return parseDate(d); })
+        .def("__repr__", [](const Date& d) { return parseDate(d); })
         .def(py::self + int())
         .def(py::self - int())
         .def(py::self - py::self)
