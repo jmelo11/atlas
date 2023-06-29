@@ -30,7 +30,6 @@ namespace Aux {
 }  // namespace Aux
 
 void py_datetime(py::module& m) {
-    m.def("parseISODate", [](const std::string& date) { return DateParser::parseISO(date); });
 
     py::class_<Date>(m, "Date")
         .def(py::init<int, Month, int>())
