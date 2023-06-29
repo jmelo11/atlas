@@ -5,7 +5,6 @@
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
-#include <atlas/others/newtonraphsonsolver.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 
 namespace Atlas {
@@ -40,11 +39,11 @@ namespace Atlas {
                     totalRedemption += payment - (tmpRate.compoundFactor(coupon.startDate(), coupon.endDate()) - 1) * (1 - totalRedemption);
                 return pow(1 - totalRedemption, 2);
             };
+            QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
-                QuantLib::Brent solver_;
                 value_ = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
-                NewtonRaphsonSolver solver_;
+                auto g = [&](double r) { return val(f(r)); };
                 value_ = solver_.solve(f, guess_, accuracy_, maxIter_);
             }
         };
