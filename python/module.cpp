@@ -27,9 +27,9 @@ PYBIND11_MODULE(Atlas, m) {
     py_visitors(m);
     py_models(m);
 
-    py::module_ visitors = m.def_submodule("visitors", "Visitors submodule");
+    py::module_ visitors = m.def_submodule("Visitors", "Visitors submodule");
     py_newvisitors(visitors);
 
-    py::module_ parsers = m.def_submodule("parsers", "Parsers submodule");
+    py::module_ parsers = m.def_submodule("Parsers", "Parsers submodule");
     py_parsers(parsers);
 }
