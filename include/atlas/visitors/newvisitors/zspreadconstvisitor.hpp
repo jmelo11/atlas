@@ -40,6 +40,11 @@ namespace Atlas {
           accuracy_(accuracy),
           maxIter_(maxIter){};
 
+        /**
+         * @brief Set the Target NPV
+         * 
+         * @param targetNPV 
+         */
         void setTargetNPV(adouble targetNPV) { targetNPV_ = targetNPV; }
 
         void operator()(const std::monostate& inst) const override { this->template printLogs<ZSpreadConstVisitor>(this, "monostate"); }
@@ -68,6 +73,11 @@ namespace Atlas {
 
         void reset() { value_ = 0.0; };
 
+        /**
+         * @brief Get the results
+         * 
+         * @return adouble 
+         */
         adouble getResults() const { return value_; }
 
        private:

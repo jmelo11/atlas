@@ -10,6 +10,7 @@
 #include <atlas/visitors/newvisitors/indexingvisitor.hpp>
 #include <atlas/visitors/newvisitors/npvconstvisitor.hpp>
 #include <atlas/visitors/newvisitors/parrateconstvisitor.hpp>
+#include <atlas/visitors/newvisitors/sensibilityconstvisitor.hpp>
 #include <atlas/visitors/newvisitors/zspreadconstvisitor.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 #include <atlas/visitors/parsolver.hpp>
@@ -173,6 +174,24 @@ void py_newvisitors(py::module& m) {
         .def(py::init<const MarketData<NumType>&>(), py::arg("marketData"))
         .def("getResults", &NPVConstVisitor<NumType>::getResults)
         .def("reset", &NPVConstVisitor<NumType>::reset);
+
+    py::class_<ParRateConstVisitor<NumType>, BaseConstVisitor<NumType>>(m, "ParRateConstVisitor")
+        .def(py::init<const MarketData<NumType>&>(), py::arg("marketData"))
+        .def("getResults", &ParRateConstVisitor<NumType>::getResults)
+        .def("reset", &ParRateConstVisitor<NumType>::reset);
+
+    py::class_<ZSpreadConstVisitor<NumType>, BaseConstVisitor<NumType>>(m, "ZSpreadConstVisitor")
+        .def(py::init<const MarketData<NumType>&, NumType, const DayCounter&, Compounding, Frequency, double, double, size_t, bool>(),
+             py::arg("marketData"), py::arg("targetNpv"), py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Compounded,
+             py::arg("frequency") = Frequency::Semiannual, py::arg("accuracy") = 1e-6, py::arg("guess") = 0.0, py::arg("maxIterations") = 100,
+             py::arg("showLogs") = false)
+        .def("getResults", &ZSpreadConstVisitor<NumType>::getResults)
+        .def("reset", &ZSpreadConstVisitor<NumType>::reset);
+
+    py::class_<SensibilityConstVisitor<NumType>, BaseConstVisitor<NumType>>(m, "SensibilityConstVisitor")
+        .def(py::init<const MarketData<NumType>&, double, bool>(), py::arg("marketData"), py::arg("delta") = 0.0001, py::arg("showLogs") = false)
+        .def("getResults", &SensibilityConstVisitor<NumType>::getResults)
+        .def("reset", &SensibilityConstVisitor<NumType>::reset);
 }
 
 #endif /* CD9BD627_F812_406D_AEEC_B699240E41D8 */
