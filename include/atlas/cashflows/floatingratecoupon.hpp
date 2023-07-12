@@ -73,6 +73,7 @@ namespace Atlas {
          */
         inline void fixing(adouble fixing) {
             fixing_       = fixing;
+            isFixingSet_  = true;
             this->amount_ = accruedAmount(this->startDate(), this->endDate());
         };
 
@@ -89,8 +90,8 @@ namespace Atlas {
          */
         void rateIndexContext(const Context<RateIndex<adouble>>& context) {
             rateIndexContextIdx_ = context.idx();
-            auto& index         = context.object();
-            rateDef_            = {index.dayCounter(), index.rateFrequency(), index.rateCompounding()};
+            auto& index          = context.object();
+            rateDef_             = {index.dayCounter(), index.rateFrequency(), index.rateCompounding()};
             hasRateIndexContext_ = true;
         }
 
@@ -104,22 +105,30 @@ namespace Atlas {
         /**
          * @brief Gets the accrued period of the coupon
          *
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
+         * @param refStart The start evaluation date for the accrual period
+         * @param refEnd The end evaluation date for the accrual period
          * @return The accrued period of the coupon
          */
-        inline double accruedPeriod(const Date& start, const Date& end) const override { return dayCounter().yearFraction(start, end); };
+        inline double accruedPeriod(const Date& refStart, const Date& refEnd) const override {
+            if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
+            auto datesPair = this->accrualDates(refStart, refEnd);
+            return dayCounter().yearFraction(datesPair.first, datesPair.second);
+        };
 
         /**
          * @brief Gets the accrued amount of the coupon
          *
-         * @param start The start date of the coupon
-         * @param end The end date of the coupon
+         * @param refStart The start evaluation date for the accrual period
+         * @param refEnd The end evaluation date for the accrual period
          * @return The accrued amount of the coupon
          */
-        inline adouble accruedAmount(const Date& start, const Date& end) const override {
-            adouble totalRate  = fixing_ + spread_;
-            adouble compFactor = fastCompoundFactor<adouble>(totalRate, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq, start, end);
+        inline adouble accruedAmount(const Date& refStart, const Date& refEnd) const override {
+            auto datesPair = this->accrualDates(refStart, refEnd);
+            if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
+            if (!isFixingSet()) throw std::runtime_error("Fixing rate not set");
+            adouble totalRate = fixing_ + spread_;
+            adouble compFactor =
+                fastCompoundFactor<adouble>(totalRate, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq, datesPair.first, datesPair.second);
             return this->notional() * (compFactor - 1.0);
         };
 
@@ -142,14 +151,13 @@ namespace Atlas {
          *
          * @return true If the fixing rate has been set, false otherwise
          */
-        inline bool hasFixingSet() const { return hasFixingSet_; }
+        inline bool isFixingSet() const { return isFixingSet_; }
 
         /**
          * @brief Sets if the fixing has been set
          *
          * @param fixing The fixing rate
          */
-        inline void hasFixingSet(bool fixing) { hasFixingSet_ = fixing; }
 
        private:
         /**
@@ -167,7 +175,7 @@ namespace Atlas {
         RateDef rateDef_;
 
         size_t rateIndexContextIdx_;
-        bool hasFixingSet_       = false;
+        bool isFixingSet_         = false;
         bool hasRateIndexContext_ = false;
     };
 }  // namespace Atlas

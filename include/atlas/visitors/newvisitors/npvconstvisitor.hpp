@@ -171,7 +171,7 @@ namespace Atlas {
                 for (auto& coupon : leg.coupons()) {
                     if (!coupon.isIndexed()) throw std::runtime_error("Coupon is not indexed.");
                     if constexpr (std::is_same_v<L, FloatingRateLeg<adouble>>) {
-                        if (!coupon.hasFixingSet()) throw std::runtime_error("Floating coupon does not have fixing set.");
+                        if (!coupon.isFixingSet()) throw std::runtime_error("Floating coupon does not have fixing set.");
                     }
                     adouble df = marketData_.dfs.at(coupon.dfIdx());
                     if (coupon.applyCcy()) {

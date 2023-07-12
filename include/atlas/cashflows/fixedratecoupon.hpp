@@ -77,8 +77,9 @@ namespace Atlas {
          * @return The accrued period of the coupon
          */
         inline double accruedPeriod(const Date& refStart, const Date& refEnd) const override {
-            std::pair<Date, Date> validDates = this->checkDates(refStart, refEnd);
-            return dayCounter().yearFraction(validDates.first, validDates.second);
+            if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
+            auto datesPair = this->accrualDates(refStart, refEnd);
+            return dayCounter().yearFraction(datesPair.first, datesPair.second);
         };
 
         /**
@@ -91,8 +92,9 @@ namespace Atlas {
          * @return The accrued amount of the coupon
          */
         inline adouble accruedAmount(const Date& refStart, const Date& refEnd) const override {
-            std::pair<Date, Date> validDates = this->checkDates(refStart, refEnd);
-            return this->notional() * (rate_.compoundFactor(validDates.first, validDates.second) - 1.0);
+            auto datesPair = this->accrualDates(refStart, refEnd);
+            if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
+            return this->notional() * (rate_.compoundFactor(datesPair.first, datesPair.second) - 1.0);
         };
 
        private:

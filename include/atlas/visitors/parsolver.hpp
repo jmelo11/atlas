@@ -5,6 +5,7 @@
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
+#include <atlas/visitors/forwardrateforecaster.hpp>
 #include <atlas/visitors/npvcalculator.hpp>
 
 namespace Atlas {
@@ -79,14 +80,16 @@ namespace Atlas {
         void evalFloatingRateProd(const T& inst) const {
             T evalInst(inst);
             NPVCalculator<adouble> calc(marketData_);
+            ForwardRateForecaster<adouble> forecast(marketData_);
             size_t pos           = evalInst.disbursement().dfIdx();
             adouble startDf      = marketData_.dfs.at(pos);
             adouble disbursement = evalInst.disbursement().amount();
 
             std::function<adouble(adouble)> f = [&](adouble s) {
                 calc.clear();
-                evalInst.spread(s);
+                forecast.visit(evalInst);
                 calc.visit(evalInst);
+                evalInst.spread(s);
                 adouble npv    = calc.results();
                 adouble result = npv + disbursement * startDf;
                 return result;
