@@ -94,19 +94,11 @@ namespace Atlas {
         virtual adouble accruedAmount(const Date& refStart, const Date& refEnd) const = 0;
 
        protected:
-        /**
-         * @brief Helper function to check dates used in accruals.
-         *
-         * @param start The start date in evaluation.
-         * @param end The end date in evaluation.
-         * @return std::pair<Date, Date> The relevant dates for the accrual.
-         */
-        std::pair<Date, Date> checkDates(const Date& start, const Date& end) const {
-            Date evalStart = start;
-            Date evalEnd   = end;
-            if (start < startDate_) evalStart = startDate_;
-            if (end > endDate_) evalEnd = endDate_;
-            return {evalStart, evalEnd};
+        std::pair<Date, Date> accrualDates(const Date& refStart, const Date& refEnd) const {
+            if (refStart > refEnd) throw std::invalid_argument("Start date must be before or equal to end date");
+            Date startDate = std::max(refStart, this->startDate());
+            Date endDate   = std::min(refEnd, this->endDate());
+            return std::make_pair(startDate, endDate);
         }
 
        private:
