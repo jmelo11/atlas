@@ -6,7 +6,7 @@
 namespace Atlas {
     /**
      * @brief A class for fixed, single-legged, equal redemption instruments.
-     * @ingroup FixedRateInstruments     
+     * @ingroup FixedRateInstruments
      */
     template <typename adouble>
     class FixedRateEqualRedemptionInstrument : public FixedRateInstrument<adouble> {
@@ -21,22 +21,12 @@ namespace Atlas {
          * @param rate rate of the instrument
          */
         FixedRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                           const InterestRate<adouble>& rate)
-        : FixedRateInstrument<adouble>(startDate, endDate, rate, notional) {
+                                           const InterestRate<adouble>& rate, Side side = Side::Long)
+        : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
             Schedule schedule        = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
             std::vector<Date> dates  = schedule.dates();
             adouble redemptionAmount = notional / (dates.size() - 1);
             std::vector<adouble> redemptions(dates.size() - 1, redemptionAmount);
-
-            // double outstanding = notional;
-            // for (size_t i = 0; i < redemptions.size(); ++i) {
-            //     FixedRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, rate);
-            //     this->leg().addCoupon(coupon);
-
-            //     Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-            //     this->leg().addRedemption(redemption);
-            //     outstanding -= redemptions.at(i);
-            // }
 
             this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
                              .startDate(startDate)
@@ -62,8 +52,8 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         FixedRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                           const InterestRate<adouble>& rate, const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FixedRateEqualRedemptionInstrument(startDate, endDate, freq, notional, rate) {
+                                           const InterestRate<adouble>& rate, const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+        : FixedRateEqualRedemptionInstrument(startDate, endDate, freq, notional, rate, side) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

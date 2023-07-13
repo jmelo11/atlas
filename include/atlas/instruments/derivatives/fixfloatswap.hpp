@@ -12,21 +12,19 @@ namespace Atlas {
      */
 
     /**
-     * @brief A class for fixed-float swap instruments.     
+     * @brief A class for fixed-float swap instruments.
      * @ingroup Derivatives
      */
     template <typename adouble>
     class FixFloatSwap : public Instrument<adouble>, public TwoLegMixin<FixedRateLeg<adouble>, FloatingRateLeg<adouble>> {
        public:
-        enum Side { PAY = -1, RECIEVE = 1 };
-
         FixFloatSwap(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble> rate, adouble spread, Frequency fixFreq,
                      const Context<RateIndex<adouble>>& floatIndex, Side side)
-        : TwoLegMixin<FixedRateLeg<adouble>, FloatingRateLeg<adouble>>(), side_(side) {
+        : TwoLegMixin<FixedRateLeg<adouble>, FloatingRateLeg<adouble>>() {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->notional_  = notional;
-            side_            = side;
+            this->side_      = side;
 
             this->firstLeg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
                                   .startDate(startDate)
@@ -63,8 +61,6 @@ namespace Atlas {
 
         void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); }
 
-        inline Side side() const { return side_; }
-
         inline Frequency fixPaymentFrequency() const { return fixFreq_; }
 
         inline Frequency floatPaymentFrequency() const { return floatFreq_; }
@@ -74,7 +70,6 @@ namespace Atlas {
         inline adouble spread() const { return spread_; }
 
        private:
-        Side side_;
         Frequency fixFreq_;
         Frequency floatFreq_;
         InterestRate<adouble> rate_;

@@ -17,8 +17,6 @@ namespace Atlas {
     template <typename adouble>
     class FxForward : public Instrument<adouble>, public OneLegMixin<adouble, Leg<adouble>> {
        public:
-        enum Side { BUY = 1, SELL = -1 };
-
         /**
          * @brief Construct a new Forward object
          *
@@ -28,14 +26,15 @@ namespace Atlas {
          * @param ccy1 currency context for first currency
          * @param ccy2 currency context for second currency
          * @param notionalInSecondCcy notional in first currency
-         * @param side BUY or SELL
+         * @param side Long or Short
          */
         FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& ccy1, const Currency& ccy2,
                   double notionalInSecondCcy, Side side)
-        : fwdPrice_(fwdPrice), side_(side) {
+        : fwdPrice_(fwdPrice) {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->notional_  = notionalInSecondCcy;
+            this->side_      = side;
 
             Cashflow<adouble> cf1(endDate, notionalInSecondCcy);
             cf1.currency(ccy1);
@@ -78,14 +77,11 @@ namespace Atlas {
 
         void accept(ConstVisitor<adouble>& v) const override { v.visit(*this); }
 
-        Side side() const { return side_; }
-
        private:
         adouble fwdPrice_;
         size_t ccy1_;
         size_t ccy2_;
         size_t discountContextIdx_;
-        Side side_;
     };
 }  // namespace Atlas
 

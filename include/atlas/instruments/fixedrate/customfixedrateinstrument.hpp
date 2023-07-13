@@ -17,9 +17,11 @@ namespace Atlas {
          * @param dates dates of payment for the instrument, starting with the start date of the first coupon
          * @param redemptions redemption amounts for the instrument
          * @param rate rate of the instrument
+         * @param side side of the instrument
          */
-        CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate)
-        : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate) {
+        CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate,
+                                  Side side = Side::Long)
+        : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate, side) {
             for (size_t i = 0; i < redemptions.size(); i++) {
                 Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
                 this->leg().addRedemption(redemption);
@@ -37,10 +39,11 @@ namespace Atlas {
          * @param redemptions redemption amounts for the instrument
          * @param rate rate of the instrument
          * @param discountCurveContext discount curve context of the instrument
+         * @param side side of the instrument
          */
         CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate,
-                                  const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : CustomFixedRateInstrument(dates, redemptions, rate) {
+                                  const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+        : CustomFixedRateInstrument(dates, redemptions, rate, side) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

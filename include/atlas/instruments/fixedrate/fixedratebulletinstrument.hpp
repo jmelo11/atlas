@@ -21,22 +21,11 @@ namespace Atlas {
          * @param freq payment frequency of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
+         * @param side side of the instrument
          */
-        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate)
-        : FixedRateInstrument<adouble>(startDate, endDate, rate, notional) {
-            // Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
-
-            // Date firstDate = Date();
-            // for (const auto& lastDate : schedule.dates()) {
-            //     if (firstDate != Date()) {
-            //         FixedRateCoupon<adouble> coupon(firstDate, lastDate, notional, rate);
-            //         this->leg().addCoupon(coupon);
-            //     }
-            //     firstDate = lastDate;
-            // }
-
-            // Redemption<adouble> redemption(schedule.endDate(), notional);
-            // this->leg().addRedemption(redemption);
+        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate, Side side = Side::Long)
+        : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
+            
             this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
                              .startDate(startDate)
                              .endDate(endDate)
@@ -57,10 +46,11 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param rate rate of the instrument
          * @param discountCurveContext discount curve context of the instrument
+         * @param side side of the instrument
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                                  const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate) {
+                                  const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+        : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate, side) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

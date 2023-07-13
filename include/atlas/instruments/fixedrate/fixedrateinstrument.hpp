@@ -17,7 +17,7 @@ namespace Atlas {
      * @class FixedRateInstrument
      * @brief An class for fixed-rate-single-legged instruments.
      * @ingroup FixedRateInstruments
-     * 
+     *
      * @tparam adouble The type of number used for calculation. It can be either double or an AAD-enabled type.
      */
     template <typename adouble>
@@ -32,11 +32,12 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param leg leg of the instrument
          */
-        FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, double notional = 0.0,
+        FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, Side side, double notional = 0.0,
                             const FixedRateLeg<adouble>& leg = FixedRateLeg<adouble>())
         : OneLegMixin<adouble, FixedRateLeg<adouble>>(leg), rate_(rate) {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
+            this->side_      = side;
             this->notional_  = notional;
             for (auto& coupon : this->leg().coupons()) { coupon.rate(rate_); }
         };

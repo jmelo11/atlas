@@ -21,10 +21,10 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param rate rate of the instrument
          */
-        ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate)
-        : FixedRateInstrument<adouble>(startDate, endDate, rate, notional) {
+        ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate, Side side = Side::Long)
+        : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
             FixedRateCoupon<adouble> coupon(startDate, endDate, notional, this->rate_);  // interest coupon
-            Redemption<adouble> redemption(endDate, notional);                    // notinal payment at the end
+            Redemption<adouble> redemption(endDate, notional);                           // notinal payment at the end
 
             this->leg().addCoupon(coupon);
             this->leg().addRedemption(redemption);
@@ -42,8 +42,8 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
-                             const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : ZeroCouponInstrument(startDate, endDate, notional, rate) {
+                             const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+        : ZeroCouponInstrument(startDate, endDate, notional, rate, side) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

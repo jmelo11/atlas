@@ -23,11 +23,13 @@ namespace Atlas {
          * @param freq payment frequency of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
+         * @param side side of the instrument
          * @param recalcNotionals recalculate notionals based on the given rate
+         * @param buildType calculation type flag
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               bool recalcNotionals = false, BuildType buildType = BuildType::Fast)
-        : FixedRateInstrument<adouble>(startDate, endDate, rate, notional), recalcNotionals_(recalcNotionals) {
+                               Side side = Side::Long, bool recalcNotionals = false, BuildType buildType = BuildType::Fast)
+        : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional), recalcNotionals_(recalcNotionals) {
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
 
             this->dates_ = schedule.dates();
@@ -58,13 +60,14 @@ namespace Atlas {
          * @param freq payment frequency of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
-         * @param recalcNotionals recalculate notionals based on the given rate
          * @param discountCurveContext discount curve context of the instrument
+         * @param side side of the instrument
+         * @param recalcNotionals recalculate notionals based on the given rate
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               const Context<YieldTermStructure<adouble>>& discountCurveContext, bool recalcNotionals = false,
+                               const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long, bool recalcNotionals = false,
                                BuildType buildType = BuildType::Fast)
-        : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, recalcNotionals) {
+        : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, side, recalcNotionals) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

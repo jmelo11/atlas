@@ -27,7 +27,6 @@
  * @brief Atlas namespace
  */
 namespace Atlas {
-
     // QuantLib types, to be replaced with our own types
     using Date                  = QuantLib::Date;
     using DateParser            = QuantLib::DateParser;
@@ -108,6 +107,9 @@ namespace Atlas {
     using China         = QuantLib::China;
     using Taiwan        = QuantLib::Taiwan;
     using Thailand      = QuantLib::Thailand;
+
+    // Other types
+    enum Side { Long = 1, Short = -1 };
 
 }  // namespace Atlas
 

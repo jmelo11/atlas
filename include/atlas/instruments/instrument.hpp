@@ -12,16 +12,14 @@ namespace Atlas {
     /**
      * @defgroup Instruments Instruments
      */
-    
-    /**     
+
+    /**
      * @class Instrument
      * @brief An abstract class for instruments.
      */
     template <typename adouble>
     class Instrument {
        public:
-
-        
         virtual ~Instrument() = default;
 
         /**
@@ -59,10 +57,18 @@ namespace Atlas {
          */
         inline double notional() const { return notional_; };
 
+        /**
+         * @brief Returns the side of the instrument.
+         *
+         * @return Side
+         */
+        inline Side side() const { return side_; };
+
        protected:
         Date startDate_  = Date();
         Date endDate_    = Date();
         double notional_ = 0.0;
+        Side side_       = Side::Long;
     };
 }  // namespace Atlas
 
