@@ -53,6 +53,22 @@ namespace Atlas {
         inline const std::vector<Redemption<adouble>>& redemptions() const { return redemptions_; }
 
         /**
+         * @brief Returns a const reference to the Redemption object at index i in the vector of Redemption objects contained in
+         *
+         * @param i
+         * @return const Redemption&
+         */
+        inline const Redemption<adouble>& redemption(size_t i) const { return redemptions_.at(i); }
+
+        /**
+         * @brief Returns a reference to the Redemption object at index i in the vector of Redemption objects contained in
+         *
+         * @param i
+         * @return Redemption&
+         */
+        inline Redemption<adouble>& redemption(size_t i) { return redemptions_[i]; }
+
+        /**
          * @brief Adds a Redemption object to the vector of redemptions contained in the Leg object
          *
          * @param redemption Redemption object to be added

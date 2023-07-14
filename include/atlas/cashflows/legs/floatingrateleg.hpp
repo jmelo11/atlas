@@ -46,6 +46,22 @@ namespace Atlas {
         inline const std::vector<FloatingRateCoupon<adouble>>& coupons() const { return coupons_; }
 
         /**
+         * @brief Returns a const reference to the coupon at index i.
+         *
+         * @param i the index of the coupon.
+         * @return const FloatingRateCoupon<adouble>&
+         */
+        inline const FloatingRateCoupon<adouble>& coupon(size_t i) const { return coupons_.at(i); }
+
+        /**
+         * @brief Returns a reference to the coupon at index i.
+         *
+         * @param i the index of the coupon.
+         * @return FloatingRateCoupon<adouble>&
+         */
+        inline FloatingRateCoupon<adouble>& coupon(size_t i) { return coupons_[i]; }
+
+        /**
          * @brief Adds a coupon to the leg.
          *
          * @param coupon a reference to a FloatingRateCoupon object representing the coupon to be added.

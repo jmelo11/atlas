@@ -45,6 +45,22 @@ namespace Atlas {
         inline const std::vector<FixedRateCoupon<adouble>>& coupons() const { return coupons_; }
 
         /**
+         * @brief Return a const reference to the coupon at index i.
+         *
+         * @param i The index of the coupon.
+         * @return const FixedRateCoupon<adouble>&
+         */
+        inline const FixedRateCoupon<adouble>& coupon(size_t i) const { return coupons_.at(i); }
+
+        /**
+         * @brief Return a reference to the coupon at index i.
+         *
+         * @param i The index of the coupon.
+         * @return FixedRateCoupon<adouble>&
+         */
+        inline FixedRateCoupon<adouble>& coupon(size_t i) { return coupons_[i]; }
+
+        /**
          * @brief Add a fixed rate coupon to the leg.
          *
          * @param coupon A fixed rate coupon.
