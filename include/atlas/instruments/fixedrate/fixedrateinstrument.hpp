@@ -32,8 +32,8 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param leg leg of the instrument
          */
-        FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, Side side, double notional = 0.0,
-                            const FixedRateLeg<adouble>& leg = FixedRateLeg<adouble>())
+        FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, Side side = Side::Long,
+                            double notional = 0.0, const FixedRateLeg<adouble>& leg = FixedRateLeg<adouble>())
         : OneLegMixin<adouble, FixedRateLeg<adouble>>(leg), rate_(rate) {
             this->startDate_ = startDate;
             this->endDate_   = endDate;

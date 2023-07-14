@@ -28,16 +28,8 @@ namespace Atlas {
             adouble redemptionAmount = notional / (dates.size() - 1);
             std::vector<adouble> redemptions(dates.size() - 1, redemptionAmount);
 
-            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
-                             .startDate(startDate)
-                             .endDate(endDate)
-                             .paymentFrequency(freq)
-                             .notional(notional)
-                             .rate(this->rate_)
-                             .redemptions(redemptions)
-                             .build();
-
-            adouble disbursement = -notional;
+            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>().dates(dates).notional(notional).redemptions(redemptions).rate(this->rate_).build();
+            adouble disbursement = -this->notional_ * this->side_;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 
@@ -52,7 +44,8 @@ namespace Atlas {
          * @param discountCurveContext discount curve context of the instrument
          */
         FixedRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                           const InterestRate<adouble>& rate, const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+                                           const InterestRate<adouble>& rate, const Context<YieldTermStructure<adouble>>& discountCurveContext,
+                                           Side side = Side::Long)
         : FixedRateEqualRedemptionInstrument(startDate, endDate, freq, notional, rate, side) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);

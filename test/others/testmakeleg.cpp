@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
 #include "../testsetup.hpp"
 #include <ql/cashflows/iborcoupon.hpp>
 #include <atlas/cashflows/legs/makeleg.hpp>
+#include <gtest/gtest.h>
 using namespace Atlas;
 
 // Test building a fixed rate leg
@@ -25,6 +25,60 @@ TEST(MakeLegTest, FixedRateLegTest) {
     EXPECT_EQ(leg.coupons().size(), 2);
     EXPECT_EQ(leg.redemptions().size(), 1);
     EXPECT_EQ(leg.coupons()[0].rate().rate(), 0.02);
+}
+
+TEST(MakeLegTest, ChangeSide) {
+    // Parameters
+    Date startDate             = Date(1, Month::January, 2020);
+    Date endDate               = Date(1, Month::January, 2021);
+    double notional            = 100;
+    Frequency paymentFrequency = Frequency::Semiannual;
+    Side side                  = Side::Short;
+    double rateValue           = 0.02;
+    InterestRate<double> rate(rateValue, Thirty360(Thirty360::BondBasis));
+    Schedule schedule       = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
+    std::vector<Date> dates = schedule.dates();
+
+    // Gen expected results
+    std::vector<double> expectedCouponAmounts;
+    for (size_t i = 0; i < dates.size() - 1; ++i) {
+        expectedCouponAmounts.push_back(notional * side * (rate.compoundFactor(dates[i], dates[i + 1]) - 1));
+    }
+
+    MakeLeg<double, FixedRateLeg<double>> makeLeg;
+    makeLeg.paymentFrequency(paymentFrequency).startDate(startDate).endDate(endDate).notional(notional).rate(rate).side(side);
+    FixedRateLeg<double> leg = makeLeg.build();
+
+    for (size_t i = 0; i < dates.size() - 1; ++i) { EXPECT_DOUBLE_EQ(leg.coupon(i).amount(), expectedCouponAmounts[i]); }
+    for (size_t i = 0; i < leg.redemptions().size(); ++i) { EXPECT_DOUBLE_EQ(leg.redemption(i).amount(), side * notional); }
+}
+
+TEST(MakeLegTest, CustomRedemptions) {
+    // Parameters
+    Date startDate                      = Date(1, Month::January, 2020);
+    Date endDate                        = Date(1, Month::January, 2021);
+    double notional                     = 100;
+    Frequency paymentFrequency          = Frequency::Semiannual;
+    Side side                           = Side::Short;
+    double rateValue                    = 0.02;
+    InterestRate<double> rate           = InterestRate<double>(rateValue, Thirty360(Thirty360::BondBasis));
+    Schedule schedule                   = MakeSchedule().from(startDate).to(endDate).withFrequency(paymentFrequency);
+    std::vector<Date> dates             = schedule.dates();
+    std::vector<double> redemptions     = {-10, 100};
+    std::vector<double> couponNotionals = {90, 100};
+
+    // Gen expected results
+    std::vector<double> expectedCouponAmounts;
+    for (size_t i = 0; i < dates.size() - 1; ++i) {
+        expectedCouponAmounts.push_back(couponNotionals.at(i) * (rate.compoundFactor(dates[i], dates[i + 1]) - 1));
+    }
+
+    MakeLeg<double, FixedRateLeg<double>> makeLeg;
+    makeLeg.paymentFrequency(paymentFrequency).dates(dates).redemptions(redemptions).notional(notional).rate(rate).side(side);
+    FixedRateLeg<double> leg = makeLeg.build();
+
+    for (size_t i = 0; i < dates.size() - 1; ++i) { EXPECT_DOUBLE_EQ(leg.coupon(i).amount(), expectedCouponAmounts[i]); }
+    for (size_t i = 0; i < leg.redemptions().size(); ++i) { EXPECT_DOUBLE_EQ(leg.redemption(i).amount(), redemptions.at(i)); }
 }
 
 // Test building a floating rate leg
@@ -98,7 +152,7 @@ TEST(MakeLegTest, FloatingRateLegTest2) {
             EXPECT_EQ(leg.coupons()[i].paymentDate(), qlCoupon->date());
             EXPECT_EQ(leg.coupons()[i].startDate(), qlCoupon->accrualStartDate());
             EXPECT_EQ(leg.coupons()[i].endDate(), qlCoupon->accrualEndDate());
-        }else{
+        } else {
             FAIL();
         }
     }
@@ -123,5 +177,5 @@ TEST(MakeLegTest, RedemptionSizeErrorTest) {
     makeLeg.spread(0.01);
     makeLeg.rateIndexContext(&testSetup.store.rateIndexContext("TEST"));
 
-    EXPECT_THROW(makeLeg.build(), std::runtime_error);
+    EXPECT_THROW(makeLeg.build(), std::invalid_argument);
 }

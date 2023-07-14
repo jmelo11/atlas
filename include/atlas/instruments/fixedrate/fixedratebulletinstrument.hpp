@@ -23,17 +23,18 @@ namespace Atlas {
          * @param rate rate of the instrument
          * @param side side of the instrument
          */
-        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate, Side side = Side::Long)
+        FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
+                                  Side side = Side::Long)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
-            
             this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
-                             .startDate(startDate)
-                             .endDate(endDate)
-                             .paymentFrequency(freq)
-                             .notional(notional)
+                             .startDate(this->startDate_)
+                             .endDate(this->endDate_)
+                             .notional(this->notional_)
                              .rate(this->rate_)
+                             .side(this->side_)
+                             .paymentFrequency(freq)
                              .build();
-            adouble disbursement = -notional;
+            adouble disbursement = -this->notional_ * this->side_;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 

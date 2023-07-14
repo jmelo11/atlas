@@ -17,9 +17,16 @@ namespace Atlas {
     template <typename adouble, class LegType>
     class MakeLeg {
        public:
-        MakeLeg() : leg_() {}
+        MakeLeg() = default;
 
-        MakeLeg& notional(adouble notional) {
+        /**
+         * @brief Sets the notional on which the leg is calculated.
+         * @details Notional must be positive.
+         * @param notional
+         * @return MakeLeg&
+         */
+        MakeLeg& notional(double notional) {
+            if (notional <= 0) { throw std::invalid_argument("Notional must be greather that 0."); }
             notional_ = notional;
             return *this;
         }
@@ -39,6 +46,17 @@ namespace Atlas {
             return *this;
         }
 
+        /**
+         * @brief Set the dates vector.
+         * @details If dates vector is set, startDate and endDate are ignored and not schedule is calculated.
+         * @param dates
+         * @return MakeLeg&
+         */
+        MakeLeg& dates(const std::vector<Date>& dates) {
+            dates_ = dates;
+            return *this;
+        }
+
         MakeLeg& currency(const Currency& currency) {
             currency_ = currency;
             return *this;
@@ -54,7 +72,15 @@ namespace Atlas {
             return *this;
         }
 
-        MakeLeg& redemptions(std::vector<adouble>& redemptions) {
+        /**
+         * @brief Set the redemptions vector.
+         * @details Positive cashflows are recieved and negative cashflows are paid. Side does not change the sign of the cashflows, therefore
+         * the redemptions vector should be positive for long positions and negative for short positions.
+         *
+         * @param redemptions
+         * @return MakeLeg&
+         */
+        MakeLeg& redemptions(const std::vector<adouble>& redemptions) {
             redemptions_ = redemptions;
             return *this;
         }
@@ -64,12 +90,24 @@ namespace Atlas {
             return *this;
         }
 
+        /**
+         * @brief Rate of the coupon. Only applies to fixed rate coupons.
+         *
+         * @param rate
+         * @return MakeLeg&
+         */
         MakeLeg& rate(const InterestRate<adouble>& rate) {
             static_assert(std::is_same_v<LegType, FixedRateLeg<adouble>>, "Only FixedRateLeg is supported for rate.");
             rate_ = rate;
             return *this;
         }
 
+        /**
+         * @brief Spread to be added to the index fixing. Only applies to floating rate coupons.
+         *
+         * @param spread
+         * @return MakeLeg&
+         */
         MakeLeg& spread(adouble spread) {
             static_assert(std::is_same_v<LegType, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported for spread.");
             spread_ = spread;
@@ -83,104 +121,139 @@ namespace Atlas {
             return *this;
         }
 
-        MakeLeg& createRedemptions(bool createRedemptions = true) {
+        /**
+         * @brief Set the side of the cashflow. If a redemption vector is not given, this will change the sign of the payment.
+         *
+         * @param side
+         * @return MakeLeg&
+         */
+        MakeLeg& side(Side side) {
+            side_ = side;
+            return *this;
+        }
+
+        /**
+         * @brief Flag to create a leg with redemptions.
+         * @details some product might not need redemptions, for example a swap leg.
+         * @param createRedemptions
+         * @return MakeLeg&
+         */
+        MakeLeg& createRedemptions(bool createRedemptions) {
             createRedemptions_ = createRedemptions;
             return *this;
         }
 
         LegType build() {
-            Schedule schedule = MakeSchedule()
-                                    .from(startDate_)
-                                    .to(endDate_)
-                                    .withFrequency(paymentFrequency_)
-                                    .withCalendar(calendar_)
-                                    .withConvention(paymentConvention_);
-            auto dates = schedule.dates();
-            LegType leg;
-
-            std::vector<adouble> couponNotionals = setRedemptions(dates, leg);
-
-            if constexpr (std::is_same_v<LegType, FixedRateLeg<adouble>>) {
-                for (size_t i = 0; i < dates.size() - 1; i++) {
-                    double amount = 0.0;
-                    if constexpr (std::is_same_v<adouble, double>) {
-                        amount = couponNotionals[i];
-                    } else {
-                        amount = val(couponNotionals[i]);
-                    }
-                    FixedRateCoupon<adouble> coupon(dates[i], dates[i + 1], amount, rate_);
-                    setFlow(coupon);
-                    leg.addCoupon(coupon);
-                }
-            } else if constexpr (std::is_same_v<LegType, FloatingRateLeg<adouble>>) {
-                for (size_t i = 0; i < dates.size() - 1; i++) {
-                    double amount = 0.0;
-                    if constexpr (std::is_same_v<adouble, double>) {
-                        amount = couponNotionals[i];
-                    } else {
-                        amount = val(couponNotionals[i]);
-                    }
-                    FloatingRateCoupon<adouble> coupon(dates[i], dates[i + 1], amount, spread_, *rateIndexContext_);
-                    setFlow(coupon);
-                    leg.addCoupon(coupon);
-                }
-            }
-            return leg;
+            setLegDates();
+            setRedemptionNotionals();
+            setCouponNotionals();
+            setLegRedemptions();
+            setLegCoupons();
+            return leg_;
         }
 
        private:
-        template <class Flow>
-        void setFlow(Flow& flow) {
-            if (currency_ != Currency()) flow.currency(currency_);
-            if (discountCurveContext_ != nullptr) flow.discountCurveContext(*discountCurveContext_);
+        /**
+         * @brief Set the Cashflow object with the correct currency and discount curve.
+         *
+         * @tparam C
+         * @param cashflow
+         */
+        template <class C>
+        void setCashflow(C& cashflow) {
+            if (currency_ != Currency()) cashflow.currency(currency_);
+            if (discountCurveContext_ != nullptr) cashflow.discountCurveContext(*discountCurveContext_);
         }
 
-        std::vector<adouble> setRedemptions(const std::vector<Date>& dates, LegType& leg) {
-            std::vector<adouble> couponAmounts;
-            size_t n_dates = dates.size();
-
-            if (redemptions_.size() == 0) {
-                couponAmounts.resize(n_dates - 1, notional_);
-                if (createRedemptions_) {
-                    Redemption<adouble> redemption(endDate_, notional_);
-                    setFlow(redemption);
-                    leg.addRedemption(redemption);
-                }
-                return couponAmounts;
-            } else if (redemptions_.size() == n_dates - 1) {
-                adouble totalRedemption = notional_;
-                couponAmounts.reserve(n_dates);
-                couponAmounts.push_back(notional_);
-
-                for (size_t i = 1; i < n_dates; i++) {
-                    totalRedemption -= redemptions_[i - 1];
-                    couponAmounts.push_back(totalRedemption);
-                    if (createRedemptions_) {
-                        Redemption<adouble> redemption(dates[i], redemptions_[i - 1]);
-                        setFlow(redemption);
-                        leg.addRedemption(redemption);
-                    }
-                }
-                return couponAmounts;
-            } else {
-                throw std::runtime_error("Redemptions must be empty or have the same size as the number of coupons.");
+        /**
+         * @brief Set the dates_ member variable if it is empty.
+         */
+        void setLegDates() {
+            if (dates_.empty()) {
+                Schedule schedule = MakeSchedule()
+                                        .from(startDate_)
+                                        .to(endDate_)
+                                        .withFrequency(paymentFrequency_)
+                                        .withCalendar(calendar_)
+                                        .withConvention(paymentConvention_);
+                dates_ = schedule.dates();
             }
         }
 
-        adouble notional_;
-        Frequency paymentFrequency_;
-        Date startDate_;
-        Date endDate_;
+        /**
+         * @brief Set the redemptions_ vector.
+         */
+        void setRedemptionNotionals() {
+            if (redemptions_.empty()) {
+                if (notional_ <= 0) throw std::runtime_error("Notional not set.");
+                redemptions_.resize(dates_.size() - 1, 0.0);
+                redemptions_.back() = notional_ * side_;
+            }
+            if (redemptions_.size() != dates_.size() - 1) {
+                throw std::invalid_argument("Redemptions vector size does not match dates vector size.");
+            }
+        }
+
+        /**
+         * @brief Sets the coupon notional vector.
+         * @details Requires that the redemption_ vector is ready to be used.
+         */
+        void setCouponNotionals() {
+            couponNotionals_.resize(dates_.size() - 1);
+            couponNotionals_[0] = std::reduce(redemptions_.begin(), redemptions_.end());
+            for (size_t i = 1; i < dates_.size() - 1; i++) { couponNotionals_[i] = couponNotionals_[i - 1] - redemptions_[i - 1]; }
+        }
+
+        /**
+         * @brief Set the leg redemptions.
+         * @details requires that the dates_ and redemptions_ vectors are ready to be consumed.
+         */
+        void setLegRedemptions() {
+            if (createRedemptions_) {
+                for (size_t i = 0; i < dates_.size() - 1; i++) {
+                    if (redemptions_.at(i) != 0.0) {
+                        Redemption<adouble> redemption(dates_.at(i + 1), redemptions_.at(i));
+                        setCashflow(redemption);
+                        leg_.addRedemption(redemption);
+                    }
+                }
+            }
+        }
+
+        /**
+         * @brief Set the leg coupons.
+         */
+        void setLegCoupons() {
+            for (size_t i = 0; i < dates_.size() - 1; i++) {
+                if constexpr (std::is_same_v<LegType, FixedRateLeg<adouble>>) {
+                    FixedRateCoupon<adouble> coupon(dates_.at(i), dates_.at(i + 1), couponNotionals_.at(i), rate_);
+                    setCashflow(coupon);
+                    leg_.addCoupon(coupon);
+                } else if constexpr (std::is_same_v<LegType, FloatingRateLeg<adouble>>) {
+                    FloatingRateCoupon<adouble> coupon(dates_[i], dates_[i + 1], couponNotionals_.at(i), spread_, *rateIndexContext_);
+                    setCashflow(coupon);
+                    leg_.addCoupon(coupon);
+                }
+            }
+        }
+
+        LegType leg_                                                      = LegType();
+        Date startDate_                                                   = Date();
+        Date endDate_                                                     = Date();
+        Side side_                                                        = Side::Long;
         const Context<RateIndex<adouble>>* rateIndexContext_              = nullptr;
         const Context<YieldTermStructure<adouble>>* discountCurveContext_ = nullptr;
         BusinessDayConvention paymentConvention_                          = BusinessDayConvention::Unadjusted;
         Calendar calendar_                                                = NullCalendar();
         Currency currency_                                                = Currency();
-        std::vector<adouble> redemptions_;
-        LegType leg_;
+        bool createRedemptions_                                           = true;
+        double notional_                                                  = -1;
+        Frequency paymentFrequency_;
+        std::vector<Date> dates_;
+        std::vector<double> redemptions_;
+        std::vector<double> couponNotionals_;
         InterestRate<adouble> rate_;
         adouble spread_;
-        bool createRedemptions_ = true;
     };
 }  // namespace Atlas
 

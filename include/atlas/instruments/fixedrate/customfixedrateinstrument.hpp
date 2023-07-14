@@ -13,37 +13,31 @@ namespace Atlas {
        public:
         /**
          * @brief Construct a new Custom Fixed Rate Instrument object
-         *
+         * @details Side is determined by the implied notional of the instrument
          * @param dates dates of payment for the instrument, starting with the start date of the first coupon
-         * @param redemptions redemption amounts for the instrument
+         * @param redemptions redemption amounts for the instrument. Note: casfhlows are flipped if side is short
          * @param rate rate of the instrument
-         * @param side side of the instrument
          */
-        CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate,
-                                  Side side = Side::Long)
-        : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate, side) {
-            for (size_t i = 0; i < redemptions.size(); i++) {
-                Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg().addRedemption(redemption);
-            }
-            this->notional_ = std::reduce(redemptions.begin(), redemptions.end());
-            this->calculateNotionals(dates, rate);
-            adouble disbursement = -this->notional_;
-            this->disbursement(Cashflow<adouble>(dates.front(), disbursement));
+        CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate)
+        : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate) {
+            this->leg_              = MakeLeg<adouble, FixedRateLeg<adouble>>().dates(dates).redemptions(redemptions).rate(this->rate_).build();
+            adouble impliedNotional = std::reduce(redemptions.begin(), redemptions.end());
+            this->side_             = impliedNotional > 0 ? Side::Long : Side::Short;
+            this->notional_         = abs(impliedNotional);
+            this->disbursement(Cashflow<adouble>(dates.front(), impliedNotional));
         };
 
         /**
          * @brief Construct a new Custom Fixed Rate Instrument object
          *
          * @param dates dates of payment for the instrument, starting with the start date of the first coupon
-         * @param redemptions redemption amounts for the instrument
+         * @param redemptions redemption amounts for the instrument. Note: casfhlows are flipped if side is short
          * @param rate rate of the instrument
          * @param discountCurveContext discount curve context of the instrument
-         * @param side side of the instrument
          */
         CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate,
-                                  const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
-        : CustomFixedRateInstrument(dates, redemptions, rate, side) {
+                                  const Context<YieldTermStructure<adouble>>& discountCurveContext)
+        : CustomFixedRateInstrument(dates, redemptions, rate) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

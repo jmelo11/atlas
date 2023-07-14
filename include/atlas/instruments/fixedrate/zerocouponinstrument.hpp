@@ -23,12 +23,15 @@ namespace Atlas {
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate, Side side = Side::Long)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
-            FixedRateCoupon<adouble> coupon(startDate, endDate, notional, this->rate_);  // interest coupon
-            Redemption<adouble> redemption(endDate, notional);                           // notinal payment at the end
-
-            this->leg().addCoupon(coupon);
-            this->leg().addRedemption(redemption);
-            adouble disbursement = -notional;
+            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
+                             .startDate(this->startDate_)
+                             .endDate(this->endDate_)
+                             .notional(this->notional_)
+                             .side(this->side_)
+                             .rate(this->rate_)
+                             .paymentFrequency(Frequency::Once)
+                             .build();
+            adouble disbursement = -this->notional_ * this->side_;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 
