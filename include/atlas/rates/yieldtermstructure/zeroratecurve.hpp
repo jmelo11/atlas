@@ -2,7 +2,7 @@
 #define A44280F0_C2FC_4939_991C_18E6A449EEA6
 
 #include <atlas/rates/interestrate.hpp>
-#include <atlas/rates/yieldtermstructure.hpp>
+#include <atlas/rates/yieldtermstructurestrategy.hpp>
 
 namespace Atlas {
 
