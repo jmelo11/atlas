@@ -14,7 +14,7 @@ namespace Atlas {
      * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>
-    class FixedRateCoupon : public Coupon<adouble> {
+    class FixedRateCoupon : public BaseCoupon<adouble, FixedRateCoupon> {
        public:
         /**
          * @brief Construct a new Fixed Rate Coupon object
@@ -25,7 +25,7 @@ namespace Atlas {
          * @param rate The interest rate of the coupon
          */
         FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate)
-        : Coupon<adouble>(startDate, endDate, notional), rate_(rate) {
+        : BaseCoupon<adouble,FixedRateCoupon>(startDate, endDate, notional), rate_(rate) {
             this->amount_ = accruedAmount(startDate, endDate);
         };
 
@@ -39,7 +39,7 @@ namespace Atlas {
          */
         FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
                         const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : Coupon<adouble>(startDate, endDate, notional, discountCurveContext), rate_(rate) {
+        : BaseCoupon<adouble,FixedRateCoupon>(startDate, endDate, notional, discountCurveContext), rate_(rate) {
             this->amount_ = accruedAmount(startDate, endDate);
         };
 
@@ -65,7 +65,7 @@ namespace Atlas {
          *
          * @return The day counter of the coupon
          */
-        inline DayCounter dayCounter() const override { return rate_.dayCounter(); };
+        inline DayCounter dayCounter() const  { return rate_.dayCounter(); };
 
         /**
          * @brief Gets the accrued period of the coupon
@@ -76,7 +76,7 @@ namespace Atlas {
          * @param refEnd The end date of the coupon
          * @return The accrued period of the coupon
          */
-        inline double accruedPeriod(const Date& refStart, const Date& refEnd) const override {
+        inline double accruedPeriod(const Date& refStart, const Date& refEnd) const  {
             if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
             auto datesPair = this->accrualDates(refStart, refEnd);
             return dayCounter().yearFraction(datesPair.first, datesPair.second);
@@ -91,7 +91,7 @@ namespace Atlas {
          * @param refEnd The end date of the coupon
          * @return The accrued amount of the coupon
          */
-        inline adouble accruedAmount(const Date& refStart, const Date& refEnd) const override {
+        inline adouble accruedAmount(const Date& refStart, const Date& refEnd) const  {
             auto datesPair = this->accrualDates(refStart, refEnd);
             if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
             return this->notional() * (rate_.compoundFactor(datesPair.first, datesPair.second) - 1.0);
