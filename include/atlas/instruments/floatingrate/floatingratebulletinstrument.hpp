@@ -19,15 +19,22 @@ namespace Atlas {
          * @param endDate  date of the last coupon
          * @param notional notional of the instrument
          * @param spread spread of the instrument
-         * @param forecastCurveContext forecast curve context of the instrument
-         * @param discountCurveContext discount curve context of the instrument
+         * @param rateIndexContext forecast curve context of the instrument
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                     const Context<RateIndex<adouble>>& forecastCurveContext,
-                                     const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FloatingRateBulletInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
-            this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement().discountCurveContext(discountCurveContext);
+                                     const Context<RateIndex<adouble>>& rateIndexContext, Side side = Side::Long)
+        : FloatingRateInstrument<adouble>(startDate, endDate, side, notional, spread) {
+            this->leg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
+                             .startDate(this->startDate_)
+                             .endDate(this->endDate_)
+                             .notional(this->notional_)
+                             .spread(this->spread_)
+                             .side(this->side_)
+                             .rateIndexContext(&rateIndexContext)
+                             .build();
+
+            adouble disbursement = -this->notional_;
+            this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 
         /**
@@ -37,27 +44,15 @@ namespace Atlas {
          * @param endDate  date of the last coupon
          * @param notional notional of the instrument
          * @param spread spread of the instrument
-         * @param forecastCurveContext forecast curve context of the instrument
+         * @param rateIndexContext forecast curve context of the instrument
+         * @param discountCurveContext discount curve context of the instrument
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                     const Context<RateIndex<adouble>>& forecastCurveContext)
-        : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread) {
-            const auto& index = forecastCurveContext.object();
-            Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
-            Date firstDate    = Date();
-            for (const auto& endDate : schedule.dates()) {
-                if (firstDate != Date()) {
-                    FloatingRateCoupon<adouble> coupon(firstDate, endDate, notional, spread, forecastCurveContext);
-                    this->leg().addCoupon(coupon);
-                }
-                firstDate = endDate;
-            }
-
-            Redemption<adouble> redemption(schedule.endDate(), notional);
-            this->leg().addRedemption(redemption);
-
-            adouble disbursement = -notional;
-            this->disbursement(Cashflow<adouble>(startDate, disbursement));
+                                     const Context<RateIndex<adouble>>& rateIndexContext,
+                                     const Context<YieldTermStructure<adouble>>& discountCurveContext)
+        : FloatingRateBulletInstrument(startDate, endDate, notional, spread, rateIndexContext) {
+            this->leg().discountCurveContext(discountCurveContext);
+            this->disbursement().discountCurveContext(discountCurveContext);
         };
     };
 }  // namespace Atlas

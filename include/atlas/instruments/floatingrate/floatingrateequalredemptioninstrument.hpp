@@ -18,26 +18,25 @@ namespace Atlas {
          * @param endDate end date of the instrument
          * @param notional notional of the instrument
          * @param spread spread of the instrument
-         * @param forecastCurveContext forecast curve context of the instrument
+         * @param rateIndexContext forecast curve context of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const Context<RateIndex<adouble>>& forecastCurveContext)
-        : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread) {
-            const auto& index = forecastCurveContext.object();
+                                              const Context<RateIndex<adouble>>& rateIndexContext, Side side = Side::Long)
+        : FloatingRateInstrument<adouble>(startDate, endDate, side, notional, spread) {
+            const auto& index = rateIndexContext.object();
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
             const auto& dates = schedule.dates();
             std::vector<double> redemptions(schedule.size() - 1, notional / (schedule.size() - 1));
 
-            double outstanding = notional;
-            for (size_t i = 0; i < dates.size() - 1; ++i) {
-                FloatingRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, spread, forecastCurveContext);
-                this->leg().addCoupon(coupon);
-                Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg().addRedemption(redemption);
-                outstanding -= redemptions.at(i);
-            }
+            this->leg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
+                             .dates(dates)
+                             .redemptions(redemptions)
+                             .spread(this->spread_)
+                             .side(this->side_)
+                             .rateIndexContext(&rateIndexContext)
+                             .build();
 
-            adouble disbursement = -notional;
+            adouble disbursement = -this->notional_;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
         /**
@@ -47,13 +46,13 @@ namespace Atlas {
          * @param endDate end date of the instrument
          * @param notional notional of the instrument
          * @param spread spread of the instrument
-         * @param forecastCurveContext forecast curve context of the instrument
+         * @param rateIndexContext forecast curve context of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const Context<RateIndex<adouble>>& forecastCurveContext,
+                                              const Context<RateIndex<adouble>>& rateIndexContext,
                                               const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, forecastCurveContext) {
+        : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, rateIndexContext) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

@@ -17,24 +17,22 @@ namespace Atlas {
          * @param dates  dates of payment for the instrument, starting with the start date of the first coupon
          * @param redemptions redemption amounts for the instrument
          * @param spread spread of the instrument
-         * @param forecastCurveContext forecast curve context of the instrument
+         * @param rateIndexContext forecast curve context of the instrument
          */
         CustomFloatingRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, adouble spread,
-                                     const Context<RateIndex<adouble>>& forecastCurveContext)
-        : FloatingRateInstrument<adouble>(dates.front(), dates.back(), 0, spread) {
-            this->notional_    = std::reduce(redemptions.begin(), redemptions.end());
-            double outstanding = this->notional_;
-            for (size_t i = 0; i < redemptions.size(); i++) {
-                Redemption<adouble> redemption(dates.at(i + 1), redemptions.at(i));
-                this->leg().addRedemption(redemption);
+                                     const Context<RateIndex<adouble>>& rateIndexContext)
+        : FloatingRateInstrument<adouble>(dates.front(), dates.back(), Side::Long, 0, spread) {
+            this->leg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
+                             .dates(dates)
+                             .redemptions(redemptions)
+                             .spread(spread)
+                             .rateIndexContext(&rateIndexContext)
+                             .build();
 
-                FloatingRateCoupon<adouble> coupon(dates.at(i), dates.at(i + 1), outstanding, spread, forecastCurveContext);
-                this->leg().addCoupon(coupon);
-                outstanding -= redemptions.at(i);
-            }
-
-            adouble disbursement = -this->notional_;
-            this->disbursement(Cashflow<adouble>(dates.front(), disbursement));
+            adouble impliedNotional = std::reduce(redemptions.begin(), redemptions.end());
+            this->side_             = impliedNotional > 0 ? Side::Long : Side::Short;
+            this->notional_         = abs(impliedNotional);
+            this->disbursement(Cashflow<adouble>(dates.front(), impliedNotional));
         };
         ;
         /**
@@ -43,12 +41,13 @@ namespace Atlas {
          * @param dates  dates of payment for the instrument, starting with the start date of the first coupon
          * @param redemptions redemption amounts for the instrument
          * @param spread spread of the instrument
-         * @param forecastCurveContext forecast curve context of the instrument
+         * @param rateIndexContext forecast curve context of the instrument
          * @param discountCurveContext discount curve context of the instrument
          */
         CustomFloatingRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, adouble spread,
-                                     const Context<RateIndex<adouble>>& forecastCurveContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : CustomFloatingRateInstrument(dates, redemptions, spread, forecastCurveContext) {
+                                     const Context<RateIndex<adouble>>& rateIndexContext,
+                                     const Context<YieldTermStructure<adouble>>& discountCurveContext)
+        : CustomFloatingRateInstrument(dates, redemptions, spread, rateIndexContext) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement_.discountCurveContext(discountCurveContext);
         };
