@@ -167,7 +167,7 @@ namespace Atlas {
          *
          * @return The day counter of the coupon
          */
-        virtual DayCounter dayCounter() const { return static_cast<const CouponType<adouble>&>(*this).dayCounter(); };
+        DayCounter dayCounter() const { return static_cast<const CouponType<adouble>&>(*this).dayCounter(); };
 
         /**
          * @brief Gets the accrual period of the coupon
@@ -178,7 +178,7 @@ namespace Atlas {
          * @param end The end date of the coupon
          * @return The accrued period of the coupon
          */
-        virtual double accruedPeriod(const Date& refStart, const Date& refEnd) const {
+        double accruedPeriod(const Date& refStart, const Date& refEnd) const {
             return static_cast<const CouponType<adouble>&>(*this).accruedPeriod(refStart, refEnd);
         };
 
@@ -191,7 +191,7 @@ namespace Atlas {
          * @param end The end date of the coupon
          * @return The accrued amount of the coupon
          */
-        virtual adouble accruedAmount(const Date& refStart, const Date& refEnd) const {
+        adouble accruedAmount(const Date& refStart, const Date& refEnd) const {
             return static_cast<const CouponType<adouble>&>(*this).accruedAmount(refStart, refEnd);
         };
 
