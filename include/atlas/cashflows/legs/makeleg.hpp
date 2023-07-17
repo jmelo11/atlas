@@ -14,7 +14,7 @@ namespace Atlas {
      * @tparam adouble
      * @tparam LegType
      */
-    template <typename adouble, class LegType>
+    template <template <typename> class LegType, typename adouble = double>
     class MakeLeg {
        public:
         MakeLeg() = default;
@@ -97,7 +97,7 @@ namespace Atlas {
          * @return MakeLeg&
          */
         MakeLeg& rate(const InterestRate<adouble>& rate) {
-            static_assert(std::is_same_v<LegType, FixedRateLeg<adouble>>, "Only FixedRateLeg is supported for rate.");
+            static_assert(std::is_same_v<LegType<adouble>, FixedRateLeg<adouble>>, "Only FixedRateLeg is supported for rate.");
             rate_ = rate;
             return *this;
         }
@@ -109,13 +109,13 @@ namespace Atlas {
          * @return MakeLeg&
          */
         MakeLeg& spread(adouble spread) {
-            static_assert(std::is_same_v<LegType, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported for spread.");
+            static_assert(std::is_same_v<LegType<adouble>, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported for spread.");
             spread_ = spread;
             return *this;
         }
 
         MakeLeg& rateIndexContext(const Context<RateIndex<adouble>>* index) {
-            static_assert(std::is_same_v<LegType, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
+            static_assert(std::is_same_v<LegType<adouble>, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
             rateIndexContext_ = index;
             paymentFrequency_ = index->object().fixingFrequency();
             return *this;
@@ -143,7 +143,7 @@ namespace Atlas {
             return *this;
         }
 
-        LegType build() {
+        LegType<adouble> build() {
             setLegDates();
             setRedemptionNotionals();
             setCouponNotionals();
@@ -225,11 +225,11 @@ namespace Atlas {
          */
         void setLegCoupons() {
             for (size_t i = 0; i < dates_.size() - 1; i++) {
-                if constexpr (std::is_same_v<LegType, FixedRateLeg<adouble>>) {
+                if constexpr (std::is_same_v<LegType<adouble>, FixedRateLeg<adouble>>) {
                     FixedRateCoupon<adouble> coupon(dates_.at(i), dates_.at(i + 1), couponNotionals_.at(i), rate_);
                     setCashflow(coupon);
                     leg_.addCoupon(coupon);
-                } else if constexpr (std::is_same_v<LegType, FloatingRateLeg<adouble>>) {
+                } else if constexpr (std::is_same_v<LegType<adouble>, FloatingRateLeg<adouble>>) {
                     FloatingRateCoupon<adouble> coupon(dates_[i], dates_[i + 1], couponNotionals_.at(i), spread_, *rateIndexContext_);
                     setCashflow(coupon);
                     leg_.addCoupon(coupon);
@@ -237,7 +237,7 @@ namespace Atlas {
             }
         }
 
-        LegType leg_                                                      = LegType();
+        LegType<adouble> leg_                                             = LegType<adouble>();
         Date startDate_                                                   = Date();
         Date endDate_                                                     = Date();
         Side side_                                                        = Side::Long;

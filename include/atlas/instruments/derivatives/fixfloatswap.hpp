@@ -15,7 +15,7 @@ namespace Atlas {
      * @brief A class for fixed-float swap instruments.
      * @ingroup Derivatives
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FixFloatSwap : public Instrument<adouble>, public TwoLegMixin<FixedRateLeg<adouble>, FloatingRateLeg<adouble>> {
        public:
         FixFloatSwap(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble> rate, adouble spread, Frequency fixFreq,
@@ -26,7 +26,7 @@ namespace Atlas {
             this->notional_  = notional;
             this->side_      = side;
 
-            this->firstLeg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
+            this->firstLeg_ = MakeLeg<FixedRateLeg, adouble>()
                                   .startDate(startDate)
                                   .endDate(endDate)
                                   .notional(notional)
@@ -35,7 +35,7 @@ namespace Atlas {
                                   .createRedemptions(false)
                                   .build();
 
-            this->secondLeg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
+            this->secondLeg_ = MakeLeg<FloatingRateLeg, adouble>()
                                    .startDate(startDate)
                                    .endDate(endDate)
                                    .notional(notional)

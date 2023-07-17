@@ -14,7 +14,7 @@ namespace Atlas {
      * @tparam adouble
      * @ingroup Derivatives
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FxForward : public Instrument<adouble>, public OneLegMixin<adouble, Leg<adouble>> {
        public:
         /**

@@ -10,7 +10,7 @@ namespace Atlas {
      * @brief A class for fixed, single-legged, bullet instruments.
      * @ingroup FixedRateInstruments
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FixedRateBulletInstrument : public FixedRateInstrument<adouble> {
        public:
         /**
@@ -26,7 +26,7 @@ namespace Atlas {
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
                                   Side side = Side::Long)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
-            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
+            this->leg_ = MakeLeg<FixedRateLeg, adouble>()
                              .startDate(this->startDate_)
                              .endDate(this->endDate_)
                              .notional(this->notional_)

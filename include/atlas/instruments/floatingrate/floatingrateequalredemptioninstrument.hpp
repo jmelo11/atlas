@@ -8,7 +8,7 @@ namespace Atlas {
      * @brief A class for floating rate equal redemption instruments.
      * @ingroup FloatingRateInstruments
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FloatingRateEqualRedemptionInstrument : public FloatingRateInstrument<adouble> {
        public:
         /**
@@ -28,7 +28,7 @@ namespace Atlas {
             const auto& dates = schedule.dates();
             std::vector<double> redemptions(schedule.size() - 1, notional / (schedule.size() - 1));
 
-            this->leg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
+            this->leg_ = MakeLeg<FloatingRateLeg, adouble>()
                              .dates(dates)
                              .redemptions(redemptions)
                              .spread(this->spread_)

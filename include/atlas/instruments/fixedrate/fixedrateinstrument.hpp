@@ -20,7 +20,7 @@ namespace Atlas {
      *
      * @tparam adouble The type of number used for calculation. It can be either double or an AAD-enabled type.
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FixedRateLeg<adouble>> {
        public:
         /**

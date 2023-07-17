@@ -8,7 +8,7 @@ using namespace Atlas;
 TEST(MakeLegTest, FixedRateLegTest) {
     TestSetup<double> testSetup;
 
-    MakeLeg<double, FixedRateLeg<double>> makeLeg;
+    MakeLeg<FixedRateLeg, double> makeLeg;
     makeLeg.paymentFrequency(Frequency::Semiannual)
         .startDate(testSetup.startDate)
         .endDate(testSetup.endDate)
@@ -45,7 +45,7 @@ TEST(MakeLegTest, ChangeSide) {
         expectedCouponAmounts.push_back(notional * side * (rate.compoundFactor(dates[i], dates[i + 1]) - 1));
     }
 
-    MakeLeg<double, FixedRateLeg<double>> makeLeg;
+    MakeLeg<FixedRateLeg, double> makeLeg;
     makeLeg.paymentFrequency(paymentFrequency).startDate(startDate).endDate(endDate).notional(notional).rate(rate).side(side);
     FixedRateLeg<double> leg = makeLeg.build();
 
@@ -73,7 +73,7 @@ TEST(MakeLegTest, CustomRedemptions) {
         expectedCouponAmounts.push_back(couponNotionals.at(i) * (rate.compoundFactor(dates[i], dates[i + 1]) - 1));
     }
 
-    MakeLeg<double, FixedRateLeg<double>> makeLeg;
+    MakeLeg<FixedRateLeg, double> makeLeg;
     makeLeg.paymentFrequency(paymentFrequency).dates(dates).redemptions(redemptions).notional(notional).rate(rate).side(side);
     FixedRateLeg<double> leg = makeLeg.build();
 
@@ -92,7 +92,7 @@ TEST(MakeLegTest, FloatingRateLegTest) {
                             .withConvention(BusinessDayConvention::ModifiedFollowing);
     size_t numCoupons = schedule.dates().size() - 1;
 
-    MakeLeg<double, FloatingRateLeg<double>> makeLeg;
+    MakeLeg<FloatingRateLeg, double> makeLeg;
     makeLeg.notional(testSetup.notional)
         .startDate(testSetup.startDate)
         .endDate(testSetup.endDate)
@@ -115,7 +115,7 @@ TEST(MakeLegTest, FloatingRateLegTest2) {
 
     auto paymentConvention      = BusinessDayConvention::Unadjusted;
     auto calendar               = UnitedStates(UnitedStates::GovernmentBond);
-    FloatingRateLeg<double> leg = MakeLeg<double, FloatingRateLeg<double>>()
+    FloatingRateLeg<double> leg = MakeLeg<FloatingRateLeg, double>()
                                       .notional(testSetup.notional)
                                       .startDate(testSetup.startDate)
                                       .endDate(testSetup.endDate)
@@ -161,7 +161,7 @@ TEST(MakeLegTest, FloatingRateLegTest2) {
 // Test throwing an error for mismatched redemption and schedule sizes
 TEST(MakeLegTest, RedemptionSizeErrorTest) {
     TestSetup<double> testSetup;
-    MakeLeg<double, FloatingRateLeg<double>> makeLeg;
+    MakeLeg<FloatingRateLeg, double> makeLeg;
 
     std::vector<double> redemptions = {1.0, 1.0, 1.0, 1.0, 1.0};
     makeLeg.notional(100.0)

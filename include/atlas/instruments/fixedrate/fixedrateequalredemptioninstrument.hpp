@@ -8,7 +8,7 @@ namespace Atlas {
      * @brief A class for fixed, single-legged, equal redemption instruments.
      * @ingroup FixedRateInstruments
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FixedRateEqualRedemptionInstrument : public FixedRateInstrument<adouble> {
        public:
         /**
@@ -28,7 +28,7 @@ namespace Atlas {
             adouble redemptionAmount = notional / (dates.size() - 1);
             std::vector<adouble> redemptions(dates.size() - 1, redemptionAmount);
 
-            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>().dates(dates).notional(notional).redemptions(redemptions).rate(this->rate_).build();
+            this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(dates).notional(notional).redemptions(redemptions).rate(this->rate_).build();
             adouble disbursement = -this->notional_ * this->side_;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };

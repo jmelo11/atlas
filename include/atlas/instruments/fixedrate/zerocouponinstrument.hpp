@@ -10,7 +10,7 @@ namespace Atlas {
      * @brief A class for zero coupon instruments.
      *
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class ZeroCouponInstrument : public FixedRateInstrument<adouble> {
        public:
         /**
@@ -23,7 +23,7 @@ namespace Atlas {
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate, Side side = Side::Long)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
-            this->leg_ = MakeLeg<adouble, FixedRateLeg<adouble>>()
+            this->leg_ = MakeLeg<FixedRateLeg, adouble>()
                              .startDate(this->startDate_)
                              .endDate(this->endDate_)
                              .notional(this->notional_)

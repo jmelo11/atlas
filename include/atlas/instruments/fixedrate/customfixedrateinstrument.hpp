@@ -8,7 +8,7 @@ namespace Atlas {
      * @brief A class for custom fixed rate instruments.
      * @ingroup FixedRateInstruments
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class CustomFixedRateInstrument : public FixedRateInstrument<adouble> {
        public:
         /**
@@ -20,7 +20,7 @@ namespace Atlas {
          */
         CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate)
         : FixedRateInstrument<adouble>(dates.front(), dates.back(), rate) {
-            this->leg_              = MakeLeg<adouble, FixedRateLeg<adouble>>().dates(dates).redemptions(redemptions).rate(this->rate_).build();
+            this->leg_              = MakeLeg<FixedRateLeg, adouble>().dates(dates).redemptions(redemptions).rate(this->rate_).build();
             adouble impliedNotional = std::reduce(redemptions.begin(), redemptions.end());
             this->side_             = impliedNotional > 0 ? Side::Long : Side::Short;
             this->notional_         = abs(impliedNotional);

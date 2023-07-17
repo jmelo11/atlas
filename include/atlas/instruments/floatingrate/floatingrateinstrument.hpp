@@ -16,7 +16,7 @@ namespace Atlas {
      * @brief An class for floating, single-legged, rate instruments.
      * @ingroup FloatingRateInstruments
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FloatingRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FloatingRateLeg<adouble>> {
        public:
         /**

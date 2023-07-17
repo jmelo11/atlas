@@ -8,7 +8,7 @@ namespace Atlas {
      * @brief A class for custom floating rate instruments.
      * @ingroup FloatingRateInstruments
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class CustomFloatingRateInstrument : public FloatingRateInstrument<adouble> {
        public:
         /**
@@ -22,12 +22,8 @@ namespace Atlas {
         CustomFloatingRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, adouble spread,
                                      const Context<RateIndex<adouble>>& rateIndexContext)
         : FloatingRateInstrument<adouble>(dates.front(), dates.back(), Side::Long, 0, spread) {
-            this->leg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
-                             .dates(dates)
-                             .redemptions(redemptions)
-                             .spread(spread)
-                             .rateIndexContext(&rateIndexContext)
-                             .build();
+            this->leg_ =
+                MakeLeg<FloatingRateLeg, adouble>().dates(dates).redemptions(redemptions).spread(spread).rateIndexContext(&rateIndexContext).build();
 
             adouble impliedNotional = std::reduce(redemptions.begin(), redemptions.end());
             this->side_             = impliedNotional > 0 ? Side::Long : Side::Short;

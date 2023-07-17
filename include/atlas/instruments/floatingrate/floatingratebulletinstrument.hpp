@@ -9,7 +9,7 @@ namespace Atlas {
      * @brief A class for floating rate bullet instruments.
      * @ingroup FloatingRateInstruments
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FloatingRateBulletInstrument : public FloatingRateInstrument<adouble> {
        public:
         /**
@@ -24,7 +24,7 @@ namespace Atlas {
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                      const Context<RateIndex<adouble>>& rateIndexContext, Side side = Side::Long)
         : FloatingRateInstrument<adouble>(startDate, endDate, side, notional, spread) {
-            this->leg_ = MakeLeg<adouble, FloatingRateLeg<adouble>>()
+            this->leg_ = MakeLeg<FloatingRateLeg, adouble>()
                              .startDate(this->startDate_)
                              .endDate(this->endDate_)
                              .notional(this->notional_)
