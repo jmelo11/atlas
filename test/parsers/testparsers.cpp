@@ -35,8 +35,8 @@ TEST(ParseDate, PartialDate) {
     EXPECT_EQ(d.year(), 2023);
     EXPECT_EQ(d.month(), 6);
     EXPECT_EQ(d.dayOfMonth(), 1);
-    std::cout << d << std::endl;
 }
+
 TEST(ParseDate, InvalidFormat) {
     std::string invalidDateString = "06-28-2023";
     std::string format            = "%Y-%m-%dT%H:%M:%S";
