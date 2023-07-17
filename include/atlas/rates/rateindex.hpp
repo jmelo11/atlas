@@ -10,7 +10,7 @@ namespace Atlas {
      * @class RateIndex
      * @brief A rate index.
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class RateIndex {
        public:
         /**

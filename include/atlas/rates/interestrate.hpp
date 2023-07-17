@@ -18,7 +18,7 @@ namespace Atlas {
      *
      * @tparam adouble
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class InterestRate {
         using DayCounter  = QuantLib::DayCounter;
         using Compounding = QuantLib::Compounding;
