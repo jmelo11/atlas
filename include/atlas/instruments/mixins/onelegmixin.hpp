@@ -15,28 +15,28 @@ namespace Atlas {
      * @brief A class for single leg instruments.
      *
      * @tparam adouble number type
-     * @tparam FirstLeg type of the first leg
+     * @tparam FirstLeg<adouble> type of the first leg
      */
-    template <typename adouble, class FirstLeg>
+    template <template <typename> class FirstLeg, typename adouble = double>
     class OneLegMixin {
        public:
         OneLegMixin() = default;
 
-        OneLegMixin(const FirstLeg& leg) : leg_(leg){};
+        OneLegMixin(const FirstLeg<adouble>& leg) : leg_(leg){};
 
         /**
          * @brief Returns the leg of the instrument.
          *
-         * @return const FirstLeg&
+         * @return const FirstLeg<adouble>&
          */
-        inline const FirstLeg& leg() const { return leg_; }
+        inline const FirstLeg<adouble>& leg() const { return leg_; }
 
         /**
          * @brief Returns the leg of the instrument.
          *
-         * @return FirstLeg&
+         * @return FirstLeg<adouble>&
          */
-        inline FirstLeg& leg() { return leg_; }
+        inline FirstLeg<adouble>& leg() { return leg_; }
 
         /**
          * @brief Sets the discount curve context of the instrument.
@@ -44,7 +44,7 @@ namespace Atlas {
          * @param context
          */
         inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& context) {
-            if constexpr (std::is_same_v<FirstLeg, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>) {
+            if constexpr (std::is_same_v<FirstLeg<adouble>, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg<adouble>, FloatingRateLeg<adouble>>) {
                 for (auto& coupon : leg_.coupons()) coupon.discountCurveContext(context);
             }
             for (auto& redemption : leg_.redemptions()) redemption.discountCurveContext(context);
@@ -57,7 +57,7 @@ namespace Atlas {
          * @param context
          */
         inline void rateIndexContext(const Context<RateIndex<adouble>>& context) {
-            static_assert(std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
+            static_assert(std::is_same_v<FirstLeg<adouble>, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
             leg_.rateIndexContext(context);
         }
 
@@ -88,7 +88,7 @@ namespace Atlas {
          * @param currency
          */
         inline void currency(const Currency& currency) {
-            if constexpr (std::is_same_v<FirstLeg, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>) {
+            if constexpr (std::is_same_v<FirstLeg<adouble>, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg<adouble>, FloatingRateLeg<adouble>>) {
                 for (auto& coupon : leg_.coupons()) coupon.currency(currency);
             }
             for (auto& redemption : leg_.redemptions()) redemption.currency(currency);
@@ -101,7 +101,7 @@ namespace Atlas {
          * @param apply true to apply the currency of each cashflow
          */
         inline void applyCcy(bool apply) {
-            if constexpr (std::is_same_v<FirstLeg, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg, FloatingRateLeg<adouble>>) {
+            if constexpr (std::is_same_v<FirstLeg<adouble>, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg<adouble>, FloatingRateLeg<adouble>>) {
                 for (auto& coupon : leg_.coupons()) coupon.applyCcy(apply);
             }
             for (auto& redemption : leg_.redemptions()) redemption.applyCcy(apply);
@@ -109,13 +109,13 @@ namespace Atlas {
         }
 
        protected:
-        template <typename T = FirstLeg, typename = std::enable_if_t<std::is_default_constructible_v<T>>>
+        template <typename T = FirstLeg<adouble>, typename = std::enable_if_t<std::is_default_constructible_v<T>>>
         inline void reset() {
-            leg_ = FirstLeg();
+            leg_ = FirstLeg<adouble>();
         }
-        
+
         Cashflow<adouble> disbursement_;
-        FirstLeg leg_;
+        FirstLeg<adouble> leg_;
     };
 }  // namespace Atlas
 

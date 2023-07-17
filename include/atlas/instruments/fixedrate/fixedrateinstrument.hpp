@@ -21,7 +21,7 @@ namespace Atlas {
      * @tparam adouble The type of number used for calculation. It can be either double or an AAD-enabled type.
      */
     template <typename adouble = double>
-    class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<adouble, FixedRateLeg<adouble>> {
+    class FixedRateInstrument : public Instrument<adouble>, public OneLegMixin<FixedRateLeg, adouble> {
        public:
         /**
          * @brief Construct a new Fixed Rate Instrument object
@@ -34,7 +34,7 @@ namespace Atlas {
          */
         FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, Side side = Side::Long,
                             double notional = 0.0, const FixedRateLeg<adouble>& leg = FixedRateLeg<adouble>())
-        : OneLegMixin<adouble, FixedRateLeg<adouble>>(leg), rate_(rate) {
+        : OneLegMixin<FixedRateLeg, adouble>(leg), rate_(rate) {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->side_      = side;

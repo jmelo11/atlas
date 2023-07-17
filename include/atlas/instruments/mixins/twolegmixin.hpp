@@ -6,27 +6,27 @@ namespace Atlas {
     /**
      * @brief A mixin class for two legs of an instrument
      *
-     * @tparam FirstLeg
-     * @tparam SecondLeg
+     * @tparam FirstLeg<adouble>
+     * @tparam SecondLeg<adouble>
      */
-    template <class FirstLeg, class SecondLeg>
+    template <template <typename> class FirstLeg, template <typename> class SecondLeg, typename adouble>
     class TwoLegMixin {
        public:
         TwoLegMixin() = default;
 
-        TwoLegMixin(const FirstLeg& firstLeg, const SecondLeg& secondLeg) : firstLeg_(firstLeg), secondLeg_(secondLeg) {}
+        TwoLegMixin(const FirstLeg<adouble>& firstLeg, const SecondLeg<adouble>& secondLeg) : firstLeg_(firstLeg), secondLeg_(secondLeg) {}
 
-        const FirstLeg& firstLeg() const { return firstLeg_; }
+        const FirstLeg<adouble>& firstLeg() const { return firstLeg_; }
 
-        FirstLeg& firstLeg() { return firstLeg_; }
+        FirstLeg<adouble>& firstLeg() { return firstLeg_; }
 
-        const SecondLeg& secondLeg() const { return secondLeg_; }
+        const SecondLeg<adouble>& secondLeg() const { return secondLeg_; }
 
-        SecondLeg& secondLeg() { return secondLeg_; }
+        SecondLeg<adouble>& secondLeg() { return secondLeg_; }
 
        protected:
-        FirstLeg firstLeg_;
-        SecondLeg secondLeg_;
+        FirstLeg<adouble> firstLeg_;
+        SecondLeg<adouble> secondLeg_;
     };
 }  // namespace Atlas
 

@@ -16,11 +16,11 @@ namespace Atlas {
      * @ingroup Derivatives
      */
     template <typename adouble = double>
-    class FixFloatSwap : public Instrument<adouble>, public TwoLegMixin<FixedRateLeg<adouble>, FloatingRateLeg<adouble>> {
+    class FixFloatSwap : public Instrument<adouble>, public TwoLegMixin<FixedRateLeg, FloatingRateLeg, adouble> {
        public:
         FixFloatSwap(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble> rate, adouble spread, Frequency fixFreq,
                      const Context<RateIndex<adouble>>& floatIndex, Side side)
-        : TwoLegMixin<FixedRateLeg<adouble>, FloatingRateLeg<adouble>>() {
+        : TwoLegMixin<FixedRateLeg, FloatingRateLeg, adouble>() {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->notional_  = notional;
