@@ -44,14 +44,16 @@ namespace Atlas {
 
     /**
      * @class BaseYieldTermStructure
-     * @brief More ergonomic version of the YieldTermStructure class. To be renamed in future versions.
+     * @brief More ergonomic version of the YieldTermStructure class. To be renamed to YieldTermStructure in future versions.
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class BaseYieldTermStructure {
        protected:
         class Strategy {
            public:
             Strategy(const Date& refDate) : refDate_(refDate){};
+
+            Strategy() = default;
 
             virtual ~Strategy() = default;
 
@@ -63,6 +65,8 @@ namespace Atlas {
                                         Frequency freq) const = 0;
 
             virtual std::unique_ptr<Strategy> clone() const = 0;
+
+            virtual void enableExtrapolation(bool e) = 0;
 
             Date refDate() const {
                 if (refDate_ == Date()) { throw std::invalid_argument("Reference date not set"); }
@@ -80,22 +84,24 @@ namespace Atlas {
 
         inline adouble discount(const Date& date) const {
             if (empty()) throw std::runtime_error("No curve strategy defined.");
-            strategy_->discount(date);
+            return strategy_->discount(date);
         };
 
         inline adouble discount(double t) const {
             if (empty()) throw std::runtime_error("No curve strategy defined.");
-            strategy_->discount(t);
+            return strategy_->discount(t);
         };
 
         inline adouble forwardRate(const Date& startDate, const Date& endDate, const DayCounter& dayCounter, Compounding comp, Frequency freq) const {
             if (empty()) throw std::runtime_error("No curve strategy defined.");
-            strategy_->forwardRate(startDate, endDate, dayCounter, comp, freq);
+            return strategy_->forwardRate(startDate, endDate, dayCounter, comp, freq);
         };
 
-        inline Date refDate() { strategy_->refDate(); };
+        inline Date refDate() const { return strategy_->refDate(); };
 
         inline bool empty() const { return !strategy_; }
+
+        inline void enableExtrapolation(bool enable) { strategy_->enableExtrapolation(enable); }
 
        private:
         std::unique_ptr<Strategy> strategy_;
