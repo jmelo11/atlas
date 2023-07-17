@@ -82,6 +82,13 @@ namespace Atlas {
        public:
         BaseYieldTermStructure() = default;
 
+        BaseYieldTermStructure(const BaseYieldTermStructure& other) : strategy_(other.strategy_->clone()) {}
+
+        BaseYieldTermStructure& operator=(const BaseYieldTermStructure& other) {
+            if (this != &other) { strategy_ = other.strategy_->clone(); }
+            return *this;
+        }
+
         inline adouble discount(const Date& date) const {
             if (empty()) throw std::runtime_error("No curve strategy defined.");
             return strategy_->discount(date);
