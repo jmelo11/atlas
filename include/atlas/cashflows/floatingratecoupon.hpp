@@ -15,7 +15,7 @@ namespace Atlas {
      * @tparam adouble The type of the floating point number used in the coupon
      */
     template <typename adouble>
-    class FloatingRateCoupon : public BaseCoupon<adouble, FloatingRateCoupon> {
+    class FloatingRateCoupon : public Coupon<adouble> {
        public:
         /**
          * Constructor
@@ -27,10 +27,7 @@ namespace Atlas {
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
                            const Context<RateIndex<adouble>>& rateIndexContext)
-        : BaseCoupon<adouble, FloatingRateCoupon>(startDate, endDate, notional),
-          spread_(spread),
-          rateIndexContextIdx_(rateIndexContext.idx()),
-          hasRateIndexContext_(true) {
+        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), rateIndexContextIdx_(rateIndexContext.idx()), hasRateIndexContext_(true) {
             rateDef_ = {rateIndexContext.object().dayCounter(), rateIndexContext.object().rateFrequency(),
                         rateIndexContext.object().rateCompounding()};
         };
@@ -103,7 +100,7 @@ namespace Atlas {
          *
          * @return The day counter of the coupon
          */
-        inline DayCounter dayCounter() const { return rateDef_.dayCounter; };
+        inline DayCounter dayCounter() const override { return rateDef_.dayCounter; };
 
         /**
          * @brief Gets the accrued period of the coupon
@@ -112,7 +109,7 @@ namespace Atlas {
          * @param refEnd The end evaluation date for the accrual period
          * @return The accrued period of the coupon
          */
-        inline double accruedPeriod(const Date& refStart, const Date& refEnd) const {
+        inline double accruedPeriod(const Date& refStart, const Date& refEnd) const override {
             if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
             auto datesPair = this->accrualDates(refStart, refEnd);
             return dayCounter().yearFraction(datesPair.first, datesPair.second);
@@ -125,7 +122,7 @@ namespace Atlas {
          * @param refEnd The end evaluation date for the accrual period
          * @return The accrued amount of the coupon
          */
-        inline adouble accruedAmount(const Date& refStart, const Date& refEnd) const {
+        inline adouble accruedAmount(const Date& refStart, const Date& refEnd) const override {
             auto datesPair = this->accrualDates(refStart, refEnd);
             if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
             if (!isFixingSet()) throw std::runtime_error("Fixing rate not set");

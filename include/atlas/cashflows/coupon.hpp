@@ -109,7 +109,7 @@ namespace Atlas {
 
     /**
      * @brief Possible optimization using CRTP
-     * 
+     * @details Breaks inheritance in Pybidn11.
      * @tparam adouble 
      * @tparam CouponType 
      */
