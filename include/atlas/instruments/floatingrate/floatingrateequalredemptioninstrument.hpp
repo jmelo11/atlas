@@ -51,8 +51,8 @@ namespace Atlas {
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                               const Context<RateIndex<adouble>>& rateIndexContext,
-                                              const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, rateIndexContext) {
+                                              const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+        : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, rateIndexContext, side) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };

@@ -49,8 +49,8 @@ namespace Atlas {
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                      const Context<RateIndex<adouble>>& rateIndexContext,
-                                     const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FloatingRateBulletInstrument(startDate, endDate, notional, spread, rateIndexContext) {
+                                     const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+        : FloatingRateBulletInstrument(startDate, endDate, notional, spread, rateIndexContext, side) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
         };
