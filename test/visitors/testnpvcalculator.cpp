@@ -38,39 +38,6 @@ TEST(NPVCalculator, FixedRateInstrument) {
     EXPECT_NEAR(npvCalculator.results(), qlBond.NPV(), 1e-6);
 }
 
-TEST(NPVCalculator, EqualPaymentInstrument) {
-    // Create a fixed rate instrument
-    TestSetup<double> vars;
-    auto& store = vars.store;
-
-    auto context   = store.curveContext("Zero");
-    Date startDate = Date(1, Month::Aug, 2017);
-    Date endDate   = Date(1, Month::Aug, 2024);
-    Frequency freq = Frequency::Monthly;
-    EqualPaymentInstrument<double> instrument(startDate, endDate, freq, vars.notional, vars.atlasRate, context, false,
-                                              EqualPaymentInstrument<double>::BuildType::Precise);
-    EqualPaymentInstrument<double> instrument2(startDate, endDate, freq, vars.notional, vars.atlasRate, context, false,
-                                               EqualPaymentInstrument<double>::BuildType::Fast);
-
-    Indexer<double> indexer;
-    indexer.visit(instrument);
-    indexer.visit(instrument2);
-    MarketRequest request;
-    indexer.setRequest(request);
-
-    SpotMarketDataModel<double> model(request, vars.store);
-    MarketData<double> marketData = model.marketData();
-    NPVCalculator<double> npvCalculator(marketData);
-    npvCalculator.visit(instrument);
-    double npv1 = npvCalculator.results();
-
-    npvCalculator.clear();
-    npvCalculator.visit(instrument2);
-    double npv2 = npvCalculator.results();
-
-    EXPECT_NEAR(npv1, npv2, 1e-8);
-}
-
 TEST(NPVCalculator, FixedRateInstrumentDual) {
     // Create a fixed rate instrument
     TestSetup<dual> vars;
@@ -140,7 +107,7 @@ TEST(NPVCalculator, FxForward) {
     double fwdPrice = 825;
     Currency ccy    = CLP();
     double notional = 100'000;
-    FxForward instrument(vars.startDate, vars.endDate, fwdPrice, CLP(), USD(), notional, FxForward<double>::BUY, vars.store.curveContext("CLP"));
+    FxForward instrument(vars.startDate, vars.endDate, fwdPrice, CLP(), USD(), notional, Side::Long, vars.store.curveContext("CLP"));
 
     Indexer<double> indexer;
     indexer.visit(instrument);
@@ -162,8 +129,7 @@ TEST(NPVCalculator, FxForward) {
     EXPECT_NEAR(npvCalculator.results(), evalNPV, 1e-6);
 
     double notional2 = notional * fwdPrice;
-    FxForward instrument2(vars.startDate, vars.endDate, 1 / fwdPrice, USD(), CLP(), notional2, FxForward<double>::SELL,
-                          vars.store.curveContext("USD"));
+    FxForward instrument2(vars.startDate, vars.endDate, 1 / fwdPrice, USD(), CLP(), notional2, Side::Short, vars.store.curveContext("USD"));
     Indexer<double> indexer2;
     indexer2.visit(instrument2);
     MarketRequest request2;
@@ -181,7 +147,7 @@ TEST(NPVCalculator, FixFloatSwap) {
     auto& store                = vars.store;
     Frequency paymentFrequency = Frequency::Quarterly;
     FixFloatSwap<double> swap(vars.startDate, vars.endDate, vars.notional, vars.atlasRate, vars.spread, paymentFrequency,
-                              store.rateIndexContext("TEST"), FixFloatSwap<double>::Side::PAY);
+                              store.rateIndexContext("TEST"), Side::Short);
 
     swap.firstLeg().discountCurveContext(store.curveContext("TEST"));
     swap.secondLeg().discountCurveContext(store.curveContext("TEST"));
@@ -226,41 +192,6 @@ TEST(NPVConstVisitor, FixedRateInstrument) {
     npvVisitor(instrument);
 
     EXPECT_NEAR(npvVisitor.getResults(), qlBond.NPV(), 1e-6);
-}
-
-TEST(NPVConstVisitor, EqualPaymentInstrument) {
-    // Create a fixed rate instrument
-    TestSetup<double> vars;
-    auto& store = vars.store;
-
-    auto context   = store.curveContext("Zero");
-    Date startDate = Date(1, Month::Aug, 2017);
-    Date endDate   = Date(1, Month::Aug, 2024);
-    Frequency freq = Frequency::Monthly;
-    EqualPaymentInstrument<double> instrument(startDate, endDate, freq, vars.notional, vars.atlasRate, context, false,
-                                              EqualPaymentInstrument<double>::BuildType::Precise);
-    EqualPaymentInstrument<double> instrument2(startDate, endDate, freq, vars.notional, vars.atlasRate, context, false,
-                                               EqualPaymentInstrument<double>::BuildType::Fast);
-
-    IndexingVisitor<double> indexer;
-    indexer(instrument);
-    indexer(instrument2);
-    MarketRequest request = indexer.getResults();
-
-    SpotMarketDataModel<double> model(request, vars.store);
-    MarketData<double> marketData = model.marketData();
-
-    NPVConstVisitor<double> npvVisitor(marketData);
-    npvVisitor(instrument);
-
-    double npv1 = npvVisitor.getResults();
-
-    npvVisitor.reset();
-
-    npvVisitor(instrument2);
-    double npv2 = npvVisitor.getResults();
-
-    EXPECT_NEAR(npv1, npv2, 1e-8);
 }
 
 TEST(NPVConstVisitor, FixedRateInstrumentDual) {
@@ -335,7 +266,7 @@ TEST(NPVConstVisitor, FxForward) {
     double fwdPrice = 825;
     Currency ccy    = CLP();
     double notional = 100'000;
-    FxForward instrument(vars.startDate, vars.endDate, fwdPrice, CLP(), USD(), notional, FxForward<double>::BUY, vars.store.curveContext("CLP"));
+    FxForward instrument(vars.startDate, vars.endDate, fwdPrice, CLP(), USD(), notional, Side::Long, vars.store.curveContext("CLP"));
 
     IndexingVisitor<double> indexer;
     indexer(instrument);
@@ -357,8 +288,7 @@ TEST(NPVConstVisitor, FxForward) {
     EXPECT_NEAR(npvVisitor.getResults(), evalNPV, 1e-6);
 
     double notional2 = notional * fwdPrice;
-    FxForward instrument2(vars.startDate, vars.endDate, 1 / fwdPrice, USD(), CLP(), notional2, FxForward<double>::SELL,
-                          vars.store.curveContext("USD"));
+    FxForward instrument2(vars.startDate, vars.endDate, 1 / fwdPrice, USD(), CLP(), notional2, Side::Short, vars.store.curveContext("USD"));
 
     IndexingVisitor<double> indexer2;
     indexer2(instrument2);
@@ -378,7 +308,7 @@ TEST(NPVConstVisitor, FixFloatSwap) {
     auto& store                = vars.store;
     Frequency paymentFrequency = Frequency::Quarterly;
     FixFloatSwap<double> swap(vars.startDate, vars.endDate, vars.notional, vars.atlasRate, vars.spread, paymentFrequency,
-                              store.rateIndexContext("TEST"), FixFloatSwap<double>::Side::PAY);
+                              store.rateIndexContext("TEST"), Side::Short);
 
     swap.firstLeg().discountCurveContext(store.curveContext("TEST"));
     swap.secondLeg().discountCurveContext(store.curveContext("TEST"));

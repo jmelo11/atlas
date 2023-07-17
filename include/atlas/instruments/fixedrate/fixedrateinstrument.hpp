@@ -90,33 +90,6 @@ namespace Atlas {
         virtual void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
        protected:
-        /**
-         * @brief calculates the instrument's notional based on the given redemptions
-         *
-         * @param dates dates of the instrument
-         * @param rate  rate of the instrument
-         */
-        void calculateNotionals(const std::vector<Date>& dates, const InterestRate<adouble>& rate) {
-            std::map<Date, double> notionals;
-            double notional = 0.0;
-            for (const auto& redemption : this->leg().redemptions()) {
-                double redemptionAmount;
-                if constexpr (std::is_same_v<adouble, double>) {
-                    redemptionAmount = redemption.amount();
-                } else {
-                    redemptionAmount = val(redemption.amount());
-                }
-                notional += redemptionAmount;
-                notionals[redemption.paymentDate()] = redemptionAmount;
-            }
-            this->notional_ = notional;
-            for (size_t i = 0; i < dates.size() - 1; i++) {
-                FixedRateCoupon<adouble> coupon(dates[i], dates[i + 1], notional, rate);
-                this->leg().addCoupon(coupon);
-                if (notionals.find(dates[i + 1]) != notionals.end()) notional -= notionals[dates[i + 1]];
-            }
-        };
-
         InterestRate<adouble> rate_;
     };
 }  // namespace Atlas

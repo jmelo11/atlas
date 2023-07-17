@@ -14,7 +14,6 @@ namespace Atlas {
     template <typename adouble = double>
     class EqualPaymentInstrument : public FixedRateInstrument<adouble> {
        public:
-        enum BuildType { Fast, Precise };
         /**
          * @brief Construct a new Equal Payment Instrument object
          *
@@ -25,32 +24,15 @@ namespace Atlas {
          * @param rate rate of the instrument
          * @param side side of the instrument
          * @param recalcNotionals recalculate notionals based on the given rate
-         * @param buildType calculation type flag
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               Side side = Side::Long, bool recalcNotionals = false, BuildType buildType = BuildType::Fast)
+                               Side side = Side::Long, bool recalcNotionals = false)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional), recalcNotionals_(recalcNotionals) {
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
             this->dates_      = schedule.dates();
 
-            // calculate redemptions for a equal payment structure
-            // switch (buildType) {
-            //     case BuildType::Fast:
-            //         calculateRedemptions2(this->dates_, this->rate_, this->notional_);
-            //         break;
-            //     case BuildType::Precise:
-            //         calculateRedemptions(this->dates_, this->rate_, this->notional_);
-            //         break;
-            //     default:
-            //         calculateRedemptions(this->dates_, this->rate_, this->notional_);
-            //         break;
-            // }
-
-            // // calculate each corresponding notional
-            // this->calculateNotionals(this->dates_, this->rate_);
-
-            std::vector<double> redemptions = calculateRedemptions3(this->dates_, this->rate_, this->notional_, this->side_);
-            this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(this->dates_).redemptions(redemptions).rate(this->rate_).build();
+            std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, this->side_);
+            this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(this->dates_).redemptions(redemptionAmounts).rate(this->rate_).build();
 
             adouble disbursement = -this->notional_ * this->side_;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
@@ -68,8 +50,7 @@ namespace Atlas {
          * @param recalcNotionals recalculate notionals based on the given rate
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long, bool recalcNotionals = false,
-                               BuildType buildType = BuildType::Fast)
+                               const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long, bool recalcNotionals = false)
         : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, side, recalcNotionals) {
             this->leg().discountCurveContext(discountCurveContext);
             this->disbursement().discountCurveContext(discountCurveContext);
@@ -87,18 +68,15 @@ namespace Atlas {
                     redemptionIdxs.push_back(redemptions.at(i).dfIdx());
                     couponIdxs.push_back(coupons.at(i).dfIdx());
                 }
-                redemptions.clear();
-                coupons.clear();
-                this->calculateRedemptions(dates_, this->rate_, this->notional_);
-                this->calculateNotionals(dates_, this->rate_);
+                std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, this->side_);
+                this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(this->dates_).redemptions(redemptionAmounts).rate(this->rate_).build();
+
                 for (size_t i = 0; i < nCoupons; ++i) {
-                    redemptions.at(i).dfIdx(redemptionIdxs.at(i));
-                    coupons.at(i).dfIdx(couponIdxs.at(i));
+                    this->leg_.redemption(i).dfIdx(redemptionIdxs.at(i));
+                    this->leg_.coupon(i).dfIdx(couponIdxs.at(i));
                 }
-            } else {
-                for (auto& coupon : this->leg().coupons()) { coupon.rate(this->rate_); }
-            }
-        };
+            };
+        }
 
         void rate(adouble r) override {
             InterestRate<adouble> tmpR(r, this->rate_.dayCounter(), this->rate_.compounding(), this->rate_.frequency());
@@ -112,44 +90,7 @@ namespace Atlas {
         void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
        private:
-        void calculateRedemptions(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional) {
-            size_t pN = dates.size() - 1;
-            size_t kN = pN + 1;
-            QuantLib::Array factors(kN, 0), B(kN, 0), K;
-
-            if constexpr (std::is_same_v<adouble, double>) {
-                for (size_t i = 1; i <= pN; i++) factors[i - 1] = rate.compoundFactor(dates.at(i - 1), dates.at(i)) - 1;
-            } else {
-                for (size_t i = 1; i <= pN; i++) factors[i - 1] = val(rate.compoundFactor(dates.at(i - 1), dates.at(i))) - 1;
-            }
-
-            factors[kN - 1] = -1;
-
-            B = -notional * factors;
-
-            QuantLib::Matrix A(kN, kN, 0);
-            for (size_t j = 0; j < kN; j++) {
-                for (size_t i = 0; i < kN; i++) {
-                    if (j == 0 && i < kN - 1) {
-                        A[i][j] = -1;
-                    } else if (j > 0 && i == j - 1) {
-                        A[i][j] = 1;
-                    } else if (j > 0 && j <= i && i < kN - 1) {
-                        A[i][j] = -factors[i];
-                    } else if (i == kN - 1 && j > 0) {
-                        A[i][j] = 1;
-                    }
-                }
-            }
-            // slow, multicore?
-            K = inverse(A) * B;
-            for (size_t i = 1; i < dates.size(); i++) {
-                Redemption<adouble> redemption(dates[i], K[i]);
-                this->leg().addRedemption(redemption);
-            }
-        };
-
-        void calculateRedemptions2(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional) {
+        std::vector<double> calculateRedemptions(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional, Side side) {
             auto k = [&](double payment) {
                 double totalAmount = notional;
                 for (size_t i = 1; i < dates.size(); i++) {
@@ -176,6 +117,7 @@ namespace Atlas {
             QuantLib::Brent solver_;
             double payment = solver_.solve(k, 1e-4, guess, 0.1);
 
+            std::vector<double> redemptions(dates.size() - 1);
             double totalAmount = notional;
             for (size_t i = 1; i < dates.size(); i++) {
                 double k = 0.0;
@@ -187,51 +129,7 @@ namespace Atlas {
                     k        = payment - I;
                 }
                 totalAmount -= k;
-                Redemption<adouble> redemption(dates[i], k);
-                this->leg().addRedemption(redemption);
-            }
-        }
-
-        std::vector<double> calculateRedemptions3(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional, Side side) {
-            auto k = [&](double payment) {
-                double totalAmount = notional;
-                for (size_t i = 1; i < dates.size(); i++) {
-                    if constexpr (std::is_same_v<adouble, double>) {
-                        double I = totalAmount * (rate.compoundFactor(dates[i - 1], dates[i]) - 1);
-                        totalAmount -= payment - I;
-                    } else {
-                        double I = totalAmount * (val(rate.compoundFactor(dates[i - 1], dates[i])) - 1);
-                        totalAmount -= payment - I;
-                    }
-                }
-                return totalAmount;
-            };
-
-            double r_;
-            if constexpr (std::is_same_v<adouble, double>) {
-                r_ = rate.rate() / 12;
-            } else {
-                r_ = val(rate.rate()) / 12;
-            }
-            int p        = (int)dates.size() - 1;
-            double guess = r_ / (1 - pow(1 + r_, -p)) * notional;
-            // double guess = 1;
-            QuantLib::Brent solver_;
-            double payment = solver_.solve(k, 1e-4, guess, 0.1);
-
-            std::vector<double> redemptions(dates.size()-1);
-            double totalAmount = notional;
-            for (size_t i = 1; i < dates.size(); i++) {
-                double k = 0.0;
-                if constexpr (std::is_same_v<adouble, double>) {
-                    double I = totalAmount * (rate.compoundFactor(dates[i - 1], dates[i]) - 1);
-                    k        = payment - I;
-                } else {
-                    double I = totalAmount * (val(rate.compoundFactor(dates[i - 1], dates[i])) - 1);
-                    k        = payment - I;
-                }
-                totalAmount -= k;
-                redemptions[i-1] = k * side;
+                redemptions[i - 1] = k * side;
             }
             return redemptions;
         }
