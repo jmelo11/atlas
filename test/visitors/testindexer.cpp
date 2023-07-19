@@ -124,14 +124,14 @@ TEST(IndexingVisitor, FixedRateInstrument) {
 
     for (const auto& coupon : fixedInst.leg().coupons()) {
         EXPECT_TRUE(coupon.isIndexed());
-        EXPECT_NE(coupon.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(coupon.dfIdx(), SIZE_MAX);
     }
     for (const auto& redemption : fixedInst.leg().redemptions()) {
         EXPECT_TRUE(redemption.isIndexed());
-        EXPECT_NE(redemption.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(redemption.dfIdx(), SIZE_MAX);
     }
     EXPECT_TRUE(fixedInst.disbursement().isIndexed());
-    EXPECT_NE(fixedInst.disbursement().dfIdx(), SIZE_T_MAX);
+    EXPECT_NE(fixedInst.disbursement().dfIdx(), SIZE_MAX);
 
     EXPECT_EQ(request.dfs.size(), dfSize);
     EXPECT_EQ(request.fwds.size(), 0);
@@ -149,14 +149,14 @@ TEST(IndexingVisitor, FloatingRateInstrument) {
 
     for (const auto& coupon : floatInst.leg().coupons()) {
         EXPECT_TRUE(coupon.isIndexed());
-        EXPECT_NE(coupon.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(coupon.dfIdx(), SIZE_MAX);
     }
     for (const auto& redemption : floatInst.leg().redemptions()) {
         EXPECT_TRUE(redemption.isIndexed());
-        EXPECT_NE(redemption.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(redemption.dfIdx(), SIZE_MAX);
     }
     EXPECT_TRUE(floatInst.disbursement().isIndexed());
-    EXPECT_NE(floatInst.disbursement().dfIdx(), SIZE_T_MAX);
+    EXPECT_NE(floatInst.disbursement().dfIdx(), SIZE_MAX);
 
     EXPECT_EQ(request.dfs.size(), dfSize);
     EXPECT_EQ(request.fwds.size(), fwdSize);
@@ -197,14 +197,14 @@ TEST(IndexingVisitor, FixedRateInstrumentDual) {
 
     for (const auto& coupon : fixedInst.leg().coupons()) {
         EXPECT_TRUE(coupon.isIndexed());
-        EXPECT_NE(coupon.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(coupon.dfIdx(), SIZE_MAX);
     }
     for (const auto& redemption : fixedInst.leg().redemptions()) {
         EXPECT_TRUE(redemption.isIndexed());
-        EXPECT_NE(redemption.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(redemption.dfIdx(), SIZE_MAX);
     }
     EXPECT_TRUE(fixedInst.disbursement().isIndexed());
-    EXPECT_NE(fixedInst.disbursement().dfIdx(), SIZE_T_MAX);
+    EXPECT_NE(fixedInst.disbursement().dfIdx(), SIZE_MAX);
 
     EXPECT_EQ(request.dfs.size(), dfSize);
     EXPECT_EQ(request.fwds.size(), 0);
@@ -222,14 +222,14 @@ TEST(IndexingVisitor, FloatingRateInstrumentDual) {
 
     for (const auto& coupon : floatInst.leg().coupons()) {
         EXPECT_TRUE(coupon.isIndexed());
-        EXPECT_NE(coupon.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(coupon.dfIdx(), SIZE_MAX);
     }
     for (const auto& redemption : floatInst.leg().redemptions()) {
         EXPECT_TRUE(redemption.isIndexed());
-        EXPECT_NE(redemption.dfIdx(), SIZE_T_MAX);
+        EXPECT_NE(redemption.dfIdx(), SIZE_MAX);
     }
     EXPECT_TRUE(floatInst.disbursement().isIndexed());
-    EXPECT_NE(floatInst.disbursement().dfIdx(), SIZE_T_MAX);
+    EXPECT_NE(floatInst.disbursement().dfIdx(), SIZE_MAX);
 
     EXPECT_EQ(request.dfs.size(), dfSize);
     EXPECT_EQ(request.fwds.size(), fwdSize);

@@ -4,3 +4,6 @@
 [submodule "repos/pybind11"]
 	path = repos/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "repos/nanobench"]
+	path = repos/nanobench
+	url = https://github.com/martinus/nanobench.git
