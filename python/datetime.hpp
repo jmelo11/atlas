@@ -11,7 +11,6 @@ namespace py = pybind11;
 using namespace Atlas;
 
 void py_datetime(py::module& m) {
-
     py::class_<Date>(m, "Date")
         .def(py::init<int, Month, int>())
         .def(py::init<const Date&>())
@@ -27,13 +26,15 @@ void py_datetime(py::module& m) {
         .def(py::self - py::self)
         .def(py::self += int())
         .def(py::self -= int())
-        .def(py::self == py::self)
         .def(py::self != py::self)
         .def(py::self < py::self)
         .def(py::self <= py::self)
         .def(py::self > py::self)
         .def(py::self >= py::self)
-        .def("__hash__", [](const Date& d) { return std::hash<Date>()(d); });
+        .def(py::self == py::self)
+        .def("__hash__", [](const Date& d) { return std::hash<Date>()(d); })
+        .def(py::self + Period())
+        .def(py::self - Period());
 
     py::class_<Schedule>(m, "Schedule")
         .def(py::init<const Date&, const Date&, const Period&, const Calendar&, BusinessDayConvention, BusinessDayConvention, DateGeneration::Rule,
