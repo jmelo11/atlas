@@ -26,7 +26,7 @@ namespace Atlas {
      *
      * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class IndexingVisitor : public BaseVisitor<adouble> {
        public:
         /**
