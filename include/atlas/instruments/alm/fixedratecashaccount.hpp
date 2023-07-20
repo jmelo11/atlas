@@ -6,11 +6,11 @@
 
 namespace Atlas {
 
-    template <typename adouble>
-    class FixedRateCashAccount : public CashAccount<adouble, FixedRateLeg<adouble>> {
+    template <typename adouble = double>
+    class FixedRateCashAccount : public CashAccount<FixedRateLeg, adouble> {
        public:
         FixedRateCashAccount(const Date& refDate, adouble initBalance, const Currency& ccy, const InterestRate<adouble>& rate)
-        : CashAccount<adouble, FixedRateLeg<adouble>>(refDate, initBalance, ccy), rate_(rate){};
+        : CashAccount<FixedRateLeg, adouble>(refDate, initBalance, ccy), rate_(rate){};
 
         void createCoupons() override {
             auto notionals = this->notionalsFromBalance();

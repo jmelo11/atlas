@@ -91,7 +91,7 @@ namespace Atlas {
          */
         void operator()(const FxForward<adouble>& inst) const override {
             const auto& cashflows = inst.leg().redemptions();
-            int side              = inst.side();
+            int side              = inst.side() == Side::Long ? 1 : -1;
 
             if (!cashflows.at(0).isIndexed()) throw std::runtime_error("Redemption is not indexed.");
             adouble fwd = marketData_.fxs.at(cashflows.at(0).fxIdx());
@@ -110,7 +110,7 @@ namespace Atlas {
          * @param inst FixFloatSwap
          */
         void operator()(const FixFloatSwap<adouble>& inst) const override {
-            int side         = inst.side();
+            int side         = inst.side() == Side::Long ? 1 : -1;
             adouble fixNPV   = 0.0;
             adouble floatNPV = 0.0;
 

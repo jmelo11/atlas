@@ -109,7 +109,7 @@ namespace Atlas {
     using Thailand      = QuantLib::Thailand;
 
     // Other types
-    enum Side { Long = 1, Short = -1 };
+    enum class Side { Long, Short };
 
 }  // namespace Atlas
 

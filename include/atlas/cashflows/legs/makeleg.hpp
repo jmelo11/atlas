@@ -128,7 +128,18 @@ namespace Atlas {
          * @return MakeLeg&
          */
         MakeLeg& side(Side side) {
-            side_ = side;
+            switch (side) {
+                case Side::Long:
+                    side_ = 1;
+                    break;
+
+                case Side::Short:
+                    side_ = -1;
+                    break;
+
+                default:
+                    throw std::invalid_argument("Side must be either long or short.");
+            }
             return *this;
         }
 
@@ -230,7 +241,7 @@ namespace Atlas {
                     setCashflow(coupon);
                     leg_.addCoupon(coupon);
                 } else if constexpr (std::is_same_v<LegType<adouble>, FloatingRateLeg<adouble>>) {
-                    FloatingRateCoupon<adouble> coupon(dates_[i], dates_[i + 1], couponNotionals_.at(i), spread_, *rateIndexContext_);
+                    FloatingRateCoupon<adouble> coupon(dates_.at(i), dates_.at(i+1), couponNotionals_.at(i), spread_, *rateIndexContext_);
                     setCashflow(coupon);
                     leg_.addCoupon(coupon);
                 }
@@ -240,7 +251,7 @@ namespace Atlas {
         LegType<adouble> leg_                                             = LegType<adouble>();
         Date startDate_                                                   = Date();
         Date endDate_                                                     = Date();
-        Side side_                                                        = Side::Long;
+        int side_                                                         = 1;
         const Context<RateIndex<adouble>>* rateIndexContext_              = nullptr;
         const Context<YieldTermStructure<adouble>>* discountCurveContext_ = nullptr;
         BusinessDayConvention paymentConvention_                          = BusinessDayConvention::Unadjusted;

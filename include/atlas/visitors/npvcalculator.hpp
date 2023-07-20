@@ -2,8 +2,8 @@
 #define EA82B4A2_2A5C_4B6E_A0A0_0807E93983BE
 
 #include <atlas/data/marketdata.hpp>
-#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/derivatives/fixfloatswap.hpp>
+#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 #include <atlas/visitors/visitor.hpp>
@@ -73,14 +73,14 @@ namespace Atlas {
          */
         void visit(FxForward<adouble>& inst) override {
             const auto& cashflows = inst.leg().redemptions();
-            int side              = inst.side();
+            int side              = inst.side() == Side::Long ? 1 : -1;
 
             adouble fwd = marketData_.fxs.at(cashflows.at(0).fxIdx());
             adouble df  = marketData_.dfs.at(cashflows.at(0).dfIdx());
 
             adouble spot = marketData_.fxs.at(cashflows.at(1).fxIdx());
-            adouble npv = (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
-            
+            adouble npv  = (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
+
             std::lock_guard<std::mutex> lock(mtx_);
             npv_ += npv;
         };
@@ -91,8 +91,8 @@ namespace Atlas {
          * @param inst
          */
         void visit(FixFloatSwap<adouble>& inst) override {
-            int side    = inst.side();
-            adouble fixNPV = 0.0;
+            int side         = inst.side() == Side::Long ? 1 : -1;
+            adouble fixNPV   = 0.0;
             adouble floatNPV = 0.0;
             fixNPV += fixedLegNPV(inst.firstLeg());
             fixNPV += redemptionsNPV(inst.firstLeg());

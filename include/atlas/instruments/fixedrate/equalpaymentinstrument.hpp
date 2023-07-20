@@ -31,10 +31,12 @@ namespace Atlas {
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
             this->dates_      = schedule.dates();
 
-            std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, this->side_);
+            int flag = (side == Side::Long) ? 1 : -1;
+
+            std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, flag);
             this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(this->dates_).redemptions(redemptionAmounts).rate(this->rate_).build();
 
-            adouble disbursement = -this->notional_ * this->side_;
+            adouble disbursement = -this->notional_ * flag;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
         /**
@@ -68,7 +70,9 @@ namespace Atlas {
                     redemptionIdxs.push_back(redemptions.at(i).dfIdx());
                     couponIdxs.push_back(coupons.at(i).dfIdx());
                 }
-                std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, this->side_);
+
+                int flag = (this->side_ == Side::Long) ? 1 : -1;
+                std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, flag);
                 this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(this->dates_).redemptions(redemptionAmounts).rate(this->rate_).build();
 
                 for (size_t i = 0; i < nCoupons; ++i) {
@@ -90,7 +94,7 @@ namespace Atlas {
         void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
        private:
-        std::vector<double> calculateRedemptions(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional, Side side) {
+        std::vector<double> calculateRedemptions(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional, int side) {
             auto k = [&](double payment) {
                 double totalAmount = notional;
                 for (size_t i = 1; i < dates.size(); i++) {

@@ -29,7 +29,9 @@ namespace Atlas {
             std::vector<adouble> redemptions(dates.size() - 1, redemptionAmount);
 
             this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(dates).notional(notional).redemptions(redemptions).rate(this->rate_).build();
-            adouble disbursement = -this->notional_ * this->side_;
+
+            int flag = (this->side_ == Side::Long) ? 1 : -1;
+            adouble disbursement = -this->notional_ * flag;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 

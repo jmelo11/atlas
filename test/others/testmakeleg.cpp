@@ -41,8 +41,9 @@ TEST(MakeLegTest, ChangeSide) {
 
     // Gen expected results
     std::vector<double> expectedCouponAmounts;
+    int flag = side == Side::Long ? 1 : -1;
     for (size_t i = 0; i < dates.size() - 1; ++i) {
-        expectedCouponAmounts.push_back(notional * side * (rate.compoundFactor(dates[i], dates[i + 1]) - 1));
+        expectedCouponAmounts.push_back(notional * flag * (rate.compoundFactor(dates[i], dates[i + 1]) - 1));
     }
 
     MakeLeg<FixedRateLeg, double> makeLeg;
@@ -50,7 +51,7 @@ TEST(MakeLegTest, ChangeSide) {
     FixedRateLeg<double> leg = makeLeg.build();
 
     for (size_t i = 0; i < dates.size() - 1; ++i) { EXPECT_DOUBLE_EQ(leg.coupon(i).amount(), expectedCouponAmounts[i]); }
-    for (size_t i = 0; i < leg.redemptions().size(); ++i) { EXPECT_DOUBLE_EQ(leg.redemption(i).amount(), side * notional); }
+    for (size_t i = 0; i < leg.redemptions().size(); ++i) { EXPECT_DOUBLE_EQ(leg.redemption(i).amount(), flag * notional); }
 }
 
 TEST(MakeLegTest, CustomRedemptions) {

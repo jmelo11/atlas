@@ -34,7 +34,9 @@ namespace Atlas {
                              .side(this->side_)
                              .paymentFrequency(freq)
                              .build();
-            adouble disbursement = -this->notional_ * this->side_;
+            
+            int flag = (this->side_ == Side::Long) ? 1 : -1;
+            adouble disbursement = -this->notional_ * flag;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
 
