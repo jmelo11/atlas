@@ -29,7 +29,7 @@ namespace Atlas {
         InterestRate() = default;
 
         InterestRate(adouble r, DayCounter dc, Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual)
-        : r_(r), dc_(std::move(dc)), comp_(comp), freqMakesSense_(false) {
+        : r_(r), dc_(dc), comp_(comp), freqMakesSense_(false) {
             if (comp_ == QuantLib::Compounded || comp_ == QuantLib::SimpleThenCompounded || comp_ == QuantLib::CompoundedThenSimple) {
                 freqMakesSense_ = true;
                 QL_REQUIRE(freq != QuantLib::Once && freq != QuantLib::NoFrequency, "frequency not allowed for this interest rate");

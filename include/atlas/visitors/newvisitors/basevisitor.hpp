@@ -40,7 +40,7 @@ namespace Atlas {
      * @brief Instruments is a std::variant of all the instruments in Atlas. It is used to implement the visitor pattern for instruments.
      * @tparam adouble
      */
-    template <typename adouble>
+    template <typename adouble = double>
     using InstrumentVariant = std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>,
                                            FixedRateBulletInstrument<adouble>, ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>,
                                            FloatingRateBulletInstrument<adouble>, FxForward<adouble>, FixFloatSwap<adouble>>;
@@ -58,7 +58,7 @@ namespace Atlas {
      *
      * @tparam adouble The number type used for the calculations. Can be double or an AAD type.
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class BaseVisitor {
        public:
         BaseVisitor(bool showLogs = false) : showLogs_(showLogs){};
@@ -95,7 +95,7 @@ namespace Atlas {
      *
      * @tparam adouble
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class BaseConstVisitor {
        public:
         BaseConstVisitor(bool showLogs = false) : showLogs_(showLogs){};

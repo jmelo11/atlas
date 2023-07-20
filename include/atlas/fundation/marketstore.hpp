@@ -11,17 +11,30 @@ namespace Atlas {
 
     /**
      * @brief A class representing a set of market information and market-related objects like curves, currencies and so on.
-     * 
-     * @tparam adouble 
+     *
+     * @tparam adouble
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class MarketStore {
        public:
+        /**
+         * @brief Construct a new Market Store object
+         *
+         * @param refDate
+         * @param localCcy
+         */
         MarketStore(const Date& refDate, Currency localCcy = USD()) : refDate_(refDate), localCcy_(localCcy) {
             curveManager_     = std::make_unique<ContextManager<YieldTermStructure<adouble>>>(refDate_);
             rateIndexManager_ = std::make_unique<ContextManager<RateIndex<adouble>>>(refDate_);
             fxManager_        = std::make_unique<ExchangeRateManager<adouble>>(refDate_);
         };
+
+        /**
+         * @brief Construct a new Market Store object
+         *
+         * @param other
+         */
+        MarketStore(const MarketStore& other) { cloneFromStore(other); };
 
         /**
          * @brief add a curve context to the store
@@ -30,16 +43,15 @@ namespace Atlas {
          * @param curve
          * @param index
          */
-        void addCurve(const std::string& name, const YieldTermStructure<adouble>& curve, const RateIndex<adouble>& index, Currency riskFreeCcy = Currency()) {
+        void addCurve(const std::string& name, const YieldTermStructure<adouble>& curve, const RateIndex<adouble>& index,
+                      Currency riskFreeCcy = Currency()) {
             if (curveManager_->hasContext(name)) {
                 throw std::invalid_argument("A curve context with the given name already exists.");
             } else {
                 curveManager_->createContext(name, curve);
                 rateIndexManager_->createContext(name, index);
             }
-            if (riskFreeCcy != Currency()) {
-                riskFreeCurveIdx(riskFreeCcy, name);
-            }
+            if (riskFreeCcy != Currency()) { riskFreeCurveIdx(riskFreeCcy, name); }
         };
 
         /**
@@ -117,17 +129,17 @@ namespace Atlas {
 
         /**
          * @brief return the currency associated risk free curve
-         * 
-         * @param ccyCode 
-         * @return size_t 
+         *
+         * @param ccyCode
+         * @return size_t
          */
         size_t riskFreeCurveIdx(size_t ccyCode) const { return fxManager_->riskFreeCurveIdx(translateCcyCode(ccyCode)); };
 
         /**
          * @brief Sets the currency associated risk free curve
-         * 
-         * @param ccy 
-         * @param name 
+         *
+         * @param ccy
+         * @param name
          */
         void riskFreeCurveIdx(const Currency& ccy, const std::string& name) {
             auto& context = curveManager_->getContext(name);

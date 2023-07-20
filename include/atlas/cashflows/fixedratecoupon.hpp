@@ -13,7 +13,7 @@ namespace Atlas {
      *
      * @tparam adouble The type of the floating point number used in the coupon
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class FixedRateCoupon : public Coupon<adouble> {
        public:
         /**

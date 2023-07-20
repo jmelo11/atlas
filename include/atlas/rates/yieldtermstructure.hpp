@@ -11,7 +11,7 @@ namespace Atlas {
      * @brief A yield term structure. The strategy pattern is used to allow for different implementations of the yield
      * term structure.
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class YieldTermStructure {
        public:
         YieldTermStructure(std::unique_ptr<YieldTermStructureStrategy<adouble>> strategy) : strategy_(std::move(strategy)) {}
