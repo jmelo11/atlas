@@ -109,6 +109,8 @@ void py_couponlegs(py::module& m) {
     // Legs
     py::class_<Leg<NumType>>(m, "Leg")
         .def(py::init<std::vector<Redemption<NumType>>&, bool>())
+        .def("redemption", py::overload_cast<size_t>(&Leg<NumType>::redemption, py::const_), py::return_value_policy::reference)
+        .def("redemption", py::overload_cast<size_t>(&Leg<NumType>::redemption), py::return_value_policy::reference)
         .def("redemptions", py::overload_cast<>(&Leg<NumType>::redemptions, py::const_), py::return_value_policy::reference)
         .def("redemptions", py::overload_cast<>(&Leg<NumType>::redemptions), py::return_value_policy::reference)
         .def("addRedemption", &Leg<NumType>::addRedemption)
@@ -116,6 +118,8 @@ void py_couponlegs(py::module& m) {
 
     py::class_<FixedRateLeg<NumType>, Leg<NumType>>(m, "FixedRateLeg")
         .def(py::init<std::vector<FixedRateCoupon<NumType>>&, std::vector<Redemption<NumType>>&, bool>())
+        .def("coupon", py::overload_cast<size_t>(&FixedRateLeg<NumType>::coupon, py::const_), py::return_value_policy::reference)
+        .def("coupon", py::overload_cast<size_t>(&FixedRateLeg<NumType>::coupon), py::return_value_policy::reference)
         .def("coupons", py::overload_cast<>(&FixedRateLeg<NumType>::coupons, py::const_), py::return_value_policy::reference)
         .def("coupons", py::overload_cast<>(&FixedRateLeg<NumType>::coupons), py::return_value_policy::reference)
         .def("addCoupon", &FixedRateLeg<NumType>::addCoupon)
@@ -124,6 +128,8 @@ void py_couponlegs(py::module& m) {
 
     py::class_<FloatingRateLeg<NumType>, Leg<NumType>>(m, "FloatingRateLeg")
         .def(py::init<std::vector<FloatingRateCoupon<NumType>>&, std::vector<Redemption<NumType>>&, bool>())
+        .def("coupon", py::overload_cast<size_t>(&FloatingRateLeg<NumType>::coupon, py::const_), py::return_value_policy::reference)
+        .def("coupon", py::overload_cast<size_t>(&FloatingRateLeg<NumType>::coupon), py::return_value_policy::reference)
         .def("coupons", py::overload_cast<>(&FloatingRateLeg<NumType>::coupons, py::const_), py::return_value_policy::reference)
         .def("coupons", py::overload_cast<>(&FloatingRateLeg<NumType>::coupons), py::return_value_policy::reference)
         .def("addCoupon", &FloatingRateLeg<NumType>::addCoupon)
