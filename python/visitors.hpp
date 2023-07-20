@@ -6,6 +6,9 @@
 #include <atlas/visitors/durationcalculator.hpp>
 #include <atlas/visitors/indexer.hpp>
 #include <atlas/visitors/newvisitors/basevisitor.hpp>
+#include <atlas/visitors/newvisitors/cashflowaggregation/accruedamountconstvisitor.hpp>
+#include <atlas/visitors/newvisitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
+#include <atlas/visitors/newvisitors/cashflowaggregation/maturingamountconstvisitor.hpp>
 #include <atlas/visitors/newvisitors/fixingvisitor.hpp>
 #include <atlas/visitors/newvisitors/indexingvisitor.hpp>
 #include <atlas/visitors/newvisitors/npvconstvisitor.hpp>
@@ -208,6 +211,21 @@ void py_newvisitors(py::module& m) {
         .def(py::init<const MarketData<NumType>&, double, bool>(), py::arg("marketData"), py::arg("delta") = 0.0001, py::arg("showLogs") = false)
         .def("getResults", &SensibilityConstVisitor<NumType>::getResults)
         .def("reset", &SensibilityConstVisitor<NumType>::reset);
+
+    py::class_<CashflowAggregationConstVisitor<NumType>, BaseConstVisitor<NumType>>(m, "CashflowAggregationConstVisitor")
+        .def("getResults", &CashflowAggregationConstVisitor<NumType>::getResults)
+        .def("reset", &CashflowAggregationConstVisitor<NumType>::reset);
+
+    py::class_<AccruedAmountConstVisitor<NumType>, CashflowAggregationConstVisitor<NumType>>(m, "AccruedAmountConstVisitor")
+        .def(py::init<const Date&, const Date&>(), py::arg("startDate"), py::arg("endDate"));
+
+    py::class_<MaturingAmountConstVisitor<NumType>, CashflowAggregationConstVisitor<NumType>>(m, "MaturingAmountConstVisitor")
+        .def(py::init<const Date&>(), py::arg("refDate"));
+
+    py::class_<InstrumentCashflowsConstVisitor<NumType>, BaseConstVisitor<NumType>>(m, "InstrumentCashflowsConstVisitor")
+        .def(py::init<>())
+        .def("getResults", &InstrumentCashflowsConstVisitor<NumType>::getResults)
+        .def("reset", &InstrumentCashflowsConstVisitor<NumType>::reset);
 }
 
 #endif /* CD9BD627_F812_406D_AEEC_B699240E41D8 */
