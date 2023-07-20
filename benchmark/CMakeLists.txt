@@ -17,7 +17,6 @@ add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES})
 find_package(nanobench REQUIRED)
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-find_package(XAD REQUIRED)
 
 # parent folder
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
@@ -29,4 +28,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Atlas)
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 target_link_libraries(${PROJECT_NAME} PUBLIC nanobench::nanobench)
-target_link_libraries(${PROJECT_NAME} PUBLIC XAD::xad)
+
+
+add_subdirectory(pricing)

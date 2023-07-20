@@ -3,8 +3,7 @@ project(AtlasTest VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 include(GNUInstallDirs)
-
-file(GLOB SOURCES "*.cpp" "coupons/*.cpp" "instruments/*.cpp" "visitors/*.cpp" "others/*.cpp" "rates/*.cpp" "parsers/*.cpp")
+file(GLOB SOURCES "*.cpp" "others/*.cpp" "coupons/*.cpp" "instruments/*.cpp" "visitors/*.cpp" "rates/*.cpp" "parsers/*.cpp")
 file(GLOB INCLUDES "*.hpp")
 
 include(FetchContent)
@@ -22,12 +21,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC gtest_main)
 
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
-find_package(XAD REQUIRED)
 
 link_directories("${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}")
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Atlas)
-target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost XAD::xad)
+target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib Boost::boost)
 
 include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")
 

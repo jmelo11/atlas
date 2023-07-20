@@ -10,7 +10,6 @@
 #include <ql/termstructures/volatility/optionlet/constantoptionletvol.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <algorithm>
-
 #include <atlas/models/spotmarketdatamodel.hpp>
 #include <atlas/multithreading/BS_thread_pool.hpp>
 #include <atlas/multithreading/threadpool.hpp>
@@ -21,7 +20,6 @@
 #include <execution>
 #include <nanobench.h>
 #include <variant>
-
 
 using namespace Atlas;
 
@@ -601,7 +599,7 @@ void variantBenchmark() {
     });
 
     bench.run("Indexer using variant visitor", [&]() {
-        std::vector<Instruments<NumType>> instruments;
+        std::vector<InstrumentVariant<NumType>> instruments;
         for (size_t i = 0; i < numInstruments; ++i) {
             InterestRate<NumType> interestRate(rateValue, Actual360(), Compounding::Simple, Frequency::Annual);
             instruments.push_back(FixedRateBulletInstrument<NumType>(startDate, endDate, paymentFreq, notional, interestRate, context));
@@ -613,10 +611,10 @@ void variantBenchmark() {
 int main() {
     // bechmarkFixedRateCoupons<double>();
     //  bechmarkFloatingRateCoupons<double>();
-    // pricingBenchmark<double>();
+    pricingBenchmark<double>();
     // pricingBenchmark2<double>();
-    variantBenchmark<double>();
-    variantBenchmark<dual>();
+    // variantBenchmark<double>();
+    // variantBenchmark<dual>();
 
     // bechmarkFixedRateCoupons<dual>();
     //  bechmarkFloatingRateCoupons<dual>();
