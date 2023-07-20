@@ -186,7 +186,3 @@ TEST(ParRateConstVisitor, FloatingRateInstrumentDual) {
     double tmpRate = QuantLib::CashFlows::atmRate(qlBond.cashflows(), **vars.discountingTermStructure, false);
     EXPECT_NEAR(val(solver.getResults()["spread"]), 0.0, 1e-6);
 }
-
-TEST(ParRateConstVisitor, FixedRateInstrumentApplyCcy) {
-    FAIL();
-}
