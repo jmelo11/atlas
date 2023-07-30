@@ -4,3 +4,6 @@
 [submodule "repos/nanobench"]
 	path = repos/nanobench
 	url = https://github.com/martinus/nanobench.git
+[submodule "QuantLib"]
+	path = repos/QuantLib
+	url = https://github.com/jmelo11/QuantLib.git
