@@ -67,10 +67,10 @@ namespace Atlas {
          * @details A fx price request is a container for the currency codes and the date.
          */
         struct ExchangeRate {
-            size_t ccy1_;
-            size_t ccy2_;
+            int ccy1_;
+            int ccy2_;
             Date date_;
-            ExchangeRate(size_t ccy1, size_t ccy2, const Date& date) : ccy1_(ccy1), ccy2_(ccy2), date_(date) {}
+            ExchangeRate(int ccy1, int ccy2, const Date& date) : ccy1_(ccy1), ccy2_(ccy2), date_(date) {}
             bool operator==(const ExchangeRate& other) const { return ccy1_ == other.ccy1_ && ccy2_ == other.ccy2_ && date_ == other.date_; }
         };
 
@@ -128,7 +128,7 @@ namespace std {
     template <>
     struct hash<Atlas::MarketRequest::ExchangeRate> {
         size_t operator()(const Atlas::MarketRequest::ExchangeRate& fx) const {
-            return std::hash<size_t>()(fx.date_.serialNumber()) ^ std::hash<size_t>()(fx.ccy1_) ^ std::hash<size_t>()(fx.ccy2_);
+            return std::hash<size_t>()(fx.date_.serialNumber()) ^ std::hash<int>()(fx.ccy1_) ^ std::hash<int>()(fx.ccy2_);
         }
     };
 }  // namespace std

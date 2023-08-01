@@ -13,6 +13,11 @@
 
 namespace Atlas {
 
+    /**
+     * @class Timer
+     * @brief Timer class
+     *
+     */
     class Timer {
        public:
         Timer() { startPoint = std::chrono::high_resolution_clock::now(); };
@@ -28,10 +33,9 @@ namespace Atlas {
     };
 
     template <class T>
-    static std::vector<std::vector<T>> sliceVector(const std::vector<T>& input, size_t n) {
+    inline std::vector<std::vector<T>> sliceVector(const std::vector<T>& input, size_t n) {
         std::vector<std::vector<T>> r;
         size_t rSize = input.size();
-        size_t step  = rSize / n;
         size_t i;
         for (i = 0; i < rSize - n; i = i + n) {
             std::vector<T> tmp(input.begin() + i, input.begin() + i + n);
@@ -42,11 +46,32 @@ namespace Atlas {
         return r;
     }
 
-    static Date fastDateParser(const std::string& date) {
+    inline Date fastDateParser(const std::string& date) {
         int day   = std::stoi(date.substr(0, 2));
         int month = std::stoi(date.substr(2, 2));
         int year  = std::stoi(date.substr(4, 4));
         return Date(day, (Month)month, year);
+    }
+
+    inline void printTable(const std::vector<std::vector<std::string>>& tableData) {
+        // Find the maximum width of each column
+        std::vector<size_t> columnWidths;
+        for (const auto& row : tableData) {
+            if (columnWidths.size() < row.size()) columnWidths.resize(row.size(), 0);
+
+            for (size_t i = 0; i < row.size(); ++i) {
+                if (row[i].length() > columnWidths[i]) { columnWidths[i] = row[i].length(); }
+            }
+        }
+
+        // Print the table
+        for (const auto& row : tableData) {
+            for (size_t i = 0; i < row.size(); ++i) {
+                std::cout << std::left << std::setw(columnWidths[i]) << row[i];
+                if (i < row.size() - 1) { std::cout << " | "; }
+            }
+            std::cout << std::endl;
+        }
     }
 }  // namespace Atlas
 

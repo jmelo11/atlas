@@ -18,8 +18,8 @@ namespace Atlas {
     template <typename adouble = double>
     class FixFloatSwap : public Instrument<adouble>, public TwoLegMixin<FixedRateLeg, FloatingRateLeg, adouble> {
        public:
-        FixFloatSwap(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble> rate, adouble spread, Frequency fixFreq,
-                     const Context<RateIndex<adouble>>& floatIndex, Side side)
+        FixFloatSwap(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate, adouble spread, Frequency fixFreq,
+                     const InterestRateIndex<adouble>& index, Side side)
         : TwoLegMixin<FixedRateLeg, FloatingRateLeg, adouble>() {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
@@ -39,27 +39,24 @@ namespace Atlas {
                                    .startDate(startDate)
                                    .endDate(endDate)
                                    .notional(notional)
-                                   .rateIndexContext(&floatIndex)
+                                   .interestRateIndex(index)
                                    .spread(spread)
                                    .createRedemptions(false)
                                    .build();
 
             fixFreq_   = fixFreq;
-            floatFreq_ = floatIndex.object().fixingFrequency();
+            floatFreq_ = index.fixingFrequency();
             rate_      = rate;
             spread_    = spread;
         };
 
-        FixFloatSwap(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble> rate, adouble spread, Frequency fixFreq,
-                     const Context<RateIndex<adouble>>& floatIndex, Side side, const Context<YieldTermStructure<adouble>>& discountCurve)
-        : FixFloatSwap(startDate, endDate, notional, rate, spread, fixFreq, floatIndex, side) {
-            this->firstLeg().discountCurveContext(discountCurve);
-            this->secondLeg().discountCurveContext(discountCurve);
+        FixFloatSwap(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate, adouble spread, Frequency fixFreq,
+                     const InterestRateIndex<adouble>& index, Side side, size_t discountContextIdx, size_t indexContextIdx)
+        : FixFloatSwap(startDate, endDate, notional, rate, spread, fixFreq, index, side) {
+            this->firstLeg().discountContextIdx(discountContextIdx);
+            this->secondLeg().discountContextIdx(discountContextIdx);
+            this->secondLeg().indexContextIdx(indexContextIdx);
         }
-
-        void accept(Visitor<adouble>& visitor) override { visitor.visit(*this); }
-
-        void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); }
 
         inline Frequency fixPaymentFrequency() const { return fixFreq_; }
 

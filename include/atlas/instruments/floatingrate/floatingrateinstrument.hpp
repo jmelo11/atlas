@@ -3,7 +3,6 @@
 
 #include <atlas/cashflows/legs/floatingrateleg.hpp>
 #include <atlas/instruments/instrument.hpp>
-#include <atlas/visitors/visitor.hpp>
 
 namespace Atlas {
     /**
@@ -56,20 +55,6 @@ namespace Atlas {
             spread_ = s;
             for (auto& coupon : this->leg().coupons()) { coupon.spread(s); }
         };
-
-        /**
-         * @brief  Accepts a visitor.
-         *
-         * @param visitor
-         */
-        virtual void accept(Visitor<adouble>& visitor) override { visitor.visit(*this); };
-
-        /**
-         * @brief Accepts a const visitor.
-         *
-         * @param visitor
-         */
-        virtual void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
        protected:
         adouble spread_;

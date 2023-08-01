@@ -1,9 +1,9 @@
 #include "../testsetup.hpp"
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
-#include <atlas/visitors/newvisitors/cashflowaggregation/accruedamountconstvisitor.hpp>
-#include <atlas/visitors/newvisitors/fixingvisitor.hpp>
-#include <atlas/visitors/newvisitors/indexingvisitor.hpp>
+#include <atlas/visitors/cashflowaggregation/accruedamountconstvisitor.hpp>
+#include <atlas/visitors/fixingvisitor.hpp>
+#include <atlas/visitors/indexingvisitor.hpp>
 
 using namespace Atlas;
 

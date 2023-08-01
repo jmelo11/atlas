@@ -1,59 +1,84 @@
-#ifndef DE58DF6A_C264_4FEA_ADB5_CAD0E751958B
-#define DE58DF6A_C264_4FEA_ADB5_CAD0E751958B
+#ifndef E102C28E_32DD_41F0_8B8D_E2A53129216D
+#define E102C28E_32DD_41F0_8B8D_E2A53129216D
 
 #include <atlas/atlasconfig.hpp>
-#include <atlas/fundation/context.hpp>
+#include <atlas/others/auxfuncs.hpp>
 #include <queue>
-#include <tuple>
-#include <unordered_map>
+#include <unordered_set>
 
 namespace Atlas {
-    template <typename adouble>
-    class YieldTermStructure;
 
     /**
      * @class ExchangeRateManager
-     * @brief ExchangeRateManager is a class that manages a collection of exchange rates.
+     * @brief This class is reponsible for managing fx parities.
      *
      * @tparam adouble
      */
-    template <typename adouble>
+    template <typename adouble = double>
     class ExchangeRateManager {
        public:
         /**
          * @brief Construct a new Exchange Rate Manager object
          *
-         * @param refDate
          */
-        ExchangeRateManager(const Date& refDate) : refDate_(refDate) {}
+        ExchangeRateManager() = default;
 
         /**
-         * @brief adds an exchange rate to the manager, i.e. the rate from weak to strong currency.
+         * @brief Construct a new Exchange Rate Manager object
          *
-         * @param weak
-         * @param strong
-         * @param spotRate
+         * @param refDate reference date of the manager
+         * @param localCurrency local currency of the manager
+         */
+        ExchangeRateManager(const Date& refDate, const Currency& localCurrency) : refDate_(refDate), localCurrency_(localCurrency) {}
+
+        /**
+         * @brief Return the local currency of the manager
+         *
+         * @return const Currency& local currency
+         */
+        inline const Currency& localCurrency() const { return localCurrency_; }
+
+        /**
+         * @brief Returns the reference date of the manager
+         *
+         * @return const Date& reference date
+         */
+        inline const Date& refDate() const { return refDate_; }
+
+        /**
+         * @brief Adds an fx parity to the manager
+         *
+         * @param weak weak currency
+         * @param strong strong currency
+         * @param spotRate conversion value
          */
         void addExchangeRate(const Currency& weak, const Currency& strong, adouble spotRate) {
             exchangeRateMap_[{weak.numericCode(), strong.numericCode()}] = spotRate;
+
+            ccyNames_[weak.numericCode()]   = weak.code();
+            ccyNames_[strong.numericCode()] = strong.code();
         }
 
         /**
-         * @brief returns the exchange rate from firstCcy to secondCcy.
+         * @brief calculates the exchange rate between two currencies.
+         * @details if a pair is not available directly, it will triagulate the price using other parities.
          *
-         * @param firstCcy
-         * @param secondCcy
-         * @return adouble
+         * @param firstCcy weak currency
+         * @param secondCcy strong currency
+         * @return adouble conversion value
          */
-        adouble exchange(size_t firstCcy, size_t secondCcy) const {
+        adouble exchangeRate(int firstCcy, int secondCcy) const {
+            firstCcy  = codeMapping(firstCcy);
+            secondCcy = codeMapping(secondCcy);
+
             if (firstCcy == secondCcy) { return 1.0; }
 
             auto cacheKey   = std::make_tuple(firstCcy, secondCcy);
             auto cachedRate = exchangeRateCache_.find(cacheKey);
             if (cachedRate != exchangeRateCache_.end()) { return cachedRate->second; }
 
-            std::queue<std::pair<size_t, adouble>> q;
-            std::unordered_set<size_t> visited;
+            std::queue<std::pair<int, adouble>> q;
+            std::unordered_set<int> visited;
             q.push({firstCcy, 1.0});
             visited.insert(firstCcy);
 
@@ -90,25 +115,26 @@ namespace Atlas {
         }
 
         /**
-         * @brief returns the exchange rate from firstCcy to secondCcy.
+         * @brief calculates the exchange rate between two currencies.
+         * @details if a pair is not available directly, it will triagulate the price using other parities.
          *
-         * @param firstCcy
-         * @param secondCcy
-         * @return adouble
+         * @param firstCcy weak currency
+         * @param secondCcy strong currency
+         * @return adouble conversion value
          */
-        adouble exchange(const Currency& firstCcy, const Currency& secondCcy) const {
-            return exchange(firstCcy.numericCode(), secondCcy.numericCode());
+        adouble exchangeRate(const Currency& firstCcy, const Currency& secondCcy) const {
+            return exchangeRate(firstCcy.numericCode(), secondCcy.numericCode());
         }
 
         /**
-         * @brief detects arbitrage opportunities in the exchange rate graph.
+         * @brief Checks if there are arbitrages between the parities given.
          *
-         * @return std::vector<size_t>
+         * @return std::vector<int> parities with arbitrages
          */
-        std::vector<size_t> detectArbitrage() const {
+        std::vector<int> detectArbitrage() const {
             // Initialize distances and predecessors
-            std::unordered_map<size_t, adouble> distances;
-            std::unordered_map<size_t, size_t> predecessors;
+            std::unordered_map<int, adouble> distances;
+            std::unordered_map<int, int> predecessors;
             for (const auto& [key, _] : exchangeRateMap_) {
                 distances[std::get<0>(key)]    = std::numeric_limits<adouble>::infinity();
                 distances[std::get<1>(key)]    = std::numeric_limits<adouble>::infinity();
@@ -141,10 +167,10 @@ namespace Atlas {
                 adouble newDistance = distances[source] - std::log(value);
                 if (newDistance < distances[dest]) {
                     // Reconstruct the cycle
-                    std::vector<size_t> cycle;
+                    std::vector<int> cycle;
                     for (size_t i = 0; i < numCurrencies; ++i) { lastUpdatedCurrency = predecessors[lastUpdatedCurrency]; }
 
-                    size_t currentCurrency = lastUpdatedCurrency;
+                    int currentCurrency = lastUpdatedCurrency;
                     do {
                         cycle.push_back(currentCurrency);
                         currentCurrency = predecessors[currentCurrency];
@@ -158,19 +184,8 @@ namespace Atlas {
         }
 
         /**
-         * @brief returns a clone of the ExchangeRateManager.
-         *
-         * @return std::unique_ptr<ExchangeRateManager>
-         */
-        std::unique_ptr<ExchangeRateManager> clone() const {
-            auto clonedManager                = std::make_unique<ExchangeRateManager>(refDate_);
-            clonedManager->exchangeRateMap_   = exchangeRateMap_;
-            clonedManager->exchangeRateCache_ = exchangeRateCache_;
-            return clonedManager;
-        }
-
-        /**
-         * @brief returns true if the exchange rate between the two currencies is known.
+         * @brief Checks if an fx parity is available between two currencies
+         * @details if a parity is not available directly, it calculates it.
          *
          * @param weak
          * @param strong
@@ -179,10 +194,10 @@ namespace Atlas {
          */
         bool hasExchangeRate(const Currency& weak, const Currency& strong) const {
             // check if the currency is in the map
-            bool hasCcy = exchangeRateMap_.find({weak.numericCode(), strong.numericCode()}) != exchangeRateMap_.end();
+            bool hasCcy = exchangeRateMap_.find({weak, strong}) != exchangeRateMap_.end();
             if (!hasCcy) {
                 try {
-                    exchange(weak, strong);
+                    exchangeRate(weak, strong);
                     return true;
                 } catch (std::runtime_error&) { return false; }
                 return false;
@@ -191,34 +206,40 @@ namespace Atlas {
         }
 
         /**
-         * @brief Set the risk free curve for a given currency.
+         * @brief Prints a summary of the values inside the manager.
          *
-         * @param ccy
-         * @param curve
          */
-        void riskFreeCurveIdx(const Currency& ccy, const Context<YieldTermStructure<adouble>>& curve) {
-            riskFreeCurveMap_[ccy.numericCode()] = curve.idx();
-        }
-
-        /**
-         * @brief Get the risk free curve for a given currency.
-         *
-         * @param ccy
-         * @return size_t
-         */
-        size_t riskFreeCurveIdx(const Currency& ccy) const { return riskFreeCurveIdx(ccy.numericCode()); }
-
-        size_t riskFreeCurveIdx(size_t ccy) const {
-            auto it = riskFreeCurveMap_.find(ccy);
-            if (it == riskFreeCurveMap_.end()) { throw std::runtime_error("Risk-free curve not found for the given currency"); }
-            return it->second;
+        void summary() const {
+            std::vector<std::vector<std::string>> tableData;
+            tableData.push_back({"weak", "strong", "value", "isImplied"});
+            for (const auto& [pair, value] : exchangeRateMap_) {
+                std::string weakName   = ccyNames_.at(std::get<0>(pair));
+                std::string strongName = ccyNames_.at(std::get<1>(pair));
+                tableData.push_back({weakName, strongName, std::to_string(value), "false"});
+            }
+            for (const auto& [pair, value] : exchangeRateCache_) {
+                std::string weakName   = ccyNames_.at(std::get<0>(pair));
+                std::string strongName = ccyNames_.at(std::get<1>(pair));
+                tableData.push_back({weakName, strongName, std::to_string(value), "true"});
+            }
+            printTable(tableData);
         }
 
        private:
-        Date refDate_;
-        mutable std::unordered_map<std::tuple<size_t, size_t>, adouble> exchangeRateCache_;
-        std::unordered_map<std::tuple<size_t, size_t>, adouble> exchangeRateMap_;
-        std::unordered_map<size_t, size_t> riskFreeCurveMap_;
+        /**
+         * @brief Helper method to transform 0 (representation of the local currency when no info is available)
+         * to the local currency of the manager.
+         *
+         * @param code
+         * @return int
+         */
+        int codeMapping(int code) const { return code == 0 ? localCurrency_.numericCode() : code; }
+
+        Date refDate_           = Date();
+        Currency localCurrency_ = Currency();
+        std::unordered_map<std::tuple<int, int>, adouble> exchangeRateMap_;
+        mutable std::unordered_map<std::tuple<int, int>, adouble> exchangeRateCache_;
+        std::unordered_map<int, std::string> ccyNames_;
     };
 
 }  // namespace Atlas
@@ -231,12 +252,12 @@ namespace std {
      * @tparam
      */
     template <>
-    struct hash<std::tuple<size_t, size_t>> {
-        size_t operator()(const std::tuple<size_t, size_t>& tuple) const {
+    struct hash<std::tuple<int, int>> {
+        size_t operator()(const std::tuple<int, int>& tuple) const {
             auto [first, second] = tuple;
-            return std::hash<size_t>()(first) ^ std::hash<size_t>()(second);
+            return std::hash<int>()(first) ^ std::hash<int>()(second);
         }
     };
 }  // namespace std
 
-#endif /* DE58DF6A_C264_4FEA_ADB5_CAD0E751958B */
+#endif /* E102C28E_32DD_41F0_8B8D_E2A53129216D */

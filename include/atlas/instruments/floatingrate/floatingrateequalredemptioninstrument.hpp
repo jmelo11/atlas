@@ -2,9 +2,11 @@
 #define F4126FFB_083C_4F17_8D47_AFE69F5C4B5A
 
 #include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
+#include <atlas/rates/index/interestrateindex.hpp>
 
 namespace Atlas {
     /**
+     * @class FloatingRateEqualRedemptionInstrument
      * @brief A class for floating rate equal redemption instruments.
      * @ingroup FloatingRateInstruments
      */
@@ -18,12 +20,12 @@ namespace Atlas {
          * @param endDate end date of the instrument
          * @param notional notional of the instrument
          * @param spread spread of the instrument
-         * @param rateIndexContext forecast curve context of the instrument
+         * @param index forecast curve context of the instrument
+         * @param side side of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const Context<RateIndex<adouble>>& rateIndexContext, Side side = Side::Long)
+                                              const InterestRateIndex<adouble>& index, Side side = Side::Long)
         : FloatingRateInstrument<adouble>(startDate, endDate, side, notional, spread) {
-            const auto& index = rateIndexContext.object();
             Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
             const auto& dates = schedule.dates();
             std::vector<double> redemptions(schedule.size() - 1, notional / (schedule.size() - 1));
@@ -33,10 +35,11 @@ namespace Atlas {
                              .redemptions(redemptions)
                              .spread(this->spread_)
                              .side(this->side_)
-                             .rateIndexContext(&rateIndexContext)
+                             .interestRateIndex(index)
                              .build();
 
-            adouble disbursement = -this->notional_;
+            int flag             = (this->side_ == Side::Long) ? 1 : -1;
+            adouble disbursement = -this->notional_ * flag;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
         /**
@@ -46,15 +49,18 @@ namespace Atlas {
          * @param endDate end date of the instrument
          * @param notional notional of the instrument
          * @param spread spread of the instrument
-         * @param rateIndexContext forecast curve context of the instrument
-         * @param discountCurveContext discount curve context of the instrument
+         * @param index interest rate index of the instrument
+         * @param discountContextIdx index of the discount curve context of the instrument
+         * @param indexContextIdx index of the interest rate index context of the instrument
+         * @param side side of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const Context<RateIndex<adouble>>& rateIndexContext,
-                                              const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
-        : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, rateIndexContext, side) {
-            this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement().discountCurveContext(discountCurveContext);
+                                              const InterestRateIndex<adouble>& index, size_t indexContextIdx, size_t discountContextIdx,
+                                              Side side = Side::Long)
+        : FloatingRateEqualRedemptionInstrument(startDate, endDate, notional, spread, index, side) {
+            this->leg().indexContextIdx(discountContextIdx);
+            this->leg().discountContextIdx(discountContextIdx);
+            this->disbursement().discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

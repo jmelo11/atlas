@@ -110,6 +110,9 @@ Para facilitar el proceso de compilación, se sugiere organizar los directorios 
     cmake --build . --target INSTALL --config <config>
 ```
 
+cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='/Users/josemelo/Desktop/dev/builds' -DBoost_INCLUDE_DIR='/Users/josemelo/Desktop/dev/builds' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DQL_TAGGED_LAYOUT=OFF -DBUILD_SHARED_LIBS=OFF
+cmake --build . --target install --config debug -j 12
+
 Donde config puede ser Debug o Release, dependiendo de la configuración que desee compilar.
 
 #### Instalación de Boost
@@ -124,8 +127,10 @@ Boost incluye un instalador. Siga las instrucciones en <https://www.boost.org/do
 
 ```cmd
     cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
-    cmake --build . --target INSTALL --config <config>
+    cmake --build . --target install --config <config>
 ```
+
+cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
 
 #### Instalación modulo Python
 

@@ -2,22 +2,16 @@
 #define CD9BD627_F812_406D_AEEC_B699240E41D8
 
 #include "config.hpp"
-#include <atlas/visitors/cashflowprofiler.hpp>
-#include <atlas/visitors/durationcalculator.hpp>
-#include <atlas/visitors/indexer.hpp>
-#include <atlas/visitors/newvisitors/basevisitor.hpp>
-#include <atlas/visitors/newvisitors/cashflowaggregation/accruedamountconstvisitor.hpp>
-#include <atlas/visitors/newvisitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
-#include <atlas/visitors/newvisitors/cashflowaggregation/maturingamountconstvisitor.hpp>
-#include <atlas/visitors/newvisitors/fixingvisitor.hpp>
-#include <atlas/visitors/newvisitors/indexingvisitor.hpp>
-#include <atlas/visitors/newvisitors/npvconstvisitor.hpp>
-#include <atlas/visitors/newvisitors/parrateconstvisitor.hpp>
-#include <atlas/visitors/newvisitors/sensibilityconstvisitor.hpp>
-#include <atlas/visitors/newvisitors/zspreadconstvisitor.hpp>
-#include <atlas/visitors/npvcalculator.hpp>
-#include <atlas/visitors/parsolver.hpp>
-#include <atlas/visitors/zspreadcalculator.hpp>
+#include <atlas/visitors/basevisitor.hpp>
+#include <atlas/visitors/cashflowaggregation/accruedamountconstvisitor.hpp>
+#include <atlas/visitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
+#include <atlas/visitors/cashflowaggregation/maturingamountconstvisitor.hpp>
+#include <atlas/visitors/fixingvisitor.hpp>
+#include <atlas/visitors/indexingvisitor.hpp>
+#include <atlas/visitors/npvconstvisitor.hpp>
+#include <atlas/visitors/parrateconstvisitor.hpp>
+#include <atlas/visitors/sensibilityconstvisitor.hpp>
+#include <atlas/visitors/zspreadconstvisitor.hpp>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -97,49 +91,6 @@ namespace Aux {
 };  // namespace Aux
 
 void py_visitors(py::module& m) {
-    py::class_<Visitor<NumType>>(m, "Visitor")
-        .def(py::init<>())
-        .def("visit", py::overload_cast<FloatingRateInstrument<NumType>&>(&Visitor<NumType>::visit))
-        .def("visit", py::overload_cast<FixedRateInstrument<NumType>&>(&Visitor<NumType>::visit))
-        .def("visit", py::overload_cast<FxForward<NumType>&>(&Visitor<NumType>::visit))
-        .def("visit", py::overload_cast<FixFloatSwap<NumType>&>(&Visitor<NumType>::visit));
-
-    py::class_<ConstVisitor<NumType>>(m, "ConstVisitor")
-        .def(py::init<>())
-        .def("visit", py::overload_cast<const FloatingRateInstrument<NumType>&>(&ConstVisitor<NumType>::visit, py::const_))
-        .def("visit", py::overload_cast<const FixedRateInstrument<NumType>&>(&ConstVisitor<NumType>::visit, py::const_))
-        .def("visit", py::overload_cast<const FxForward<NumType>&>(&ConstVisitor<NumType>::visit, py::const_))
-        .def("visit", py::overload_cast<const FixFloatSwap<NumType>&>(&ConstVisitor<NumType>::visit, py::const_));
-
-    py::class_<NPVCalculator<NumType>, Visitor<NumType>>(m, "NPVCalculator")
-        .def(py::init<const MarketData<NumType>&>(), py::arg("marketData"))
-        .def("results", &NPVCalculator<NumType>::results)
-        .def("clear", &NPVCalculator<NumType>::clear);
-
-    py::class_<Indexer<NumType>, Visitor<NumType>>(m, "Indexer")
-        .def(py::init<>())
-        .def("request", &Indexer<NumType>::request)
-        .def("clear", &Indexer<NumType>::clear);
-
-    py::class_<ParSolver<NumType>, ConstVisitor<NumType>>(m, "ParSolver")
-        .def(py::init<const MarketData<NumType>&>(), py::arg("marketData"))
-        .def("results", &ParSolver<NumType>::results)
-        .def("clear", &ParSolver<NumType>::clear);
-
-    py::class_<ZSpreadCalculator<NumType>, ConstVisitor<NumType>>(m, "ZSpreadCalculator")
-        .def(py::init<const MarketData<NumType>&, NumType, const DayCounter&, Compounding, Frequency>(), py::arg("marketData"), py::arg("targetNpv"),
-             py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Compounded, py::arg("frequency") = Frequency::Semiannual)
-        .def("results", &ZSpreadCalculator<NumType>::results)
-        .def("clear", &ZSpreadCalculator<NumType>::clear);
-
-    py::class_<CashflowProfiler<NumType>, ConstVisitor<NumType>>(m, "CashflowProfiler")
-        .def(py::init<>())
-        .def("redemptions", &CashflowProfiler<NumType>::redemptions)
-        .def("interests", &CashflowProfiler<NumType>::interests)
-        .def("clear", &CashflowProfiler<NumType>::clear);
-}
-
-void py_newvisitors(py::module& m) {
     py::class_<InstrumentVariant<NumType>>(m, "InstrumentVariant").def(py::init<>());
 
     py::class_<BaseVisitor<NumType>, Aux::PyBaseVisitor>(m, "BaseVisitor")

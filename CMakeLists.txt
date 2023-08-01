@@ -1,18 +1,16 @@
 cmake_minimum_required(VERSION 3.3.0)
-project(Atlas VERSION 2.0.6)
+project(Atlas VERSION 2.1.0)
 
 include(GNUInstallDirs)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 option(BUILD_PYTHON "Build python module" ON)
 option(BUILD_TESTS "Build test suite" ON)
 option(BUILD_BENCHMARK "Build benchmark suite" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_WITH_AD "Build with AD" OFF)
-
-if (MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD /EHsc /MP")
-endif()
 
 file(
   GLOB
@@ -38,12 +36,12 @@ file(
   "include/atlas/parsers/*.hpp"
 )
 
+add_library(${PROJECT_NAME} STATIC ${INCLUDES} ${SOURCES})
 if(MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD /EHsc")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MD /EHsc")
-  add_library(${PROJECT_NAME} STATIC ${INCLUDES} ${SOURCES})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD /EHsc /MP")
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
 else()
-  add_library(${PROJECT_NAME} SHARED ${INCLUDES} ${SOURCES})
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif(MSVC)
 
 target_include_directories(

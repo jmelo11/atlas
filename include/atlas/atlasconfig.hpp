@@ -113,4 +113,16 @@ namespace Atlas {
 
 }  // namespace Atlas
 
+namespace std {
+    /**
+     * @brief hash specialization for Currency
+     *
+     * @tparam
+     */
+    template <>
+    struct hash<Atlas::Currency> {
+        size_t operator()(const Atlas::Currency& curr) const { return std::hash<size_t>()(curr.numericCode()); }
+    };
+}  // namespace std
+
 #endif /* AC3D1435_E543_466D_8A3E_A4DD7B9D5E8D */

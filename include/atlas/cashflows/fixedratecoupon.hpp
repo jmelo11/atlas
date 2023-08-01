@@ -38,8 +38,8 @@ namespace Atlas {
          * @param rate The interest rate of the coupon
          */
         FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
-                        const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : Coupon<adouble>(startDate, endDate, notional, discountCurveContext), rate_(rate) {
+                        size_t discountContextIdx)
+        : Coupon<adouble>(startDate, endDate, notional, discountContextIdx), rate_(rate) {
             this->amount_ = accruedAmount(startDate, endDate);
         };
 
@@ -48,7 +48,7 @@ namespace Atlas {
          *
          * @return The interest rate of the coupon
          */
-        inline InterestRate<adouble> rate() const { return rate_; };
+        inline const InterestRate<adouble>& rate() const { return rate_; };
 
         /**
          * @brief Sets the interest rate of the coupon
@@ -65,7 +65,7 @@ namespace Atlas {
          *
          * @return The day counter of the coupon
          */
-        inline DayCounter dayCounter() const override { return rate_.dayCounter(); };
+        inline const DayCounter& dayCounter() const override { return rate_.dayCounter(); };
 
         /**
          * @brief Gets the accrued period of the coupon

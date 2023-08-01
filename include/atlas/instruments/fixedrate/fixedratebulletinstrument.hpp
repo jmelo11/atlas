@@ -7,6 +7,7 @@
 
 namespace Atlas {
     /**
+     * @class FixedRateBulletInstrument
      * @brief A class for fixed, single-legged, bullet instruments.
      * @ingroup FixedRateInstruments
      */
@@ -34,8 +35,8 @@ namespace Atlas {
                              .side(this->side_)
                              .paymentFrequency(freq)
                              .build();
-            
-            int flag = (this->side_ == Side::Long) ? 1 : -1;
+
+            int flag             = (this->side_ == Side::Long) ? 1 : -1;
             adouble disbursement = -this->notional_ * flag;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
@@ -48,14 +49,14 @@ namespace Atlas {
          * @param freq payment frequency of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
-         * @param discountCurveContext discount curve context of the instrument
+         * @param discountContextIdx discount curve context of the instrument
          * @param side side of the instrument
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                                  const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+                                  size_t discountContextIdx, Side side = Side::Long)
         : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate, side) {
-            this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement().discountCurveContext(discountCurveContext);
+            this->leg().discountContextIdx(discountContextIdx);
+            this->disbursement().discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

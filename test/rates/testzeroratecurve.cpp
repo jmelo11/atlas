@@ -22,7 +22,7 @@ TEST(ZeroRateCurve, DiscountFactors) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::InterpolatedZeroCurve<QuantLib::Linear> qlCurve(dates, rates, dayCounter, calendar, QuantLib::Linear());
-    ZeroRateStrategy<double, LinearInterpolator<double>> curve(dates, rates, dayCounter, compounding, frequency);
+    ZeroRateTermStructure<LinearInterpolator,double> curve(dates, rates, dayCounter, compounding, frequency);
 
     for (auto date : dates) {
         double expected = qlCurve.discount(date);
@@ -46,7 +46,7 @@ TEST(ZeroRateCurve, ForwardRates) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::InterpolatedZeroCurve<QuantLib::Linear> qlCurve(dates, rates, dayCounter, calendar, QuantLib::Linear());
-    ZeroRateStrategy<double, LinearInterpolator<double>> curve(dates, rates, dayCounter, compounding, frequency);
+    ZeroRateTermStructure<LinearInterpolator,double> curve(dates, rates, dayCounter, compounding, frequency);
 
     for (size_t i = 0; i < dates.size() - 1; ++i) {
         Date start      = dates[i];
@@ -74,7 +74,7 @@ TEST(ZeroRateTermStructure, DiscountFactors) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::InterpolatedZeroCurve<QuantLib::Linear> qlCurve(dates, rates, dayCounter, calendar, QuantLib::Linear());
-    BaseYieldTermStructure curve = ZeroRateTermStructure<LinearInterpolator>(dates, rates, dayCounter, compounding, frequency);
+    YieldTermStructure curve = ZeroRateTermStructure<LinearInterpolator>(dates, rates, dayCounter, compounding, frequency);
 
     for (auto date : dates) {
         double expected = qlCurve.discount(date);
@@ -98,7 +98,7 @@ TEST(ZeroRateTermStructure, ForwardRates) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::InterpolatedZeroCurve<QuantLib::Linear> qlCurve(dates, rates, dayCounter, calendar, QuantLib::Linear());
-    BaseYieldTermStructure curve = ZeroRateTermStructure<LinearInterpolator>(dates, rates, dayCounter, compounding, frequency);
+    YieldTermStructure curve = ZeroRateTermStructure<LinearInterpolator>(dates, rates, dayCounter, compounding, frequency);
 
     for (size_t i = 0; i < dates.size() - 1; ++i) {
         Date start      = dates[i];

@@ -104,8 +104,8 @@ namespace Atlas {
          * @param context Discount curve context
          */
         template <typename C>
-        void setDiscountCurveContext(std::vector<C>& cashflows, const CurveContext<adouble>& context) {
-            for (auto& cashflow : cashflows) { cashflow.discountCurveContext(context); }
+        void setDiscountContextIdx(std::vector<C>& cashflows, size_t idx) {
+            for (auto& cashflow : cashflows) { cashflow.discountContextIdx(idx); }
         }
 
         std::vector<Redemption<adouble>> redemptions_;  // Vector of Redemption objects contained in the Leg object

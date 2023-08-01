@@ -12,7 +12,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/others/interpolations/linearinterpolation.hpp>
-#include <atlas/rates/rateindex.hpp>
+#include <atlas/rates/index/interestrateindex.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/rates/yieldtermstructure/zeroratecurve.hpp>
 #include <gtest/gtest.h>
@@ -78,32 +78,31 @@ struct TestSetup {
     // methods
     void createCurves() {
         // create atlas curves
-        FlatForwardStrategy<adouble> curveStrategy(curveRefDate, curveRate, curveDayCounter, curveCompounding, curveFrequency);
-        YieldTermStructure<adouble> curve(std::make_unique<FlatForwardStrategy<adouble>>(curveStrategy));
-        RateIndex<adouble> index(curveRefDate, indexFrequency, curveDayCounter);
-        store.addCurve("TEST", curve, index);
 
-        FlatForwardStrategy<adouble> clpCurveStrategy(curveRefDate, clpCurveRate, curveDayCounter, curveCompounding, curveFrequency);
-        YieldTermStructure<adouble> clpCurve(std::make_unique<FlatForwardStrategy<adouble>>(clpCurveStrategy));
-        store.addCurve("CLP", clpCurve, index);
+        YieldTermStructure<adouble> curve =
+            FlatForwardTermStructure<adouble>(curveRefDate, curveRate, curveDayCounter, curveCompounding, curveFrequency);
+        InterestRateIndex<adouble> index(indexFrequency, RateDefinition(curveDayCounter, curveCompounding, Frequency::Annual));
+        store.curveManager().addCurveContext("TEST", curve, index);
 
-        FlatForwardStrategy<adouble> usdCurveStrategy(curveRefDate, usdCurveRate, curveDayCounter, curveCompounding, curveFrequency);
-        YieldTermStructure<adouble> usdCurve(std::make_unique<FlatForwardStrategy<adouble>>(usdCurveStrategy));
+        YieldTermStructure<adouble> clpCurve =
+            FlatForwardTermStructure<adouble>(curveRefDate, clpCurveRate, curveDayCounter, curveCompounding, curveFrequency);
+        store.curveManager().addCurveContext("CLP", clpCurve, index, CLP(), true);
 
-        store.addCurve("USD", usdCurve, index);
+        YieldTermStructure<adouble> usdCurve =
+            FlatForwardTermStructure<adouble>(curveRefDate, usdCurveRate, curveDayCounter, curveCompounding, curveFrequency);
+
+        store.curveManager().addCurveContext("USD", usdCurve, index, USD(), true);
 
         std::vector<adouble> rates = {0.01, 0.02, 0.03, 0.04, 0.05};
         std::vector<Date> dates    = {Date(1, Month::Aug, 2020), Date(1, Month::Aug, 2021), Date(1, Month::Aug, 2023), Date(1, Month::Aug, 2025),
                                       Date(1, Month::Aug, 2030)};
-        ZeroRateStrategy<adouble, LinearInterpolator<adouble>> strategy(dates, rates, curveDayCounter);
-        YieldTermStructure<adouble> zeroCurve(std::make_unique<ZeroRateStrategy<adouble, LinearInterpolator<adouble>>>(strategy));
-        store.addCurve("Zero", zeroCurve, index);
+
+        YieldTermStructure<adouble> zeroCurve = ZeroRateTermStructure<LinearInterpolator, adouble>(dates, rates, curveDayCounter);
+        store.curveManager().addCurveContext("Zero", zeroCurve, index);
 
         // for fx testing
         adouble exchange = 800;
-        store.addExchangeRate(CLP(), USD(), exchange);
-        store.riskFreeCurveIdx(CLP(), "CLP");
-        store.riskFreeCurveIdx(USD(), "USD");
+        store.fxManager().addExchangeRate(CLP(), USD(), exchange);
 
         // create ql curves
         boost::shared_ptr<QuantLib::YieldTermStructure> qlCurve;
@@ -158,9 +157,12 @@ struct TestSetup {
         QuantLib::setCouponPricer(qlFloatBond->cashflows(), pricer);
         qlFloatBond->setPricingEngine(bondEngine);
         // create atlas instruments
-        atlasFixBond = new FixedRateBulletInstrument<adouble>(startDate, endDate, paymentFrequency, notional, atlasRate, store.curveContext("TEST"));
-        atlasFloatBond = new FloatingRateBulletInstrument<adouble>(startDate, endDate, notional, spread, store.rateIndexContext("TEST"),
-                                                                   store.curveContext("TEST"));
+
+        const auto& curveManager = store.curveManager();
+        atlasFixBond             = new FixedRateBulletInstrument<adouble>(startDate, endDate, paymentFrequency, notional, atlasRate,
+                                                              curveManager.curveContext("TEST").idx());
+        atlasFloatBond = new FloatingRateBulletInstrument<adouble>(startDate, endDate, notional, spread, curveManager.curveContext("TEST").index(),
+                                                                   curveManager.curveContext("TEST").idx(), curveManager.curveContext("TEST").idx());
     }
 };
 

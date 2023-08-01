@@ -5,6 +5,7 @@
 
 namespace Atlas {
     /**
+     * @class FixedRateEqualRedemptionInstrument
      * @brief A class for fixed, single-legged, equal redemption instruments.
      * @ingroup FixedRateInstruments
      */
@@ -30,7 +31,7 @@ namespace Atlas {
 
             this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(dates).notional(notional).redemptions(redemptions).rate(this->rate_).build();
 
-            int flag = (this->side_ == Side::Long) ? 1 : -1;
+            int flag             = (this->side_ == Side::Long) ? 1 : -1;
             adouble disbursement = -this->notional_ * flag;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
@@ -43,14 +44,13 @@ namespace Atlas {
          * @param freq payment frequency of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
-         * @param discountCurveContext discount curve context of the instrument
+         * @param discountContextIdx discount curve context of the instrument
          */
         FixedRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                           const InterestRate<adouble>& rate, const Context<YieldTermStructure<adouble>>& discountCurveContext,
-                                           Side side = Side::Long)
+                                           const InterestRate<adouble>& rate, size_t discountContextIdx, Side side = Side::Long)
         : FixedRateEqualRedemptionInstrument(startDate, endDate, freq, notional, rate, side) {
-            this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement().discountCurveContext(discountCurveContext);
+            this->leg().discountContextIdx(discountContextIdx);
+            this->disbursement().discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

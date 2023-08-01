@@ -7,6 +7,7 @@
 namespace Atlas {
 
     /**
+     * @class ZeroCouponInstrument
      * @brief A class for zero coupon instruments.
      *
      */
@@ -32,7 +33,7 @@ namespace Atlas {
                              .paymentFrequency(Frequency::Once)
                              .build();
 
-            int flag = (this->side_ == Side::Long) ? 1 : -1;
+            int flag             = (this->side_ == Side::Long) ? 1 : -1;
             adouble disbursement = -this->notional_ * flag;
             this->disbursement(Cashflow<adouble>(startDate, disbursement));
         };
@@ -44,13 +45,13 @@ namespace Atlas {
          * @param endDate end date of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
-         * @param discountCurveContext discount curve context of the instrument
+         * @param discountContextIdx discount curve context of the instrument
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
-                             const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long)
+                             size_t discountContextIdx, Side side = Side::Long)
         : ZeroCouponInstrument(startDate, endDate, notional, rate, side) {
-            this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement().discountCurveContext(discountCurveContext);
+            this->leg().discountContextIdx(discountContextIdx);
+            this->disbursement().discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

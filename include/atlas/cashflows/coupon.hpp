@@ -36,8 +36,8 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param discountCurveContext The discount curve context of the coupon
          */
-        Coupon(const Date& startDate, const Date& endDate, double notional, const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : Cashflow<adouble>(discountCurveContext), startDate_(startDate), endDate_(endDate), notional_(notional) {
+        Coupon(const Date& startDate, const Date& endDate, double notional, size_t discountContextIdx)
+        : Cashflow<adouble>(discountContextIdx), startDate_(startDate), endDate_(endDate), notional_(notional) {
             this->paymentDate_ = endDate;  // paymentDate shouldnt be same as endDate
         };
 
@@ -55,21 +55,21 @@ namespace Atlas {
          *
          * @return The accrual start date of the coupon
          */
-        inline Date startDate() const { return startDate_; }
+        inline const Date& startDate() const { return startDate_; }
 
         /**
          * @brief Gets the accrual end date of the coupon
          *
          * @return The accrual end date of the coupon
          */
-        inline Date endDate() const { return endDate_; }
+        inline const Date& endDate() const { return endDate_; }
 
         /**
          * @brief Gets the day counter of the coupon
          *
          * @return The day counter of the coupon
          */
-        virtual DayCounter dayCounter() const = 0;
+        virtual const DayCounter& dayCounter() const = 0;
 
         /**
          * @brief Gets the accrual period of the coupon
@@ -110,8 +110,8 @@ namespace Atlas {
     /**
      * @brief Possible optimization using CRTP
      * @details Breaks inheritance in Pybidn11.
-     * @tparam adouble 
-     * @tparam CouponType 
+     * @tparam adouble
+     * @tparam CouponType
      */
     template <typename adouble, template <typename> class CouponType>
     class BaseCoupon : public Cashflow<adouble> {
@@ -136,8 +136,8 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param discountCurveContext The discount curve context of the coupon
          */
-        BaseCoupon(const Date& startDate, const Date& endDate, double notional, const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : Cashflow<adouble>(discountCurveContext), startDate_(startDate), endDate_(endDate), notional_(notional) {
+        BaseCoupon(const Date& startDate, const Date& endDate, double notional, size_t discountContextIdx)
+        : Cashflow<adouble>(discountContextIdx), startDate_(startDate), endDate_(endDate), notional_(notional) {
             this->paymentDate_ = endDate;  // paymentDate shouldnt be same as endDate
         };
 

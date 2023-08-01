@@ -2,7 +2,7 @@
 #define C8B4E847_D420_42A8_A7AC_A1BDBC8381CF
 
 #include "../testsetup.hpp"
-#include <atlas/visitors/newvisitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
+#include <atlas/visitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
 
 using namespace Atlas;
 

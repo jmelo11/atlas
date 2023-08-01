@@ -1,7 +1,6 @@
 #ifndef A8BC3BBB_99D6_41C4_9EEB_436877D8DA6D
 #define A8BC3BBB_99D6_41C4_9EEB_436877D8DA6D
 
-#include <ql/interestrate.hpp>
 #include <atlas/cashflows/legs/fixedrateleg.hpp>
 #include <atlas/instruments/instrument.hpp>
 #include <atlas/instruments/mixins/onelegmixin.hpp>
@@ -74,20 +73,6 @@ namespace Atlas {
          * @return InterestRate
          */
         InterestRate<adouble> rate() const { return rate_; };
-
-        /**
-         * @brief accepts a visitor.
-         *
-         * @param visitor
-         */
-        virtual void accept(Visitor<adouble>& visitor) override { visitor.visit(*this); };
-
-        /**
-         * @brief accepts a const visitor.
-         *
-         * @param visitor
-         */
-        virtual void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
        protected:
         InterestRate<adouble> rate_;

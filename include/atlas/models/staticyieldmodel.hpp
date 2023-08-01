@@ -6,6 +6,7 @@
 namespace Atlas {
 
     /**
+     * @class StaticYieldModel
      * @brief Static yield model. Generates scenarios based on a single yield. Mainly for educational purposes.
      *
      * @tparam adouble

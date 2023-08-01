@@ -7,13 +7,13 @@ using namespace Atlas;
 // Test building a fixed rate leg
 TEST(MakeLegTest, FixedRateLegTest) {
     TestSetup<double> testSetup;
-
+    const auto& curveManager = testSetup.store.curveManager();
     MakeLeg<FixedRateLeg, double> makeLeg;
     makeLeg.paymentFrequency(Frequency::Semiannual)
         .startDate(testSetup.startDate)
         .endDate(testSetup.endDate)
         .currency(USD())
-        .discountCurveContext(&testSetup.store.curveContext("TEST"))
+        .discountContextIdx(curveManager.curveContext("TEST").idx())
         .paymentConvention(BusinessDayConvention::ModifiedFollowing)
         .notional(testSetup.notional)
         .calendar(UnitedStates(UnitedStates::GovernmentBond));
@@ -85,6 +85,8 @@ TEST(MakeLegTest, CustomRedemptions) {
 // Test building a floating rate leg
 TEST(MakeLegTest, FloatingRateLegTest) {
     TestSetup<double> testSetup;
+    const auto& curveManager = testSetup.store.curveManager();
+
     Schedule schedule = MakeSchedule()
                             .from(testSetup.startDate)
                             .to(testSetup.endDate)
@@ -98,12 +100,13 @@ TEST(MakeLegTest, FloatingRateLegTest) {
         .startDate(testSetup.startDate)
         .endDate(testSetup.endDate)
         .currency(USD())
-        .discountCurveContext(&testSetup.store.curveContext("TEST"))
+        .interestRateIndex(curveManager.curveContext("TEST").index())
+        .discountContextIdx(curveManager.curveContext("TEST").idx())
         .paymentConvention(BusinessDayConvention::ModifiedFollowing)
         .calendar(UnitedStates(UnitedStates::GovernmentBond));
 
     makeLeg.spread(0.01);
-    makeLeg.rateIndexContext(&testSetup.store.rateIndexContext("TEST"));
+    makeLeg.indexContextIdx(curveManager.curveContext("TEST").idx());
 
     FloatingRateLeg<double> leg = makeLeg.build();
 
@@ -113,6 +116,7 @@ TEST(MakeLegTest, FloatingRateLegTest) {
 
 TEST(MakeLegTest, FloatingRateLegTest2) {
     TestSetup<double> testSetup;
+    const auto& curveManager = testSetup.store.curveManager();
 
     auto paymentConvention      = BusinessDayConvention::Unadjusted;
     auto calendar               = UnitedStates(UnitedStates::GovernmentBond);
@@ -121,11 +125,13 @@ TEST(MakeLegTest, FloatingRateLegTest2) {
                                       .startDate(testSetup.startDate)
                                       .endDate(testSetup.endDate)
                                       .currency(USD())
-                                      .discountCurveContext(&testSetup.store.curveContext("TEST"))
+                                      .paymentFrequency(curveManager.curveContext("TEST").index().fixingFrequency())
+                                      .rateDefinition(curveManager.curveContext("TEST").index().rateDefinition())
+                                      .discountContextIdx(curveManager.curveContext("TEST").idx())
                                       .paymentConvention(paymentConvention)
                                       .calendar(calendar)
                                       .spread(0.01)
-                                      .rateIndexContext(&testSetup.store.rateIndexContext("TEST"))
+                                      .indexContextIdx(curveManager.curveContext("TEST").idx())
                                       .build();
 
     Schedule schedule = MakeSchedule()
@@ -162,6 +168,7 @@ TEST(MakeLegTest, FloatingRateLegTest2) {
 // Test throwing an error for mismatched redemption and schedule sizes
 TEST(MakeLegTest, RedemptionSizeErrorTest) {
     TestSetup<double> testSetup;
+    const auto& curveManager = testSetup.store.curveManager();
     MakeLeg<FloatingRateLeg, double> makeLeg;
 
     std::vector<double> redemptions = {1.0, 1.0, 1.0, 1.0, 1.0};
@@ -170,13 +177,14 @@ TEST(MakeLegTest, RedemptionSizeErrorTest) {
         .startDate(testSetup.startDate)
         .endDate(testSetup.endDate)
         .currency(USD())
-        .discountCurveContext(&testSetup.store.curveContext("TEST"))
+        .interestRateIndex(curveManager.curveContext("TEST").index())
+        .discountContextIdx(curveManager.curveContext("TEST").idx())
         .paymentConvention(BusinessDayConvention::ModifiedFollowing)
         .redemptions(redemptions)
         .calendar(UnitedStates(UnitedStates::GovernmentBond));
 
     makeLeg.spread(0.01);
-    makeLeg.rateIndexContext(&testSetup.store.rateIndexContext("TEST"));
+    makeLeg.indexContextIdx(curveManager.curveContext("TEST").idx());
 
     EXPECT_THROW(makeLeg.build(), std::invalid_argument);
 }

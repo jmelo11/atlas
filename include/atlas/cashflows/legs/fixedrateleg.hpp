@@ -85,9 +85,9 @@ namespace Atlas {
          *
          * @param discountCurveContext a reference to a Context object representing the discount curve context.
          */
-        inline void discountCurveContext(const CurveContext<adouble>& context) {
-            this->setDiscountCurveContext(this->redemptions_, context);
-            this->setDiscountCurveContext(coupons_, context);
+        inline void discountContextIdx(size_t idx) {
+            this->setDiscountContextIdx(this->redemptions_, idx);
+            this->setDiscountContextIdx(coupons_, idx);
         }
 
        private:

@@ -1,9 +1,11 @@
 /build
 /python/build
-/python/atlas.egg-info
+/python/*.egg-info
 /python/dist
+/python/python
 /dev
 /docs/html
 /docs/latex
 /.vscode
 .env
+python/python.zip

@@ -28,11 +28,11 @@ namespace Atlas {
        public:
         InterestRate() = default;
 
-        InterestRate(adouble r, DayCounter dc, Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual)
+        InterestRate(adouble r, const DayCounter& dc, Compounding comp = Compounding::Simple, Frequency freq = Frequency::Annual)
         : r_(r), dc_(dc), comp_(comp), freqMakesSense_(false) {
-            if (comp_ == QuantLib::Compounded || comp_ == QuantLib::SimpleThenCompounded || comp_ == QuantLib::CompoundedThenSimple) {
+            if (comp_ == Compounding::Compounded || comp_ == Compounding::SimpleThenCompounded || comp_ == Compounding::CompoundedThenSimple) {
                 freqMakesSense_ = true;
-                QL_REQUIRE(freq != QuantLib::Once && freq != QuantLib::NoFrequency, "frequency not allowed for this interest rate");
+                QL_REQUIRE(freq != Frequency::Once && freq != Frequency::NoFrequency, "frequency not allowed for this interest rate");
                 freq_ = double(freq);
             }
         };
@@ -42,7 +42,7 @@ namespace Atlas {
          *
          * @return adouble
          */
-        adouble rate() const { return r_; }
+        inline adouble rate() const { return r_; }
 
         /**
          * @brief Returns the day counter.
@@ -71,7 +71,7 @@ namespace Atlas {
          * @param t
          * @return adouble
          */
-        adouble discountFactor(double t) const { return 1.0 / compoundFactor(t); }
+        inline adouble discountFactor(double t) const { return 1.0 / compoundFactor(t); }
 
         /**
          * @brief Calculates the discount factor implied by the rate compounded between the given dates.
@@ -82,7 +82,7 @@ namespace Atlas {
          * @param refEnd
          * @return adouble
          */
-        adouble discountFactor(const Date& d1, const Date& d2, const Date& refStart = Date(), const Date& refEnd = Date()) const {
+        inline adouble discountFactor(const Date& d1, const Date& d2, const Date& refStart = Date(), const Date& refEnd = Date()) const {
             double t = dc_.yearFraction(d1, d2, refStart, refEnd);
             return discountFactor(t);
         }
@@ -127,7 +127,7 @@ namespace Atlas {
          * @param refEnd
          * @return adouble
          */
-        adouble compoundFactor(const Date& d1, const Date& d2, const Date& refStart = Date(), const Date& refEnd = Date()) const {
+        inline adouble compoundFactor(const Date& d1, const Date& d2, const Date& refStart = Date(), const Date& refEnd = Date()) const {
             double t = dc_.yearFraction(d1, d2, refStart, refEnd);
             return compoundFactor(t);
         }

@@ -5,7 +5,7 @@ from pathlib import Path
 from sys import platform
 import os 
 
-__version__ = "2.0.5"
+__version__ = "2.1.0"
 
 LIB_DIR = Path("/Users/josemelo/desktop/dev/builds")
 include_dirs = [str(LIB_DIR / 'include'), '/opt/homebrew/include']
@@ -24,9 +24,9 @@ if ad_lib_name != "":
 
 
 if platform == 'win32':
-    extra_compile_args = ['/std:c++17']
+    extra_compile_args = ['/std:c++20']
 else:
-    extra_compile_args = ['-std=c++17']
+    extra_compile_args = ['-std=c++20']
 
 
 ext_modules = [
@@ -40,13 +40,13 @@ ext_modules = [
 ]
 
 setup(
-    name="altas-finance-noad",
+    name="atlas-finance-noad",
     version=__version__,
     author="Jose Melo",
     author_email="jmelo@live.cl",
     description="Pricing library for Python",
-    ext_modules=ext_modules,
+    ext_modules=ext_modules,    
     cmdclass={"build_ext": build_ext},
     zip_safe=False,
-    python_requires=">=3.10",
+    python_requires=">=3.7",
 )

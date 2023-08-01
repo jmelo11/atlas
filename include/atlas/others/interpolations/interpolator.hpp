@@ -3,6 +3,12 @@
 
 namespace Atlas {
 
+    /**
+     * @class Interpolator
+     * @brief Interpolator interface
+     * 
+     * @tparam adouble 
+     */
     template <typename adouble>
     class Interpolator {
        public:

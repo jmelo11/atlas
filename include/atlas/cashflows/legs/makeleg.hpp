@@ -3,6 +3,8 @@
 
 #include <atlas/cashflows/legs/fixedrateleg.hpp>
 #include <atlas/cashflows/legs/floatingrateleg.hpp>
+#include <atlas/rates/index/interestrateindex.hpp>
+#include <numeric>
 
 namespace Atlas {
 
@@ -62,8 +64,8 @@ namespace Atlas {
             return *this;
         }
 
-        MakeLeg& discountCurveContext(const Context<YieldTermStructure<adouble>>* discountCurve) {
-            discountCurveContext_ = discountCurve;
+        MakeLeg& discountContextIdx(size_t idx) {
+            discountContextIdx_ = idx;
             return *this;
         }
 
@@ -114,10 +116,14 @@ namespace Atlas {
             return *this;
         }
 
-        MakeLeg& rateIndexContext(const Context<RateIndex<adouble>>* index) {
-            static_assert(std::is_same_v<LegType<adouble>, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
-            rateIndexContext_ = index;
-            paymentFrequency_ = index->object().fixingFrequency();
+        MakeLeg& indexContextIdx(size_t idx) {
+            indexContextIdx_ = idx;
+            return *this;
+        }
+
+        MakeLeg& interestRateIndex(const InterestRateIndex<adouble>& index) {
+            paymentFrequency_ = index.fixingFrequency();
+            rateDef_          = index.rateDefinition();
             return *this;
         }
 
@@ -140,6 +146,17 @@ namespace Atlas {
                 default:
                     throw std::invalid_argument("Side must be either long or short.");
             }
+            return *this;
+        }
+
+        /**
+         * @brief Sets the rate definition
+         * @details interestRateIndex should be used instead
+         * @param rateDef
+         * @return MakeLeg&
+         */
+        MakeLeg& rateDefinition(const RateDefinition& rateDef) {
+            rateDef_ = rateDef;
             return *this;
         }
 
@@ -173,7 +190,10 @@ namespace Atlas {
         template <class C>
         void setCashflow(C& cashflow) {
             if (currency_ != Currency()) cashflow.currency(currency_);
-            if (discountCurveContext_ != nullptr) cashflow.discountCurveContext(*discountCurveContext_);
+            if (discountContextIdx_ != SIZE_MAX) cashflow.discountContextIdx(discountContextIdx_);
+            if constexpr (std::is_same_v<FloatingRateCoupon<adouble>, C>) {
+                if (indexContextIdx_ != SIZE_MAX) cashflow.indexContextIdx(indexContextIdx_);
+            }
         }
 
         /**
@@ -181,13 +201,17 @@ namespace Atlas {
          */
         void setLegDates() {
             if (dates_.empty()) {
-                Schedule schedule = MakeSchedule()
-                                        .from(startDate_)
-                                        .to(endDate_)
-                                        .withFrequency(paymentFrequency_)
-                                        .withCalendar(calendar_)
-                                        .withConvention(paymentConvention_);
-                dates_ = schedule.dates();
+                if (startDate_ != Date() || endDate_ != Date() || paymentFrequency_ != Frequency::NoFrequency) {
+                    Schedule schedule = MakeSchedule()
+                                            .from(startDate_)
+                                            .to(endDate_)
+                                            .withFrequency(paymentFrequency_)
+                                            .withCalendar(calendar_)
+                                            .withConvention(paymentConvention_);
+                    dates_ = schedule.dates();
+                } else {
+                    throw std::invalid_argument("Dates vector is empty and startDate, endDate and paymentFrequency are not set.");
+                }
             }
         }
 
@@ -241,25 +265,26 @@ namespace Atlas {
                     setCashflow(coupon);
                     leg_.addCoupon(coupon);
                 } else if constexpr (std::is_same_v<LegType<adouble>, FloatingRateLeg<adouble>>) {
-                    FloatingRateCoupon<adouble> coupon(dates_.at(i), dates_.at(i+1), couponNotionals_.at(i), spread_, *rateIndexContext_);
+                    FloatingRateCoupon<adouble> coupon(dates_.at(i), dates_.at(i + 1), couponNotionals_.at(i), spread_, rateDef_);
                     setCashflow(coupon);
                     leg_.addCoupon(coupon);
                 }
             }
         }
 
-        LegType<adouble> leg_                                             = LegType<adouble>();
-        Date startDate_                                                   = Date();
-        Date endDate_                                                     = Date();
-        int side_                                                         = 1;
-        const Context<RateIndex<adouble>>* rateIndexContext_              = nullptr;
-        const Context<YieldTermStructure<adouble>>* discountCurveContext_ = nullptr;
-        BusinessDayConvention paymentConvention_                          = BusinessDayConvention::Unadjusted;
-        Calendar calendar_                                                = NullCalendar();
-        Currency currency_                                                = Currency();
-        bool createRedemptions_                                           = true;
-        double notional_                                                  = -1;
-        Frequency paymentFrequency_;
+        LegType<adouble> leg_                    = LegType<adouble>();
+        Date startDate_                          = Date();
+        Date endDate_                            = Date();
+        int side_                                = 1;
+        Calendar calendar_                       = Calendar();
+        Currency currency_                       = Currency();
+        bool createRedemptions_                  = true;
+        double notional_                         = -1;
+        size_t indexContextIdx_                  = SIZE_MAX;
+        size_t discountContextIdx_               = SIZE_MAX;
+        BusinessDayConvention paymentConvention_ = BusinessDayConvention::Unadjusted;
+        Frequency paymentFrequency_              = Frequency::NoFrequency;
+        RateDefinition rateDef_;
         std::vector<Date> dates_;
         std::vector<double> redemptions_;
         std::vector<double> couponNotionals_;

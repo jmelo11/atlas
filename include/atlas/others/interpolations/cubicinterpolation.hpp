@@ -5,6 +5,16 @@
 #include <stdexcept>
 
 namespace Atlas {
+    /**
+     * @brief Cubic interpolation
+     * 
+     * @tparam T 
+     * @param x 
+     * @param x_ 
+     * @param y_ 
+     * @param extrapolate 
+     * @return T 
+     */
     template <typename T>
     T cubicInterpolation(T x, const std::vector<T>& x_, const std::vector<T>& y_, bool extrapolate) {
         if (x_.size() != y_.size()) { throw std::invalid_argument("x_ and y_ should have the same size."); }

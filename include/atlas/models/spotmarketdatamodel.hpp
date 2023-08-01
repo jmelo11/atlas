@@ -61,7 +61,7 @@ namespace Atlas {
                 const auto& request                      = this->marketRequest_.dfs.at(i);
                 size_t idx                               = request.curve_;
                 const Date& date                         = request.date_;
-                const YieldTermStructure<adouble>& curve = marketStore_.curveContext(idx).object();
+                const YieldTermStructure<adouble>& curve = marketStore_.curveManager().curveContext(idx).curve();
 
                 adouble df;
                 if (evalDate < date) {
@@ -88,14 +88,15 @@ namespace Atlas {
                 const Date& startDate = request.startDate_;
                 const Date& endDate   = request.endDate_;
 
-                const YieldTermStructure<adouble>& curve = marketStore_.curveContext(idx).object();
-                const RateIndex<adouble>& index          = marketStore_.rateIndexContext(idx).object();
-
+                const auto& curveManager                 = marketStore_.curveManager();
+                const YieldTermStructure<adouble>& curve = curveManager.curveContext(idx).curve();
+                const InterestRateIndex<adouble>& index  = curveManager.curveContext(idx).index();
+                const auto& rateDef                      = index.rateDefinition();
                 adouble fwd;
                 if (evalDate <= startDate) {
-                    fwd = curve.forwardRate(startDate, endDate, index.dayCounter(), index.rateCompounding(), index.rateFrequency());
+                    fwd = curve.forwardRate(startDate, endDate, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());
                 } else {
-                    fwd = index.getFixing(startDate);
+                    fwd = index.fixing(startDate);
                 }
                 md.fwds.push_back(fwd);
             }
@@ -111,16 +112,17 @@ namespace Atlas {
         void simulateExchangeRates(const Date& evalDate, MarketData<adouble>& md) const {
             for (size_t i = 0; i < this->marketRequest_.fxs.size(); ++i) {
                 const auto& request = this->marketRequest_.fxs.at(i);
-                size_t ccy1         = request.ccy1_;
-                size_t ccy2         = request.ccy2_;
+                int ccy1         = request.ccy1_;
+                int ccy2         = request.ccy2_;
                 const Date& date    = request.date_;
 
-                adouble fx = marketStore_.exchange(ccy1, ccy2);
+                adouble fx = marketStore_.fxManager().exchangeRate(ccy1, ccy2);
                 if (date != Date()) {
-                    size_t ccy1RFC                               = marketStore_.riskFreeCurveIdx(ccy1);
-                    size_t ccy2RFC                               = marketStore_.riskFreeCurveIdx(ccy2);
-                    const YieldTermStructure<adouble>& ccy1Curve = marketStore_.curveContext(ccy1RFC).object();
-                    const YieldTermStructure<adouble>& ccy2Curve = marketStore_.curveContext(ccy2RFC).object();
+                    const auto& curveManager                     = marketStore_.curveManager();
+                    size_t ccy1RFC                               = curveManager.riskFreeCurveIdx(ccy1);
+                    size_t ccy2RFC                               = curveManager.riskFreeCurveIdx(ccy2);
+                    const YieldTermStructure<adouble>& ccy1Curve = curveManager.curveContext(ccy1RFC).curve();
+                    const YieldTermStructure<adouble>& ccy2Curve = curveManager.curveContext(ccy2RFC).curve();
                     fx *= ccy2Curve.discount(date) / ccy1Curve.discount(date);
                 }
                 md.fxs.push_back(fx);

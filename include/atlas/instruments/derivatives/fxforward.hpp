@@ -28,9 +28,7 @@ namespace Atlas {
          * @param notionalInSecondCcy notional in first currency
          * @param side Long or Short
          */
-        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& ccy1, const Currency& ccy2,
-                  double notionalInSecondCcy, Side side)
-        : fwdPrice_(fwdPrice) {
+        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& ccy1, const Currency& ccy2, double notionalInSecondCcy, Side side) : fwdPrice_(fwdPrice) {
             this->startDate_ = startDate;
             this->endDate_   = endDate;
             this->notional_  = notionalInSecondCcy;
@@ -57,13 +55,12 @@ namespace Atlas {
          * @param curr1 first currency
          * @param curr2 second currency
          * @param side  BUY or SELL
-         * @param discountCurve discount curve context
+         * @param discountContextIdx discount curve context
          */
-        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& curr1, const Currency& curr2,
-                  double notionalInSecondCcy, Side side, const Context<YieldTermStructure<adouble>>& discountCurve)
+        FxForward(const Date& startDate, const Date& endDate, adouble fwdPrice, const Currency& curr1, const Currency& curr2, double notionalInSecondCcy, Side side, size_t discountContextIdx)
         : FxForward(startDate, endDate, fwdPrice, curr1, curr2, notionalInSecondCcy, side) {
-            this->leg().redemptions()[0].discountCurveContext(discountCurve);
-            this->leg().redemptions()[1].discountCurveContext(discountCurve);
+            this->leg().redemptions()[0].discountContextIdx(discountContextIdx);
+            this->leg().redemptions()[1].discountContextIdx(discountContextIdx);
         }
 
         adouble fwdPrice() const { return fwdPrice_; }
@@ -72,10 +69,6 @@ namespace Atlas {
             adouble notionalInFirstCcy = this->notional_ * fwdPrice;
             this->leg().redemptions()[1].amount(notionalInFirstCcy);
         }
-
-        void accept(Visitor<adouble>& v) override { v.visit(*this); }
-
-        void accept(ConstVisitor<adouble>& v) const override { v.visit(*this); }
 
        private:
         adouble fwdPrice_;

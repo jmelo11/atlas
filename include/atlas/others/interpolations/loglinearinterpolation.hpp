@@ -6,12 +6,17 @@
 
 namespace Atlas {
 
+    /**
+     * @class LogLinearInterpolator
+     * @brief Log linear interpolation
+     *
+     * @tparam adouble
+     */
     template <typename adouble>
     class LogLinearInterpolator : public Interpolator<adouble> {
        public:
-
         LogLinearInterpolator() = default;
-        
+
         LogLinearInterpolator(const std::vector<double>& x, const std::vector<adouble>& y, bool extrapolate = false)
         : x_(x), y_(y), extrapolate_(extrapolate) {
             if (x_.size() != y_.size()) { throw std::invalid_argument("x_ and y_ should have the same size."); }
@@ -20,6 +25,7 @@ namespace Atlas {
         adouble operator()(double x) const override { return logLinearInterpolation(x); }
 
         void enableExtrapolation(bool e) { extrapolate_ = e; }
+
        private:
         adouble logLinearInterpolation(double x) const {
             auto it      = std::lower_bound(x_.begin(), x_.end(), x);
@@ -34,8 +40,7 @@ namespace Atlas {
             if (index == 0) { return y_[0] * exp((x - x_[0]) * (log(y_[1]) - log(y_[0])) / (x_[1] - x_[0])); }
 
             if (index == x_.size()) {
-                return y_[index - 1] *
-                       exp((x - x_[index - 1]) * (log(y_[index - 1]) - log(y_[index - 2])) / (x_[index - 1] - x_[index - 2]));
+                return y_[index - 1] * exp((x - x_[index - 1]) * (log(y_[index - 1]) - log(y_[index - 2])) / (x_[index - 1] - x_[index - 2]));
             }
 
             return y_[index - 1] * exp((x - x_[index - 1]) * (log(y_[index]) - log(y_[index - 1])) / (x_[index] - x_[index - 1]));

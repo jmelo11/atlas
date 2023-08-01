@@ -2,7 +2,7 @@
 #define C5139B34_BABA_4D42_B2D5_CD375677E6A8
 
 #include <atlas/cashflows/coupon.hpp>
-#include <atlas/rates/rateindex.hpp>
+#include <atlas/rates/index/ratedefinition.hpp>
 
 namespace Atlas {
 
@@ -18,19 +18,15 @@ namespace Atlas {
     class FloatingRateCoupon : public Coupon<adouble> {
        public:
         /**
-         * Constructor
+         * @brief Construct a new Floating Rate Coupon object
          * @param startDate The start date of the coupon
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          * @param spread The spread of the coupon
-         * @param rateIndexContext The forecast CurveContext of the coupon
+         * @param rateDef The rate definition of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                           const Context<RateIndex<adouble>>& rateIndexContext)
-        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), rateIndexContextIdx_(rateIndexContext.idx()), hasRateIndexContext_(true) {
-            rateDef_ = {rateIndexContext.object().dayCounter(), rateIndexContext.object().rateFrequency(),
-                        rateIndexContext.object().rateCompounding()};
-        };
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const RateDefinition& rateDef)
+        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), rateDef_(rateDef){};
 
         /**
          * @brief Construct a new Floating Rate Coupon object
@@ -39,14 +35,15 @@ namespace Atlas {
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          * @param spread The spread of the coupon
-         * @param rateIndexContext The forecast CurveContext of the coupon
-         * @param discountCurveContext The discount CurveContext of the coupon
+         * @param rateDef The rate definition of the coupon
+         * @param indexContextIdx The forecast CurveContext of the coupon
+         * @param discountContextIdx The discount CurveContext of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                           const Context<RateIndex<adouble>>& rateIndexContext, const Context<YieldTermStructure<adouble>>& discountCurveContext)
-        : FloatingRateCoupon(startDate, endDate, notional, spread, rateIndexContext) {
-            this->discountContextIdx_ = discountCurveContext.idx();
-            this->hasDiscountContext_ = true;
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const RateDefinition& rateDef,
+                           size_t indexContextIdx, size_t discountContextIdx)
+        : FloatingRateCoupon(startDate, endDate, notional, spread, rateDef) {
+            this->indexContextIdx(indexContextIdx);
+            this->discountContextIdx(discountContextIdx);
         };
 
         /**
@@ -84,23 +81,30 @@ namespace Atlas {
          */
         inline adouble fixing() const { return fixing_; }
 
-        /***
-         * Sets the forecast CurveContext of the coupon
-         * @param rateIndexContext The forecast CurveContext of the coupon
+        /**
+         * @brief Sets the forecast CurveContext of the coupon
+         *
+         * @param idx The forecast CurveContext of the coupon
          */
-        void rateIndexContext(const Context<RateIndex<adouble>>& context) {
-            rateIndexContextIdx_ = context.idx();
-            auto& index          = context.object();
-            rateDef_             = {index.dayCounter(), index.rateFrequency(), index.rateCompounding()};
-            hasRateIndexContext_ = true;
+        void indexContextIdx(size_t idx) {
+            if (idx == SIZE_MAX) throw std::invalid_argument("Invalid index context idx");
+            indexContextIdx_    = idx;
+            hasIndexContextIdx_ = true;
         }
+
+        /**
+         * @brief Gets the forecast curve context idx
+         *
+         * @return size_t The forecast curve context idx
+         */
+        inline size_t indexContextIdx() const { return indexContextIdx_; }
 
         /**
          * @brief Gets the day counter of the coupon
          *
          * @return The day counter of the coupon
          */
-        inline DayCounter dayCounter() const override { return rateDef_.dayCounter; };
+        inline const DayCounter& dayCounter() const override { return rateDef_.dayCounter(); };
 
         /**
          * @brief Gets the accrued period of the coupon
@@ -126,9 +130,9 @@ namespace Atlas {
             auto datesPair = this->accrualDates(refStart, refEnd);
             if (refStart >= this->endDate() || refEnd <= this->startDate()) return 0.0;
             if (!isFixingSet()) throw std::runtime_error("Fixing rate not set");
-            adouble totalRate = fixing_ + spread_;
-            adouble compFactor =
-                fastCompoundFactor<adouble>(totalRate, rateDef_.dayCounter, rateDef_.comp, rateDef_.freq, datesPair.first, datesPair.second);
+            adouble totalRate  = fixing_ + spread_;
+            adouble compFactor = fastCompoundFactor<adouble>(totalRate, rateDef_.dayCounter(), rateDef_.compounding(), rateDef_.frequency(),
+                                                             datesPair.first, datesPair.second);
             return this->notional() * (compFactor - 1.0);
         };
 
@@ -137,14 +141,7 @@ namespace Atlas {
          *
          * @return true If the coupon has a forecast CurveContext
          */
-        inline bool hasRateIndexContext() const { return hasRateIndexContext_; }
-
-        /**
-         * @brief Gets the forecast curve context idx
-         *
-         * @return size_t The forecast curve context idx
-         */
-        inline size_t rateIndexContextIdx() const { return rateIndexContextIdx_; }
+        inline bool hasIndexContextIdx() const { return hasIndexContextIdx_; }
 
         /**
          * @brief Checks if the fixing rate has been set
@@ -160,23 +157,12 @@ namespace Atlas {
          */
 
        private:
-        /**
-         * @brief A struct representing the rate definition of the coupon
-         * @details The rate definition of the coupon is the day counter, frequency, and compounding of the coupon
-         */
-        struct RateDef {
-            DayCounter dayCounter;
-            Frequency freq;
-            Compounding comp;
-        };
-
-        adouble spread_ = 0.0;
-        adouble fixing_ = 0.0;
-        RateDef rateDef_;
-
-        size_t rateIndexContextIdx_;
-        bool isFixingSet_         = false;
-        bool hasRateIndexContext_ = false;
+        adouble spread_          = 0.0;
+        adouble fixing_          = 0.0;
+        size_t indexContextIdx_  = SIZE_MAX;
+        bool hasIndexContextIdx_ = false;
+        bool isFixingSet_        = false;
+        RateDefinition rateDef_;
     };
 }  // namespace Atlas
 

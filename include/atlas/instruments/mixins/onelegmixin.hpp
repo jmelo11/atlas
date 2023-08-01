@@ -3,7 +3,6 @@
 
 #include <atlas/cashflows/cashflow.hpp>
 #include <atlas/cashflows/legs/floatingrateleg.hpp>
-#include <atlas/fundation/context.hpp>
 #include <type_traits>
 
 namespace Atlas {
@@ -12,6 +11,7 @@ namespace Atlas {
     class YieldTermStructure;
 
     /**
+     * @class OneLegMixin
      * @brief A class for single leg instruments.
      *
      * @tparam adouble number type
@@ -41,14 +41,14 @@ namespace Atlas {
         /**
          * @brief Sets the discount curve context of the instrument.
          *
-         * @param context
+         * @param idx
          */
-        inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& context) {
+        inline void discountContextIdx(size_t idx) {
             if constexpr (std::is_same_v<FirstLeg<adouble>, FixedRateLeg<adouble>> || std::is_same_v<FirstLeg<adouble>, FloatingRateLeg<adouble>>) {
-                for (auto& coupon : leg_.coupons()) coupon.discountCurveContext(context);
+                for (auto& coupon : leg_.coupons()) coupon.discountContextIdx(idx);
             }
-            for (auto& redemption : leg_.redemptions()) redemption.discountCurveContext(context);
-            disbursement_.discountCurveContext(context);
+            for (auto& redemption : leg_.redemptions()) redemption.discountContextIdx(idx);
+            disbursement_.discountContextIdx(idx);
         };
 
         /**
@@ -56,9 +56,9 @@ namespace Atlas {
          *
          * @param context
          */
-        inline void rateIndexContext(const Context<RateIndex<adouble>>& context) {
+        inline void indexContextIdx(size_t idx) {
             static_assert(std::is_same_v<FirstLeg<adouble>, FloatingRateLeg<adouble>>, "Only FloatingRateLeg is supported.");
-            leg_.rateIndexContext(context);
+            leg_.indexContextIdx(idx);
         }
 
         /**

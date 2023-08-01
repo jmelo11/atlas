@@ -23,32 +23,18 @@ namespace Atlas {
         virtual ~Instrument() = default;
 
         /**
-         * @brief Accepts a visitor.
-         *
-         * @param visitor
-         */
-        virtual void accept(Visitor<adouble>& visitor) = 0;
-
-        /**
-         * @brief Accepts a const visitor.
-         *
-         * @param visitor
-         */
-        virtual void accept(ConstVisitor<adouble>& visitor) const = 0;
-
-        /**
          * @brief Returns the start date of the instrument.
          *
          * @return Date
          */
-        inline Date startDate() const { return startDate_; };
+        inline const Date& startDate() const { return startDate_; };
 
         /**
          * @brief Returns the end date of the instrument.
          *
          * @return Date
          */
-        inline Date endDate() const { return endDate_; };
+        inline const Date& endDate() const { return endDate_; };
 
         /**
          * @brief Returns the notional of the instrument.

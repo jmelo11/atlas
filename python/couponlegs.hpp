@@ -21,11 +21,11 @@ namespace Aux {
        public:
         using Coupon<NumType>::Coupon;
 
-        DayCounter dayCounter() const override {
-            PYBIND11_OVERRIDE_PURE(DayCounter,      /* Return type */
-                                   Coupon<NumType>, /* Parent class */
-                                   dayCounter,      /* Name of function in C++ (must match Python name) */
-                                                    /* Argument(s) */
+        const DayCounter& dayCounter() const override {
+            PYBIND11_OVERRIDE_PURE(const DayCounter&, /* Return type */
+                                   Coupon<NumType>,   /* Parent class */
+                                   dayCounter,        /* Name of function in C++ (must match Python name) */
+                                                      /* Argument(s) */
             );
         }
 
@@ -59,23 +59,24 @@ void py_couponlegs(py::module& m) {
 
     py::class_<Cashflow<NumType>, Indexable>(m, "Cashflow")
         .def(py::init<>())
-        .def(py::init<const Context<YieldTermStructure<NumType>>&>())
+        .def(py::init<size_t>())
         .def(py::init<const Date&, NumType>())
-        .def(py::init<const Date&, NumType, const Context<YieldTermStructure<NumType>>&>())
+        .def(py::init<const Date&, NumType, size_t>())
         .def("paymentDate", &Cashflow<NumType>::paymentDate)
         .def("amount", py::overload_cast<>(&Cashflow<NumType>::amount, py::const_))
         .def("hasOcurred", &Cashflow<NumType>::hasOcurred)
-        .def("discountCurveContext", &Cashflow<NumType>::discountCurveContext)
+        .def("discountContextIdx", py::overload_cast<size_t>(&Cashflow<NumType>::discountContextIdx))
+        .def("discountContextIdx", py::overload_cast<>(&Cashflow<NumType>::discountContextIdx, py::const_))
         .def("hasDiscountContext", &Cashflow<NumType>::hasDiscountContext)
-        .def("discountContextIdx", &Cashflow<NumType>::discountContextIdx)
-        .def("currency", &Cashflow<NumType>::currency)
+        .def("currency", py::overload_cast<const Currency&>(&Cashflow<NumType>::currency))
+        .def("currency", py::overload_cast<>(&Cashflow<NumType>::currency, py::const_))
         .def("currencyCode", &Cashflow<NumType>::currencyCode)
         .def("applyCcy", py::overload_cast<>(&Cashflow<NumType>::applyCcy, py::const_))
         .def("applyCcy", py::overload_cast<bool>(&Cashflow<NumType>::applyCcy));
 
     py::class_<Coupon<NumType>, Aux::PyCoupon, Cashflow<NumType>>(m, "Coupon")
         .def(py::init<const Date&, const Date&, double>())
-        .def(py::init<const Date&, const Date&, double, const Context<YieldTermStructure<NumType>>&>())
+        .def(py::init<const Date&, const Date&, double, size_t>())
         .def("notional", &Coupon<NumType>::notional)
         .def("startDate", &Coupon<NumType>::startDate)
         .def("endDate", &Coupon<NumType>::endDate)
@@ -85,26 +86,21 @@ void py_couponlegs(py::module& m) {
 
     py::class_<FixedRateCoupon<NumType>, Coupon<NumType>>(m, "FixedRateCoupon")
         .def(py::init<const Date&, const Date&, double, const InterestRate<NumType>&>())
-        .def(py::init<const Date&, const Date&, double, const InterestRate<NumType>&, const Context<YieldTermStructure<NumType>>&>())
+        .def(py::init<const Date&, const Date&, double, const InterestRate<NumType>&, size_t>())
         .def("rate", py::overload_cast<>(&FixedRateCoupon<NumType>::rate, py::const_))
-        .def("rate", py::overload_cast<const InterestRate<NumType>&>(&FixedRateCoupon<NumType>::rate))
-        .def("accruedPeriod", &FixedRateCoupon<NumType>::accruedPeriod)
-        .def("accruedAmount", &FixedRateCoupon<NumType>::accruedAmount)
-        .def("dayCounter", &FixedRateCoupon<NumType>::dayCounter);
+        .def("rate", py::overload_cast<const InterestRate<NumType>&>(&FixedRateCoupon<NumType>::rate));
 
     py::class_<FloatingRateCoupon<NumType>, Coupon<NumType>>(m, "FloatingRateCoupon")
-        .def(py::init<const Date&, const Date&, double, NumType, const Context<RateIndex<NumType>>&>())
-        .def(py::init<const Date&, const Date&, double, NumType, const Context<RateIndex<NumType>>&, const Context<YieldTermStructure<NumType>>&>())
+        .def(py::init<const Date&, const Date&, double, NumType, const RateDefinition&>())
+        .def(py::init<const Date&, const Date&, double, NumType, const RateDefinition&, size_t, size_t>())
         .def("spread", py::overload_cast<>(&FloatingRateCoupon<NumType>::spread, py::const_))
         .def("spread", py::overload_cast<NumType>(&FloatingRateCoupon<NumType>::spread))
         .def("fixing", py::overload_cast<>(&FloatingRateCoupon<NumType>::fixing, py::const_))
         .def("fixing", py::overload_cast<NumType>(&FloatingRateCoupon<NumType>::fixing))
-        .def("rateIndexContext", &FloatingRateCoupon<NumType>::rateIndexContext)
-        .def("accruedAmount", &FloatingRateCoupon<NumType>::accruedAmount)
-        .def("dayCounter", &FloatingRateCoupon<NumType>::dayCounter)
-        .def("accruedPeriod", &FloatingRateCoupon<NumType>::accruedPeriod)
-        .def("rateIndexContextIdx", &FloatingRateCoupon<NumType>::rateIndexContextIdx)
-        .def("hasRateIndexContext", &FloatingRateCoupon<NumType>::hasRateIndexContext);
+        .def("indexContextIdx", py::overload_cast<>(&FloatingRateCoupon<NumType>::indexContextIdx, py::const_))
+        .def("indexContextIdx", py::overload_cast<size_t>(&FloatingRateCoupon<NumType>::indexContextIdx))
+        .def("hasIndexContextIdx", &FloatingRateCoupon<NumType>::hasIndexContextIdx)
+        .def("isFixingSet", &FloatingRateCoupon<NumType>::isFixingSet);
 
     // Legs
     py::class_<Leg<NumType>>(m, "Leg")
@@ -124,7 +120,7 @@ void py_couponlegs(py::module& m) {
         .def("coupons", py::overload_cast<>(&FixedRateLeg<NumType>::coupons), py::return_value_policy::reference)
         .def("addCoupon", &FixedRateLeg<NumType>::addCoupon)
         .def("sort", &FixedRateLeg<NumType>::sort)
-        .def("discountCurveContext", &FixedRateLeg<NumType>::discountCurveContext);
+        .def("discountContextIdx", &FixedRateLeg<NumType>::discountContextIdx);
 
     py::class_<FloatingRateLeg<NumType>, Leg<NumType>>(m, "FloatingRateLeg")
         .def(py::init<std::vector<FloatingRateCoupon<NumType>>&, std::vector<Redemption<NumType>>&, bool>())
@@ -134,8 +130,8 @@ void py_couponlegs(py::module& m) {
         .def("coupons", py::overload_cast<>(&FloatingRateLeg<NumType>::coupons), py::return_value_policy::reference)
         .def("addCoupon", &FloatingRateLeg<NumType>::addCoupon)
         .def("sort", &FloatingRateLeg<NumType>::sort)
-        .def("discountCurveContext", &FloatingRateLeg<NumType>::discountCurveContext)
-        .def("rateIndexContext", &FloatingRateLeg<NumType>::rateIndexContext);
+        .def("discountContextIdx", &FloatingRateLeg<NumType>::discountContextIdx)
+        .def("indexContextIdx", &FloatingRateLeg<NumType>::indexContextIdx);
 };
 
 #endif /* F01E58DD_C649_4B27_B416_BE9F8F03E002 */

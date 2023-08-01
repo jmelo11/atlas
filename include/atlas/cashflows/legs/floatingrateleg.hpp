@@ -85,22 +85,22 @@ namespace Atlas {
          *
          * @param discountCurveContext a reference to a Context object representing the discount curve context.
          */
-        inline void discountCurveContext(const Context<YieldTermStructure<adouble>>& discountCurveContext) {
-            this->setDiscountCurveContext(coupons_, discountCurveContext);
-            this->setDiscountCurveContext(this->redemptions_, discountCurveContext);
+        inline void discountContextIdx(size_t idx) {
+            this->setDiscountContextIdx(coupons_, idx);
+            this->setDiscountContextIdx(this->redemptions_, idx);
         }
 
         /**
          * @brief Sets the forecast curve context for the leg.
          *
-         * @param forecastCurveContext a reference to a Context object representing the forecast curve context.
+         * @param rateIndexContext a reference to a Context object representing the forecast curve context.
          */
-        inline void rateIndexContext(const Context<RateIndex<adouble>>& rateIndexContext) {
-            for (auto& coupon : coupons_) { coupon.rateIndexContext(rateIndexContext); }
+        inline void indexContextIdx(size_t idx) {
+            for (auto& coupon : coupons_) { coupon.indexContextIdx(idx); }
         }
 
        private:
-        std::vector<FloatingRateCoupon<adouble>> coupons_; /**< vector of FloatingRateCoupon objects representing the coupons in the leg. */
+        std::vector<FloatingRateCoupon<adouble>> coupons_;
     };
 
 }  // namespace Atlas

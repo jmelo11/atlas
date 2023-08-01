@@ -24,11 +24,10 @@ PYBIND11_MODULE(Atlas, m) {
     py_rates(m);
     py_market(m);
     py_instruments(m);
-    py_visitors(m);
     py_models(m);
 
     py::module_ visitors = m.def_submodule("Visitors", "Visitors submodule");
-    py_newvisitors(visitors);
+    py_visitors(visitors);
 
     py::module_ parsers = m.def_submodule("Parsers", "Parsers submodule");
     py_parsers(parsers);

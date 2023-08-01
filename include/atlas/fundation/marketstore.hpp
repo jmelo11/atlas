@@ -1,16 +1,15 @@
-#ifndef C49C3B38_A428_4D92_AB3E_8E88957A544A
-#define C49C3B38_A428_4D92_AB3E_8E88957A544A
+#ifndef B0F28AFF_3A60_4857_90F2_152C813BE8CC
+#define B0F28AFF_3A60_4857_90F2_152C813BE8CC
 
 #include <atlas/atlasconfig.hpp>
-#include <atlas/fundation/contextmanager.hpp>
 #include <atlas/fundation/exchangeratemanager.hpp>
-#include <atlas/rates/rateindex.hpp>
-#include <atlas/rates/yieldtermstructure.hpp>
+#include <atlas/fundation/yieldtermstructuremanager.hpp>
 
 namespace Atlas {
 
     /**
-     * @brief A class representing a set of market information and market-related objects like curves, currencies and so on.
+     * @class MarketStore
+     * @brief This class is responsable for storing all market related data, so processes relying on it can access it easely.
      *
      * @tparam adouble
      */
@@ -20,189 +19,63 @@ namespace Atlas {
         /**
          * @brief Construct a new Market Store object
          *
-         * @param refDate
-         * @param localCcy
+         * @param refDate reference date of the data inside
+         * @param localCurrency local currency of the store
          */
-        MarketStore(const Date& refDate, Currency localCcy = USD()) : refDate_(refDate), localCcy_(localCcy) {
-            curveManager_     = std::make_unique<ContextManager<YieldTermStructure<adouble>>>(refDate_);
-            rateIndexManager_ = std::make_unique<ContextManager<RateIndex<adouble>>>(refDate_);
-            fxManager_        = std::make_unique<ExchangeRateManager<adouble>>(refDate_);
+        MarketStore(const Date& refDate, const Currency& localCurrency = USD()) : refDate_(refDate), localCurrency_(localCurrency) {
+            curveManager_ = YieldTermStructureManager<adouble>(refDate, localCurrency);
+            fxManager_    = ExchangeRateManager<adouble>(refDate, localCurrency);
         };
 
         /**
-         * @brief Construct a new Market Store object
+         * @brief Returns an reference to the curve manager inside the store.
          *
-         * @param other
+         * @return YieldTermStructureManager<adouble>&
          */
-        MarketStore(const MarketStore& other) { cloneFromStore(other); };
+        inline YieldTermStructureManager<adouble>& curveManager() { return curveManager_; };
 
         /**
-         * @brief add a curve context to the store
+         * @brief Return a const reference to the curve manager inside the store
          *
-         * @param name name of the curve
-         * @param curve
-         * @param index
+         * @return const YieldTermStructureManager<adouble>&
          */
-        void addCurve(const std::string& name, const YieldTermStructure<adouble>& curve, const RateIndex<adouble>& index,
-                      Currency riskFreeCcy = Currency()) {
-            if (curveManager_->hasContext(name)) {
-                throw std::invalid_argument("A curve context with the given name already exists.");
-            } else {
-                curveManager_->createContext(name, curve);
-                rateIndexManager_->createContext(name, index);
-            }
-            if (riskFreeCcy != Currency()) { riskFreeCurveIdx(riskFreeCcy, name); }
-        };
+        inline const YieldTermStructureManager<adouble>& curveManager() const { return curveManager_; };
 
         /**
-         * @brief add an exchange rate to the store
+         * @brief Returns a reference to the exchange rate manager inside the store.
          *
-         * @param weak
-         * @param strong
-         * @param rate
+         * @return ExchangeRateManager<adouble>&
          */
-        void addExchangeRate(const Currency& weak, const Currency& strong, adouble rate) {
-            if (fxManager_->hasExchangeRate(weak, strong)) {
-                throw std::invalid_argument("An exchange rate with the given currencies already exists.");
-            } else {
-                fxManager_->addExchangeRate(weak, strong, rate);
-            }
-        };
+        inline ExchangeRateManager<adouble>& fxManager() { return fxManager_; };
 
         /**
-         * @brief gets the curve context with the given index
+         * @brief Returns a const reference to the exchange rate manager inside the store.
          *
-         * @param idx
-         * @return const Context<YieldTermStructure<adouble>>&
+         * @return const ExchangeRateManager<adouble>&
          */
-        const Context<YieldTermStructure<adouble>>& curveContext(size_t idx) const { return curveManager_->getContext(idx); };
+        inline const ExchangeRateManager<adouble>& fxManager() const { return fxManager_; };
 
         /**
-         * @brief gets the curve context with the given name
+         * @brief Returns the reference date of the store
          *
-         * @param name
-         * @return const Context<YieldTermStructure<adouble>>&
+         * @return const Date&
          */
-        const Context<YieldTermStructure<adouble>>& curveContext(const std::string& name) const { return curveManager_->getContext(name); };
+        inline const Date& refDate() const { return refDate_; };
 
         /**
-         * @brief gets the rate index context with the given name
-         *
-         * @param name
-         * @return const Context<RateIndex<adouble>>&
-         */
-        const Context<RateIndex<adouble>>& rateIndexContext(const std::string& name) const { return rateIndexManager_->getContext(name); };
-
-        /**
-         * @brief gets the rate index context with the given index
-         *
-         * @param idx
-         * @return const Context<RateIndex<adouble>>&
-         */
-        const Context<RateIndex<adouble>>& rateIndexContext(size_t idx) const { return rateIndexManager_->getContext(idx); };
-
-        /**
-         * @brief calculates the exchange rate between two currencies
-         *
-         * @param weak
-         * @param strong
-         * @return adouble
-         */
-        adouble exchange(const Currency& weak, const Currency& strong) const { return exchange(weak.numericCode(), strong.numericCode()); };
-
-        /**
-         * @brief calculates the exchange rate between two currencies
-         *
-         * @param weak
-         * @param strong
-         * @return adouble
-         */
-        adouble exchange(size_t weak, size_t strong) const { return fxManager_->exchange(translateCcyCode(weak), translateCcyCode(strong)); };
-
-        /**
-         * @brief return the currency associated risk free curve
-         *
-         * @param ccy
-         * @return size_t
-         */
-        size_t riskFreeCurveIdx(const Currency& ccy) const { return riskFreeCurveIdx(ccy.numericCode()); };
-
-        /**
-         * @brief return the currency associated risk free curve
-         *
-         * @param ccyCode
-         * @return size_t
-         */
-        size_t riskFreeCurveIdx(size_t ccyCode) const { return fxManager_->riskFreeCurveIdx(translateCcyCode(ccyCode)); };
-
-        /**
-         * @brief Sets the currency associated risk free curve
-         *
-         * @param ccy
-         * @param name
-         */
-        void riskFreeCurveIdx(const Currency& ccy, const std::string& name) {
-            auto& context = curveManager_->getContext(name);
-            fxManager_->riskFreeCurveIdx(ccy, context);
-        };
-
-        /**
-         * @brief gets the currency set as local
+         * @brief Returns the local currency of the store
          *
          * @return const Currency&
          */
-        const Currency& localCurrency() const { return localCcy_; };
-
-        /**
-         * @brief sets the currency as local
-         *
-         * @param ccy
-         */
-        void localCurrency(const Currency& ccy) { localCcy_ = ccy; };
-        /**
-         * @brief clone the market store
-         *
-         * @return MarketStore<adouble>
-         */
-        MarketStore<adouble> clone() const {
-            MarketStore<adouble> store(refDate_, localCcy_);
-            store.curveManager_     = curveManager_->clone();
-            store.rateIndexManager_ = rateIndexManager_->clone();
-            store.fxManager_        = fxManager_->clone();
-            return store;
-        };
-
-        /**
-         * @brief clone the market store from another store
-         *
-         * @param store
-         */
-        void cloneFromStore(const MarketStore<adouble>& store) {
-            refDate_          = store.refDate_;
-            localCcy_         = store.localCcy_;
-            curveManager_     = store.curveManager_->clone();
-            rateIndexManager_ = store.rateIndexManager_->clone();
-            fxManager_        = store.fxManager_->clone();
-        };
-
-        inline Date refDate() const { return refDate_; };
+        inline const Currency& localCurrency() const { return localCurrency_; };
 
        private:
-        inline size_t translateCcyCode(size_t code) const {
-            if (code == 0) {
-                return localCcy_.numericCode();
-            } else {
-                return code;
-            }
-        }
-
-        Date refDate_;
-        Currency localCcy_;
-
-        std::unique_ptr<ContextManager<YieldTermStructure<adouble>>> curveManager_;
-        std::unique_ptr<ContextManager<RateIndex<adouble>>> rateIndexManager_;
-        std::unique_ptr<ExchangeRateManager<adouble>> fxManager_;
+        YieldTermStructureManager<adouble> curveManager_;
+        ExchangeRateManager<adouble> fxManager_;
+        Date refDate_           = Date();
+        Currency localCurrency_ = Currency();
     };
+
 }  // namespace Atlas
 
-#endif /* C49C3B38_A428_4D92_AB3E_8E88957A544A */
+#endif /* B0F28AFF_3A60_4857_90F2_152C813BE8CC */

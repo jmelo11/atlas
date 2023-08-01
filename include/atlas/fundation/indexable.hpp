@@ -16,61 +16,61 @@ namespace Atlas {
          * @brief Returns the index of the discount factor.
          * @return The index of the discount factor.
          */
-        size_t dfIdx() const { return idx_[0]; }
+        inline size_t dfIdx() const { return idx_[0]; }
 
         /**
          * @brief Sets the index of the discount factor.
          * @param idx The index of the discount factor to set.
          */
-        void dfIdx(size_t idx) { idx_[0] = idx; }
+        inline void dfIdx(size_t idx) { idx_[0] = idx; }
 
         /**
          * @brief Returns the index of the forward rate.
          * @return The index of the forward rate.
          */
-        size_t fwdIdx() const { return idx_[1]; }
+        inline size_t fwdIdx() const { return idx_[1]; }
 
         /**
          * @brief Sets the index of the forward rate.
          * @param idx The index of the forward rate to set.
          */
-        void fwdIdx(size_t idx) { idx_[1] = idx; }
+        inline void fwdIdx(size_t idx) { idx_[1] = idx; }
 
         /**
          * @brief Returns the index of the related price.
          * @return The index of the price.
          */
-        size_t priceIdx() const { return idx_[2]; }
+        inline size_t priceIdx() const { return idx_[2]; }
 
         /**
          * @brief Sets the index of the price.
          * @param idx The index of the price to set.
          */
-        void priceIdx(size_t idx) { idx_[2] = idx; }
+        inline void priceIdx(size_t idx) { idx_[2] = idx; }
 
         /**
          * @brief Returns the index of the fx price.
          * @return The index of the fx price.
          */
-        size_t fxIdx() const { return idx_[3]; }
+        inline size_t fxIdx() const { return idx_[3]; }
 
         /**
          * @brief Sets the index of the fx price.
          * @param idx The index of the fx price to set.
          */
-        void fxIdx(size_t idx) { idx_[3] = idx; }
+        inline void fxIdx(size_t idx) { idx_[3] = idx; }
 
         /**
          * @brief Returns true if the object is indexed.
          * @return True if the object is indexed.
          */
-        bool isIndexed() const { return isIndexed_; }
+        inline bool isIndexed() const { return isIndexed_; }
 
         /**
          * @brief Sets the object as indexed.
          * @param isIndexed True if the object is indexed.
          */
-        void isIndexed(bool isIndexed) { isIndexed_ = isIndexed; }
+        inline void isIndexed(bool isIndexed) { isIndexed_ = isIndexed; }
 
        private:
         bool isIndexed_ = false;

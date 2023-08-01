@@ -3,12 +3,12 @@
 
 #include <ql/math/solvers1d/brent.hpp>
 #include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
-#include <type_traits>
 
 namespace Atlas {
 
     /**
-     * @brief An class for equalk payment instruments.
+     * @class EqualPaymentInstrument
+     * @brief An class for equal payment instruments.
      * @ingroup FixedRateInstruments
      */
     template <typename adouble = double>
@@ -47,15 +47,15 @@ namespace Atlas {
          * @param freq payment frequency of the instrument
          * @param notional notional of the instrument
          * @param rate rate of the instrument
-         * @param discountCurveContext discount curve context of the instrument
+         * @param discountContextIdx discount curve context of the instrument
          * @param side side of the instrument
          * @param recalcNotionals recalculate notionals based on the given rate
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               const Context<YieldTermStructure<adouble>>& discountCurveContext, Side side = Side::Long, bool recalcNotionals = false)
+                               size_t discountContextIdx, Side side = Side::Long, bool recalcNotionals = false)
         : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, side, recalcNotionals) {
-            this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement().discountCurveContext(discountCurveContext);
+            this->leg().discountContextIdx(discountContextIdx);
+            this->disbursement().discountContextIdx(discountContextIdx);
         };
 
         void rate(const InterestRate<adouble>& r) override {
@@ -71,7 +71,7 @@ namespace Atlas {
                     couponIdxs.push_back(coupons.at(i).dfIdx());
                 }
 
-                int flag = (this->side_ == Side::Long) ? 1 : -1;
+                int flag                              = (this->side_ == Side::Long) ? 1 : -1;
                 std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, flag);
                 this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(this->dates_).redemptions(redemptionAmounts).rate(this->rate_).build();
 
@@ -88,10 +88,6 @@ namespace Atlas {
         };
 
         InterestRate<adouble> rate() const { return this->rate_; };
-
-        void accept(Visitor<adouble>& visitor) override { visitor.visit(*this); };
-
-        void accept(ConstVisitor<adouble>& visitor) const override { visitor.visit(*this); };
 
        private:
         std::vector<double> calculateRedemptions(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional, int side) {

@@ -5,6 +5,7 @@
 
 namespace Atlas {
     /**
+     * @class CustomFixedRateInstrument
      * @brief A class for custom fixed rate instruments.
      * @ingroup FixedRateInstruments
      */
@@ -14,6 +15,7 @@ namespace Atlas {
         /**
          * @brief Construct a new Custom Fixed Rate Instrument object
          * @details Side is determined by the implied notional of the instrument
+         * 
          * @param dates dates of payment for the instrument, starting with the start date of the first coupon
          * @param redemptions redemption amounts for the instrument. Note: casfhlows are flipped if side is short
          * @param rate rate of the instrument
@@ -33,13 +35,13 @@ namespace Atlas {
          * @param dates dates of payment for the instrument, starting with the start date of the first coupon
          * @param redemptions redemption amounts for the instrument. Note: casfhlows are flipped if side is short
          * @param rate rate of the instrument
-         * @param discountCurveContext discount curve context of the instrument
+         * @param discountContext discount curve context of the instrument
          */
         CustomFixedRateInstrument(const std::vector<Date>& dates, const std::vector<double>& redemptions, const InterestRate<adouble>& rate,
-                                  const Context<YieldTermStructure<adouble>>& discountCurveContext)
+                                  size_t discountContextIdx)
         : CustomFixedRateInstrument(dates, redemptions, rate) {
-            this->leg().discountCurveContext(discountCurveContext);
-            this->disbursement().discountCurveContext(discountCurveContext);
+            this->leg().discountContextIdx(discountContextIdx);
+            this->disbursement().discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

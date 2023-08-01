@@ -16,10 +16,9 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
 #include <atlas/models/spotmarketdatamodel.hpp>
-#include <atlas/multithreading/BS_thread_pool.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
-#include <atlas/visitors/newvisitors/indexingvisitor.hpp>
-#include <atlas/visitors/newvisitors/npvconstvisitor.hpp>
+#include <atlas/visitors/indexingvisitor.hpp>
+#include <atlas/visitors/npvconstvisitor.hpp>
 
 // MT
 #include <atlas/multithreading/threadpool.hpp>
@@ -28,7 +27,7 @@ namespace PricingBenchmark {
     namespace QL = QuantLib;
     namespace AT = Atlas;
 
-    inline void priceZCB_QL_ST(size_t n) {
+    inline double priceZCB_QL_ST(size_t n) {
         QL::Date today(1, QL::January, 2020);
         QL::Settings::instance().evaluationDate() = today;
 
@@ -63,9 +62,11 @@ namespace PricingBenchmark {
             bond.setPricingEngine(bondEngine);
             npv += bond.NPV();
         });
+
+        return npv;
     }
 
-    inline void priceZCB_AT_ST(size_t n) {
+    inline double priceZCB_AT_ST(size_t n) {
         // bond parameters
         AT::Date startDate              = AT::Date(1, QL::January, 2020);
         AT::Date endDate                = startDate + QL::Period(10, QL::Years);
@@ -78,11 +79,9 @@ namespace PricingBenchmark {
 
         // market data
         AT::MarketStore<double> marketStore(startDate);
-        AT::FlatForwardStrategy<double> strategy(startDate, curveRate);
-        AT::YieldTermStructure<double> curve(std::make_unique<AT::FlatForwardStrategy<double>>(strategy));
-        AT::RateIndex<double> index(startDate, paymentFreq);
-        marketStore.addCurve("CLP", curve, index);
-        AT::Context<AT::YieldTermStructure<double>> context = marketStore.curveContext("CLP");
+        AT::YieldTermStructure<double> curve = AT::FlatForwardTermStructure<double>(startDate, curveRate);
+        marketStore.curveManager().addCurveContext("CLP", curve);
+        size_t context = marketStore.curveManager().curveContext("CLP").idx();
 
         std::vector<AT::InstrumentVariant<double>> bonds;
         bonds.reserve(n);
@@ -100,10 +99,10 @@ namespace PricingBenchmark {
         AT::NPVConstVisitor npvVisitor(marketData);
 
         std::for_each(bonds.begin(), bonds.end(), [&](auto& bond) { std::visit(npvVisitor, bond); });
-        double npv = npvVisitor.getResults();
+        return npvVisitor.getResults();
     }
 
-    inline void priceBond_QL_ST(size_t n) {
+    inline double priceBond_QL_ST(size_t n) {
         QL::Date today(1, QL::January, 2020);
         QL::Settings::instance().evaluationDate() = today;
 
@@ -125,8 +124,9 @@ namespace PricingBenchmark {
         }
 
         // discounting term structure
-        QL::DayCounter curveDayCounter = QL::Actual360();
-        boost::shared_ptr<QL::FlatForward> curvePtr(new QL::FlatForward(today, curveRate, curveDayCounter));
+        QL::DayCounter curveDayCounter   = QL::Actual360();
+        QL::Compounding curveCompounding = QL::Simple;
+        boost::shared_ptr<QL::FlatForward> curvePtr(new QL::FlatForward(today, curveRate, curveDayCounter, curveCompounding));
         QL::Handle<QL::YieldTermStructure> discountingTermStructure(curvePtr);
 
         // pricing engine
@@ -138,9 +138,11 @@ namespace PricingBenchmark {
             bond.setPricingEngine(bondEngine);
             npv += bond.NPV();
         });
+
+        return npv;
     }
 
-    inline void priceBond_AT_ST(size_t n) {
+    inline double priceBond_AT_ST(size_t n) {
         // bond parameters
         AT::Date startDate              = AT::Date(1, QL::January, 2020);
         AT::Date endDate                = startDate + QL::Period(10, QL::Years);
@@ -154,11 +156,11 @@ namespace PricingBenchmark {
         // market data
 
         AT::MarketStore<double> marketStore(startDate);
-        AT::FlatForwardStrategy<double> strategy(startDate, curveRate);
-        AT::YieldTermStructure<double> curve(std::make_unique<AT::FlatForwardStrategy<double>>(strategy));
-        AT::RateIndex<double> index(startDate, paymentFreq);
-        marketStore.addCurve("CLP", curve, index);
-        AT::Context<AT::YieldTermStructure<double>> context = marketStore.curveContext("CLP");
+        AT::DayCounter curveDayCounter       = QL::Actual360();
+        QL::Compounding curveCompounding     = QL::Simple;
+        AT::YieldTermStructure<double> curve = AT::FlatForwardTermStructure<double>(startDate, curveRate, curveDayCounter, curveCompounding);
+        marketStore.curveManager().addCurveContext("CLP", curve);
+        size_t context = marketStore.curveManager().curveContext("CLP").idx();
 
         std::vector<AT::InstrumentVariant<double>> bonds;
         bonds.reserve(n);
@@ -176,10 +178,10 @@ namespace PricingBenchmark {
         AT::NPVConstVisitor npvVisitor(marketData);
 
         std::for_each(bonds.begin(), bonds.end(), [&](auto& bond) { std::visit(npvVisitor, bond); });
-        double npv = npvVisitor.getResults();
+        return npvVisitor.getResults();
     }
 
-    inline void priceBond_QL_MT(size_t n) {
+    inline double priceBond_QL_MT(size_t n) {
         QL::Date today(1, QL::January, 2020);
         QL::Settings::instance().evaluationDate() = today;
 
@@ -193,9 +195,11 @@ namespace PricingBenchmark {
         double notional   = 100.0;
 
         // curves inside to reduce shared memory access
-        QL::DayCounter curveDayCounter = QL::Actual360();
-        boost::shared_ptr<QL::FlatForward> curvePtr(new QL::FlatForward(today, curveRate, curveDayCounter));
+        QL::DayCounter curveDayCounter   = QL::Actual360();
+        QL::Compounding curveCompounding = QL::Simple;
+        boost::shared_ptr<QL::FlatForward> curvePtr(new QL::FlatForward(today, curveRate, curveDayCounter, curveCompounding));
         QL::Handle<QL::YieldTermStructure> discountingTermStructure(curvePtr);
+
         boost::shared_ptr<QL::PricingEngine> bondEngine(new QL::DiscountingBondEngine(discountingTermStructure));
 
         std::mutex mtx;
@@ -207,7 +211,8 @@ namespace PricingBenchmark {
         for (size_t i = 0; i < numThreads; ++i) {
             auto task = [&]() {
                 double npv_ = 0.0;
-                std::lock_guard<std::mutex> lock(mtx);  // --> from this point not thread safe (segmentation fault)
+                std::lock_guard l(mtx);
+
                 std::vector<QL::FixedRateBond> bonds;
                 bonds.reserve(n / numThreads);
                 for (size_t i = 0; i < n / numThreads; ++i) {
@@ -227,23 +232,28 @@ namespace PricingBenchmark {
         }
         for (auto& future : futures) { pool->activeWait(future); }
         pool->stop();
+
+        return npv;
     }
 
-    inline void priceBond_AT_MT(size_t n) {
+    inline double priceBond_AT_MT(size_t n) {
         // bond parameters
-        AT::Date startDate        = AT::Date(1, QL::January, 2020);
-        AT::Date endDate          = startDate + QL::Period(10, QL::Years);
-        AT::Frequency paymentFreq = AT::Frequency::Semiannual;
-        double couponRate         = 0.05;
-        double curveRate          = 0.06;
-        double notional           = 100.0;
+        AT::Date startDate              = AT::Date(1, QL::January, 2020);
+        AT::Date endDate                = startDate + QL::Period(10, QL::Years);
+        AT::Frequency paymentFreq       = AT::Frequency::Semiannual;
+        double couponRate               = 0.05;
+        double curveRate                = 0.06;
+        double notional                 = 100.0;
+        AT::DayCounter couponDayCounter = AT::Thirty360(QL::Thirty360::BondBasis);  // --> must be defined inside thread, to be fixed in future
+        AT::InterestRate rate(couponRate, couponDayCounter);
 
         // market data
         AT::MarketStore<double> marketStore(startDate);
-        AT::FlatForwardStrategy<double> strategy(startDate, curveRate);
-        AT::YieldTermStructure<double> curve(std::make_unique<AT::FlatForwardStrategy<double>>(strategy));
-        AT::RateIndex<double> index(startDate, paymentFreq);
-        marketStore.addCurve("CLP", curve, index);
+        AT::DayCounter curveDayCounter       = QL::Actual360();
+        QL::Compounding curveCompounding     = QL::Simple;
+        AT::YieldTermStructure<double> curve = AT::FlatForwardTermStructure<double>(startDate, curveRate, curveDayCounter, curveCompounding);
+        marketStore.curveManager().addCurveContext("CLP", curve);
+        size_t context = marketStore.curveManager().curveContext("CLP").idx();
 
         // MT
         size_t numThreads = std::thread::hardware_concurrency();
@@ -254,13 +264,9 @@ namespace PricingBenchmark {
         double npv = 0.0;
         for (size_t i = 0; i < numThreads; ++i) {
             auto task = [&]() {
-                AT::MarketStore localStore(marketStore);
-                AT::Context<AT::YieldTermStructure<double>> context = localStore.curveContext("CLP");
+                AT::MarketStore localStore = marketStore;
 
                 // building
-                AT::DayCounter couponDayCounter =
-                    AT::Thirty360(QL::Thirty360::BondBasis);  // --> must be defined inside thread, to be fixed in future
-                AT::InterestRate rate(couponRate, couponDayCounter);
                 std::vector<AT::InstrumentVariant<double>> slice;
                 slice.reserve(n / numThreads);
                 for (size_t j = 0; j < n / numThreads; ++j) {
@@ -286,7 +292,10 @@ namespace PricingBenchmark {
         }
         for (auto& future : futures) { pool->activeWait(future); }
         pool->stop();
+
+        return npv;
     }
+
 }  // namespace PricingBenchmark
 
 #endif /* E33FF0E7_2A2F_48F6_9352_1F04A5DA0613 */

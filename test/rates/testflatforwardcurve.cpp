@@ -1,7 +1,7 @@
 
-#include <gtest/gtest.h>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
+#include <gtest/gtest.h>
 
 using namespace Atlas;
 
@@ -15,7 +15,7 @@ TEST(FlatForwardCurve, DiscountFactors) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::FlatForward qlCurve(refDate, rate, dayCounter, compounding, frequency);
-    FlatForwardStrategy<double> curve(refDate, rate, dayCounter, compounding, frequency);
+    FlatForwardTermStructure<double> curve(refDate, rate, dayCounter, compounding, frequency);
 
     Date startDate = refDate;
     Date endDate   = startDate + 5 * TimeUnit::Years;
@@ -40,7 +40,7 @@ TEST(FlatForwardCurve, ForwardRates) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::FlatForward qlCurve(refDate, rate, dayCounter, compounding, frequency);
-    FlatForwardStrategy<double> curve(refDate, rate, dayCounter, compounding, frequency);
+    FlatForwardTermStructure<double> curve(refDate, rate, dayCounter, compounding, frequency);
 
     Date startDate = refDate;
     Date endDate   = startDate + 5 * TimeUnit::Years;
@@ -49,8 +49,8 @@ TEST(FlatForwardCurve, ForwardRates) {
     Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq).withConvention(BusinessDayConvention::Unadjusted);
 
     for (size_t i = 0; i < schedule.size() - 1; ++i) {
-        Date start = schedule[i];
-        Date end   = schedule[i + 1];
+        Date start      = schedule[i];
+        Date end        = schedule[i + 1];
         double expected = qlCurve.forwardRate(start, end, dayCounter, compounding, frequency);
         double actual   = curve.forwardRate(start, end, dayCounter, compounding, frequency);
         EXPECT_NEAR(actual, expected, 1e-9);
@@ -69,7 +69,7 @@ TEST(FlatForwardTermStructure, DiscountFactors) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::FlatForward qlCurve(refDate, rate, dayCounter, compounding, frequency);
-    BaseYieldTermStructure curve = FlatForwardTermStructure(refDate, rate, dayCounter, compounding, frequency);
+    YieldTermStructure curve = FlatForwardTermStructure(refDate, rate, dayCounter, compounding, frequency);
 
     Date startDate = refDate;
     Date endDate   = startDate + 5 * TimeUnit::Years;
@@ -94,7 +94,7 @@ TEST(FlatForwardTermStructure, ForwardRates) {
     Frequency frequency                             = Frequency::Annual;
     Calendar calendar                               = QuantLib::NullCalendar();
     QuantLib::FlatForward qlCurve(refDate, rate, dayCounter, compounding, frequency);
-    BaseYieldTermStructure curve = FlatForwardTermStructure(refDate, rate, dayCounter, compounding, frequency);
+    YieldTermStructure curve = FlatForwardTermStructure(refDate, rate, dayCounter, compounding, frequency);
 
     Date startDate = refDate;
     Date endDate   = startDate + 5 * TimeUnit::Years;
@@ -103,8 +103,8 @@ TEST(FlatForwardTermStructure, ForwardRates) {
     Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq).withConvention(BusinessDayConvention::Unadjusted);
 
     for (size_t i = 0; i < schedule.size() - 1; ++i) {
-        Date start = schedule[i];
-        Date end   = schedule[i + 1];
+        Date start      = schedule[i];
+        Date end        = schedule[i + 1];
         double expected = qlCurve.forwardRate(start, end, dayCounter, compounding, frequency);
         double actual   = curve.forwardRate(start, end, dayCounter, compounding, frequency);
         EXPECT_NEAR(actual, expected, 1e-9);

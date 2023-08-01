@@ -6,7 +6,10 @@ using namespace Atlas;
 
 TEST(FixedRateCouponTest, Attributes) {
     TestSetup<double> vars;
-    FixedRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.atlasRate, vars.store.curveContext("TEST"));
+
+    const auto& curveManager = vars.store.curveManager();
+    size_t idx               = curveManager.curveContext("TEST").idx();
+    FixedRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.atlasRate, idx);
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
@@ -123,7 +126,11 @@ TEST(FixedRateCouponTest, AccrualSameDates) {
 
 TEST(FloatingRateCouponTest, Attributes) {
     TestSetup<double> vars;
-    FloatingRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.store.rateIndexContext("TEST"));
+
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+
+    FloatingRateCoupon<double> coupon(vars.startDate, vars.endDate, vars.notional, vars.spread, index.rateDefinition());
 
     EXPECT_EQ(vars.startDate, coupon.startDate());
     EXPECT_EQ(vars.endDate, coupon.endDate());
@@ -139,13 +146,16 @@ TEST(FloatingRateCouponTest, ValidDates) {
     TestSetup<double> vars;
     double notional = 1000;
     double spread   = 0.0;
-    auto& context   = vars.store.rateIndexContext("TEST");
-    auto& index     = context.object();
-    InterestRate<double> rate(0.05, index.dayCounter(), index.rateCompounding(), index.rateFrequency());  // Assuming double as the template type
+
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+    auto rateDef            = index.rateDefinition();
+
+    InterestRate<double> rate(0.05, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());  // Assuming double as the template type
     Date refStartDate(1, Month::January, 2023);
     Date refEndDate(31, Month::March, 2023);
 
-    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, vars.store.rateIndexContext("TEST"));
+    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, rateDef);
     coupon.fixing(rate.rate());
     double expectedAccruedAmount = notional * (rate.compoundFactor(refStartDate, refEndDate) - 1.0);
     EXPECT_DOUBLE_EQ(coupon.accruedAmount(refStartDate, refEndDate), expectedAccruedAmount);
@@ -161,10 +171,13 @@ TEST(FloatingRateCouponTest, DatesBeforeReference) {
 
     TestSetup<double> vars;
     double spread = 0.0;
-    auto& context = vars.store.rateIndexContext("TEST");
-    auto& index   = context.object();
-    InterestRate<double> rate(0.05, index.dayCounter(), index.rateCompounding(), index.rateFrequency());  // Assuming double as the template type
-    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, vars.store.rateIndexContext("TEST"));
+
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+    auto rateDef            = index.rateDefinition();
+    InterestRate<double> rate(0.05, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());  // Assuming double as the template type
+
+    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, rateDef);
 
     double expectedAccruedAmount = 0.0;  // Coupon dates are before the reference dates
 
@@ -180,12 +193,15 @@ TEST(FloatingRateCouponTest, DatesAfterReference) {
     Date refEndDate(31, Month::March, 2023);
 
     TestSetup<double> vars;
-    double spread   = 0.0;
-    auto& context   = vars.store.rateIndexContext("TEST");
-    auto& index     = context.object();
+    double spread = 0.0;
+
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+    auto rateDef            = index.rateDefinition();
+    InterestRate<double> rate(0.05, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());  // Assuming double as the template type
+
     double notional = 5000;
-    InterestRate<double> rate(0.05, index.dayCounter(), index.rateCompounding(), index.rateFrequency());  // Assuming double as the template type
-    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, vars.store.rateIndexContext("TEST"));
+    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, rateDef);
     double expectedAccruedAmount = 0.0;  // Coupon dates are after the reference dates
 
     EXPECT_DOUBLE_EQ(coupon.accruedAmount(refStartDate, refEndDate), expectedAccruedAmount);
@@ -202,10 +218,13 @@ TEST(FloatingRateCouponTest, FirstOutSecondInDates) {
     TestSetup<double> vars;
     double notional = 5000;
     double spread   = 0.0;
-    auto& context   = vars.store.rateIndexContext("TEST");
-    auto& index     = context.object();
-    InterestRate<double> rate(0.05, index.dayCounter(), index.rateCompounding(), index.rateFrequency());  // Assuming double as the template type
-    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, vars.store.rateIndexContext("TEST"));
+
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+    auto rateDef            = index.rateDefinition();
+    InterestRate<double> rate(0.05, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());  // Assuming double as the template type
+
+    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, rateDef);
     coupon.fixing(rate.rate());
     // Expected accrued amount is the same as if the first date was the coupon start date
     double expectedAccruedAmount = notional * (rate.compoundFactor(couponStartDate, refEndDate) - 1.0);
@@ -221,12 +240,14 @@ TEST(FloatingRateCouponTest, FirstInSecondOutDates) {
     Date refEndDate(31, Month::July, 2023);
 
     TestSetup<double> vars;
-    double notional = 5000;
-    double spread   = 0.0;
-    auto& context   = vars.store.rateIndexContext("TEST");
-    auto& index     = context.object();
-    InterestRate<double> rate(0.05, index.dayCounter(), index.rateCompounding(), index.rateFrequency());  // Assuming double as the template type
-    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, vars.store.rateIndexContext("TEST"));
+    double notional          = 5000;
+    double spread            = 0.0;
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+    auto rateDef            = index.rateDefinition();
+    InterestRate<double> rate(0.05, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());  // Assuming double as the template type
+    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, rateDef);
+
     coupon.fixing(rate.rate());
     // Expected accrued amount is the same as if the second date was the coupon end date
     double expectedAccruedAmount = notional * (rate.compoundFactor(refStartDate, couponEndDate) - 1.0);
@@ -243,12 +264,13 @@ TEST(FloatingRateCouponTest, SameStartAndEndDate) {
     Date refEndDate(31, Month::March, 2023);
 
     TestSetup<double> vars;
-    double notional = 5000;
-    double spread   = 0.0;
-    auto& context   = vars.store.rateIndexContext("TEST");
-    auto& index     = context.object();
-    InterestRate<double> rate(0.05, index.dayCounter(), index.rateCompounding(), index.rateFrequency());  // Assuming double as the template type
-    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, vars.store.rateIndexContext("TEST"));
+    double notional          = 5000;
+    double spread            = 0.0;
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+    auto rateDef            = index.rateDefinition();
+    InterestRate<double> rate(0.05, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());  // Assuming double as the template type
+    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, rateDef);
 
     double expectedAccruedAmount = 0.0;  // Start date is the same as the end date
 
@@ -262,12 +284,14 @@ TEST(FloatingRateCouponTest, AccrualSameDates) {
     Date couponEndDate(31, Month::May, 2023);
 
     TestSetup<double> vars;
-    double notional = 5000;
-    double spread   = 0.0;
-    auto& context   = vars.store.rateIndexContext("TEST");
-    auto& index     = context.object();
-    InterestRate<double> rate(0.05, index.dayCounter(), index.rateCompounding(), index.rateFrequency());  // Assuming double as the template type
-    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, vars.store.rateIndexContext("TEST"));
+    double notional          = 5000;
+    double spread            = 0.0;
+    const auto& curveManager = vars.store.curveManager();
+    const auto& index        = curveManager.curveContext("TEST").index();
+    auto rateDef            = index.rateDefinition();
+    InterestRate<double> rate(0.05, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());  // Assuming double as the template type
+
+    FloatingRateCoupon<double> coupon(couponStartDate, couponEndDate, notional, spread, rateDef);
     coupon.fixing(rate.rate());
     double expectedAccruedAmount = notional * (rate.compoundFactor(couponStartDate, couponEndDate) - 1.0);
 

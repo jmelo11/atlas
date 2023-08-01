@@ -7,6 +7,12 @@
 
 namespace Atlas {
 
+    /**
+     * @class LinearInterpolator
+     * @brief Linear interpolation
+     * 
+     * @tparam adouble 
+     */
     template <typename adouble>
     class LinearInterpolator : public Interpolator<adouble> {
        public:

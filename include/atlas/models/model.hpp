@@ -37,11 +37,6 @@ namespace Atlas {
         MarketRequest marketRequest_;
     };
 
-    template <typename adouble>
-    class MonteCarloEngine {
-        virtual bool nextScenario(const std::vector<Date>& evalDates, Scenario<adouble>& scenario) const = 0;
-    };
-
 }  // namespace Atlas
 
 #endif /* CB4131F2_7926_4625_AEEC_DD73178CBD54 */
