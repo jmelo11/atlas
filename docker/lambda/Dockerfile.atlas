@@ -5,6 +5,7 @@ ARG INSTALL_DIR='/builds'
 ARG nproc=12
 VOLUME [ "/pythonpackage" ]
 
+COPY . /app
 WORKDIR /app/build
 
 RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
