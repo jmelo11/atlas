@@ -6,6 +6,7 @@ project(
   LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(GNUInstallDirs)
 file(GLOB SOURCES "*.cpp")
@@ -16,6 +17,7 @@ add_executable(${PROJECT_NAME} ${INCLUDES} ${SOURCES})
 find_package(nanobench REQUIRED)
 find_package(Boost REQUIRED)
 find_package(QuantLib REQUIRED)
+find_package(Threads REQUIRED)
 
 # parent folder
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/include"
@@ -27,3 +29,4 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Atlas)
 target_link_libraries(${PROJECT_NAME} PUBLIC QuantLib::QuantLib)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 target_link_libraries(${PROJECT_NAME} PUBLIC nanobench::nanobench)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)

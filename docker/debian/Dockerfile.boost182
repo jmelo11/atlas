@@ -1,0 +1,19 @@
+FROM debian:11.7
+
+ARG nproc=12
+
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -f -y build-essential wget libbz2-dev autoconf libtool dos2unix cmake zlib1g-dev opencl-headers ocl-icd-opencl-dev openssl libssl-dev git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz && \
+    tar -xzf boost_1_82_0.tar.gz && \
+    cd boost_1_82_0 && \
+    ./bootstrap.sh && \
+    ./b2 install -j 8 && \
+    cd .. && \
+    rm -rf boost_1_82_0.tar.gz boost_1_82_0
+
+CMD ["bash"]

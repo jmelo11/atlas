@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 
 void py_parsers(py::module& m) {
+    m.def("parseDate", py::overload_cast<const Date&>(&parseDate), py::arg("date"));
     m.def("parseDate", py::overload_cast<const std::string&, const std::string&>(&parseDate), py::arg("date"), py::arg("format") = "%Y-%m-%d");
     m.def("parseCurrency", py::overload_cast<const std::string&>(&parseCurrency));
     m.def("parsePeriod", py::overload_cast<const std::string&>(&parsePeriod));

@@ -1,0 +1,19 @@
+FROM boost182:latest
+
+RUN apt-get update && apt-get install -y libffi-dev
+RUN wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz && \
+    tar -xzf Python-3.10.0.tgz && \
+    cd Python-3.10.0 && \
+    ./configure --enable-optimizations && \
+    make -j ${nproc} && \
+    make altinstall && \
+    cd .. && \
+    rm -rf Python-3.10.0.tgz Python-3.10.0
+
+# install pip
+
+RUN wget https://bootstrap.pypa.io/get-pip.py && \
+    python3.10 get-pip.py && \
+    rm -rf get-pip.py
+
+CMD ["bash"]

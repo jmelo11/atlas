@@ -1,0 +1,21 @@
+FROM public.ecr.aws/lambda/python:3.10
+
+ARG nproc=12
+
+RUN yum update -y && \
+    yum install -y gcc10 gcc10-c++ bzip2-devel libffi-devel wget tar gzip zlib zlib-devel make openssl-devel git
+
+ENV CC=/usr/bin/gcc10-cc
+ENV CXX=/usr/bin/gcc10-g++
+
+RUN wget https://cmake.org/files/v3.21/cmake-3.21.3.tar.gz
+
+RUN tar -xf cmake-3.21.3.tar.gz && \
+    cd cmake-3.21.3 && \
+    ./bootstrap && \
+    make && \
+    make install
+
+RUN rm -rf cmake-3.21.3 cmake-3.21.3.tar.gz
+
+CMD ["bash"]

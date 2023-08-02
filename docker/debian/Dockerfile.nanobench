@@ -1,0 +1,13 @@
+FROM quantlib:latest
+
+ARG BUILD_TYPE=Release
+ARG INSTALL_DIR='/builds'
+ARG nproc=12
+
+WORKDIR /app/repos/nanobench/build
+RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} && \
+    cmake --build . --config ${BUILD_TYPE} --target install -j ${nproc}
+
+CMD [ "bash" ]

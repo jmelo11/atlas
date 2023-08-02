@@ -1,0 +1,13 @@
+FROM cmake321:latest
+
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz
+
+RUN yum groupinstall "Development Tools" -y
+RUN tar -xf boost_1_82_0.tar.gz && \
+    cd boost_1_82_0 && \
+    ./bootstrap.sh  && \
+    ./b2 install
+
+RUN rm -rf boost_1_82_0.tar.gz boost_1_82_0
+
+CMD ["bash"]

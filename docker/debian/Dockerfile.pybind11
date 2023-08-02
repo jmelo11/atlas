@@ -1,0 +1,19 @@
+FROM python310:latest
+
+ARG BUILD_TYPE=Release
+ARG INSTALL_DIR='/builds'
+ARG nproc=12
+
+COPY . /app
+RUN cd app && git submodule update --init --recursive
+
+WORKDIR /app/repos/pybind11/build
+RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} \
+    -DBUILD_TESTING=OFF &&\
+    cmake --build . --config ${BUILD_TYPE} --target install -j ${nproc}
+
+RUN pip3.10 install setuptools wheel pybind11
+
+CMD ["bash"]

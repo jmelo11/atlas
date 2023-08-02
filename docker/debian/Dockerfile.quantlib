@@ -1,0 +1,19 @@
+FROM pybind11:latest
+
+ARG BUILD_TYPE=Release
+ARG INSTALL_DIR='/builds'
+ARG nproc=12
+
+WORKDIR /app/repos/QuantLib/build
+RUN rm -rf * && cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+    -DQL_BUILD_BENCHMARK=OFF \
+    -DQL_BUILD_EXAMPLES=OFF \
+    -DQL_BUILD_TEST_SUITE=OFF \
+    -DQL_TAGGED_LAYOUT=OFF \
+    -DBoost_INCLUDE_DIR='/usr/include/boost158' \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+    -DCMAKE_PREFIX_PATH=${INSTALL_DIR} && \
+    cmake --build . --config ${BUILD_TYPE} --target install -j ${nproc}
+
+CMD ["bash"]
