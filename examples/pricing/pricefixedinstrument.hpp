@@ -26,7 +26,7 @@ namespace PricingExample {
 
         MarketStore<double> store                             = createStore(startDate);
         const YieldTermStructureManager<double>& curveManager = store.curveManager();
-        CurveContext context                                  = curveManager.curveContext("ExampleCurve");
+        CurveContext context                                  = curveManager.curveContext("DiscountCurve");
         size_t idx                                            = context.idx();
 
         InstrumentVariant<double> instrument = FixedRateBulletInstrument<double>(startDate, endDate, paymentFrequency, notional, rate, idx, side);
@@ -71,7 +71,7 @@ namespace PricingExample {
 
         MarketStore<double> store                             = createStore(startDate);
         const YieldTermStructureManager<double>& curveManager = store.curveManager();
-        CurveContext context                                  = curveManager.curveContext("ExampleCurve");
+        CurveContext context                                  = curveManager.curveContext("DiscountCurve");
         size_t idx                                            = context.idx();
 
         std::map<Date, double> redemptions   = {{Date(27, Month::Aug, 2023), 50}, {Date(27, Month::Sep, 2023), 50}, {Date(27, Month::Oct, 2023), 50}};

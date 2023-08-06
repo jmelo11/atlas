@@ -102,10 +102,7 @@ namespace Atlas {
          *
          * @return adouble
          */
-        inline Results getResults() const {
-            results_.npv = results_.disbursementsNPV + results_.redemptionsNPV + results_.floatingRateCouponsNPV + results_.fixedRateCouponsNPV;
-            return results_;
-        };
+        inline Results getResults() const { return results_; };
 
        private:
         /**
@@ -125,6 +122,7 @@ namespace Atlas {
             if constexpr (std::is_base_of_v<FixedRateCouponStreamMixin<adouble>, CS>) {
                 for (const auto& cashflow : cashflows.fixedRateCoupons()) results_.fixedRateCouponsNPV += cashflowNPV(cashflow);
             }
+            results_.npv = results_.disbursementsNPV + results_.redemptionsNPV + results_.floatingRateCouponsNPV + results_.fixedRateCouponsNPV;
         };
 
         template <class C>

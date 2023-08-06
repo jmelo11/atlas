@@ -19,11 +19,13 @@ namespace PricingExample {
 
         MarketStore<double> store                             = createStore(startDate);
         const YieldTermStructureManager<double>& curveManager = store.curveManager();
-        CurveContext context                                  = curveManager.curveContext("ExampleCurve");
-        size_t idx                                            = context.idx();
-        InterestRateIndex index                               = context.index();
+        CurveContext forecastContext                          = curveManager.curveContext("ForecastCurve");
+        CurveContext discountContext                          = curveManager.curveContext("DiscountCurve");
+        size_t discountContextIdx                             = discountContext.idx();
+        size_t forecastContextIdx                             = forecastContext.idx();
+        InterestRateIndex index                               = forecastContext.index();
 
-        InstrumentVariant<double> instrument = FloatingRateBulletInstrument(startDate, endDate, notional, spread, index, idx, idx);
+        InstrumentVariant<double> instrument = FloatingRateBulletInstrument(startDate, endDate, notional, spread, index, discountContextIdx, forecastContextIdx);
 
         // indexing
         IndexingVisitor<double> indexingVisitor;

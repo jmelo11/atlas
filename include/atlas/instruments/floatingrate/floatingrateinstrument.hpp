@@ -45,7 +45,10 @@ namespace Atlas {
          *
          * @param s
          */
-        inline void spread(adouble s) { cashflows_.spread(s); };
+        inline void spread(adouble s) {
+            spread_ = s;
+            cashflows_.spread(s);
+        };
 
         Cashflows& cashflows() { return cashflows_; };
 

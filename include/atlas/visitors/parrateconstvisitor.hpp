@@ -123,8 +123,7 @@ namespace Atlas {
                 npvVisitor(evalInst);
                 return npvVisitor.getResults().npv;
             };
-
-            reset();
+            
             QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
                 results_.parRate = solver_.solve(f, accuracy_, guess_, 0.0001);
@@ -148,7 +147,6 @@ namespace Atlas {
                 return npvVisitor.getResults().npv;
             };
 
-            reset();
             QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
                 results_.parSpread = solver_.solve(f, accuracy_, guess_, 0.0001);

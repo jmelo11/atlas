@@ -61,17 +61,21 @@ namespace PricingExample {
     }
 
     inline MarketStore<double> createStore(const Date& refDate) {
-        double rate = 0.03;
-        double fx   = 800;
+        double forecastRate = 0.05;
+        double discountRate = 0.1;
+        double fx           = 800;
 
         DayCounter dc           = Actual360();
         Compounding compounding = Compounding::Simple;
         Frequency frequency     = Frequency::Annual;
 
-        YieldTermStructure curve = FlatForwardTermStructure(refDate, rate, dc, compounding, frequency);
-        InterestRateIndex index(Frequency::Annual);
+        YieldTermStructure discountCurve  = FlatForwardTermStructure(refDate, discountRate, dc, compounding, frequency);
+        YieldTermStructure forecastCurve = FlatForwardTermStructure(refDate, forecastRate, dc, compounding, frequency);
+        InterestRateIndex index(Frequency::Semiannual);
+        
         MarketStore store(refDate, CLP());
-        store.curveManager().addCurveContext("ExampleCurve", curve, index, CLP());
+        store.curveManager().addCurveContext("ForecastCurve", forecastCurve, index, CLP());
+        store.curveManager().addCurveContext("DiscountCurve", discountCurve, index, CLP());
         store.fxManager().addExchangeRate(CLP(), USD(), fx);
         return store;
     }

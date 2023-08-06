@@ -32,10 +32,13 @@ namespace Atlas {
          * @param idx
          */
         template <template <typename> class CashflowType>
-        void indexCashflows(std::vector<CashflowType<adouble>>& cf, size_t idx) {
-            for (auto& c : cf) { c.discountContextIdx(idx); }
-            if constexpr (std::is_same_v<CashflowType<adouble>, FloatingRateCoupon<adouble>>) {
-                for (auto& c : cf) { c.indexContextIdx(idx); }
+        void indexCashflows(std::vector<CashflowType<adouble>>& cf, size_t idx, bool f) {
+            if (f) {
+                for (auto& c : cf) { c.discountContextIdx(idx); }
+            } else {
+                if constexpr (std::is_same_v<CashflowType<adouble>, FloatingRateCoupon<adouble>>) {
+                    for (auto& c : cf) { c.indexContextIdx(idx); }
+                }
             }
         }
 
@@ -61,7 +64,7 @@ namespace Atlas {
     template <typename adouble = double>
     class RedemptionStreamMixin : public BaseCashflowStreamMixin<adouble> {
        public:
-        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(redemptions_, idx); };
+        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(redemptions_, idx, true); };
 
         void streamIndexContextIdx(size_t idx) override{};
 
@@ -100,9 +103,9 @@ namespace Atlas {
     template <typename adouble = double>
     class FixedRateCouponStreamMixin : public BaseCashflowStreamMixin<adouble> {
        public:
-        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(fixedRateCoupons_, idx); };
+        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(fixedRateCoupons_, idx, true); };
 
-        void streamIndexContextIdx(size_t idx) override { this->indexCashflows(fixedRateCoupons_, idx); };
+        void streamIndexContextIdx(size_t idx) override { this->indexCashflows(fixedRateCoupons_, idx, false); };
 
         void streamSort() override { this->sortCashflows(fixedRateCoupons_); };
 
@@ -143,9 +146,9 @@ namespace Atlas {
     template <typename adouble = double>
     class FloatingRateCouponStreamMixin : public BaseCashflowStreamMixin<adouble> {
        public:
-        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(floatingRateCoupons_, idx); };
+        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(floatingRateCoupons_, idx, true); };
 
-        void streamIndexContextIdx(size_t idx) override { this->indexCashflows(floatingRateCoupons_, idx); };
+        void streamIndexContextIdx(size_t idx) override { this->indexCashflows(floatingRateCoupons_, idx, false); };
 
         void streamSort() override { this->sortCashflows(floatingRateCoupons_); };
 
@@ -186,7 +189,7 @@ namespace Atlas {
     template <typename adouble = double>
     class DisbursementStreamMixin : public BaseCashflowStreamMixin<adouble> {
        public:
-        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(disbursements_, idx); };
+        void streamDiscountContextIdx(size_t idx) override { this->indexCashflows(disbursements_, idx, true); };
 
         void streamIndexContextIdx(size_t idx) override{};
 
