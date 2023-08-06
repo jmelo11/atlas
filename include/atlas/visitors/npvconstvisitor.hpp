@@ -2,8 +2,6 @@
 #define DC329E39_DDE8_403D_8DB9_7FECE70A4FA9
 
 #include <atlas/data/marketdata.hpp>
-#include <atlas/instruments/derivatives/fixfloatswap.hpp>
-#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
@@ -12,7 +10,6 @@
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
 #include <atlas/visitors/basevisitor.hpp>
-
 #include <mutex>
 
 namespace Atlas {
@@ -28,6 +25,14 @@ namespace Atlas {
     template <typename adouble>
     class NPVConstVisitor : public BaseConstVisitor<adouble> {
        public:
+        struct Results {
+            adouble npv                    = 0.0;
+            adouble disbursementsNPV       = 0.0;
+            adouble redemptionsNPV         = 0.0;
+            adouble floatingRateCouponsNPV = 0.0;
+            adouble fixedRateCouponsNPV    = 0.0;
+        };
+
         /**
          * @brief Construct a new NPVConstVisitor object
          *
@@ -42,103 +47,65 @@ namespace Atlas {
          *
          * @param inst CustomFixedRateInstrument
          */
-        void operator()(const CustomFixedRateInstrument<adouble>& inst) const override { fixedIncomeNPV(inst); };
+        void operator()(const CustomFixedRateInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a EqualPaymentInstrument.
          *
          * @param inst EqualPaymentInstrument
          */
-        void operator()(const EqualPaymentInstrument<adouble>& inst) const override { fixedIncomeNPV(inst); };
+        void operator()(const EqualPaymentInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a FixedRateBulletInstrument.
          *
          * @param inst FixedRateBulletInstrument
          */
-        void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { fixedIncomeNPV(inst); };
+        void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a ZeroCouponInstrument.
          *
          * @param inst ZeroCouponInstrument
          */
-        void operator()(const ZeroCouponInstrument<adouble>& inst) const override { fixedIncomeNPV(inst); };
+        void operator()(const ZeroCouponInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a CustomFloatingRateInstrument.
          *
          * @param inst CustomFloatingRateInstrument
          */
-        void operator()(const CustomFloatingRateInstrument<adouble>& inst) const override { fixedIncomeNPV(inst); };
+        void operator()(const CustomFloatingRateInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a FloatingRateBulletInstrument.
          *
          * @param inst FloatingRateBulletInstrument
          */
-        void operator()(const FloatingRateBulletInstrument<adouble>& inst) const override { fixedIncomeNPV(inst); };
+        void operator()(const FloatingRateBulletInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a FloatingRateEqualRedemptionInstrument.
          *
          * @param inst FloatingRateEqualRedemptionInstrument
          */
-        void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { fixedIncomeNPV(inst); };
-
-        /**
-         * @brief Calculate the net present value of a FxForward.
-         *
-         * @param inst
-         */
-        void operator()(const FxForward<adouble>& inst) const override {
-            const auto& cashflows = inst.leg().redemptions();
-            int side              = inst.side() == Side::Long ? 1 : -1;
-
-            if (!cashflows.at(0).isIndexed()) throw std::runtime_error("Redemption is not indexed.");
-            adouble fwd = marketData_.fxs.at(cashflows.at(0).fxIdx());
-            adouble df  = marketData_.dfs.at(cashflows.at(0).dfIdx());
-
-            adouble spot = marketData_.fxs.at(cashflows.at(1).fxIdx());
-            adouble npv  = (fwd - inst.fwdPrice()) * df * side * inst.notional() / spot;
-
-            std::lock_guard<std::mutex> lock(mtx_);
-            npv_ += npv;
-        };
-
-        /**
-         * @brief Calculate the net present value of a FixFloatSwap.
-         *
-         * @param inst FixFloatSwap
-         */
-        void operator()(const FixFloatSwap<adouble>& inst) const override {
-            int side         = inst.side() == Side::Long ? 1 : -1;
-            adouble fixNPV   = 0.0;
-            adouble floatNPV = 0.0;
-
-            const auto& firstCoupon = inst.firstLeg().coupons().at(0);
-            if (!firstCoupon.isIndexed()) throw std::runtime_error("FixFloatSwap is not indexed.");
-            adouble fx = marketData_.fxs.at(firstCoupon.fxIdx());
-            fixNPV += legNPV(inst.firstLeg(), fx);
-            floatNPV += legNPV(inst.secondLeg(), fx);
-            adouble npv = (fixNPV - floatNPV) * side;
-
-            std::lock_guard<std::mutex> lock(mtx_);
-            npv_ += npv;
-        }
+        void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Clear the net present value of the visited instruments.
          *
          */
-        void reset() { npv_ = 0.0; };
+        void reset() { results_ = Results(); };
 
         /**
          * @brief Returns the net present value of the visited instruments.
          *
          * @return adouble
          */
-        inline adouble getResults() const { return npv_; };
+        inline Results getResults() const {
+            results_.npv = results_.disbursementsNPV + results_.redemptionsNPV + results_.floatingRateCouponsNPV + results_.fixedRateCouponsNPV;
+            return results_;
+        };
 
        private:
         /**
@@ -147,59 +114,34 @@ namespace Atlas {
          * @tparam I An instrument class.
          * @param inst The given instrument.
          */
-        template <typename I>
-        void fixedIncomeNPV(const I& inst) const {
-            const auto& disbursement = inst.disbursement();
-            if (!disbursement.isIndexed()) throw std::runtime_error("Disbursement is not indexed.");
-            adouble spotFx = marketData_.fxs.at(disbursement.fxIdx());
-            adouble npv    = legNPV(inst.leg(), spotFx);
+        template <class CS>
+        void cashflowsNPV(const CS& cashflows) const {
             std::lock_guard<std::mutex> lock(mtx_);
-            npv_ += npv;
+            for (const auto& cashflow : cashflows.disbursements()) results_.disbursementsNPV += cashflowNPV(cashflow);
+            for (const auto& cashflow : cashflows.redemptions()) results_.redemptionsNPV += cashflowNPV(cashflow);
+            if constexpr (std::is_base_of_v<FloatingRateCouponStreamMixin<adouble>, CS>) {
+                for (const auto& cashflow : cashflows.floatingRateCoupons()) results_.floatingRateCouponsNPV += cashflowNPV(cashflow);
+            }
+            if constexpr (std::is_base_of_v<FixedRateCouponStreamMixin<adouble>, CS>) {
+                for (const auto& cashflow : cashflows.fixedRateCoupons()) results_.fixedRateCouponsNPV += cashflowNPV(cashflow);
+            }
         };
 
-        /**
-         * @brief Helper method for calculating the net present value of a leg.
-         * @details It applies an exchange rate to the amount.
-         *
-         * @tparam L A leg class.
-         * @param leg The given leg.
-         * @param spotFx The spot fx rate.
-         * @return adouble
-         */
-        template <typename L>
-        adouble legNPV(const L& leg, adouble spotFx) const {
-            adouble npv = 0.0;
-            if constexpr (!std::is_same_v<L, Leg<adouble>>) {
-                for (auto& coupon : leg.coupons()) {
-                    if (!coupon.isIndexed()) throw std::runtime_error("Coupon is not indexed.");
-                    if constexpr (std::is_same_v<L, FloatingRateLeg<adouble>>) {
-                        if (!coupon.isFixingSet()) throw std::runtime_error("Floating coupon does not have fixing set.");
-                    }
-                    adouble df = marketData_.dfs.at(coupon.dfIdx());
-                    if (coupon.applyCcy()) {
-                        adouble fwdFx = marketData_.fxs.at(coupon.fxIdx());
-                        npv += coupon.amount() * df / fwdFx;
-                    } else {
-                        npv += coupon.amount() * df / spotFx;
-                    }
-                }
+        template <class C>
+        adouble cashflowNPV(const C& cashflow) const {
+            if (!cashflow.isIndexed()) throw std::runtime_error("Coupon is not indexed.");
+            if constexpr (std::is_same_v<FloatingRateCoupon<adouble>, C>) {
+                if (!cashflow.isFixingSet()) throw std::runtime_error("Floating coupon does not have fixing set.");
             }
-            for (const auto& redemption : leg.redemptions()) {
-                if (!redemption.isIndexed()) throw std::runtime_error("Redemption is not indexed.");
-                adouble df = marketData_.dfs.at(redemption.dfIdx());
-                if (redemption.applyCcy()) {
-                    adouble fwdFx = marketData_.fxs.at(redemption.fxIdx());
-                    npv += redemption.amount() * df / fwdFx;
-                } else {
-                    npv += redemption.amount() * df / spotFx;
-                }
-            }
+            adouble df  = marketData_.dfs.at(cashflow.dfIdx());
+            adouble fx  = marketData_.fxs.at(cashflow.fxIdx());
+            adouble npv = cashflow.amount() * df / fx * static_cast<int>(cashflow.side());
             return npv;
-        }
+        };
 
         mutable std::mutex mtx_;
-        mutable adouble npv_ = 0.0;
         const MarketData<adouble>& marketData_;
+        mutable Results results_ = Results();
     };
 }  // namespace Atlas
 

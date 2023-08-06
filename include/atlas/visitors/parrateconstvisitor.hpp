@@ -17,6 +17,11 @@ namespace Atlas {
     template <typename adouble>
     class ParRateConstVisitor : public BaseConstVisitor<adouble> {
        public:
+        struct Results {
+            adouble parRate   = 0.0;
+            adouble parSpread = 0.0;
+        };
+
         /**
          * @brief Construct a new Par Rate Const Visitor object
          *
@@ -50,8 +55,8 @@ namespace Atlas {
          * @param inst EqualPaymentInstrument
          */
         void operator()(const EqualPaymentInstrument<adouble>& inst) const override {
-            const auto& coupons = inst.leg().coupons();
-            adouble startDf     = marketData_.dfs.at(inst.disbursement().dfIdx());
+            const auto& coupons = inst.cashflows().fixedRateCoupons();
+            adouble startDf     = marketData_.dfs.at(inst.cashflows().disbursement(0).dfIdx());
             adouble dfSum       = 0;
             for (const auto& coupon : coupons) dfSum += marketData_.dfs.at(coupon.dfIdx());
             adouble payment = startDf / dfSum;
@@ -68,10 +73,10 @@ namespace Atlas {
 
             QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
-                results_["rate"] = solver_.solve(f, accuracy_, guess_, 0.0001);
+                results_.parRate = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 auto g           = [&](double r) { return val(f(r)); };
-                results_["rate"] = solver_.solve(g, accuracy_, guess_, 0.0001);
+                results_.parRate = solver_.solve(g, accuracy_, guess_, 0.0001);
             }
         };
 
@@ -103,52 +108,29 @@ namespace Atlas {
          */
         void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { evalFloatingRateProd(inst); };
 
-        /**
-         * @brief Not implemented.
-         *
-         * @param inst FxForward
-         */
-        void operator()(const FxForward<adouble>& inst) const override { throw std::runtime_error("Not implemented"); };
+        inline void reset() const { results_ = Results(); };
 
-        /**
-         * @brief Not implemented.
-         *
-         * @param inst FixFloatSwap
-         */
-        void operator()(const FixFloatSwap<adouble>& inst) const override { throw std::runtime_error("Not implemented"); };
-
-        void reset() const { results_.clear(); };
-
-        std::unordered_map<std::string, adouble> getResults() const { return results_; };
+        inline Results getResults() const { return results_; };
 
        private:
         template <typename T>
         void evalFixedRateProd(const T& inst) const {
             T evalInst(inst);
             NPVConstVisitor<adouble> npvVisitor(marketData_);
-            size_t pos           = evalInst.disbursement().dfIdx();
-            adouble startDf      = marketData_.dfs.at(pos);
-            adouble disbursement = evalInst.disbursement().amount();
-            adouble fx           = 1.0;
-            if (evalInst.disbursement().applyCcy()) { fx = marketData_.fxs.at(evalInst.disbursement().fxIdx()); }
-
             auto f = [&](adouble r) {
                 npvVisitor.reset();
                 evalInst.rate(r);
                 npvVisitor(evalInst);
-                adouble npv = npvVisitor.getResults();
-
-                adouble results = npv + disbursement * startDf / fx;
-                return results;
+                return npvVisitor.getResults().npv;
             };
 
             reset();
             QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
-                results_["rate"] = solver_.solve(f, accuracy_, guess_, 0.0001);
+                results_.parRate = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 auto g           = [&](double r) { return val(f(r)); };
-                results_["rate"] = solver_.solve(g, accuracy_, guess_, 0.0001);
+                results_.parRate = solver_.solve(g, accuracy_, guess_, 0.0001);
             }
         };
 
@@ -159,37 +141,28 @@ namespace Atlas {
             FixingVisitor<adouble> fixingVisitor(marketData_);
             fixingVisitor(evalInst);
 
-            size_t pos           = evalInst.disbursement().dfIdx();
-            adouble startDf      = marketData_.dfs.at(pos);
-            adouble disbursement = evalInst.disbursement().amount();
-
-            adouble fx = 1.0;
-            if (evalInst.disbursement().applyCcy()) { fx = marketData_.fxs.at(evalInst.disbursement().fxIdx()); }
-
             auto f = [&](adouble s) {
                 npvVisitor.reset();
                 evalInst.spread(s);
                 npvVisitor(evalInst);
-                adouble npv    = npvVisitor.getResults();
-                adouble result = npv + disbursement * startDf / fx;
-                return result;
+                return npvVisitor.getResults().npv;
             };
 
             reset();
             QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
-                results_["spread"] = solver_.solve(f, accuracy_, guess_, 0.0001);
+                results_.parSpread = solver_.solve(f, accuracy_, guess_, 0.0001);
             } else {
                 auto g             = [&](double s) { return val(f(s)); };
-                results_["spread"] = solver_.solve(g, accuracy_, guess_, 0.0001);
+                results_.parSpread = solver_.solve(g, accuracy_, guess_, 0.0001);
             }
         };
 
         const MarketData<adouble>& marketData_;
-        mutable std::unordered_map<std::string, adouble> results_;
         double guess_;
         double accuracy_;
         double maxIter_;
+        mutable Results results_ = Results();
     };
 }  // namespace Atlas
 

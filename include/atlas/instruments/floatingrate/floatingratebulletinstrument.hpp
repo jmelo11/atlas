@@ -25,20 +25,18 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                     const InterestRateIndex<adouble>& index, Side side = Side::Long)
-        : FloatingRateInstrument<adouble>(startDate, endDate, side, notional, spread) {
-            this->leg_ = MakeLeg<FloatingRateLeg, adouble>()
-                             .startDate(this->startDate_)
-                             .endDate(this->endDate_)
-                             .notional(this->notional_)
-                             .spread(this->spread_)
-                             .side(this->side_)
-                             .interestRateIndex(index)
-                             .build();
+                                     const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+        : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread, side) {
+            Schedule schedule       = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+            std::vector<Date> dates = schedule.dates();
 
-            int flag             = (this->side_ == Side::Long) ? 1 : -1;
-            adouble disbursement = -this->notional_ * flag;
-            this->disbursement(Cashflow<adouble>(startDate, disbursement));
+            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
+            this->cashflows_.addRedemption(Cashflow<adouble>(endDate, notional, side));
+            for (size_t i = 1; i < dates.size(); i++) {
+                this->cashflows_.addFloatingRateCoupon(
+                    FloatingRateCoupon<adouble>(dates.at(i - 1), dates.at(i), notional, spread, index.rateDefinition(), side));
+            }
         };
 
         /**
@@ -55,11 +53,10 @@ namespace Atlas {
          */
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                      const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                     Side side = Side::Long)
+                                     Side side = Side::Recieve)
         : FloatingRateBulletInstrument(startDate, endDate, notional, spread, index, side) {
-            this->leg().indexContextIdx(indexContextIdx);
-            this->leg().discountContextIdx(discountContextIdx);
-            this->disbursement().discountContextIdx(discountContextIdx);
+            this->cashflows_.indexContextIdx(indexContextIdx);
+            this->cashflows_.discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

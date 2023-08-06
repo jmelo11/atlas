@@ -22,18 +22,21 @@ namespace Atlas {
          * @param rate rate of the instrument
          */
         FixedRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                           const InterestRate<adouble>& rate, Side side = Side::Long)
+                                           const InterestRate<adouble>& rate, Side side = Side::Recieve)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
             Schedule schedule        = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
             std::vector<Date> dates  = schedule.dates();
             adouble redemptionAmount = notional / (dates.size() - 1);
             std::vector<adouble> redemptions(dates.size() - 1, redemptionAmount);
 
-            this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(dates).notional(notional).redemptions(redemptions).rate(this->rate_).build();
-
-            int flag             = (this->side_ == Side::Long) ? 1 : -1;
-            adouble disbursement = -this->notional_ * flag;
-            this->disbursement(Cashflow<adouble>(startDate, disbursement));
+            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
+            double tmpNotional = notional;
+            for (size_t i = 1; i < dates.size(); i++) {
+                this->cashflows_.addRedemption(Cashflow<adouble>(dates.at(i), redemptions.at(i - 1), side));
+                this->cashflows_.addFixedRateCoupon(FixedRateCoupon<adouble>(dates.at(i - 1), dates.at(i), tmpNotional, rate, side));
+                tmpNotional -= redemptions.at(i - 1);
+            }
         };
 
         /**
@@ -47,10 +50,9 @@ namespace Atlas {
          * @param discountContextIdx discount curve context of the instrument
          */
         FixedRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional,
-                                           const InterestRate<adouble>& rate, size_t discountContextIdx, Side side = Side::Long)
+                                           const InterestRate<adouble>& rate, size_t discountContextIdx, Side side = Side::Recieve)
         : FixedRateEqualRedemptionInstrument(startDate, endDate, freq, notional, rate, side) {
-            this->leg().discountContextIdx(discountContextIdx);
-            this->disbursement().discountContextIdx(discountContextIdx);
+            this->cashflows_.discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

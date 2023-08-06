@@ -99,7 +99,7 @@ namespace PricingBenchmark {
         AT::NPVConstVisitor npvVisitor(marketData);
 
         std::for_each(bonds.begin(), bonds.end(), [&](auto& bond) { std::visit(npvVisitor, bond); });
-        return npvVisitor.getResults();
+        return npvVisitor.getResults().npv;
     }
 
     inline double priceBond_QL_ST(size_t n) {
@@ -178,7 +178,7 @@ namespace PricingBenchmark {
         AT::NPVConstVisitor npvVisitor(marketData);
 
         std::for_each(bonds.begin(), bonds.end(), [&](auto& bond) { std::visit(npvVisitor, bond); });
-        return npvVisitor.getResults();
+        return npvVisitor.getResults().npv;
     }
 
     inline double priceBond_QL_MT(size_t n) {
@@ -285,7 +285,7 @@ namespace PricingBenchmark {
                 AT::NPVConstVisitor npvVisitor(marketData);
 
                 for (auto& bond : slice) { std::visit(npvVisitor, bond); }
-                npv += npvVisitor.getResults();
+                npv += npvVisitor.getResults().npv;
                 return true;
             };
             futures.push_back(pool->spawnTask(task));

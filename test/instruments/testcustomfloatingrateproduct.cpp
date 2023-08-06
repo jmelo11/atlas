@@ -5,45 +5,24 @@
 TEST(Instrument, CustomFloatingRateInstrument) {
     TestSetup<double> vars;
 
-    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
-    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
+    Schedule schedule       = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
+    std::vector<Date> dates = schedule.dates();
 
-    auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    double redemption = 50;
+    double notional   = redemption * (schedule.dates().size() - 1);
+    std::map<Date, double> redemptionMap, disbursementMap;
 
-    auto& context = vars.store.curveManager().curveContext("TEST");
-    auto& index   = context.index();
-    CustomFloatingRateInstrument<double> prod(schedule.dates(), redemptionAmounts, vars.spread, index);
-
-    auto& leg         = prod.leg();
-    auto& coupons     = leg.coupons();
-    auto& redemptions = leg.redemptions();
-    EXPECT_EQ(coupons.size(), 2);
-    EXPECT_EQ(redemptions.size(), 2);
-
-    for (const auto& redemption : redemptions) { EXPECT_EQ(redemption.amount(), notional / 2); }
-
-    testChangeCurrency<CustomFloatingRateInstrument<double>, double>(prod);
-}
-
-TEST(Instrument, CustomFloatingRateInstrumentDual) {
-    TestSetup<dual> vars;
-
-    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
-    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
-
-    auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
+    for (size_t i = 1; i < dates.size(); ++i) { redemptionMap[dates[i]] = redemption; }
+    disbursementMap[dates[0]] = notional;
 
     auto& context = vars.store.curveManager().curveContext("TEST");
     auto& index   = context.index();
-    CustomFloatingRateInstrument<dual> prod(schedule.dates(), redemptionAmounts, vars.spread, index);
+    CustomFloatingRateInstrument<double> prod(disbursementMap, redemptionMap, vars.spread, index);
 
-    auto& leg         = prod.leg();
-    auto& coupons     = leg.coupons();
-    auto& redemptions = leg.redemptions();
-    EXPECT_EQ(coupons.size(), 2);
-    EXPECT_EQ(redemptions.size(), 2);
+    EXPECT_EQ(prod.cashflows().redemptionCount(), redemptionMap.size());
+    EXPECT_EQ(prod.cashflows().disbursementCount(), disbursementMap.size());
+    EXPECT_EQ(prod.cashflows().floatingRateCouponCount(), dates.size() - 1);
 
-    for (const auto& redemption : redemptions) { EXPECT_EQ(val(redemption.amount()), notional / 2); }
-
-    testChangeCurrency<CustomFloatingRateInstrument<dual>, dual>(prod);
+    for (const auto& r : prod.cashflows().redemptions()) { EXPECT_EQ(r.amount(), redemption); }
+    for (const auto& d : prod.cashflows().disbursements()) { EXPECT_EQ(d.amount(), notional); }
 }

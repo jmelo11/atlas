@@ -7,6 +7,7 @@
 #include <atlas/visitors/indexingvisitor.hpp>
 #include <atlas/visitors/npvconstvisitor.hpp>
 #include <atlas/visitors/parrateconstvisitor.hpp>
+#include <atlas/visitors/sensitivityconstvisitor.hpp>
 
 namespace PricingExample {
 
@@ -19,7 +20,7 @@ namespace PricingExample {
         Frequency paymentFrequency = Frequency::Semiannual;
         double notional            = 100;
         double r                   = 0.05;
-        Side side                  = Side::Long;
+        Side side                  = Side::Recieve;
         InterestRate<double> rate  = InterestRate<double>(r, Actual360(), Compounding::Compounded, Frequency::Annual);
 
         MarketStore<double> store                             = createStore(startDate);
@@ -38,11 +39,15 @@ namespace PricingExample {
 
         NPVConstVisitor<double> npvVisitor(marketData);
         std::visit(npvVisitor, instrument);
-        printLine("NPV", npvVisitor.getResults(), 20);
+        printLine("NPV", npvVisitor.getResults().npv, 20);
 
         ParRateConstVisitor<double> parVisitor(marketData);
         std::visit(parVisitor, instrument);
-        printLine("Par Rate", parVisitor.getResults()["rate"], 20);
+        printLine("Par Rate", parVisitor.getResults().parRate, 20);
+
+        SensitivityConstVisitor<double> sensitivityVisitor(marketData);
+        std::visit(sensitivityVisitor, instrument);
+        printLine("Sensitivity", sensitivityVisitor.getResults().couponSens, 20);
     };
 
 }  // namespace PricingExample

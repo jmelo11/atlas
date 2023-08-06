@@ -2,7 +2,6 @@
 #define D00AFD6C_AA3F_43AC_B12A_E9BC237A26AE
 
 #include <ql/interestrate.hpp>
-#include <atlas/cashflows/legs/makeleg.hpp>
 #include <atlas/instruments/fixedrate/fixedrateinstrument.hpp>
 
 namespace Atlas {
@@ -25,20 +24,18 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                                  Side side = Side::Long)
+                                  Side side = Side::Recieve)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
-            this->leg_ = MakeLeg<FixedRateLeg, adouble>()
-                             .startDate(this->startDate_)
-                             .endDate(this->endDate_)
-                             .notional(this->notional_)
-                             .rate(this->rate_)
-                             .side(this->side_)
-                             .paymentFrequency(freq)
-                             .build();
+    
+            Schedule schedule       = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+            std::vector<Date> dates = schedule.dates();
 
-            int flag             = (this->side_ == Side::Long) ? 1 : -1;
-            adouble disbursement = -this->notional_ * flag;
-            this->disbursement(Cashflow<adouble>(startDate, disbursement));
+            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
+            this->cashflows_.addRedemption(Cashflow<adouble>(endDate, notional, side));
+            for (size_t i = 1; i < dates.size(); i++) {
+                this->cashflows_.addFixedRateCoupon(FixedRateCoupon<adouble>(dates.at(i - 1), dates.at(i), notional, rate, side));
+            }
         };
 
         /**
@@ -53,10 +50,9 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                                  size_t discountContextIdx, Side side = Side::Long)
+                                  size_t discountContextIdx, Side side = Side::Recieve)
         : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate, side) {
-            this->leg().discountContextIdx(discountContextIdx);
-            this->disbursement().discountContextIdx(discountContextIdx);
+             this->cashflows_.discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

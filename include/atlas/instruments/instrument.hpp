@@ -20,7 +20,10 @@ namespace Atlas {
     template <typename adouble>
     class Instrument {
        public:
-        virtual ~Instrument() = default;
+        Instrument() = default;
+
+        Instrument(const Date& startDate, const Date& endDate, double notional = 0.0, Side side = Side::Recieve)
+        : startDate_(startDate), endDate_(endDate), notional_(notional), side_(side) {}
 
         /**
          * @brief Returns the start date of the instrument.
@@ -54,7 +57,7 @@ namespace Atlas {
         Date startDate_  = Date();
         Date endDate_    = Date();
         double notional_ = 0.0;
-        Side side_       = Side::Long;
+        Side side_       = Side::Recieve;
     };
 }  // namespace Atlas
 

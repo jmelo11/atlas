@@ -29,7 +29,7 @@ TEST(ParseDate, InvalidDate) {
 }
 
 TEST(ParseDate, PartialDate) {
-    // Test with an invalid date format
+    // Test with an partial date format
     std::string invalidDateString = "2023-06";  // Incomplete date format
     Date d                        = Atlas::parseDate(invalidDateString);
     EXPECT_EQ(d.year(), 2023);

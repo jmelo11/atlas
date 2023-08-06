@@ -22,20 +22,13 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param rate rate of the instrument
          */
-        ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate, Side side = Side::Long)
+        ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
+                             Side side = Side::Recieve)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
-            this->leg_ = MakeLeg<FixedRateLeg, adouble>()
-                             .startDate(this->startDate_)
-                             .endDate(this->endDate_)
-                             .notional(this->notional_)
-                             .side(this->side_)
-                             .rate(this->rate_)
-                             .paymentFrequency(Frequency::Once)
-                             .build();
-
-            int flag             = (this->side_ == Side::Long) ? 1 : -1;
-            adouble disbursement = -this->notional_ * flag;
-            this->disbursement(Cashflow<adouble>(startDate, disbursement));
+            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
+            this->cashflows_.addRedemption(Cashflow<adouble>(endDate, notional, side));
+            this->cashflows_.addFixedRateCoupon(FixedRateCoupon<adouble>(startDate, endDate, notional, rate, side));
         };
 
         /**
@@ -48,10 +41,9 @@ namespace Atlas {
          * @param discountContextIdx discount curve context of the instrument
          */
         ZeroCouponInstrument(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate,
-                             size_t discountContextIdx, Side side = Side::Long)
+                             size_t discountContextIdx, Side side = Side::Recieve)
         : ZeroCouponInstrument(startDate, endDate, notional, rate, side) {
-            this->leg().discountContextIdx(discountContextIdx);
-            this->disbursement().discountContextIdx(discountContextIdx);
+            this->cashflows_.discountContextIdx(discountContextIdx);
         };
     };
 }  // namespace Atlas

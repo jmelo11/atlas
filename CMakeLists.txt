@@ -101,9 +101,9 @@ install(
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include
         DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-if(BUILD_PYTHON)
-  add_subdirectory(python)
-endif()
+# if(BUILD_PYTHON)
+#   add_subdirectory(python)
+# endif()
 
 if(BUILD_BENCHMARK)
   add_subdirectory(benchmark)

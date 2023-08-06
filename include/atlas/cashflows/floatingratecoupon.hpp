@@ -25,8 +25,9 @@ namespace Atlas {
          * @param spread The spread of the coupon
          * @param rateDef The rate definition of the coupon
          */
-        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const RateDefinition& rateDef)
-        : Coupon<adouble>(startDate, endDate, notional), spread_(spread), rateDef_(rateDef){};
+        FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const RateDefinition& rateDef,
+                           Side side = Side::Recieve)
+        : Coupon<adouble>(startDate, endDate, notional, side), spread_(spread), rateDef_(rateDef){};
 
         /**
          * @brief Construct a new Floating Rate Coupon object
@@ -36,14 +37,14 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param spread The spread of the coupon
          * @param rateDef The rate definition of the coupon
-         * @param indexContextIdx The forecast CurveContext of the coupon
          * @param discountContextIdx The discount CurveContext of the coupon
+         * @param indexContextIdx The forecast CurveContext of the coupon
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const RateDefinition& rateDef,
-                           size_t indexContextIdx, size_t discountContextIdx)
+                           size_t discountContextIdx, size_t indexContextIdx)
         : FloatingRateCoupon(startDate, endDate, notional, spread, rateDef) {
-            this->indexContextIdx(indexContextIdx);
             this->discountContextIdx(discountContextIdx);
+            this->indexContextIdx(indexContextIdx);
         };
 
         /**

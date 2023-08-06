@@ -9,3 +9,4 @@
 /.vscode
 .env
 python/python.zip
+*.uxf

@@ -26,6 +26,8 @@ void py_market(py::module& m) {
         .def(py::init<const Date&, const Currency&>(), py::arg("refDate"), py::arg("localCurrency"))
         .def("addCurveContext", &YieldTermStructureManager<NumType>::addCurveContext, py::arg("name"), py::arg("curve"),
              py::arg("index") = InterestRateIndex<NumType>(), py::arg("ccy") = Currency(), py::arg("isRiskFree") = false)
+        .def("curveContext", py::overload_cast<size_t>(&YieldTermStructureManager<NumType>::curveContext, py::const_))
+        .def("curveContext", py::overload_cast<const std::string&>(&YieldTermStructureManager<NumType>::curveContext, py::const_))
         .def("localCurrency", &YieldTermStructureManager<NumType>::localCurrency)
         .def("refDate", &YieldTermStructureManager<NumType>::refDate)
         .def("summary", &YieldTermStructureManager<NumType>::summary);
@@ -60,21 +62,19 @@ void py_market(py::module& m) {
     py::class_<MarketRequest::ForwardRate>(m, "ForwardRateRequest").def("__str__", [](const MarketRequest::ForwardRate& r) {
         std::string start = r.startDate_ == Date() ? "null" : parseDate(r.startDate_);
         std::string end   = r.endDate_ == Date() ? "null" : parseDate(r.endDate_);
-        std::string rep = "ForwardRateRequest(startDate=" + start + ", endDate=" + end +
-                          ", idx=" + std::to_string(r.curve_) + ")";
+        std::string rep   = "ForwardRateRequest(startDate=" + start + ", endDate=" + end + ", idx=" + std::to_string(r.curve_) + ")";
         return rep;
     });
 
     py::class_<MarketRequest::DiscountFactor>(m, "DiscountFactorRequest").def("__str__", [](const MarketRequest::DiscountFactor& r) {
         std::string date = r.date_ == Date() ? "null" : parseDate(r.date_);
-        std::string rep = "DiscountFactorRequest(date=" + date + ", idx=" + std::to_string(r.curve_) + ")";
+        std::string rep  = "DiscountFactorRequest(date=" + date + ", idx=" + std::to_string(r.curve_) + ")";
         return rep;
     });
 
     py::class_<MarketRequest::ExchangeRate>(m, "ExchangeRateRequest").def("__str__", [](const MarketRequest::ExchangeRate& r) {
         std::string date = r.date_ == Date() ? "null" : parseDate(r.date_);
-        std::string rep =
-            "ExchangeRateRequest(ccy1=" + std::to_string(r.ccy1_) + ", ccy2=" + std::to_string(r.ccy2_) + ", date=" + date + ")";
+        std::string rep  = "ExchangeRateRequest(ccy1=" + std::to_string(r.ccy1_) + ", ccy2=" + std::to_string(r.ccy2_) + ", date=" + date + ")";
         return rep;
     });
 }

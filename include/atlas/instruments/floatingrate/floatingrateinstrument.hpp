@@ -1,7 +1,7 @@
 #ifndef EA6DF8D1_F778_4FBF_9CDE_CD72C677D078
 #define EA6DF8D1_F778_4FBF_9CDE_CD72C677D078
 
-#include <atlas/cashflows/legs/floatingrateleg.hpp>
+#include <atlas/cashflows/cashflowstreammixins.hpp>
 #include <atlas/instruments/instrument.hpp>
 
 namespace Atlas {
@@ -16,8 +16,9 @@ namespace Atlas {
      * @ingroup FloatingRateInstruments
      */
     template <typename adouble = double>
-    class FloatingRateInstrument : public Instrument<adouble>, public OneLegMixin<FloatingRateLeg, adouble> {
+    class FloatingRateInstrument : public Instrument<adouble> {
        public:
+        using Cashflows = CashflowStream<adouble, FloatingRateCouponStreamMixin, RedemptionStreamMixin, DisbursementStreamMixin>;
         /**
          * @brief Construct a new Floating Rate Instrument object
          *
@@ -28,16 +29,9 @@ namespace Atlas {
          * @param spread spread of the instrument
          * @param leg leg of the instrument
          */
-        FloatingRateInstrument(const Date& startDate, const Date& endDate, Side side = Side::Long, double notional = 0.0, adouble spread = 0.0,
-                               const FloatingRateLeg<adouble>& leg = FloatingRateLeg<adouble>())
-        : OneLegMixin<FloatingRateLeg, adouble>(leg), spread_(spread) {
-            this->startDate_ = startDate;
-            this->endDate_   = endDate;
-            this->side_      = side;
-            this->notional_  = notional;
-        };
-
-        virtual ~FloatingRateInstrument(){};
+        FloatingRateInstrument(const Date& startDate, const Date& endDate, double notional = 0.0, adouble spread = 0.0, Side side = Side::Recieve,
+                               const Cashflows& cashflows = Cashflows())
+        : Instrument<adouble>(startDate, endDate, notional, side), spread_(spread), cashflows_(cashflows){};
 
         /**
          * @brief Returns the spread of the instrument.
@@ -51,13 +45,15 @@ namespace Atlas {
          *
          * @param s
          */
-        inline void spread(adouble s) {
-            spread_ = s;
-            for (auto& coupon : this->leg().coupons()) { coupon.spread(s); }
-        };
+        inline void spread(adouble s) { cashflows_.spread(s); };
+
+        Cashflows& cashflows() { return cashflows_; };
+
+        const Cashflows& cashflows() const { return cashflows_; };
 
        protected:
         adouble spread_;
+        Cashflows cashflows_;
     };
 }  // namespace Atlas
 

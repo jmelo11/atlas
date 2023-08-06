@@ -11,7 +11,7 @@ namespace Atlas {
     using CouponInspector = std::function<adouble(const Coupon<adouble>*)>;
 
     template <typename adouble = double>
-    using RedemptionInspector = std::function<adouble(const Redemption<adouble>*)>;
+    using CashflowInspector = std::function<adouble(const Cashflow<adouble>*)>;
 
     template <typename adouble = double>
     class CashflowAggregationConstVisitor : public BaseConstVisitor<adouble> {
@@ -23,47 +23,45 @@ namespace Atlas {
         void operator()(const std::monostate& inst) const override { this->template printLogs<CashflowAggregationConstVisitor>(this, "monostate"); }
 
         void operator()(const CustomFixedRateInstrument<adouble>& instrument) const override {
-            apply(instrument.leg().coupons());
-            apply(instrument.leg().redemptions());
+            apply(instrument.cashflows().fixedRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
         }
 
         void operator()(const EqualPaymentInstrument<adouble>& instrument) const override {
-            apply(instrument.leg().coupons());
-            apply(instrument.leg().redemptions());
+            apply(instrument.cashflows().fixedRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
         }
 
         void operator()(const FixedRateBulletInstrument<adouble>& instrument) const override {
-            apply(instrument.leg().coupons());
-            apply(instrument.leg().redemptions());
+            apply(instrument.cashflows().fixedRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
         }
 
         void operator()(const ZeroCouponInstrument<adouble>& instrument) const override {
-            apply(instrument.leg().coupons());
-            apply(instrument.leg().redemptions());
+            apply(instrument.cashflows().fixedRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
         }
 
         void operator()(const FloatingRateBulletInstrument<adouble>& instrument) const override {
-            apply(instrument.leg().coupons());
-            apply(instrument.leg().redemptions());
+            apply(instrument.cashflows().floatingRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
         }
 
         void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& instrument) const override {
-            apply(instrument.leg().coupons());
-            apply(instrument.leg().redemptions());
+            apply(instrument.cashflows().floatingRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
         }
 
         void operator()(const CustomFloatingRateInstrument<adouble>& instrument) const override {
-            apply(instrument.leg().coupons());
-            apply(instrument.leg().redemptions());
-        }
-
-        void operator()(const FxForward<adouble>& instrument) const override { apply(instrument.leg().redemptions()); }
-
-        void operator()(const FixFloatSwap<adouble>& instrument) const override {
-            apply(instrument.firstLeg().coupons());
-            apply(instrument.firstLeg().redemptions());
-            apply(instrument.secondLeg().coupons());
-            apply(instrument.secondLeg().redemptions());
+            apply(instrument.cashflows().floatingRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
         }
 
         void reset() { amount_ = 0.0; }
@@ -71,13 +69,13 @@ namespace Atlas {
         adouble getResults() const { return amount_; }
 
        protected:
-        template <template <typename> class C>
-        void apply(const std::vector<C<adouble>>& cashflows) const {
+        template <class C>
+        void apply(const std::vector<C>& cashflows) const {
             adouble amount = 0.0;
-            if constexpr (std::is_base_of_v<Coupon<adouble>, C<adouble>>) {
+            if constexpr (std::is_base_of_v<Coupon<adouble>, C>) {
                 for (const auto& cashflow : cashflows) { amount += couponInspector_(&cashflow); }
-            } else if constexpr (std::is_same_v<Redemption<adouble>, C<adouble>>) {
-                for (const auto& cashflow : cashflows) { amount += redemptionInspector_(&cashflow); }
+            } else if constexpr (std::is_same_v<Cashflow<adouble>, C>) {
+                for (const auto& cashflow : cashflows) { amount += cashflowInspector_(&cashflow); }
             }
             std::lock_guard<std::mutex> lock(mtx_);
             amount_ += amount;
@@ -90,7 +88,7 @@ namespace Atlas {
         Date startDate_;
         Date endDate_;
         CouponInspector<adouble> couponInspector_;
-        RedemptionInspector<adouble> redemptionInspector_;
+        CashflowInspector<adouble> cashflowInspector_;
         mutable std::mutex mtx_;
         mutable adouble amount_ = 0.0;
     };

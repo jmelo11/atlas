@@ -24,8 +24,8 @@ namespace Atlas {
          * @param notional The notional amount of the coupon
          * @param rate The interest rate of the coupon
          */
-        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate)
-        : Coupon<adouble>(startDate, endDate, notional), rate_(rate) {
+        FixedRateCoupon(const Date& startDate, const Date& endDate, double notional, const InterestRate<adouble>& rate, Side side = Side::Recieve)
+        : Coupon<adouble>(startDate, endDate, notional, side), rate_(rate) {
             this->amount_ = accruedAmount(startDate, endDate);
         };
 

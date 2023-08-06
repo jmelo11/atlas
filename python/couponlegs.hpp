@@ -3,12 +3,10 @@
 
 #include "config.hpp"
 #include <atlas/cashflows/cashflow.hpp>
+#include <atlas/cashflows/cashflowstreammixins.hpp>
 #include <atlas/cashflows/coupon.hpp>
 #include <atlas/cashflows/fixedratecoupon.hpp>
 #include <atlas/cashflows/floatingratecoupon.hpp>
-#include <atlas/cashflows/legs/fixedrateleg.hpp>
-#include <atlas/cashflows/legs/floatingrateleg.hpp>
-#include <atlas/cashflows/legs/leg.hpp>
 #include <atlas/fundation/indexable.hpp>
 #include <pybind11/pybind11.h>
 
@@ -71,8 +69,8 @@ void py_couponlegs(py::module& m) {
         .def("currency", py::overload_cast<const Currency&>(&Cashflow<NumType>::currency))
         .def("currency", py::overload_cast<>(&Cashflow<NumType>::currency, py::const_))
         .def("currencyCode", &Cashflow<NumType>::currencyCode)
-        .def("applyCcy", py::overload_cast<>(&Cashflow<NumType>::applyCcy, py::const_))
-        .def("applyCcy", py::overload_cast<bool>(&Cashflow<NumType>::applyCcy));
+        .def("applyCurrency", py::overload_cast<>(&Cashflow<NumType>::applyCurrency, py::const_))
+        .def("applyCurrency", py::overload_cast<bool>(&Cashflow<NumType>::applyCurrency));
 
     py::class_<Coupon<NumType>, Aux::PyCoupon, Cashflow<NumType>>(m, "Coupon")
         .def(py::init<const Date&, const Date&, double>())
@@ -102,36 +100,40 @@ void py_couponlegs(py::module& m) {
         .def("hasIndexContextIdx", &FloatingRateCoupon<NumType>::hasIndexContextIdx)
         .def("isFixingSet", &FloatingRateCoupon<NumType>::isFixingSet);
 
-    // Legs
-    py::class_<Leg<NumType>>(m, "Leg")
-        .def(py::init<std::vector<Redemption<NumType>>&, bool>())
-        .def("redemption", py::overload_cast<size_t>(&Leg<NumType>::redemption, py::const_), py::return_value_policy::reference)
-        .def("redemption", py::overload_cast<size_t>(&Leg<NumType>::redemption), py::return_value_policy::reference)
-        .def("redemptions", py::overload_cast<>(&Leg<NumType>::redemptions, py::const_), py::return_value_policy::reference)
-        .def("redemptions", py::overload_cast<>(&Leg<NumType>::redemptions), py::return_value_policy::reference)
-        .def("addRedemption", &Leg<NumType>::addRedemption)
-        .def("sortRedemptions", &Leg<NumType>::sortRedemptions);
+    py::class_<RedemptionStreamMixin<NumType>>(m, "RedemptionStreamMixin")
+        .def("redemption", py::overload_cast<size_t>(&RedemptionStreamMixin<NumType>::redemption, py::const_), py::return_value_policy::reference)
+        .def("redemption", py::overload_cast<size_t>(&RedemptionStreamMixin<NumType>::redemption), py::return_value_policy::reference)
+        .def("redemptions", py::overload_cast<>(&RedemptionStreamMixin<NumType>::redemptions, py::const_), py::return_value_policy::reference)
+        .def("redemptions", py::overload_cast<>(&RedemptionStreamMixin<NumType>::redemptions), py::return_value_policy::reference)
+        .def("addRedemption", &RedemptionStreamMixin<NumType>::addRedemption);
 
-    py::class_<FixedRateLeg<NumType>, Leg<NumType>>(m, "FixedRateLeg")
-        .def(py::init<std::vector<FixedRateCoupon<NumType>>&, std::vector<Redemption<NumType>>&, bool>())
-        .def("coupon", py::overload_cast<size_t>(&FixedRateLeg<NumType>::coupon, py::const_), py::return_value_policy::reference)
-        .def("coupon", py::overload_cast<size_t>(&FixedRateLeg<NumType>::coupon), py::return_value_policy::reference)
-        .def("coupons", py::overload_cast<>(&FixedRateLeg<NumType>::coupons, py::const_), py::return_value_policy::reference)
-        .def("coupons", py::overload_cast<>(&FixedRateLeg<NumType>::coupons), py::return_value_policy::reference)
-        .def("addCoupon", &FixedRateLeg<NumType>::addCoupon)
-        .def("sort", &FixedRateLeg<NumType>::sort)
-        .def("discountContextIdx", &FixedRateLeg<NumType>::discountContextIdx);
+    py::class_<FixedRateCouponStreamMixin<NumType>>(m, "FixedRateCouponStreamMixin")
+        .def("fixedRateCoupon", py::overload_cast<size_t>(&FixedRateCouponStreamMixin<NumType>::fixedRateCoupon, py::const_),
+             py::return_value_policy::reference)
+        .def("fixedRateCoupon", py::overload_cast<size_t>(&FixedRateCouponStreamMixin<NumType>::fixedRateCoupon), py::return_value_policy::reference)
+        .def("fixedRateCoupons", py::overload_cast<>(&FixedRateCouponStreamMixin<NumType>::fixedRateCoupons, py::const_),
+             py::return_value_policy::reference)
+        .def("fixedRateCoupons", py::overload_cast<>(&FixedRateCouponStreamMixin<NumType>::fixedRateCoupons), py::return_value_policy::reference)
+        .def("addFixedRateCoupon", &FixedRateCouponStreamMixin<NumType>::addFixedRateCoupon);
 
-    py::class_<FloatingRateLeg<NumType>, Leg<NumType>>(m, "FloatingRateLeg")
-        .def(py::init<std::vector<FloatingRateCoupon<NumType>>&, std::vector<Redemption<NumType>>&, bool>())
-        .def("coupon", py::overload_cast<size_t>(&FloatingRateLeg<NumType>::coupon, py::const_), py::return_value_policy::reference)
-        .def("coupon", py::overload_cast<size_t>(&FloatingRateLeg<NumType>::coupon), py::return_value_policy::reference)
-        .def("coupons", py::overload_cast<>(&FloatingRateLeg<NumType>::coupons, py::const_), py::return_value_policy::reference)
-        .def("coupons", py::overload_cast<>(&FloatingRateLeg<NumType>::coupons), py::return_value_policy::reference)
-        .def("addCoupon", &FloatingRateLeg<NumType>::addCoupon)
-        .def("sort", &FloatingRateLeg<NumType>::sort)
-        .def("discountContextIdx", &FloatingRateLeg<NumType>::discountContextIdx)
-        .def("indexContextIdx", &FloatingRateLeg<NumType>::indexContextIdx);
+    py::class_<FloatingRateCouponStreamMixin<NumType>>(m, "FloatingRateCouponStreamMixin")
+        .def("floatingRateCoupon", py::overload_cast<size_t>(&FloatingRateCouponStreamMixin<NumType>::floatingRateCoupon, py::const_),
+             py::return_value_policy::reference)
+        .def("floatingRateCoupon", py::overload_cast<size_t>(&FloatingRateCouponStreamMixin<NumType>::floatingRateCoupon),
+             py::return_value_policy::reference)
+        .def("floatingRateCoupons", py::overload_cast<>(&FloatingRateCouponStreamMixin<NumType>::floatingRateCoupons, py::const_),
+             py::return_value_policy::reference)
+        .def("floatingRateCoupons", py::overload_cast<>(&FloatingRateCouponStreamMixin<NumType>::floatingRateCoupons),
+             py::return_value_policy::reference)
+        .def("addFloatingRateCoupon", &FloatingRateCouponStreamMixin<NumType>::addFloatingRateCoupon);
+
+    py::class_<DisbursementStreamMixin<NumType>>(m, "DisbursementStreamMixin")
+        .def("disbursement", py::overload_cast<size_t>(&DisbursementStreamMixin<NumType>::disbursement, py::const_),
+             py::return_value_policy::reference)
+        .def("disbursement", py::overload_cast<size_t>(&DisbursementStreamMixin<NumType>::disbursement), py::return_value_policy::reference)
+        .def("disbursements", py::overload_cast<>(&DisbursementStreamMixin<NumType>::disbursements, py::const_), py::return_value_policy::reference)
+        .def("disbursements", py::overload_cast<>(&DisbursementStreamMixin<NumType>::disbursements), py::return_value_policy::reference)
+        .def("addDisbursement", &DisbursementStreamMixin<NumType>::addDisbursement);
 };
 
 #endif /* F01E58DD_C649_4B27_B416_BE9F8F03E002 */

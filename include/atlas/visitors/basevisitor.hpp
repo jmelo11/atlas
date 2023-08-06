@@ -29,21 +29,14 @@ namespace Atlas {
     template <typename adouble>
     class FloatingRateEqualRedemptionInstrument;
 
-    // Derivatives
-    template <typename adouble>
-    class FxForward;
-
-    template <typename adouble>
-    class FixFloatSwap;
-
     /**
      * @brief Instruments is a std::variant of all the instruments in Atlas. It is used to implement the visitor pattern for instruments.
      * @tparam adouble
      */
     template <typename adouble = double>
-    using InstrumentVariant = std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>,
-                                           FixedRateBulletInstrument<adouble>, ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>,
-                                           FloatingRateBulletInstrument<adouble>, FxForward<adouble>, FixFloatSwap<adouble>>;
+    using InstrumentVariant =
+        std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>, FixedRateBulletInstrument<adouble>,
+                     ZeroCouponInstrument<adouble>, CustomFloatingRateInstrument<adouble>, FloatingRateBulletInstrument<adouble>>;
 
     /**
      * @defgroup Visitors Visitors
@@ -70,8 +63,6 @@ namespace Atlas {
         virtual void operator()(CustomFloatingRateInstrument<adouble>& inst)          = 0;
         virtual void operator()(FloatingRateBulletInstrument<adouble>& inst)          = 0;
         virtual void operator()(FloatingRateEqualRedemptionInstrument<adouble>& inst) = 0;
-        virtual void operator()(FxForward<adouble>& inst)                             = 0;
-        virtual void operator()(FixFloatSwap<adouble>& inst)                          = 0;
         virtual void operator()(std::monostate& ms)                                   = 0;
 
        protected:
@@ -107,8 +98,6 @@ namespace Atlas {
         virtual void operator()(const CustomFloatingRateInstrument<adouble>& inst) const          = 0;
         virtual void operator()(const FloatingRateBulletInstrument<adouble>& inst) const          = 0;
         virtual void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const = 0;
-        virtual void operator()(const FxForward<adouble>& inst) const                             = 0;
-        virtual void operator()(const FixFloatSwap<adouble>& inst) const                          = 0;
         virtual void operator()(const std::monostate& ms) const                                   = 0;
 
        protected:

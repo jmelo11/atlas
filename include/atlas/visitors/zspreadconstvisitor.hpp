@@ -49,27 +49,19 @@ namespace Atlas {
 
         void operator()(const std::monostate& inst) const override { this->template printLogs<ZSpreadConstVisitor>(this, "monostate"); }
 
-        void operator()(const CustomFixedRateInstrument<adouble>& inst) const override { zspread(inst); };
+        void operator()(const CustomFixedRateInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
-        void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { zspread(inst); };
+        void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
-        void operator()(const EqualPaymentInstrument<adouble>& inst) const override { zspread(inst); };
+        void operator()(const EqualPaymentInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
-        void operator()(const ZeroCouponInstrument<adouble>& inst) const override { zspread(inst); };
+        void operator()(const ZeroCouponInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
-        void operator()(const FloatingRateBulletInstrument<adouble>& inst) const override { zspread(inst); };
+        void operator()(const FloatingRateBulletInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
-        void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { zspread(inst); };
+        void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
-        void operator()(const CustomFloatingRateInstrument<adouble>& inst) const override { zspread(inst); };
-
-        void operator()(const FxForward<adouble>& inst) const override {
-            this->template printLogs<ZSpreadConstVisitor>(this, "FxForward not supported.");
-        };
-
-        void operator()(const FixFloatSwap<adouble>& inst) const override {
-            this->template printLogs<ZSpreadConstVisitor>(this, "FixFloatSwap not supported.");
-        };
+        void operator()(const CustomFloatingRateInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
         void reset() { value_ = 0.0; };
 
@@ -81,33 +73,24 @@ namespace Atlas {
         adouble getResults() const { return value_; }
 
        private:
-        template <class T>
-        void zspread(const T& inst) const {
-            T evalInst(inst);
+        template <class C>
+        inline adouble cashflowNPV(const C& cashflow, adouble z, const MarketData<adouble>& marketData) const {
+            adouble df = marketData.dfs.at(cashflow.dfIdx());
+            adouble r  = InterestRate<adouble>::impliedRate(1 / df, dayCounter_, comp_, freq_, marketData.refDate, cashflow.paymentDate()).rate();
+            return cashflow.amount() / fastCompoundFactor(r + z, dayCounter_, comp_, freq_, marketData.refDate, cashflow.paymentDate());
+        }
 
-            if constexpr (std::is_base_of_v<FloatingRateInstrument<adouble>, T>) {
-                FixingVisitor<adouble> fixingVisitor(marketData_);
-                fixingVisitor(evalInst);
-            }
-
+        template <class CS>
+        void zspread(const CS& cashflows) const {
             auto f = [&](adouble z) {
                 adouble npv = 0.0;
-                auto& leg   = evalInst.leg();
-                for (auto& coupon : leg.coupons()) {
-                    adouble df = marketData_.dfs.at(coupon.dfIdx());
-                    adouble r =
-                        InterestRate<adouble>::impliedRate(1 / df, dayCounter_, comp_, freq_, marketData_.refDate, coupon.paymentDate()).rate();
-                    r += z;
-                    npv += coupon.amount() / fastCompoundFactor(r, dayCounter_, comp_, freq_, marketData_.refDate, coupon.paymentDate());
+                if constexpr (std::is_base_of_v<FixedRateCouponStreamMixin<adouble>, CS>) {
+                    for (const auto& coupon : cashflows.fixedRateCoupons()) { npv += cashflowNPV(coupon, z, marketData_); }
                 }
-
-                for (auto& redemption : leg.redemptions()) {
-                    adouble df = marketData_.dfs.at(redemption.dfIdx());
-                    adouble r =
-                        InterestRate<adouble>::impliedRate(1 / df, dayCounter_, comp_, freq_, marketData_.refDate, redemption.paymentDate()).rate();
-                    r += z;
-                    npv += redemption.amount() / fastCompoundFactor(r, dayCounter_, comp_, freq_, marketData_.refDate, redemption.paymentDate());
+                if constexpr (std::is_base_of_v<FloatingRateCouponStreamMixin<adouble>, CS>) {
+                    for (const auto& coupon : cashflows.floatingRateCoupons()) { npv += cashflowNPV(coupon, z, marketData_); }
                 }
+                for (const auto& redemption : cashflows.redemptions()) { npv += cashflowNPV(redemption, z, marketData_); }
                 return targetNPV_ - npv;
             };
 

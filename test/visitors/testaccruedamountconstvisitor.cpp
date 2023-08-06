@@ -1,4 +1,4 @@
-#include "../testsetup.hpp"
+#include "testaccruedamountconstvisitor.hpp"
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/visitors/cashflowaggregation/accruedamountconstvisitor.hpp>
@@ -7,16 +7,108 @@
 
 using namespace Atlas;
 
-TEST(AccruedAmountConstVisitor, FixedRateInstrument) {
-    TestSetup<double> vars;
-    auto& instrument = *vars.atlasFixBond;
+TEST(AccruedAmountConstVisitor, NoFixingSet) {
+    TestAccruedAmountConstVisitor::Common vars;
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.side);
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    EXPECT_THROW(visitor(instrument), std::runtime_error);
+}
 
-    auto& coupon = instrument.leg().coupons().at(0);
-    Date startDate(coupon.startDate());
-    Date endDate(coupon.endDate());
-    AccruedAmountConstVisitor<double> accruedAmountVisitor(startDate, endDate);
+TEST(AccruedAmountConstVisitor, FixedRateBulletInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    FixedRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, vars.discountIdx,
+                                                 vars.side);
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
+}
 
-    accruedAmountVisitor(instrument);
+TEST(AccruedAmountConstVisitor, EqualPaymentInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    EqualPaymentInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.rate, vars.discountIdx,
+                                              vars.side);
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
+}
 
-    EXPECT_DOUBLE_EQ(accruedAmountVisitor.getResults(), coupon.accruedAmount(startDate, endDate));
+TEST(AccruedAmountConstVisitor, ZeroCouponInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    ZeroCouponInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.discountIdx, vars.side);
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
+}
+
+TEST(AccruedAmountConstVisitor, CustomFixedRateInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    std::map<Date, double> disbursementMap, redemptionMap;
+    disbursementMap[vars.startDate] = vars.notional;
+    redemptionMap[vars.endDate]     = vars.notional;
+
+    CustomFixedRateInstrument<double> instrument(disbursementMap, redemptionMap, vars.rate, vars.discountIdx, vars.side);
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
+}
+
+TEST(AccruedAmountConstVisitor, FloatingRateBulletInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+                                                    vars.indexIdx, vars.side);
+
+    IndexingVisitor indexingVisitor;
+    indexingVisitor(instrument);
+
+    MarketData<double> marketData;
+    for (size_t i = 0; i < instrument.cashflows().floatingRateCouponCount(); ++i) { marketData.fwds.push_back(0.05); }
+
+    FixingVisitor<double> fixingVisitor(marketData);
+    fixingVisitor(instrument);
+
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
+}
+
+TEST(AccruedAmountConstVisitor, FloatingRateEqualRedemptionInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    FloatingRateEqualRedemptionInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+                                                             vars.indexIdx, vars.side);
+
+    IndexingVisitor indexingVisitor;
+    indexingVisitor(instrument);
+
+    MarketData<double> marketData;
+    for (size_t i = 0; i < instrument.cashflows().floatingRateCouponCount(); ++i) { marketData.fwds.push_back(0.05); }
+
+    FixingVisitor<double> fixingVisitor(marketData);
+    fixingVisitor(instrument);
+
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
+}
+
+TEST(AccruedAmountConstVisitor, CustomFloatingRateInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    std::map<Date, double> disbursementMap, redemptionMap;
+    disbursementMap[vars.startDate] = vars.notional;
+    redemptionMap[vars.endDate]     = vars.notional;
+
+    CustomFloatingRateInstrument<double> instrument(disbursementMap, redemptionMap, vars.spread, vars.index, vars.discountIdx, vars.indexIdx,
+                                                    vars.side);
+
+    IndexingVisitor indexingVisitor;
+    indexingVisitor(instrument);
+
+    MarketData<double> marketData;
+    for (size_t i = 0; i < instrument.cashflows().floatingRateCouponCount(); ++i) { marketData.fwds.push_back(0.05); }
+
+    FixingVisitor<double> fixingVisitor(marketData);
+    fixingVisitor(instrument);
+
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
 }

@@ -34,7 +34,7 @@ namespace Atlas {
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, adouble amount) : amount_(amount), paymentDate_(paymentDate){};
+        Cashflow(const Date& paymentDate, adouble amount, Side side = Side::Recieve) : amount_(amount), paymentDate_(paymentDate), side_(side){};
 
         /**
          * @brief Construct a new Cashflow object
@@ -103,7 +103,7 @@ namespace Atlas {
          *
          * @param ccy The currency
          */
-        inline void currency(const Currency& ccy) { ccy_ = ccy; }
+        inline void currency(const Currency& ccy) { currency_ = ccy; }
 
         /**
          * @brief Gets the currency of the cashflow.
@@ -111,7 +111,7 @@ namespace Atlas {
          *
          * @return The currency
          */
-        inline Currency currency() const { return ccy_; }
+        inline Currency currency() const { return currency_; }
 
         /**
          * @brief Gets the currency code
@@ -119,41 +119,44 @@ namespace Atlas {
          * @return size_t
          */
         inline size_t currencyCode() const {
-            if (ccy_ != Currency()) return ccy_.numericCode();
+            if (currency_ != Currency()) return currency_.numericCode();
             return 0;
         }
 
         /**
-         * @brief Returns applyCcy_ flag. This flag is used in pricing, to transform the cashflow amount to the store base currency.
+         * @brief Returns applyCurrency_ flag. This flag is used in pricing, to transform the cashflow amount to the store base currency.
          *
          * @return true
          * @return false
          */
-        inline bool applyCcy() const { return applyCcy_; }
+        inline bool applyCurrency() const { return applyCurrency_; }
 
         /**
          * @brief Sets the applyCcy_ flag. This flag is used in pricing, to transform the cashflow amount to the store base currency.
          *
          * @param applyCcy
          */
-        inline void applyCcy(bool applyCcy) { applyCcy_ = applyCcy; }
+        inline void applyCurrency(bool applyCcy) { applyCurrency_ = applyCcy; }
+
+        inline Side side() const { return side_; }
 
        protected:
         adouble amount_            = 0;
         Date paymentDate_          = Date();
         bool hasDiscountContext_   = false;
-        Currency ccy_              = Currency();
-        bool applyCcy_             = false;
+        Currency currency_         = Currency();
+        bool applyCurrency_        = false;
         size_t discountContextIdx_ = SIZE_MAX;
+        Side side_                 = Side::Recieve;
 
        private:
         inline void amount(adouble amount) { amount_ = amount; }
 
+        inline void side(Side side) { side_ = side; }
+
         friend class Instrument<adouble>;
     };
 
-    template <typename adouble>
-    using Redemption = Cashflow<adouble>;
 }  // namespace Atlas
 
 #endif /* FB3CE86C_B207_47DE_B110_DA337769FAF4 */

@@ -23,10 +23,8 @@ namespace Atlas {
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          */
-        Coupon(const Date& startDate, const Date& endDate, double notional)
-        : Cashflow<adouble>(), startDate_(startDate), endDate_(endDate), notional_(notional) {
-            this->paymentDate_ = endDate;  // paymentDate shouldnt be same as endDate
-        };
+        Coupon(const Date& startDate, const Date& endDate, double notional, Side side = Side::Recieve)
+        : Cashflow<adouble>(endDate, 0.0, side), startDate_(startDate), endDate_(endDate), notional_(notional){};
 
         /**
          * @brief Construct a new Coupon object
@@ -37,9 +35,7 @@ namespace Atlas {
          * @param discountCurveContext The discount curve context of the coupon
          */
         Coupon(const Date& startDate, const Date& endDate, double notional, size_t discountContextIdx)
-        : Cashflow<adouble>(discountContextIdx), startDate_(startDate), endDate_(endDate), notional_(notional) {
-            this->paymentDate_ = endDate;  // paymentDate shouldnt be same as endDate
-        };
+        : Cashflow<adouble>(endDate, 0.0, discountContextIdx), startDate_(startDate), endDate_(endDate), notional_(notional){};
 
         virtual ~Coupon(){};
 
@@ -109,7 +105,7 @@ namespace Atlas {
 
     /**
      * @brief Possible optimization using CRTP
-     * @details Breaks inheritance in Pybidn11.
+     * @details Breaks inheritance in Pybind11.
      * @tparam adouble
      * @tparam CouponType
      */

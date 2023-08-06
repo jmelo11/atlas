@@ -4,36 +4,23 @@
 
 TEST(Instrument, CustomFixedRateInstrument) {
     TestSetup<double> vars;
-    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
+    Schedule schedule       = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
+    std::vector<Date> dates = schedule.dates();
 
-    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
-    auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
-    CustomFixedRateInstrument<double> prod(schedule.dates(), redemptionAmounts, vars.atlasRate);
-    auto& leg         = prod.leg();
-    auto& coupons     = leg.coupons();
-    auto& redemptions = leg.redemptions();
-    EXPECT_EQ(coupons.size(), 2);
-    EXPECT_EQ(redemptions.size(), 2);
+    double redemption = 50;
+    double notional   = redemption * (schedule.dates().size() - 1);
+    std::map<Date, double> redemptionMap, disbursementMap;
 
-    for (const auto& redemption : redemptions) { EXPECT_EQ(redemption.amount(), notional / 2); }
+    for (size_t i = 1; i < dates.size(); ++i) { redemptionMap[dates[i]] = redemption; }
+    disbursementMap[dates[0]] = notional;
 
-    testChangeCurrency<CustomFixedRateInstrument<double>, double>(prod);
-}
+    CustomFixedRateInstrument<double> prod(disbursementMap, redemptionMap, vars.atlasRate);
 
-TEST(Instrument, CustomFixedRateInstrumentDual) {
-    TestSetup<dual> vars;
-    Schedule schedule = MakeSchedule().from(vars.startDate).to(vars.endDate).withFrequency(vars.paymentFrequency);
+    EXPECT_EQ(prod.cashflows().redemptionCount(), redemptionMap.size());
+    EXPECT_EQ(prod.cashflows().disbursementCount(), disbursementMap.size());
+    EXPECT_EQ(prod.cashflows().fixedRateCouponCount(), dates.size() - 1);
 
-    std::vector<double> redemptionAmounts(schedule.dates().size() - 1, 50);  // constant redemptions
-    auto notional = std::reduce(redemptionAmounts.begin(), redemptionAmounts.end());
-    CustomFixedRateInstrument<dual> prod(schedule.dates(), redemptionAmounts, vars.atlasRate);
-    auto& leg         = prod.leg();
-    auto& coupons     = leg.coupons();
-    auto& redemptions = leg.redemptions();
-    EXPECT_EQ(coupons.size(), 2);
-    EXPECT_EQ(redemptions.size(), 2);
+    for (const auto& r : prod.cashflows().redemptions()) { EXPECT_EQ(r.amount(), redemption); }
+    for (const auto& d : prod.cashflows().disbursements()) { EXPECT_EQ(d.amount(), notional); }
 
-    for (const auto& redemption : redemptions) { EXPECT_EQ(val(redemption.amount()), notional / 2); }
-
-    testChangeCurrency<CustomFixedRateInstrument<dual>, dual>(prod);
 }

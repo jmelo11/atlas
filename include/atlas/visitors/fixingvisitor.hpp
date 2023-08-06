@@ -2,8 +2,6 @@
 #define C77767A1_346A_4254_865F_DDE836D15D05
 
 #include <atlas/data/marketdata.hpp>
-#include <atlas/instruments/derivatives/fixfloatswap.hpp>
-#include <atlas/instruments/derivatives/fxforward.hpp>
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
@@ -76,37 +74,21 @@ namespace Atlas {
          *
          * @param inst CustomFloatingRateInstrument
          */
-        void operator()(CustomFloatingRateInstrument<adouble>& inst) override { fixLegCoupons(inst.leg()); };
+        void operator()(CustomFloatingRateInstrument<adouble>& inst) override { fixFloatingRate(inst.cashflows()); };
 
         /**
          * @brief Fix the coupons of the floating rate leg of the instrument.
          *
          * @param inst FloatingRateBulletInstrument
          */
-        void operator()(FloatingRateBulletInstrument<adouble>& inst) override { fixLegCoupons(inst.leg()); };
+        void operator()(FloatingRateBulletInstrument<adouble>& inst) override { fixFloatingRate(inst.cashflows()); };
 
         /**
          * @brief Fix the coupons of the floating rate leg of the instrument.
          *
          * @param inst FloatingRateEqualRedemptionInstrument
          */
-        void operator()(FloatingRateEqualRedemptionInstrument<adouble>& inst) override { fixLegCoupons(inst.leg()); };
-
-        /**
-         * @brief An fx forward is not a floating rate instrument, so the visitor only prints a message.
-         *
-         * @param inst
-         */
-        void operator()(FxForward<adouble>& inst) override {
-            this->template printLogs<FixingVisitor>(this, "FxForward is not a floating rate instrument.");
-        };
-
-        /**
-         * @brief Fix the coupons of the floating rate legs of the instrument.
-         *
-         * @param inst FixFloatSwap
-         */
-        void operator()(FixFloatSwap<adouble>& inst) override { fixLegCoupons(inst.secondLeg()); };
+        void operator()(FloatingRateEqualRedemptionInstrument<adouble>& inst) override { fixFloatingRate(inst.cashflows()); };
 
        private:
         /**
@@ -115,10 +97,11 @@ namespace Atlas {
          * @tparam L A floating rate leg
          * @param leg The given leg.
          */
-        template <typename L>
-        void fixLegCoupons(L& leg) {
-            if constexpr (std::is_same_v<L, FloatingRateLeg<adouble>>) {
-                for (auto& coupon : leg.coupons()) {
+        template <class CS>
+        void fixFloatingRate(CS& cashflows) {
+            if constexpr (std::is_base_of_v<FloatingRateCouponStreamMixin<adouble>, CS>) {
+                for (auto& coupon : cashflows.floatingRateCoupons()) {
+                    if (!coupon.isIndexed()) throw std::runtime_error("FixingVisitor: Coupon is not indexed.");
                     adouble fwd = marketData_.fwds.at(coupon.fwdIdx());
                     coupon.fixing(fwd);
                 }

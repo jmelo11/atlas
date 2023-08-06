@@ -9,8 +9,8 @@ namespace Atlas {
     class AccruedAmountConstVisitor : public CashflowAggregationConstVisitor<adouble> {
        public:
         AccruedAmountConstVisitor(const Date& startDate, const Date& endDate) : CashflowAggregationConstVisitor<adouble>(startDate, endDate) {
-            this->couponInspector_     = [&](const Coupon<adouble>* coupon) { return coupon->accruedAmount(this->startDate_, this->endDate_); };
-            this->redemptionInspector_ = [&](const Redemption<adouble>* redemption) { return 0.0; };
+            this->couponInspector_   = [&](const Coupon<adouble>* coupon) { return coupon->accruedAmount(this->startDate_, this->endDate_); };
+            this->cashflowInspector_ = [&](const Cashflow<adouble>* cashflow) { return 0.0; };
         };
     };
 }  // namespace Atlas

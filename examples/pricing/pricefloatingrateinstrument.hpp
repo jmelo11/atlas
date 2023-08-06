@@ -17,7 +17,7 @@ namespace PricingExample {
         double notional       = 100.0;
         double spread         = 0.01;
 
-        MarketStore<double> store                            = createStore(startDate);
+        MarketStore<double> store                             = createStore(startDate);
         const YieldTermStructureManager<double>& curveManager = store.curveManager();
         CurveContext context                                  = curveManager.curveContext("ExampleCurve");
         size_t idx                                            = context.idx();
@@ -40,11 +40,15 @@ namespace PricingExample {
         std::visit(fixingVisitor, instrument);
         std::visit(npvVisitor, instrument);
 
-        printLine("NPV", npvVisitor.getResults(), 20);
+        printLine("NPV", npvVisitor.getResults().npv, 20);
 
         ParRateConstVisitor<double> parVisitor(marketData);
         std::visit(parVisitor, instrument);
-        printLine("Par Spread", parVisitor.getResults()["spread"], 20);
+        printLine("Par Spread", parVisitor.getResults().parSpread, 20);
+
+        SensitivityConstVisitor<double> sensitivityVisitor(marketData);
+        std::visit(sensitivityVisitor, instrument);
+        printLine("Sensitivity", sensitivityVisitor.getResults().spreadSens, 20);
     }
 }  // namespace PricingExample
 

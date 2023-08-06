@@ -53,7 +53,7 @@ namespace PricingBenchmark {
             std::visit(fixingVisitor, bond);
             std::visit(npvVisitor, bond);
         });
-        return npvVisitor.getResults();
+        return npvVisitor.getResults().npv;
     }
 
     inline double priceFloatingBond_QL_MT(size_t n) {
@@ -107,7 +107,7 @@ namespace PricingBenchmark {
                     std::visit(fixingVisitor, bond);
                     std::visit(npvVisitor, bond);
                 }
-                npv += npvVisitor.getResults();
+                npv += npvVisitor.getResults().npv;
                 return true;
             };
             futures.push_back(pool->spawnTask(task));

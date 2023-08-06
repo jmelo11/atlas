@@ -12,83 +12,46 @@ using namespace Atlas;
 
 enum PaymentStructure { BulletOrZero, EqualRedemptions };
 
-template <class T, typename adouble>
-void inline testStructure(const T& instrument, const Schedule& schedule, PaymentStructure structure) {
-    const auto& leg         = instrument.leg();
-    const auto& coupons     = leg.coupons();
-    const auto& redemptions = leg.redemptions();
+struct Params {
+    double amount;
+    double notional;
+    Date startDate;
+    Date endDate;
+};
 
-    const auto& dates = schedule.dates();
+template <class C>
+void inline testCashflow(const C& cashflow, Params params) {
+    EXPECT_EQ(cashflow.amount(), params.amount);
+    EXPECT_EQ(cashflow.paymentDate(), params.endDate);
+    if constexpr (std::is_base_of_v<Coupon<double>, C>) {
+        EXPECT_EQ(cashflow.notional(), params.notional);
+        EXPECT_EQ(cashflow.startDate(), params.startDate);
+    }
+}
 
-    // test that the number of coupons is equal to the number of dates - 1
-    EXPECT_EQ(coupons.size(), dates.size() - 1);
+template <class T>
+void inline testRegularStructure(const T& instrument, const std::vector<Date>& dates, PaymentStructure structure) {
+    auto& cashflows = instrument.cashflows();
+    if constexpr (std::is_base_of_v<FixedRateInstrument<double>, T>) { EXPECT_EQ(cashflows.fixedRateCouponCount(), dates.size() - 1); }
+    if constexpr (std::is_base_of_v<FloatingRateInstrument<double>, T>) { EXPECT_EQ(cashflows.floatingRateCouponCount(), dates.size() - 1); }
 
     switch (structure) {
         case PaymentStructure::BulletOrZero:
-            EXPECT_EQ(redemptions.size(), 1);
-            if constexpr (std::is_same_v<adouble, double>) {
-                EXPECT_EQ(redemptions.front().amount(), instrument.notional());
-            } else {
-                EXPECT_EQ(val(redemptions.front().amount()), instrument.notional());
-            }
-
+            EXPECT_EQ(cashflows.redemptionCount(), 1);
+            EXPECT_EQ(cashflows.disbursementCount(), 1);
+            testCashflow(cashflows.redemption(0), {instrument.notional(), instrument.notional(), instrument.endDate(), instrument.endDate()});
+            testCashflow(cashflows.disbursement(0), {instrument.notional(), instrument.notional(), instrument.startDate(), instrument.startDate()});
             break;
         case PaymentStructure::EqualRedemptions:
-            EXPECT_EQ(redemptions.size(), coupons.size());
-            for (const auto& redemption : redemptions) {
-                if constexpr (std::is_same_v<adouble, double>) {
-                    EXPECT_EQ(redemption.amount(), instrument.notional() / coupons.size());
-                } else {
-                    EXPECT_EQ(val(redemption.amount()), instrument.notional() / coupons.size());
-                }
+            EXPECT_EQ(cashflows.redemptionCount(), dates.size() - 1);
+            EXPECT_EQ(cashflows.disbursementCount(), 1);
+            for (size_t i = 0; i < dates.size() - 1; ++i) {
+                Params params = {instrument.notional() / (dates.size() - 1), instrument.notional(), dates[i+1], dates[i+1]};
+                testCashflow(cashflows.redemption(i), params);
             }
             break;
         default:
             break;
-    }
-};
-
-template<class T, typename adouble>
-void inline testChangeCurrency(const T& instrument){
-    T newInstrument = instrument;
-    Currency newCurrency = JPY();
-    newInstrument.currency(newCurrency);
-    const auto& leg = newInstrument.leg();
-    const auto& coupons = leg.coupons();
-    const auto& redemptions = leg.redemptions();
- 
-    for(const auto& coupon : coupons){
-        EXPECT_EQ(coupon.currencyCode(), newCurrency.numericCode());
-    }
-    for(const auto& redemption : redemptions){
-        EXPECT_EQ(redemption.currencyCode(), newCurrency.numericCode());
-    }
-
-    if constexpr(std::is_base_of_v<FixedRateInstrument<adouble>, T> || std::is_base_of_v<FloatingRateInstrument<adouble>, T>){
-        EXPECT_EQ(newInstrument.disbursement().currencyCode(), newCurrency.numericCode());
-    }
-}
-
-template <typename adouble>
-void inline testInterest(const FixedRateInstrument<adouble>& instrument, const Schedule& schedule, const InterestRate<adouble>& rate) {
-    const auto& leg         = instrument.leg();
-    const auto& coupons     = leg.coupons();
-    const auto& redemptions = leg.redemptions();
-
-    const auto& dates = schedule.dates();
-
-    size_t i = 0;
-    for (const FixedRateCoupon<adouble>& coupon : coupons) {
-        if constexpr (std::is_same_v<adouble, double>) {
-            EXPECT_EQ(coupon.amount(), coupon.notional() * (rate.compoundFactor(dates.at(i), dates.at(i + 1)) - 1));
-        } else {
-            EXPECT_EQ(val(coupon.amount()), coupon.notional() * (val(rate.compoundFactor(dates.at(i), dates.at(i + 1))) - 1));
-        }
-        EXPECT_EQ(coupon.startDate(), dates.at(i));
-        EXPECT_EQ(coupon.endDate(), dates.at(i + 1));
-        EXPECT_EQ(coupon.rate().rate(), rate.rate());
-
-        ++i;
     }
 };
 

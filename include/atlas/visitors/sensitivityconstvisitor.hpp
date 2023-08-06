@@ -7,7 +7,7 @@
 namespace Atlas {
 
     /**
-     * @class SensibilityConstVisitor
+     * @class SensitivityConstVisitor
      * @brief Visitor in charge of calculating some sensibilities of a product.
      * @details For fixed income, the sensibility is calculated w.r.t the coupon rate (fixed rate instruments) or the coupon spread (floating rate
      * instruments).
@@ -16,33 +16,42 @@ namespace Atlas {
      * @tparam adouble
      */
     template <typename adouble>
-    class SensibilityConstVisitor : public BaseConstVisitor<adouble> {
+    class SensitivityConstVisitor : public BaseConstVisitor<adouble> {
        public:
+        struct Results {
+            adouble couponSens = 0.0;
+            adouble spreadSens = 0.0;
+        };
+
         /**
-         * @brief Construct a new Sensibility Const Visitor object
+         * @brief Construct a new Sensitivity Const Visitor object
          *
          * @param marketData  MarketData object
-         * @param delta      Sensibility step
+         * @param delta      Sensitivity step
          * @param showLogs   Show logs
          */
-        SensibilityConstVisitor(const MarketData<adouble>& marketData, double delta = 0.0001, bool showLogs = false)
+        SensitivityConstVisitor(const MarketData<adouble>& marketData, double delta = 0.0001, bool showLogs = false)
         : BaseConstVisitor<adouble>(showLogs), marketData_(marketData), delta_(delta){};
 
         /**
          * @brief Get the Results object
          *
-         * @return std::unordered_map<std::string, adouble> map of results
+         * @return Results map of results
          */
-        std::unordered_map<std::string, adouble> getResults() const { return results_; }
+        inline Results getResults() const { return results_; }
 
-        void reset() { results_.clear(); }
+        /**
+         * @brief Reset the results
+         *
+         */
+        void reset() { results_ = Results(); }
 
         /**
          * @brief
          *
          * @param inst
          */
-        void operator()(const std::monostate& inst) const override { this->template printLogs<SensibilityConstVisitor>(this, "monostate"); }
+        void operator()(const std::monostate& inst) const override { this->template printLogs<SensitivityConstVisitor>(this, "monostate"); }
 
         /**
          * @brief Calculate the coupon sensibility of a FixedRateBulletInstrument.
@@ -63,14 +72,6 @@ namespace Atlas {
 
         void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { floatingInstSens(inst); }
 
-        void operator()(const FxForward<adouble>& inst) const override {
-            throw std::runtime_error("SensibilityConstVisitor: FxForward not implemented");
-        }
-
-        void operator()(const FixFloatSwap<adouble>& inst) const override {
-            throw std::runtime_error("SensibilityConstVisitor: FxSwap not implemented");
-        }
-
        private:
         template <typename T>
         void fixedInstSens(const T& inst) const {
@@ -78,15 +79,16 @@ namespace Atlas {
             NPVConstVisitor<adouble> npvVisitor(marketData_);
             InterestRate<adouble> rate = tmpProd.rate();
 
-            auto f = [&](adouble r) {
-                npvVisitor.reset();
-                tmpProd.rate(r);
-                npvVisitor(tmpProd);
-                return npvVisitor.getResults();
-            };
-            adouble npv                = f(rate.rate());
-            adouble npv_               = f(rate.rate() + delta_);
-            results_["couponRateSens"] = (npv_ - npv) / npv / delta_;
+            npvVisitor(tmpProd);
+            adouble sensNPV    = npvVisitor.getResults().fixedRateCouponsNPV;
+            adouble nonSensNPV = -npvVisitor.getResults().disbursementsNPV;
+
+            npvVisitor.reset();
+
+            tmpProd.rate(rate.rate() + delta_);
+            npvVisitor(tmpProd);
+            adouble sensNPV_        = npvVisitor.getResults().fixedRateCouponsNPV;
+            results_.couponSens = (sensNPV_ - sensNPV) / nonSensNPV / delta_;
         };
 
         template <typename T>
@@ -97,20 +99,21 @@ namespace Atlas {
             FixingVisitor<adouble> fixingVisitor(marketData_);
             fixingVisitor(tmpProd);
 
-            auto f = [&](adouble s) {
-                npvVisitor.reset();
-                tmpProd.spread(s);
-                npvVisitor(tmpProd);
-                return npvVisitor.getResults();
-            };
-            adouble npv            = f(spread);
-            adouble npv_           = f(spread + delta_);
-            results_["spreadSens"] = (npv_ - npv) / npv / delta_;
+            npvVisitor(tmpProd);
+            adouble sensNPV    = npvVisitor.getResults().floatingRateCouponsNPV;
+            adouble nonSensNPV = -npvVisitor.getResults().disbursementsNPV;
+
+            npvVisitor.reset();
+
+            tmpProd.spread(spread + delta_);
+            npvVisitor(tmpProd);
+            adouble sensNPV_    = npvVisitor.getResults().floatingRateCouponsNPV;
+            results_.spreadSens = (sensNPV_ - sensNPV) / nonSensNPV / delta_;
         };
 
         const MarketData<adouble>& marketData_;
         double delta_;
-        mutable std::unordered_map<std::string, adouble> results_;
+        mutable Results results_ = Results();
     };
 }  // namespace Atlas
 
