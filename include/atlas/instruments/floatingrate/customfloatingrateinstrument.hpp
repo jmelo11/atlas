@@ -43,7 +43,6 @@ namespace Atlas {
             }
             if (impliedNotional != 0.0) { throw std::runtime_error("Disbursments are not fully paid with the given redemptions"); }
 
-            this->notional_ = impliedNotional;
             // calculate the outstanding notional and create the correponding fixed rate coupons
             auto outstrading = calculateOutstanding(disbursements, redemptions);
 

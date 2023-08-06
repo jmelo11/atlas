@@ -68,7 +68,7 @@ namespace Atlas {
                 adouble totalRedemption = 0;
                 for (const auto& coupon : coupons)
                     totalRedemption += payment - (tmpRate.compoundFactor(coupon.startDate(), coupon.endDate()) - 1) * (1 - totalRedemption);
-                return pow(1 - totalRedemption, 2);
+                return 1 - totalRedemption;
             };
 
             QuantLib::Brent solver_;

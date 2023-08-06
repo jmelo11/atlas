@@ -12,6 +12,7 @@
 #include <map>
 #include <tuple>
 #include <vector>
+#include <atlas/atlasconfig.hpp>
 
 namespace Atlas {
 
@@ -59,39 +60,26 @@ namespace Atlas {
                                                                             const std::map<Date, double>& redemptions) {
         std::vector<std::tuple<Date, Date, double>> outstanding;
 
-        // Copy disbursements to a mutable map
-        std::map<Date, double> remainingDisbursements = disbursements;
+        // Combine disbursements and redemptions into a timeline of events
+        std::map<Date, double> timeline = disbursements;
+        for (const auto& redemption : redemptions) { timeline[redemption.first] -= redemption.second; }
 
-        // For each redemption
-        for (const auto& redemptionPair : redemptions) {
-            Date redemptionDate     = redemptionPair.first;
-            double redemptionAmount = redemptionPair.second;
+        // Process the timeline
+        auto eventIter       = timeline.begin();
+        double currentAmount = eventIter->second;
+        Date periodStart     = eventIter->first;
+        ++eventIter;
 
-            // Find a disbursement to apply the redemption to
-            for (auto& disbursementPair : remainingDisbursements) {
-                if (disbursementPair.second > 0) {
-                    Date disbursementDate      = disbursementPair.first;
-                    double& disbursementAmount = disbursementPair.second;
-
-                    // Calculate outstanding amount for the period
-                    double periodOutstanding = std::min(disbursementAmount, redemptionAmount);
-
-                    // Add outstanding amount for the period to the result
-                    outstanding.push_back(std::make_tuple(disbursementDate, redemptionDate, periodOutstanding));
-
-                    // Update disbursement and redemption amounts
-                    disbursementAmount -= periodOutstanding;
-                    redemptionAmount -= periodOutstanding;
-
-                    if (redemptionAmount <= 0) {
-                        break;  // Break the loop if the redemption is fully applied
-                    }
-                }
-            }
+        while (eventIter != timeline.end()) {
+            Date periodEnd = eventIter->first;
+            outstanding.push_back(std::make_tuple(periodStart, periodEnd, currentAmount));
+            currentAmount += eventIter->second;
+            periodStart = periodEnd;
+            ++eventIter;
         }
 
         return outstanding;
-    }
+    };
 
     inline void printTable(const std::vector<std::vector<std::string>>& tableData) {
         // Find the maximum width of each column

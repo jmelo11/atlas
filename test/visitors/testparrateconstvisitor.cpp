@@ -48,3 +48,19 @@ TEST(ParRateConstVisitor, FloatingRateInstrument) {
     double tmpRate = QuantLib::CashFlows::atmRate(qlBond.cashflows(), **vars.discountingTermStructure, false);
     EXPECT_NEAR(solver.getResults().parSpread, 0.0, 1e-6);
 }
+
+TEST(ParRateConstVisitor, EqualPaymentInstrument) {
+    // Create a fixed rate instrument
+    TestParRateConstVisitor::TestSetup<double> vars;
+    EqualPaymentInstrument instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.atlasRate, 0);
+
+    IndexingVisitor<double> indexer;
+    indexer(instrument);
+    MarketRequest request = indexer.getResults();
+
+    SpotMarketDataModel<double> model(request, vars.store);
+    MarketData<double> marketData = model.marketData();
+
+    ParRateConstVisitor<double> solver(marketData);    
+    EXPECT_NO_THROW(solver(instrument));
+}

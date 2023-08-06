@@ -4,7 +4,9 @@ ARG BUILD_TYPE=Release
 ARG INSTALL_DIR='/builds'
 ARG nproc=12
 
-COPY . /app
+COPY ./.gitmodules /app/.gitmodules 
+COPY ./.git /app/.git
+
 WORKDIR /app
 RUN git submodule update --init --recursive
 

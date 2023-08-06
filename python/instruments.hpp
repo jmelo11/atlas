@@ -63,13 +63,12 @@ void py_instruments(py::module& m) {
              py::arg("notional"), py::arg("rate"), py::arg("discountContextIdx"), py::arg("side") = Side::Recieve);
 
     py::class_<EqualPaymentInstrument<NumType>, FixedRateInstrument<NumType>>(m, "EqualPaymentInstrument")
-        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, Side, bool>(), py::arg("startDate"),
-             py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Recieve,
-             py::arg("recalculateNotionals") = false)
-        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, size_t, Side, bool>(), py::arg("startDate"),
+        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
+             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Recieve)
+        .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("discountContextIdx"),
-             py::arg("side") = Side::Recieve, py::arg("recalculateNotionals") = false)
-        .def("recalculateNotionals", &EqualPaymentInstrument<NumType>::recalculateNotionals, py::arg("recalculateNotionals") = true);
+             py::arg("side") = Side::Recieve)
+        .def("withRate", &EqualPaymentInstrument<NumType>::withRate);
 
     py::class_<CustomFixedRateInstrument<NumType>, FixedRateInstrument<NumType>>(m, "CustomFixedRateInstrument")
         .def(py::init<const std::map<Date, double>&, const std::map<Date, double>&, const InterestRate<NumType>&>(), py::arg("dates"),

@@ -23,23 +23,21 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param rate rate of the instrument
          * @param side side of the instrument
-         * @param recalcNotionals recalculate notionals based on the given rate
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               Side side = Side::Recieve, bool recalcNotionals = false)
-        : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional), recalcNotionals_(recalcNotionals) {
-            Schedule schedule = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
-            this->dates_      = schedule.dates();
-
-            std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, static_cast<int>(this->side_));
+                               Side side = Side::Recieve)
+        : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional), paymentFrequency_(freq) {
+            Schedule schedule                     = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
+            std::vector<Date> dates               = schedule.dates();
+            std::vector<double> redemptionAmounts = calculateRedemptions(dates, this->rate_, this->notional_, static_cast<int>(this->side_));
 
             auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
             this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
             double tmpNotional = notional;
-            for (size_t i = 1; i < this->dates_.size(); i++) {
-                this->cashflows_.addRedemption(Cashflow<adouble>(this->dates_.at(i), redemptionAmounts.at(i - 1), side));
-                this->cashflows_.addFixedRateCoupon(FixedRateCoupon<adouble>(this->dates_.at(i - 1), this->dates_.at(i), tmpNotional, rate, side));
-                tmpNotional -= redemptionAmounts.at(i-1);
+            for (size_t i = 1; i < dates.size(); i++) {
+                this->cashflows_.addRedemption(Cashflow<adouble>(dates.at(i), redemptionAmounts.at(i - 1), side));
+                this->cashflows_.addFixedRateCoupon(FixedRateCoupon<adouble>(dates.at(i - 1), dates.at(i), tmpNotional, rate, side));
+                tmpNotional -= redemptionAmounts.at(i - 1);
             }
         };
         /**
@@ -52,39 +50,25 @@ namespace Atlas {
          * @param rate rate of the instrument
          * @param discountContextIdx discount curve context of the instrument
          * @param side side of the instrument
-         * @param recalcNotionals recalculate notionals based on the given rate
          */
         EqualPaymentInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                               size_t discountContextIdx, Side side = Side::Recieve, bool recalcNotionals = false)
-        : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, side, recalcNotionals) {
+                               size_t discountContextIdx, Side side = Side::Recieve)
+        : EqualPaymentInstrument(startDate, endDate, freq, notional, rate, side) {
             this->cashflows_.discountContextIdx(discountContextIdx);
         };
 
-        // void rate(const InterestRate<adouble>& r) override {
-        //     this->rate_ = r;
-        //     if (recalcNotionals_) {
-        //         std::vector<size_t> redemptionIdxs;
-        //         std::vector<size_t> couponIdxs;
-        //         auto& redemptions = this->leg().redemptions();
-        //         auto& coupons     = this->leg().coupons();
-        //         size_t nCoupons   = coupons.size();
-        //         for (size_t i = 0; i < nCoupons; ++i) {
-        //             redemptionIdxs.push_back(redemptions.at(i).dfIdx());
-        //             couponIdxs.push_back(coupons.at(i).dfIdx());
-        //         }
-
-        //         int flag                              = (this->side_ == Side::Long) ? 1 : -1;
-        //         std::vector<double> redemptionAmounts = calculateRedemptions(this->dates_, this->rate_, this->notional_, flag);
-        //         this->leg_ = MakeLeg<FixedRateLeg, adouble>().dates(this->dates_).redemptions(redemptionAmounts).rate(this->rate_).build();
-
-        //         for (size_t i = 0; i < nCoupons; ++i) {
-        //             this->leg_.redemption(i).dfIdx(redemptionIdxs.at(i));
-        //             this->leg_.coupon(i).dfIdx(couponIdxs.at(i));
-        //         }
-        //     };
-        // }
-
-        void recalculateNotionals(bool calc) { recalcNotionals_ = calc; }
+        /**
+         * @brief Construct a new Equal Payment Instrument object
+         *
+         * @param instrument
+         * @param rate
+         * @return EqualPaymentInstrument
+         */
+        static EqualPaymentInstrument withRate(const EqualPaymentInstrument& instrument, adouble rate) {
+            InterestRate<adouble> newRate(rate, instrument.rate_.dayCounter(), instrument.rate_.compounding(), instrument.rate_.frequency());
+            return EqualPaymentInstrument(instrument.startDate_, instrument.endDate_, instrument.paymentFrequency_, instrument.notional_, newRate,
+                                          instrument.side_);
+        }
 
        private:
         std::vector<double> calculateRedemptions(const std::vector<Date>& dates, const InterestRate<adouble>& rate, double notional, int side) {
@@ -131,8 +115,7 @@ namespace Atlas {
             return redemptions;
         }
 
-        bool recalcNotionals_;
-        std::vector<Date> dates_;
+        Frequency paymentFrequency_;
     };
 
 }  // namespace Atlas

@@ -43,7 +43,6 @@ namespace Atlas {
                 this->cashflows_.addRedemption(Cashflow<adouble>(date, amount, side));
             }
             if (impliedNotional != 0.0) { throw std::runtime_error("Disbursments are not fully paid with the given redemptions"); }
-            this->notional_ = impliedNotional;
 
             auto outstrading = calculateOutstanding(disbursements, redemptions);
 
