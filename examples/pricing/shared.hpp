@@ -3,6 +3,7 @@
 
 #include <atlas/fundation/marketstore.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
+#include <atlas/visitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
 
 namespace PricingExample {
 
@@ -22,6 +23,41 @@ namespace PricingExample {
     inline void printLine(const std::string& key, double value, int keyWidth) {
         const std::string sep = ":";
         std::cout << std::left << std::setw(keyWidth) << key << sep << value << '\n';
+    }
+
+    void printTable(const InstrumentCashflowsConstVisitor<double>::Results& results) {
+        std::map<std::string, std::map<Date, double>> data = {{"redemptions", results.redemptions},
+                                                              {"floatingRateCoupons", results.floatingRateCoupons},
+                                                              {"fixedRateCoupons", results.fixedRateCoupons},
+                                                              {"disbursements", results.disbursements}};
+
+        int colWidth = 20;  // adjust based on your needs
+
+        // Get all dates
+        std::set<Date> allDates;
+        for (const auto& col : data) {
+            for (const auto& dateValuePair : col.second) { allDates.insert(dateValuePair.first); }
+        }
+
+        // Print headers
+        std::cout << std::left << std::setw(colWidth) << "Date";
+        for (const auto& col : data) { std::cout << std::setw(colWidth) << col.first; }
+        std::cout << "\n";
+
+        // Iterate over all dates
+        for (const auto& date : allDates) {
+            std::cout << std::left << std::setw(colWidth) << parseDate(date);
+            for (const auto& col : data) {
+                const auto& dateValueMap = col.second;
+                auto it                  = dateValueMap.find(date);
+                if (it != dateValueMap.end()) {
+                    std::cout << std::setw(colWidth) << it->second;
+                } else {
+                    std::cout << std::setw(colWidth) << "-";  // print "N/A" if date doesn't exist in this column
+                }
+            }
+            std::cout << "\n";
+        }
     }
 
     inline MarketStore<double> createStore(const Date& refDate) {

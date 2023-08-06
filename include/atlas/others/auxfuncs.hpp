@@ -9,6 +9,8 @@
 
 #include <chrono>
 #include <iostream>
+#include <map>
+#include <tuple>
 #include <vector>
 
 namespace Atlas {
@@ -51,6 +53,44 @@ namespace Atlas {
         int month = std::stoi(date.substr(2, 2));
         int year  = std::stoi(date.substr(4, 4));
         return Date(day, (Month)month, year);
+    }
+
+    inline std::vector<std::tuple<Date, Date, double>> calculateOutstanding(const std::map<Date, double>& disbursements,
+                                                                            const std::map<Date, double>& redemptions) {
+        std::vector<std::tuple<Date, Date, double>> outstanding;
+
+        // Copy disbursements to a mutable map
+        std::map<Date, double> remainingDisbursements = disbursements;
+
+        // For each redemption
+        for (const auto& redemptionPair : redemptions) {
+            Date redemptionDate     = redemptionPair.first;
+            double redemptionAmount = redemptionPair.second;
+
+            // Find a disbursement to apply the redemption to
+            for (auto& disbursementPair : remainingDisbursements) {
+                if (disbursementPair.second > 0) {
+                    Date disbursementDate      = disbursementPair.first;
+                    double& disbursementAmount = disbursementPair.second;
+
+                    // Calculate outstanding amount for the period
+                    double periodOutstanding = std::min(disbursementAmount, redemptionAmount);
+
+                    // Add outstanding amount for the period to the result
+                    outstanding.push_back(std::make_tuple(disbursementDate, redemptionDate, periodOutstanding));
+
+                    // Update disbursement and redemption amounts
+                    disbursementAmount -= periodOutstanding;
+                    redemptionAmount -= periodOutstanding;
+
+                    if (redemptionAmount <= 0) {
+                        break;  // Break the loop if the redemption is fully applied
+                    }
+                }
+            }
+        }
+
+        return outstanding;
     }
 
     inline void printTable(const std::vector<std::vector<std::string>>& tableData) {

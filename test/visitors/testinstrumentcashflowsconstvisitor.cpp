@@ -46,7 +46,7 @@ TEST(InstrumentCashflowsConstVisitor, FixedRateInstrument) {
 
 TEST(InstrumentCashflowsConstVisitor, FloatingRateInstrument) {
     TestInstrumentCashflowsConstVisitor::Common vars;
-
+    QuantLib::Settings::instance().evaluationDate() = vars.startDate;
     // QuantLib
     auto qlCurve = boost::make_shared<QuantLib::FlatForward>(vars.startDate, vars.rate, vars.dayCounter, vars.compounding, vars.frequency);
     QuantLib::RelinkableHandle<QuantLib::YieldTermStructure> forecastTermStructure;

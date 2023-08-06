@@ -49,6 +49,13 @@ namespace PricingExample {
         SensitivityConstVisitor<double> sensitivityVisitor(marketData);
         std::visit(sensitivityVisitor, instrument);
         printLine("Sensitivity", sensitivityVisitor.getResults().spreadSens, 20);
+
+        InstrumentCashflowsConstVisitor<double> cashflowVisitor;
+        std::visit(cashflowVisitor, instrument);
+        auto results = cashflowVisitor.getResults();
+
+        std::cout << std::endl;
+        printTable(results);
     }
 }  // namespace PricingExample
 
