@@ -44,7 +44,7 @@ namespace Atlas {
          * @brief Reset the results
          *
          */
-        void reset() { results_ = Results(); }
+        void reset() const { results_ = Results(); }
 
         /**
          * @brief
@@ -64,13 +64,15 @@ namespace Atlas {
 
         void operator()(const EqualPaymentInstrument<adouble>& inst) const override { fixedInstSens(inst); }
 
-        void operator()(const ZeroCouponInstrument<adouble>& inst) const override { fixedInstSens(inst); }
+        void operator()(const ZeroCouponFixedRateInstrument<adouble>& inst) const override { fixedInstSens(inst); }
 
         void operator()(const CustomFixedRateInstrument<adouble>& inst) const override { fixedInstSens(inst); }
 
         void operator()(const CustomFloatingRateInstrument<adouble>& inst) const override { floatingInstSens(inst); }
 
         void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { floatingInstSens(inst); }
+
+        void operator()(const ZeroCouponFloatingRateInstrument<adouble>& inst) const override { floatingInstSens(inst); }
 
        private:
         template <typename T>
@@ -87,7 +89,10 @@ namespace Atlas {
 
             tmpProd.rate(rate.rate() + delta_);
             npvVisitor(tmpProd);
-            adouble sensNPV_        = npvVisitor.getResults().fixedRateCouponsNPV;
+            adouble sensNPV_ = npvVisitor.getResults().fixedRateCouponsNPV;
+
+            std::lock_guard<std::mutex> lock(mtx_);
+            reset();
             results_.couponSens = (sensNPV_ - sensNPV) / nonSensNPV / delta_;
         };
 
@@ -107,10 +112,14 @@ namespace Atlas {
 
             tmpProd.spread(spread + delta_);
             npvVisitor(tmpProd);
-            adouble sensNPV_    = npvVisitor.getResults().floatingRateCouponsNPV;
+            adouble sensNPV_ = npvVisitor.getResults().floatingRateCouponsNPV;
+
+            std::lock_guard<std::mutex> lock(mtx_);
+            reset();
             results_.spreadSens = (sensNPV_ - sensNPV) / nonSensNPV / delta_;
         };
 
+        mutable std::mutex mtx_;
         const MarketData<adouble>& marketData_;
         double delta_;
         mutable Results results_ = Results();

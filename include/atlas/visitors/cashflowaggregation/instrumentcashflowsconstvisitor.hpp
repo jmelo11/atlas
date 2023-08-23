@@ -4,7 +4,8 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
+#include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
+#include <atlas/instruments/floatingrate/zerocouponfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
@@ -44,7 +45,7 @@ namespace Atlas {
             paymentProfile(instrument.cashflows().fixedRateCoupons(), results_.fixedRateCoupons);
         }
 
-        void operator()(const ZeroCouponInstrument<adouble>& instrument) const override {
+        void operator()(const ZeroCouponFixedRateInstrument<adouble>& instrument) const override {
             paymentProfile(instrument.cashflows().redemptions(), results_.redemptions);
             paymentProfile(instrument.cashflows().disbursements(), results_.disbursements);
             paymentProfile(instrument.cashflows().fixedRateCoupons(), results_.fixedRateCoupons);
@@ -63,6 +64,12 @@ namespace Atlas {
         }
 
         void operator()(const CustomFloatingRateInstrument<adouble>& instrument) const override {
+            paymentProfile(instrument.cashflows().redemptions(), results_.redemptions);
+            paymentProfile(instrument.cashflows().disbursements(), results_.disbursements);
+            paymentProfile(instrument.cashflows().floatingRateCoupons(), results_.floatingRateCoupons);
+        }
+
+        void operator()(const ZeroCouponFloatingRateInstrument<adouble>& instrument) const override {
             paymentProfile(instrument.cashflows().redemptions(), results_.redemptions);
             paymentProfile(instrument.cashflows().disbursements(), results_.disbursements);
             paymentProfile(instrument.cashflows().floatingRateCoupons(), results_.floatingRateCoupons);

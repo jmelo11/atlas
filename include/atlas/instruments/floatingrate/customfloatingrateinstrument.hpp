@@ -23,7 +23,7 @@ namespace Atlas {
          * @param index interest rate index of the instrument
          */
         CustomFloatingRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions, adouble spread,
-                                     const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+                                     const InterestRateIndex<adouble>& index, Side side = Side::Recieve, const std::set<Date>& additionalDates = {})
         : FloatingRateInstrument<adouble>(disbursements.begin()->first, redemptions.begin()->first, 0, spread, side) {
             Date firstDisbursementDate = disbursements.begin()->first;
             Date firstRedemptionDate   = redemptions.begin()->first;
@@ -44,7 +44,7 @@ namespace Atlas {
             if (impliedNotional != 0.0) { throw std::runtime_error("Disbursments are not fully paid with the given redemptions"); }
 
             // calculate the outstanding notional and create the correponding fixed rate coupons
-            auto outstrading = calculateOutstanding(disbursements, redemptions);
+            auto outstrading = calculateOutstanding(disbursements, redemptions, additionalDates);
 
             for (const auto& o : outstrading) {
                 Date startDate   = std::get<0>(o);
@@ -67,7 +67,7 @@ namespace Atlas {
          */
         CustomFloatingRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions, adouble spread,
                                      const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                     Side side = Side::Recieve)
+                                     Side side = Side::Recieve, const std::set<Date> additionalDates = {})
         : CustomFloatingRateInstrument(disbursements, redemptions, spread, index, side) {
             this->cashflows_.discountContextIdx(discountContextIdx);
             this->cashflows_.indexContextIdx(indexContextIdx);

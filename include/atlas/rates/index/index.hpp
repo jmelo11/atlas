@@ -22,7 +22,14 @@ namespace Atlas {
          *
          * @param fixingFreq
          */
-        Index(Frequency fixingFreq) : fixingFreq_(fixingFreq){};
+        Index(Frequency fixingFreq) : tenor_(Period(fixingFreq)){};
+
+        /**
+         * @brief Construct a new Index object
+         *
+         * @param tenor
+         */
+        Index(const Period& tenor) : tenor_(tenor){};
 
         /**
          * @brief Destroy the Index object
@@ -60,7 +67,7 @@ namespace Atlas {
          *
          * @return Frequency
          */
-        inline Frequency fixingFrequency() const { return fixingFreq_; };
+        inline Period tenor() const { return tenor_; };
 
         /**
          * @brief Checks if the fixing map is empty
@@ -72,7 +79,7 @@ namespace Atlas {
 
        protected:
         std::map<Date, double> historicalFixings_;
-        Frequency fixingFreq_ = Frequency::NoFrequency;
+        Period tenor_ = Period();
     };
 }  // namespace Atlas
 

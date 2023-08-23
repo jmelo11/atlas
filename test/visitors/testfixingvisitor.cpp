@@ -66,3 +66,19 @@ TEST(FixingVisitor, CustomFloatingRateInstrument) {
 
     for (const auto& cf : instrument.cashflows().floatingRateCoupons()) { EXPECT_TRUE(cf.isFixingSet()); }
 }
+
+TEST(FixingVisitor, ZeroCouponFloatingRateInstrument){
+    TestFixingVisitor::Common vars;
+    ZeroCouponFloatingRateInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+                                                        vars.indexIdx, vars.side);
+    IndexingVisitor indexingVisitor;
+    indexingVisitor(instrument);
+
+    MarketData<double> marketData;
+    for (size_t i = 0; i < instrument.cashflows().floatingRateCouponCount(); ++i) { marketData.fwds.push_back(0.05); }
+
+    FixingVisitor<double> fixingVisitor(marketData);
+    fixingVisitor(instrument);
+
+    for (const auto& cf : instrument.cashflows().floatingRateCoupons()) { EXPECT_TRUE(cf.isFixingSet()); }
+}

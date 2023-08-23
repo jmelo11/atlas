@@ -22,7 +22,7 @@ namespace Atlas {
          * @param side
          */
         CustomFixedRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions,
-                                  const InterestRate<adouble>& rate, Side side = Side::Recieve)
+                                  const InterestRate<adouble>& rate, Side side = Side::Recieve, const std::set<Date>& additionalDates = {})
         : FixedRateInstrument<adouble>(disbursements.begin()->first, redemptions.end()->first, rate, side) {
             // if there is a redemption on the first date, throw an error
             Date firstDisbursementDate = disbursements.begin()->first;
@@ -44,7 +44,7 @@ namespace Atlas {
             }
             if (impliedNotional != 0.0) { throw std::runtime_error("Disbursments are not fully paid with the given redemptions"); }
 
-            auto outstrading = calculateOutstanding(disbursements, redemptions);
+            auto outstrading = calculateOutstanding(disbursements, redemptions, additionalDates);
 
             for (const auto& o : outstrading) {
                 Date startDate   = std::get<0>(o);
@@ -64,7 +64,8 @@ namespace Atlas {
          * @param side
          */
         CustomFixedRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions,
-                                  const InterestRate<adouble>& rate, size_t discountContextIdx, Side side = Side::Recieve)
+                                  const InterestRate<adouble>& rate, size_t discountContextIdx, Side side = Side::Recieve,
+                                  const std::set<Date>& additionalDates = {})
         : CustomFixedRateInstrument(disbursements, redemptions, rate, side) {
             this->cashflows_.discountContextIdx(discountContextIdx);
         }

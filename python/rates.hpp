@@ -48,7 +48,7 @@ void py_rates(py::module& m) {
              py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Simple, py::arg("frequency") = Frequency::Annual)
         .def(py::init<const Date&, const InterestRate<NumType>&>(), py::arg("refDate"), py::arg("rate"));
 
-    py::class_<ZeroRateTermStructure<LinearInterpolator, NumType>, YieldTermStructure<NumType>>(m, "ZeroRateTermStructure")
+    py::class_<ZeroRateTermStructure<LinearInterpolator, NumType>, YieldTermStructure<NumType>>(m, "ZeroRateLinearTermStructure")
         .def(py::init<const std::vector<Date>&, const std::vector<NumType>&, const DayCounter&, Compounding, Frequency>(), py::arg("dates"),
              py::arg("zeroRates"), py::arg("dayCounter") = Actual360(), py::arg("compounding") = Compounding::Simple,
              py::arg("frequency") = Frequency::Annual);
@@ -57,9 +57,10 @@ void py_rates(py::module& m) {
     py::class_<Index<NumType>>(m, "Index")
         .def(py::init<>())
         .def(py::init<Frequency>(), py::arg("fixingFrequency"))
+        .def(py::init<const Period&>(), py::arg("tenor"))
         .def("addHistoricalFixing", &Index<NumType>::addHistoricalFixing)
         .def("addHistoricalFixings", &Index<NumType>::addHistoricalFixings)
-        .def("fixingFrequency", &Index<NumType>::fixingFrequency)
+        .def("tenor", &Index<NumType>::tenor)
         .def("empty", &Index<NumType>::empty)
         .def("fixing", &Index<NumType>::fixing);
 
@@ -69,9 +70,10 @@ void py_rates(py::module& m) {
         .def("frequency", &RateDefinition::frequency)
         .def("compounding", &RateDefinition::compounding);
 
-    py::class_<InterestRateIndex<NumType>>(m, "InterestRateIndex")
+    py::class_<InterestRateIndex<NumType>, Index<NumType>>(m, "InterestRateIndex")
         .def(py::init<Frequency, const RateDefinition&>(), py::arg("fixingFrequency") = Frequency::NoFrequency,
              py::arg("rateDefinition") = RateDefinition())
+        .def(py::init<const Period&, const RateDefinition&>(), py::arg("tenor") = Period(), py::arg("rateDefinition") = RateDefinition())
         .def("rateDefinition", &InterestRateIndex<NumType>::rateDefinition)
         .def("isValid", &InterestRateIndex<NumType>::isValid);
 };

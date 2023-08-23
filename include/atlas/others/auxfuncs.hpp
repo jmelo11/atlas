@@ -7,12 +7,12 @@
 #ifndef A1E6F5B0_6F4A_4460_9F42_A14B525D8447
 #define A1E6F5B0_6F4A_4460_9F42_A14B525D8447
 
+#include <atlas/atlasconfig.hpp>
 #include <chrono>
 #include <iostream>
 #include <map>
 #include <tuple>
 #include <vector>
-#include <atlas/atlasconfig.hpp>
 
 namespace Atlas {
 
@@ -57,12 +57,17 @@ namespace Atlas {
     }
 
     inline std::vector<std::tuple<Date, Date, double>> calculateOutstanding(const std::map<Date, double>& disbursements,
-                                                                            const std::map<Date, double>& redemptions) {
+                                                                            const std::map<Date, double>& redemptions,
+                                                                            const std::set<Date>& additionalDates) {
         std::vector<std::tuple<Date, Date, double>> outstanding;
 
         // Combine disbursements and redemptions into a timeline of events
         std::map<Date, double> timeline = disbursements;
         for (const auto& redemption : redemptions) { timeline[redemption.first] -= redemption.second; }
+
+        for (const auto& date : additionalDates) {
+            if (timeline.count(date) == 0) { timeline[date] = 0; }
+        }
 
         // Process the timeline
         auto eventIter       = timeline.begin();

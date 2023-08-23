@@ -395,6 +395,38 @@ namespace Atlas {
             throw std::runtime_error("Business day convention not supported");
         }
     };
+
+    /**
+     * @brief Parses a string to a day counter
+     *
+     * @param side
+     * @return Side
+     */
+    inline Side parseSide(const std::string& side) {
+        if (side == "Recieve") {
+            return Side::Recieve;
+        } else if (side == "Pay") {
+            return Side::Pay;
+        } else {
+            throw std::runtime_error("Side not supported");
+        }
+    };
+
+    /**
+     * @brief Parses a day counter to a string
+     *
+     * @param side
+     * @return std::string
+     */
+    inline std::string parseSide(const Side& side) {
+        if (side == Side::Recieve) {
+            return "Recieve";
+        } else if (side == Side::Pay) {
+            return "Pay";
+        } else {
+            throw std::runtime_error("Side not supported");
+        }
+    };
 }  // namespace Atlas
 
 #endif /* AABE4AC2_5D19_49DC_96D1_F768D56CC12F */

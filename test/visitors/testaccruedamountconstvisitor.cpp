@@ -1,6 +1,4 @@
 #include "testaccruedamountconstvisitor.hpp"
-#include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/visitors/cashflowaggregation/accruedamountconstvisitor.hpp>
 #include <atlas/visitors/fixingvisitor.hpp>
 #include <atlas/visitors/indexingvisitor.hpp>
@@ -32,9 +30,9 @@ TEST(AccruedAmountConstVisitor, EqualPaymentInstrument) {
     TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
 }
 
-TEST(AccruedAmountConstVisitor, ZeroCouponInstrument) {
+TEST(AccruedAmountConstVisitor, ZeroCouponFixedRateInstrument) {
     TestAccruedAmountConstVisitor::Common vars;
-    ZeroCouponInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.discountIdx, vars.side);
+    ZeroCouponFixedRateInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.discountIdx, vars.side);
     AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
     visitor(instrument);
     TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
@@ -98,6 +96,25 @@ TEST(AccruedAmountConstVisitor, CustomFloatingRateInstrument) {
 
     CustomFloatingRateInstrument<double> instrument(disbursementMap, redemptionMap, vars.spread, vars.index, vars.discountIdx, vars.indexIdx,
                                                     vars.side);
+
+    IndexingVisitor indexingVisitor;
+    indexingVisitor(instrument);
+
+    MarketData<double> marketData;
+    for (size_t i = 0; i < instrument.cashflows().floatingRateCouponCount(); ++i) { marketData.fwds.push_back(0.05); }
+
+    FixingVisitor<double> fixingVisitor(marketData);
+    fixingVisitor(instrument);
+
+    AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
+    visitor(instrument);
+    TestAccruedAmountConstVisitor::calculateAccrual(instrument.cashflows(), vars.startDate, vars.endDate);
+}
+
+TEST(AccruedAmountConstVisitor, ZeroCouponFloatingRateInstrument) {
+    TestAccruedAmountConstVisitor::Common vars;
+    ZeroCouponFloatingRateInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+                                                        vars.indexIdx, vars.side);
 
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);

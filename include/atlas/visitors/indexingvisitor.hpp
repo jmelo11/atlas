@@ -5,10 +5,11 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
+#include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
+#include <atlas/instruments/floatingrate/zerocouponfloatingrateinstrument.hpp>
 #include <atlas/visitors/basevisitor.hpp>
 #include <mutex>
 #include <set>
@@ -56,11 +57,11 @@ namespace Atlas {
         void operator()(FixedRateBulletInstrument<adouble>& inst) override { indexCashflowStream(inst.cashflows()); }
 
         /**
-         * @brief Indexes the cashflows of a ZeroCouponInstrument.
+         * @brief Indexes the cashflows of a ZeroCouponFixedRateInstrument.
          *
-         * @param inst A ZeroCouponInstrument.
+         * @param inst A ZeroCouponFixedRateInstrument.
          */
-        void operator()(ZeroCouponInstrument<adouble>& inst) override { indexCashflowStream(inst.cashflows()); }
+        void operator()(ZeroCouponFixedRateInstrument<adouble>& inst) override { indexCashflowStream(inst.cashflows()); }
 
         /**
          * @brief Indexes the cashflows of a CustomFloatingRateInstrument.
@@ -82,6 +83,12 @@ namespace Atlas {
          * @param inst A FloatingRateEqualRedemptionInstrument.
          */
         void operator()(FloatingRateEqualRedemptionInstrument<adouble>& inst) override { indexCashflowStream(inst.cashflows()); }
+
+        /**
+         * @brief Indexes the cashflows of a ZeroCouponFloatingRateInstrument.
+         *
+         */
+        void operator()(ZeroCouponFloatingRateInstrument<adouble>& inst) override { indexCashflowStream(inst.cashflows()); }
 
         /**
          * @brief Get the Request object

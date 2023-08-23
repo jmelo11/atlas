@@ -15,6 +15,7 @@ void py_parsers(py::module& m) {
     m.def("parseFrequency", py::overload_cast<const std::string&>(&parseFrequency));
     m.def("parseCompounding", py::overload_cast<const std::string&>(&parseCompounding));
     m.def("parseTimeUnit", py::overload_cast<const std::string&>(&parseTimeUnit));
+    m.def("parseSide", py::overload_cast<const std::string&>(&parseSide));
 }
 
 #endif /* D88FAB7D_1265_4198_A85D_4E4BF9A0B34A */

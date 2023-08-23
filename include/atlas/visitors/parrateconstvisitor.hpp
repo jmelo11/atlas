@@ -83,9 +83,9 @@ namespace Atlas {
         /**
          * @brief Calculates the par fixed rate of the instrument.
          *
-         * @param inst ZeroCouponInstrument
+         * @param inst ZeroCouponFixedRateInstrument
          */
-        void operator()(const ZeroCouponInstrument<adouble>& inst) const override { evalFixedRateProd(inst); };
+        void operator()(const ZeroCouponFixedRateInstrument<adouble>& inst) const override { evalFixedRateProd(inst); };
 
         /**
          * @brief Calculates the par spread of the instrument.
@@ -108,6 +108,12 @@ namespace Atlas {
          */
         void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { evalFloatingRateProd(inst); };
 
+        /**
+         * @brief Calculates the par spread of the instrument.
+         *
+         */
+        void operator()(const ZeroCouponFloatingRateInstrument<adouble>& inst) const override { evalFloatingRateProd(inst); };
+
         inline void reset() const { results_ = Results(); };
 
         inline Results getResults() const { return results_; };
@@ -123,7 +129,8 @@ namespace Atlas {
                 npvVisitor(evalInst);
                 return npvVisitor.getResults().npv;
             };
-            
+            std::lock_guard<std::mutex> lock(mtx_);
+            reset();
             QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
                 results_.parRate = solver_.solve(f, accuracy_, guess_, 0.0001);
@@ -147,6 +154,8 @@ namespace Atlas {
                 return npvVisitor.getResults().npv;
             };
 
+            std::lock_guard<std::mutex> lock(mtx_);
+            reset();
             QuantLib::Brent solver_;
             if constexpr (std::is_same_v<adouble, double>) {
                 results_.parSpread = solver_.solve(f, accuracy_, guess_, 0.0001);
@@ -156,6 +165,7 @@ namespace Atlas {
             }
         };
 
+        mutable std::mutex mtx_;
         const MarketData<adouble>& marketData_;
         double guess_;
         double accuracy_;

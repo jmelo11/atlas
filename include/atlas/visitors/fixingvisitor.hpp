@@ -5,10 +5,11 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
+#include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
+#include <atlas/instruments/floatingrate/zerocouponfloatingrateinstrument.hpp>
 #include <atlas/visitors/basevisitor.hpp>
 
 namespace Atlas {
@@ -63,10 +64,10 @@ namespace Atlas {
         /**
          * @brief Since the instrument is not a floating rate instrument, the visitor only prints a message.
          *
-         * @param inst ZeroCouponInstrument
+         * @param inst ZeroCouponFixedRateInstrument
          */
-        void operator()(ZeroCouponInstrument<adouble>& inst) override {
-            std::cout << "FixingVisitor: ZeroCouponInstrument is not a floating rate instrument." << std::endl;
+        void operator()(ZeroCouponFixedRateInstrument<adouble>& inst) override {
+            std::cout << "FixingVisitor: ZeroCouponFixedRateInstrument is not a floating rate instrument." << std::endl;
         };
 
         /**
@@ -89,6 +90,12 @@ namespace Atlas {
          * @param inst FloatingRateEqualRedemptionInstrument
          */
         void operator()(FloatingRateEqualRedemptionInstrument<adouble>& inst) override { fixFloatingRate(inst.cashflows()); };
+
+        /**
+         * @brief Fix the coupons of the floating rate leg of the instrument.
+         *
+         */
+        void operator()(ZeroCouponFloatingRateInstrument<adouble>& inst) override { fixFloatingRate(inst.cashflows()); };
 
        private:
         /**

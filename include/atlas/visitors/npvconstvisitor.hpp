@@ -5,7 +5,7 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
+#include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
@@ -64,11 +64,11 @@ namespace Atlas {
         void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
-         * @brief Calculate the net present value of a ZeroCouponInstrument.
+         * @brief Calculate the net present value of a ZeroCouponFixedRateInstrument.
          *
-         * @param inst ZeroCouponInstrument
+         * @param inst ZeroCouponFixedRateInstrument
          */
-        void operator()(const ZeroCouponInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
+        void operator()(const ZeroCouponFixedRateInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a CustomFloatingRateInstrument.
@@ -92,10 +92,16 @@ namespace Atlas {
         void operator()(const FloatingRateEqualRedemptionInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
+         * @brief Calculate the net present value of a ZeroCouponFloatingRateInstrument.
+         *
+         */
+        void operator()(const ZeroCouponFloatingRateInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
+
+        /**
          * @brief Clear the net present value of the visited instruments.
          *
          */
-        void reset() { results_ = Results(); };
+        void reset() const { results_ = Results(); };
 
         /**
          * @brief Returns the net present value of the visited instruments.
@@ -114,6 +120,7 @@ namespace Atlas {
         template <class CS>
         void cashflowsNPV(const CS& cashflows) const {
             std::lock_guard<std::mutex> lock(mtx_);
+            reset();
             for (const auto& cashflow : cashflows.disbursements()) results_.disbursementsNPV += cashflowNPV(cashflow);
             for (const auto& cashflow : cashflows.redemptions()) results_.redemptionsNPV += cashflowNPV(cashflow);
             if constexpr (std::is_base_of_v<FloatingRateCouponStreamMixin<adouble>, CS>) {

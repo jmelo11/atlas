@@ -39,7 +39,7 @@ namespace Atlas {
          * @param curve curve of the curve context
          * @param index index of the curve context
          * @param ccy currency of the curve context
-         * @param isRiskFree if the curve is risk free
+         * @param isRiskFree if the curve is risk free (to be removed)
          *
          * @return size_t
          */

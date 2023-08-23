@@ -14,7 +14,7 @@
 #include <ql/termstructures/yield/flatforward.hpp>
 // AT
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
+#include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/models/spotmarketdatamodel.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/indexingvisitor.hpp>
@@ -85,7 +85,7 @@ namespace PricingBenchmark {
 
         std::vector<AT::InstrumentVariant<double>> bonds;
         bonds.reserve(n);
-        for (size_t i = 0; i < n; ++i) { bonds.push_back(AT::ZeroCouponInstrument(startDate, endDate, notional, rate, context)); }
+        for (size_t i = 0; i < n; ++i) { bonds.push_back(AT::ZeroCouponFixedRateInstrument(startDate, endDate, notional, rate, context)); }
 
         // indexing
         AT::IndexingVisitor<double> indexingVisitor;
@@ -170,15 +170,16 @@ namespace PricingBenchmark {
         AT::IndexingVisitor<double> indexingVisitor;
         std::for_each(bonds.begin(), bonds.end(), [&](auto& bond) { std::visit(indexingVisitor, bond); });
 
-        auto request = indexingVisitor.getResults();
-        AT::SpotMarketDataModel model(request, marketStore);
-        auto marketData = model.marketData(startDate);
+        // auto request = indexingVisitor.getResults();
+        // AT::SpotMarketDataModel model(request, marketStore);
+        // auto marketData = model.marketData(startDate);
 
-        // pricing
-        AT::NPVConstVisitor npvVisitor(marketData);
+        // // pricing
+        // AT::NPVConstVisitor npvVisitor(marketData);
 
-        std::for_each(bonds.begin(), bonds.end(), [&](auto& bond) { std::visit(npvVisitor, bond); });
-        return npvVisitor.getResults().npv;
+        // std::for_each(bonds.begin(), bonds.end(), [&](auto& bond) { std::visit(npvVisitor, bond); });
+        // return npvVisitor.getResults().npv;
+        return 0.0;
     }
 
     inline double priceBond_QL_MT(size_t n) {

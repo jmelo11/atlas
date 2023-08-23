@@ -17,17 +17,18 @@ namespace Atlas {
         /**
          * @brief Construct a new Floating Rate Bullet Instrument object
          *
-         * @param startDate date of the first coupon
-         * @param endDate  date of the last coupon
+         * @param startDate start date of the instrument
+         * @param endDate end date of the instrument
+         * @param tenor tenor of the instrument
          * @param notional notional of the instrument
          * @param spread spread of the instrument
          * @param index forecast curve context of the instrument
          * @param side side of the instrument
          */
-        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
+        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, const Period& tenor, double notional, adouble spread,
                                      const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
         : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread, side) {
-            Schedule schedule       = MakeSchedule().from(startDate).to(endDate).withFrequency(index.fixingFrequency());
+            Schedule schedule       = MakeSchedule().from(startDate).to(endDate).withTenor(tenor);
             std::vector<Date> dates = schedule.dates();
 
             auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
@@ -42,11 +43,46 @@ namespace Atlas {
         /**
          * @brief Construct a new Floating Rate Bullet Instrument object
          *
+         * @param startDate start date of the instrument
+         * @param endDate end date of the instrument
+         * @param tenor tenor of the instrument
+         * @param notional notional of the instrument
+         * @param spread spread of the instrument
+         * @param index forecast curve context of the instrument
+         * @param discountContextIdx index of the discount curve context of the instrument
+         * @param indexContextIdx index of the interest rate index context of the instrument
+         * @param side side of the instrument
+         */
+        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, const Period& tenor, double notional, adouble spread,
+                                     const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
+                                     Side side = Side::Recieve)
+        : FloatingRateBulletInstrument(startDate, endDate, tenor, notional, spread, index, side) {
+            this->cashflows_.indexContextIdx(indexContextIdx);
+            this->cashflows_.discountContextIdx(discountContextIdx);
+        };
+
+        /**
+         * @brief Construct a new Floating Rate Bullet Instrument object
+         *
          * @param startDate date of the first coupon
          * @param endDate  date of the last coupon
          * @param notional notional of the instrument
          * @param spread spread of the instrument
-         * @param index interest rate index of the instrument
+         * @param index forecast curve context of the instrument
+         * @param side side of the instrument
+         */
+        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
+                                     const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+        : FloatingRateBulletInstrument(startDate, endDate, index.tenor(), notional, spread, index, side){};
+
+        /**
+         * @brief Construct a new Floating Rate Bullet Instrument object
+         *
+         * @param startDate date of the first coupon
+         * @param endDate  date of the last coupon
+         * @param notional notional of the instrument
+         * @param spread spread of the instrument
+         * @param index forecast curve context of the instrument
          * @param discountContextIdx index of the discount curve context of the instrument
          * @param indexContextIdx index of the interest rate index context of the instrument
          * @param side side of the instrument
@@ -54,10 +90,7 @@ namespace Atlas {
         FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                      const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
                                      Side side = Side::Recieve)
-        : FloatingRateBulletInstrument(startDate, endDate, notional, spread, index, side) {
-            this->cashflows_.indexContextIdx(indexContextIdx);
-            this->cashflows_.discountContextIdx(discountContextIdx);
-        };
+        : FloatingRateBulletInstrument(startDate, endDate, index.tenor(), notional, spread, index, discountContextIdx, indexContextIdx, side){};
     };
 }  // namespace Atlas
 

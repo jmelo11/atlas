@@ -2,10 +2,11 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
-#include <atlas/instruments/fixedrate/zerocouponinstrument.hpp>
+#include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
+#include <atlas/instruments/floatingrate/zerocouponfloatingrateinstrument.hpp>
 #include <atlas/visitors/indexingvisitor.hpp>
 
 // New Indexing Visitor
@@ -41,9 +42,9 @@ TEST(IndexingVisitor, EqualPaymentInstrument) {
     TestIndexingVisitor::testindexer(instrument.cashflows(), indexingVisitor.getResults());
 }
 
-TEST(IndexingVisitor, ZeroCouponInstrument) {
+TEST(IndexingVisitor, ZeroCouponFixedRateInstrument) {
     TestIndexingVisitor::Common vars;
-    ZeroCouponInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.discountIdx, vars.side);
+    ZeroCouponFixedRateInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.rate, vars.discountIdx, vars.side);
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);
     TestIndexingVisitor::testindexer(instrument.cashflows(), indexingVisitor.getResults());
@@ -87,6 +88,15 @@ TEST(IndexingVisitor, CustomFloatingRateInstrument) {
 
     CustomFloatingRateInstrument<double> instrument(disbursementMap, redemptionMap, vars.spread, vars.index, vars.discountIdx, vars.indexIdx,
                                                     vars.side);
+    IndexingVisitor indexingVisitor;
+    indexingVisitor(instrument);
+    TestIndexingVisitor::testindexer(instrument.cashflows(), indexingVisitor.getResults());
+}
+
+TEST(IndexingVisitor, ZeroCouponFloatingRateInstrument) {
+    TestIndexingVisitor::Common vars;
+    ZeroCouponFloatingRateInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+                                                        vars.indexIdx, vars.side);
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);
     TestIndexingVisitor::testindexer(instrument.cashflows(), indexingVisitor.getResults());

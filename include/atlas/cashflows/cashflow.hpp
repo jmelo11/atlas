@@ -138,6 +138,11 @@ namespace Atlas {
          */
         inline void applyCurrency(bool applyCcy) { applyCurrency_ = applyCcy; }
 
+        /**
+         * @brief Gets the side of the cashflow
+         *
+         * @return Side
+         */
         inline Side side() const { return side_; }
 
        protected:

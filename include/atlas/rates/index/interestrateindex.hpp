@@ -18,11 +18,20 @@ namespace Atlas {
         /**
          * @brief Construct a new Interest Rate Index object
          *
-         * @param rateDef
          * @param fixingFreq
+         * @param rateDef
          */
         InterestRateIndex(Frequency fixingFreq = Frequency::NoFrequency, const RateDefinition& rateDef = RateDefinition())
         : Index<adouble>(fixingFreq), rateDef_(rateDef){};
+
+        /**
+         * @brief Construct a new Interest Rate Index object
+         *
+         * @param tenor
+         * @param rateDef
+         */
+        InterestRateIndex(const Period& tenor, const RateDefinition& rateDef = RateDefinition())
+        : Index<adouble>(tenor), rateDef_(rateDef){};
 
         /**
          * @brief Destructor
@@ -44,7 +53,7 @@ namespace Atlas {
          * @return true
          * @return false
          */
-        inline bool isValid() const { return this->fixingFrequency() != Frequency::NoFrequency; };
+        inline bool isValid() const { return this->tenor() != Period(); };
 
        private:
         RateDefinition rateDef_;
