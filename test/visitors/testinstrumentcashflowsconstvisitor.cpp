@@ -19,6 +19,7 @@
 #include <atlas/visitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
 #include <atlas/visitors/fixingvisitor.hpp>
 #include <atlas/visitors/indexingvisitor.hpp>
+#include <atlas/rates/index/iborindex.hpp>
 
 using namespace Atlas;
 
@@ -74,11 +75,11 @@ TEST(InstrumentCashflowsConstVisitor, FloatingRateInstrument) {
     // Atlas
     MarketStore<double> store(vars.startDate);
     YieldTermStructure<double> curve = FlatForwardTermStructure<double>(vars.startDate, vars.rate, vars.dayCounter, vars.compounding, vars.frequency);
-    InterestRateIndex<double> index(vars.paymentFrequency, RateDefinition(vars.dayCounter, vars.compounding, vars.frequency));
+    Index<double> index              = IborIndex(curve, vars.paymentFrequency, RateDefinition(vars.dayCounter, vars.compounding, vars.frequency));
     store.curveManager().addCurveContext("TEST", curve, index);
 
-    FloatingRateBulletInstrument<double> atlasInst(vars.startDate, vars.endDate, vars.notional, vars.spread, index, vars.discountIdx, vars.indexIdx,
-                                                   vars.side);
+    FloatingRateBulletInstrument<double> atlasInst(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, index,
+                                                   vars.discountIdx, vars.indexIdx, vars.side);
     IndexingVisitor<double> indexingVisitor;
     indexingVisitor(atlasInst);
 

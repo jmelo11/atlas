@@ -19,7 +19,8 @@ TEST(IndexingVisitor, NoDiscountContextIdx) {
 
 TEST(IndexingVisitor, NoIndexContextIdx) {
     TestIndexingVisitor::Common vars;
-    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.side);
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, vars.index,
+                                                    vars.side);
     IndexingVisitor indexingVisitor;
     EXPECT_THROW(indexingVisitor(instrument), std::runtime_error);
 }
@@ -64,8 +65,8 @@ TEST(IndexingVisitor, CustomFixedRateInstrument) {
 
 TEST(IndexingVisitor, FloatingRateBulletInstrument) {
     TestIndexingVisitor::Common vars;
-    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
-                                                    vars.indexIdx, vars.side);
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, vars.index,
+                                                    vars.discountIdx, vars.indexIdx, vars.side);
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);
     TestIndexingVisitor::testindexer(instrument.cashflows(), indexingVisitor.getResults());
@@ -73,8 +74,8 @@ TEST(IndexingVisitor, FloatingRateBulletInstrument) {
 
 TEST(IndexingVisitor, FloatingRateEqualRedemptionInstrument) {
     TestIndexingVisitor::Common vars;
-    FloatingRateEqualRedemptionInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
-                                                             vars.indexIdx, vars.side);
+    FloatingRateEqualRedemptionInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread,
+                                                             vars.index, vars.discountIdx, vars.indexIdx, vars.side);
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);
     TestIndexingVisitor::testindexer(instrument.cashflows(), indexingVisitor.getResults());

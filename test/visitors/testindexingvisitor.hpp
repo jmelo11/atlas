@@ -3,7 +3,7 @@
 
 #include <atlas/cashflows/cashflowstreammixins.hpp>
 #include <atlas/data/marketrequest.hpp>
-#include <atlas/rates/index/interestrateindex.hpp>
+#include <atlas/rates/index/index.hpp>
 #include <gtest/gtest.h>
 
 using namespace Atlas;
@@ -11,16 +11,16 @@ using namespace Atlas;
 namespace TestIndexingVisitor {
 
     struct Common {
-        Date startDate                  = Date(1, Month::January, 2020);
-        Date endDate                    = Date(1, Month::January, 2025);
-        double notional                 = 1000000.0;
-        InterestRate<double> rate       = InterestRate(0.05, Actual360());
-        double spread                   = 0.01;
-        InterestRateIndex<double> index = InterestRateIndex(Frequency::Semiannual);
-        Frequency paymentFrequency      = Frequency::Semiannual;
-        Side side                       = Side::Recieve;
-        size_t discountIdx              = 0;
-        size_t indexIdx                 = 0;
+        Date startDate             = Date(1, Month::January, 2020);
+        Date endDate               = Date(1, Month::January, 2025);
+        double notional            = 1000000.0;
+        InterestRate<double> rate  = InterestRate(0.05, Actual360());
+        double spread              = 0.01;
+        Index<double> index        = Index();
+        Frequency paymentFrequency = Frequency::Semiannual;
+        Side side                  = Side::Recieve;
+        size_t discountIdx         = 0;
+        size_t indexIdx            = 0;
     };
 
     template <class CS>

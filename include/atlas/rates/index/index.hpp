@@ -26,8 +26,8 @@ namespace Atlas {
             inline void addHistoricalFixing(const Date& date, double fixing) { historicalFixings_[date] = fixing; };
             inline RateDefinition rateDefinition() const { return rateDef_; }
             inline const Date& refDate() const { return historicalFixings_.begin().first; }
-            virtual std::unique_ptr<Strategy> clone() const                                                        = 0;
-            virtual adouble forecastRate(const Date& fixingDate, const Date& startDate, const Date& endDate) const = 0;
+            virtual std::unique_ptr<Strategy> clone() const { return std::make_unique<Strategy>(*this); };
+            virtual adouble forecastRate(const Date& fixingDate, const Date& startDate, const Date& endDate) const { return fixing(fixingDate); };
 
             inline bool isValid() const { return tenor_ != Period(); };
 
@@ -38,7 +38,8 @@ namespace Atlas {
         };
 
        public:
-        Index() = default;
+        Index(const Period& tenor = Period(), const RateDefinition& rateDefinition = RateDefinition())
+        : strategy_(std::make_unique<Strategy>(tenor, rateDefinition)){};
 
         Index(std::unique_ptr<Strategy> strategy) : strategy_(std::move(strategy)){};
 

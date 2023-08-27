@@ -6,9 +6,9 @@ include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BUILD_PYTHON "Build python module" ON)
-option(BUILD_TESTS "Build test suite" ON)
-option(BUILD_BENCHMARK "Build benchmark suite" ON)
+option(BUILD_PYTHON "Build python module" OFF)
+option(BUILD_TESTS "Build test suite" OFF)
+option(BUILD_BENCHMARK "Build benchmark suite" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_WITH_AD "Build with AD" OFF)
 

@@ -2,7 +2,7 @@
 #define BC63B04C_97BE_4479_8930_4D9D1682AE61
 
 #include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
-#include <atlas/rates/index/interestrateindex.hpp>
+#include <atlas/rates/index/index.hpp>
 
 namespace Atlas {
     /**
@@ -23,8 +23,8 @@ namespace Atlas {
          * @param index index of the instrument
          * @param side side of the instrument
          */
-        ZeroCouponFloatingRateInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                         const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+        ZeroCouponFloatingRateInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread, const Index<adouble>& index,
+                                         Side side = Side::Recieve)
         : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread, side) {
             auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
             this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
@@ -44,9 +44,8 @@ namespace Atlas {
          * @param indexContextIdx index curve context of the instrument
          * @param side side of the instrument
          */
-        ZeroCouponFloatingRateInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                         const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                         Side side = Side::Recieve)
+        ZeroCouponFloatingRateInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread, const Index<adouble>& index,
+                                         size_t discountContextIdx, size_t indexContextIdx, Side side = Side::Recieve)
         : ZeroCouponFloatingRateInstrument(startDate, endDate, notional, spread, index, side) {
             this->cashflows_.indexContextIdx(indexContextIdx);
             this->cashflows_.discountContextIdx(discountContextIdx);

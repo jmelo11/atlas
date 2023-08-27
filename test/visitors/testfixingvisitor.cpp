@@ -5,7 +5,7 @@
 
 TEST(FixingVisitor, NoIndexing) {
     TestFixingVisitor::Common vars;
-    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, vars.index, vars.discountIdx,
                                                     vars.indexIdx, vars.side);
     MarketData<double> marketData;
     for (size_t i = 0; i < instrument.cashflows().floatingRateCouponCount(); ++i) { marketData.fwds.push_back(0.05); }
@@ -16,7 +16,7 @@ TEST(FixingVisitor, NoIndexing) {
 
 TEST(FixingVisitor, FloatingRateBulletInstrument) {
     TestFixingVisitor::Common vars;
-    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, vars.index, vars.discountIdx,
                                                     vars.indexIdx, vars.side);
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);
@@ -32,7 +32,7 @@ TEST(FixingVisitor, FloatingRateBulletInstrument) {
 
 TEST(FixingVisitor, FloatingRateEqualRedemptionInstrument) {
     TestFixingVisitor::Common vars;
-    FloatingRateEqualRedemptionInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
+    FloatingRateEqualRedemptionInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, vars.index, vars.discountIdx,
                                                              vars.indexIdx, vars.side);
 
     IndexingVisitor indexingVisitor;

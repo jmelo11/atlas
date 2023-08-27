@@ -59,6 +59,14 @@ namespace Atlas {
             this->cashflows_.indexContextIdx(indexContextIdx);
             this->cashflows_.discountContextIdx(discountContextIdx);
         };
+
+        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency tenor, double notional, adouble spread,
+                                     const Index<adouble>& index, Side side = Side::Recieve)
+        : FloatingRateBulletInstrument(startDate, endDate, Period(tenor), notional, spread, index, side){};
+
+        FloatingRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency tenor, double notional, adouble spread,
+                                     const Index<adouble>& index, size_t discountContextIdx, size_t indexContextIdx, Side side = Side::Recieve)
+        : FloatingRateBulletInstrument(startDate, endDate, Period(tenor), notional, spread, index, discountContextIdx, indexContextIdx, side){};
     };
 }  // namespace Atlas
 

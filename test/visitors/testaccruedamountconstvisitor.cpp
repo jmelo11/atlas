@@ -7,7 +7,8 @@ using namespace Atlas;
 
 TEST(AccruedAmountConstVisitor, NoFixingSet) {
     TestAccruedAmountConstVisitor::Common vars;
-    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.side);
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, vars.index,
+                                                    vars.side);
     AccruedAmountConstVisitor visitor(vars.startDate, vars.endDate);
     EXPECT_THROW(visitor(instrument), std::runtime_error);
 }
@@ -52,8 +53,8 @@ TEST(AccruedAmountConstVisitor, CustomFixedRateInstrument) {
 
 TEST(AccruedAmountConstVisitor, FloatingRateBulletInstrument) {
     TestAccruedAmountConstVisitor::Common vars;
-    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
-                                                    vars.indexIdx, vars.side);
+    FloatingRateBulletInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread, vars.index,
+                                                    vars.discountIdx, vars.indexIdx, vars.side);
 
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);
@@ -71,8 +72,8 @@ TEST(AccruedAmountConstVisitor, FloatingRateBulletInstrument) {
 
 TEST(AccruedAmountConstVisitor, FloatingRateEqualRedemptionInstrument) {
     TestAccruedAmountConstVisitor::Common vars;
-    FloatingRateEqualRedemptionInstrument<double> instrument(vars.startDate, vars.endDate, vars.notional, vars.spread, vars.index, vars.discountIdx,
-                                                             vars.indexIdx, vars.side);
+    FloatingRateEqualRedemptionInstrument<double> instrument(vars.startDate, vars.endDate, vars.paymentFrequency, vars.notional, vars.spread,
+                                                             vars.index, vars.discountIdx, vars.indexIdx, vars.side);
 
     IndexingVisitor indexingVisitor;
     indexingVisitor(instrument);

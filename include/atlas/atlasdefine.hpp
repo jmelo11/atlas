@@ -9,6 +9,10 @@
 // #include <autodiff/forward/dual.hpp>
 // #include <autodiff/forward/dual/eigen.hpp>
 
+#define USE_NONE true
+#define USE_DYNAMIC_POLYMORPHISM false
+#define USE_STATIC_POLYMORPHISM false
+
 namespace Atlas {
 
     using dual = double;

@@ -38,6 +38,9 @@ namespace Atlas {
        public:
         explicit IborIndex(const YieldTermStructure<adouble>& curve, const Period& period, const RateDefinition& rateDef = RateDefinition())
         : Index<adouble>(std::make_unique<Strategy>(curve, period, rateDef)){};
+
+        explicit IborIndex(const YieldTermStructure<adouble>& curve, Frequency period, const RateDefinition& rateDef = RateDefinition())
+        : Index<adouble>(std::make_unique<Strategy>(curve, Period(period), rateDef)){};
     };
 }  // namespace Atlas
 

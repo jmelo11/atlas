@@ -12,7 +12,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/others/interpolations/linearinterpolation.hpp>
-#include <atlas/rates/index/interestrateindex.hpp>
+#include <atlas/rates/index/iborindex.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/rates/yieldtermstructure/zeroratecurve.hpp>
 #include <gtest/gtest.h>
@@ -82,7 +82,7 @@ namespace TestParRateConstVisitor {
 
             YieldTermStructure<adouble> curve =
                 FlatForwardTermStructure<adouble>(curveRefDate, curveRate, curveDayCounter, curveCompounding, curveFrequency);
-            InterestRateIndex<adouble> index(indexFrequency, RateDefinition(curveDayCounter, curveCompounding, Frequency::Annual));
+            Index<adouble> index = IborIndex(curve, indexFrequency, RateDefinition(curveDayCounter, curveCompounding, Frequency::Annual));
             store.curveManager().addCurveContext("TEST", curve, index);
 
             YieldTermStructure<adouble> clpCurve =
@@ -163,9 +163,9 @@ namespace TestParRateConstVisitor {
             const auto& curveManager = store.curveManager();
             atlasFixBond             = new FixedRateBulletInstrument<adouble>(startDate, endDate, paymentFrequency, notional, atlasRate,
                                                                   curveManager.curveContext("TEST").idx());
-            atlasFloatBond =
-                new FloatingRateBulletInstrument<adouble>(startDate, endDate, notional, spread, curveManager.curveContext("TEST").index(),
-                                                          curveManager.curveContext("TEST").idx(), curveManager.curveContext("TEST").idx());
+            atlasFloatBond           = new FloatingRateBulletInstrument<adouble>(
+                startDate, endDate, paymentFrequency, notional, spread, curveManager.curveContext("TEST").index(),
+                curveManager.curveContext("TEST").idx(), curveManager.curveContext("TEST").idx());
         };
     };
 }  // namespace TestParRateConstVisitor

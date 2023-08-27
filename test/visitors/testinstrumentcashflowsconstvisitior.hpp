@@ -31,12 +31,12 @@ namespace TestInstrumentCashflowsConstVisitor {
         Compounding compounding = Compounding::Simple;
         double rate             = 0.03;
 
-        double spread                   = 0.0;
-        InterestRateIndex<double> index = InterestRateIndex(Frequency::Semiannual);
-        Frequency paymentFrequency      = Frequency::Semiannual;
-        Side side                       = Side::Recieve;
-        size_t discountIdx              = 0;
-        size_t indexIdx                 = 0;
+        double spread              = 0.0;
+        Index<double> index        = Index();
+        Frequency paymentFrequency = Frequency::Semiannual;
+        Side side                  = Side::Recieve;
+        size_t discountIdx         = 0;
+        size_t indexIdx            = 0;
     };
 }  // namespace TestInstrumentCashflowsConstVisitor
 
