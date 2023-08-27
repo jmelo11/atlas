@@ -4,7 +4,7 @@
 #include <atlas/fundation/curvecontext.hpp>
 #include <atlas/others/auxfuncs.hpp>
 #include <atlas/parsers/parsingmethods.hpp>
-#include <atlas/rates/index/interestrateindex.hpp>
+#include <atlas/rates/index/index.hpp>
 #include <atlas/rates/yieldtermstructure/yieldtermstructure.hpp>
 
 namespace Atlas {
@@ -44,7 +44,7 @@ namespace Atlas {
          * @return size_t
          */
         size_t addCurveContext(const std::string& name, const YieldTermStructure<adouble>& curve,
-                               const InterestRateIndex<adouble>& index = InterestRateIndex<adouble>(), const Currency& ccy = Currency(),
+                               const Index<adouble>& index = Index<adouble>(), const Currency& ccy = Currency(),
                                bool isRiskFree = false) {
             if (hasCurveContext(name)) { throw std::invalid_argument("A curve CurveContext with the given name already exists."); }
             if (ccy == Currency() && isRiskFree) { throw std::invalid_argument("A risk free curve needs have a defined currency."); }

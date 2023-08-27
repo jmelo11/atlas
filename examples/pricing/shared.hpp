@@ -2,6 +2,7 @@
 #define CE447B1A_BDE9_4B75_BC43_82F3BDFE4314
 
 #include <atlas/fundation/marketstore.hpp>
+#include <atlas/rates/index/iborindex.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/visitors/cashflowaggregation/instrumentcashflowsconstvisitor.hpp>
 
@@ -69,10 +70,10 @@ namespace PricingExample {
         Compounding compounding = Compounding::Simple;
         Frequency frequency     = Frequency::Annual;
 
-        YieldTermStructure discountCurve  = FlatForwardTermStructure(refDate, discountRate, dc, compounding, frequency);
+        YieldTermStructure discountCurve = FlatForwardTermStructure(refDate, discountRate, dc, compounding, frequency);
         YieldTermStructure forecastCurve = FlatForwardTermStructure(refDate, forecastRate, dc, compounding, frequency);
-        InterestRateIndex index(Frequency::Semiannual);
-        
+        Index index                      = IborIndex(forecastCurve, Period(6, TimeUnit::Months));
+
         MarketStore store(refDate, CLP());
         store.curveManager().addCurveContext("ForecastCurve", forecastCurve, index, CLP());
         store.curveManager().addCurveContext("DiscountCurve", discountCurve, index, CLP());

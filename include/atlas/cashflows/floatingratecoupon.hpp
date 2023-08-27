@@ -26,8 +26,8 @@ namespace Atlas {
          * @param rateDef The rate definition of the coupon
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const RateDefinition& rateDef,
-                           Side side = Side::Recieve)
-        : Coupon<adouble>(startDate, endDate, notional, side), spread_(spread), rateDef_(rateDef){};
+                           Side side = Side::Recieve, const Date& fixingDate = Date())
+        : Coupon<adouble>(startDate, endDate, notional, side), spread_(spread), rateDef_(rateDef), fixingDate_(fixingDate){};
 
         /**
          * @brief Construct a new Floating Rate Coupon object
@@ -151,11 +151,7 @@ namespace Atlas {
          */
         inline bool isFixingSet() const { return isFixingSet_; }
 
-        /**
-         * @brief Sets if the fixing has been set
-         *
-         * @param fixing The fixing rate
-         */
+        inline const Date& fixingDate() const { return fixingDate_; }
 
        private:
         adouble spread_          = 0.0;
@@ -163,6 +159,7 @@ namespace Atlas {
         size_t indexContextIdx_  = SIZE_MAX;
         bool hasIndexContextIdx_ = false;
         bool isFixingSet_        = false;
+        Date fixingDate_;
         RateDefinition rateDef_;
     };
 }  // namespace Atlas

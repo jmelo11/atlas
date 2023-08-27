@@ -2,7 +2,7 @@
 #define F4126FFB_083C_4F17_8D47_AFE69F5C4B5A
 
 #include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
-#include <atlas/rates/index/interestrateindex.hpp>
+#include <atlas/rates/index/index.hpp>
 
 namespace Atlas {
     /**
@@ -25,7 +25,7 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, const Period& tenor, double notional, adouble spread,
-                                              const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+                                              const Index<adouble>& index, Side side = Side::Recieve)
         : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread, side) {
             Schedule schedule        = MakeSchedule().from(startDate).to(endDate).withTenor(tenor);
             std::vector<Date> dates  = schedule.dates();
@@ -48,20 +48,6 @@ namespace Atlas {
          *
          * @param startDate start date of the instrument
          * @param endDate end date of the instrument
-         * @param notional notional of the instrument
-         * @param spread spread of the instrument
-         * @param index forecast curve context of the instrument
-         * @param side side of the instrument
-         */
-        FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
-        : FloatingRateEqualRedemptionInstrument(startDate, endDate, index.tenor(), notional, spread, index, side){};
-
-        /**
-         * @brief Construct a new Floating Rate Equal Redemption Instrument object
-         *
-         * @param startDate start date of the instrument
-         * @param endDate end date of the instrument
          * @param tenor tenor of the instrument
          * @param notional notional of the instrument
          * @param spread spread of the instrument
@@ -71,30 +57,12 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, const Period& tenor, double notional, adouble spread,
-                                              const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
+                                              const Index<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
                                               Side side = Side::Recieve)
         : FloatingRateEqualRedemptionInstrument(startDate, endDate, tenor, notional, spread, index, side) {
             this->cashflows_.indexContextIdx(indexContextIdx);
             this->cashflows_.discountContextIdx(discountContextIdx);
         };
-
-        /**
-         * @brief Construct a new Floating Rate Equal Redemption Instrument object
-         *
-         * @param startDate start date of the instrument
-         * @param endDate end date of the instrument
-         * @param notional notional of the instrument
-         * @param spread spread of the instrument
-         * @param index index of the instrument
-         * @param discountContextIdx discount curve context index
-         * @param indexContextIdx index curve context index
-         * @param side side of the instrument
-         */
-        FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                              Side side = Side::Recieve)
-        : FloatingRateEqualRedemptionInstrument(startDate, endDate, index.tenor(), notional, spread, index, discountContextIdx, indexContextIdx,
-                                                side){};
     };
 }  // namespace Atlas
 

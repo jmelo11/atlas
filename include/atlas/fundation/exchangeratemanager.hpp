@@ -4,6 +4,7 @@
 #include <atlas/atlasconfig.hpp>
 #include <atlas/others/auxfuncs.hpp>
 #include <queue>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace Atlas {

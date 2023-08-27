@@ -3,7 +3,7 @@
 
 #include <atlas/instruments/floatingrate/floatingrateinstrument.hpp>
 #include <atlas/others/auxfuncs.hpp>
-#include <atlas/rates/index/interestrateindex.hpp>
+#include <atlas/rates/index/index.hpp>
 
 namespace Atlas {
     /**
@@ -23,7 +23,7 @@ namespace Atlas {
          * @param index interest rate index of the instrument
          */
         CustomFloatingRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions, adouble spread,
-                                     const InterestRateIndex<adouble>& index, Side side = Side::Recieve, const std::set<Date>& additionalDates = {})
+                                     const Index<adouble>& index, Side side = Side::Recieve, const std::set<Date>& additionalDates = {})
         : FloatingRateInstrument<adouble>(disbursements.begin()->first, redemptions.begin()->first, 0, spread, side) {
             Date firstDisbursementDate = disbursements.begin()->first;
             Date firstRedemptionDate   = redemptions.begin()->first;
@@ -66,8 +66,8 @@ namespace Atlas {
          * @param indexContextIdx index of the interest rate index context of the instrument
          */
         CustomFloatingRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions, adouble spread,
-                                     const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                     Side side = Side::Recieve, const std::set<Date> additionalDates = {})
+                                     const Index<adouble>& index, size_t discountContextIdx, size_t indexContextIdx, Side side = Side::Recieve,
+                                     const std::set<Date> additionalDates = {})
         : CustomFloatingRateInstrument(disbursements, redemptions, spread, index, side) {
             this->cashflows_.discountContextIdx(discountContextIdx);
             this->cashflows_.indexContextIdx(indexContextIdx);

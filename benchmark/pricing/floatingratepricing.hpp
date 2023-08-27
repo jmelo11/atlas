@@ -29,7 +29,7 @@ namespace PricingBenchmark {
         // market data
         AT::MarketStore<double> marketStore(startDate);
         AT::FlatForwardTermStructure<double> curve(startDate, curveRate, AT::Actual360(), AT::Compounding::Simple);
-        AT::InterestRateIndex<double> index(AT::Frequency::Semiannual);
+        AT::Index<double> index = AT::IborIndex(curve, AT::Period(6, AT::TimeUnit::Months));
 
         size_t idx = marketStore.curveManager().addCurveContext("CLP", curve, index);
 

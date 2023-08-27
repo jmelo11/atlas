@@ -10,7 +10,7 @@ namespace Atlas {
     class YieldTermStructureManager;
 
     template <typename adouble>
-    class InterestRateIndex;
+    class Index;
 
     /**
      * @class CurveContext
@@ -24,20 +24,20 @@ namespace Atlas {
        public:
         inline const std::string& name() const { return name_; }
         inline const YieldTermStructure<adouble>& curve() const { return curve_; }
-        inline const InterestRateIndex<adouble>& index() const { return index_; }
+        inline const Index<adouble>& index() const { return index_; }
         inline const Currency& currency() const { return currency_; }
         inline bool isRiskFree() const { return isRiskFree_; }
         inline size_t idx() const { return idx_; }
 
        private:
-        CurveContext(size_t idx, const std::string& name, const YieldTermStructure<adouble>& curve, const InterestRateIndex<adouble>& index,
+        CurveContext(size_t idx, const std::string& name, const YieldTermStructure<adouble>& curve, const Index<adouble>& index,
                      const Currency& currency, bool isRiskFree)
         : idx_(idx), name_(name), curve_(curve), index_(index), currency_(currency), isRiskFree_(isRiskFree) {}
 
         size_t idx_;
         std::string name_;
         YieldTermStructure<adouble> curve_;
-        InterestRateIndex<adouble> index_;
+        Index<adouble> index_;
         Currency currency_;
         bool isRiskFree_;
 

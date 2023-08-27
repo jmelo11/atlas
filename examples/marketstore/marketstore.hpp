@@ -2,6 +2,7 @@
 #define C2882491_9882_4D56_B587_DCDE8ED50E68
 
 #include <atlas/fundation/marketstore.hpp>
+#include <atlas/rates/index/iborindex.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 
 namespace MarketStoreExample {
@@ -11,7 +12,7 @@ namespace MarketStoreExample {
         double curveRate = 0.05;
         Date refDate     = Date(1, Month::Jan, 2020);
         FlatForwardTermStructure usdCurve(refDate, 0.05);
-        InterestRateIndex usdIndex(Frequency::Annual);
+        Index usdIndex = IborIndex(usdCurve, Period(6, TimeUnit::Months));
         FlatForwardTermStructure clpCurve(refDate, 0.01);
         FlatForwardTermStructure clfCurve(refDate, 0.03);
 
@@ -19,8 +20,8 @@ namespace MarketStoreExample {
 
         auto& curveManager = marketStore.curveManager();
         curveManager.addCurveContext("A USD curve", usdCurve, usdIndex, USD());
-        curveManager.addCurveContext("A CLP curve", clpCurve, InterestRateIndex(), CLP(), true);
-        curveManager.addCurveContext("A CLF curve", clfCurve, InterestRateIndex(), CLF(), false);
+        curveManager.addCurveContext("A CLP curve", clpCurve, Index(), CLP(), true);
+        curveManager.addCurveContext("A CLF curve", clfCurve, Index(), CLF(), false);
         curveManager.summary();
 
         auto curveContext = curveManager.curveContext(0);

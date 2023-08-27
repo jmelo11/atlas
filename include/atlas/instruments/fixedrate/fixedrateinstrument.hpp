@@ -3,7 +3,6 @@
 
 #include <atlas/cashflows/cashflowstreammixins.hpp>
 #include <atlas/instruments/instrument.hpp>
-
 namespace Atlas {
 
     /**
@@ -21,7 +20,10 @@ namespace Atlas {
     template <typename adouble = double>
     class FixedRateInstrument : public Instrument<adouble> {
        public:
+
+#ifdef USE_NONE
         using Cashflows = CashflowStream<adouble, FixedRateCouponStreamMixin, RedemptionStreamMixin, DisbursementStreamMixin>;
+#endif
         /**
          * @brief Construct a new Fixed Rate Instrument object
          *

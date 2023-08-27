@@ -7,7 +7,7 @@ namespace Atlas {
 
     /**
      * @brief A struct representing a market request.
-     * 
+     *
      */
     struct MarketRequest {
         /**
@@ -15,9 +15,10 @@ namespace Atlas {
          * @details A rate request is a container for the start date, end date and the curve index.
          */
         struct ForwardRate {
-            Date startDate_; /**< The start date of the rate request. */
-            Date endDate_;   /**< The end date of the rate request. */
-            size_t curve_;   /**< The index of the curve used to calculate the rate. */
+            Date fixingDate_; /**< The fixing date of the rate request. */
+            Date startDate_;  /**< The start date of the rate request. */
+            Date endDate_;    /**< The end date of the rate request. */
+            size_t curve_;    /**< The index of the curve used to calculate the rate. */
 
             /**
              * @brief Constructs a Rate object with the specified parameters.
@@ -25,10 +26,11 @@ namespace Atlas {
              * @param startDate The start date of the rate request.
              * @param endDate The end date of the rate request.
              */
-            ForwardRate(const Date& startDate, const Date& endDate, size_t curve) : startDate_(startDate), endDate_(endDate), curve_(curve){};
+            ForwardRate(const Date& fixingDate, const Date& startDate, const Date& endDate, size_t curve)
+            : fixingDate_(fixingDate), startDate_(startDate), endDate_(endDate), curve_(curve){};
 
             bool operator==(const ForwardRate& other) const {
-                return startDate_ == other.startDate_ && endDate_ == other.endDate_ && curve_ == other.curve_;
+                return startDate_ == other.startDate_ && endDate_ == other.endDate_ && curve_ == other.curve_ && fixingDate_ == other.fixingDate_;
             }
         };
 

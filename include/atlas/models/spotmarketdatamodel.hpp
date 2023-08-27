@@ -83,20 +83,21 @@ namespace Atlas {
          */
         void simulateForwardRates(const Date& evalDate, MarketData<adouble>& md) const {
             for (size_t i = 0; i < this->marketRequest_.fwds.size(); ++i) {
-                const auto& request   = this->marketRequest_.fwds.at(i);
-                size_t idx            = request.curve_;
-                const Date& startDate = request.startDate_;
-                const Date& endDate   = request.endDate_;
+                const auto& request    = this->marketRequest_.fwds.at(i);
+                size_t idx             = request.curve_;
+                const Date& fixingDate = request.fixingDate_ == Date() ? evalDate : request.fixingDate_;
+                const Date& startDate  = request.startDate_;
+                const Date& endDate    = request.endDate_;
 
-                const auto& curveManager                 = marketStore_.curveManager();
-                const YieldTermStructure<adouble>& curve = curveManager.curveContext(idx).curve();
-                const InterestRateIndex<adouble>& index  = curveManager.curveContext(idx).index();
-                const auto& rateDef                      = index.rateDefinition();
+                const auto& curveManager = marketStore_.curveManager();
+                const auto& curve        = curveManager.curveContext(idx).curve();
+                const auto& index        = curveManager.curveContext(idx).index();
+                const auto& rateDef      = index.rateDefinition();
                 adouble fwd;
                 if (evalDate <= startDate) {
                     fwd = curve.forwardRate(startDate, endDate, rateDef.dayCounter(), rateDef.compounding(), rateDef.frequency());
                 } else {
-                    fwd = index.fixing(startDate);
+                    fwd = index.forecastRate(fixingDate, startDate, endDate);
                 }
                 md.fwds.push_back(fwd);
             }
@@ -112,8 +113,8 @@ namespace Atlas {
         void simulateExchangeRates(const Date& evalDate, MarketData<adouble>& md) const {
             for (size_t i = 0; i < this->marketRequest_.fxs.size(); ++i) {
                 const auto& request = this->marketRequest_.fxs.at(i);
-                int ccy1         = request.ccy1_;
-                int ccy2         = request.ccy2_;
+                int ccy1            = request.ccy1_;
+                int ccy2            = request.ccy2_;
                 const Date& date    = request.date_;
 
                 adouble fx = marketStore_.fxManager().exchangeRate(ccy1, ccy2);

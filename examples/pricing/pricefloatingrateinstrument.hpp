@@ -23,9 +23,10 @@ namespace PricingExample {
         CurveContext discountContext                          = curveManager.curveContext("DiscountCurve");
         size_t discountContextIdx                             = discountContext.idx();
         size_t forecastContextIdx                             = forecastContext.idx();
-        InterestRateIndex index                               = forecastContext.index();
+        Index index                                           = forecastContext.index();
 
-        InstrumentVariant<double> instrument = FloatingRateBulletInstrument(startDate, endDate, notional, spread, index, discountContextIdx, forecastContextIdx);
+        InstrumentVariant<double> instrument = FloatingRateBulletInstrument(startDate, endDate, Period(6, TimeUnit::Months), notional, spread, index,
+                                                                            discountContextIdx, forecastContextIdx);
 
         // indexing
         IndexingVisitor<double> indexingVisitor;
