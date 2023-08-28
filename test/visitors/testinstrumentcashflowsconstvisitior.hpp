@@ -12,7 +12,7 @@
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/others/interpolations/linearinterpolation.hpp>
-#include <atlas/rates/index/interestrateindex.hpp>
+#include <atlas/rates/index/index.hpp>
 #include <atlas/rates/yieldtermstructure/flatforwardcurve.hpp>
 #include <atlas/rates/yieldtermstructure/zeroratecurve.hpp>
 #include <gtest/gtest.h>

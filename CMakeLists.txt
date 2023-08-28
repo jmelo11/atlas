@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3.0)
-project(Atlas VERSION 2.1.0)
+project(Atlas VERSION 0.2.1)
 
 include(GNUInstallDirs)
 
@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_PYTHON "Build python module" OFF)
-option(BUILD_TESTS "Build test suite" OFF)
+option(BUILD_TESTS "Build test suite" ON)
 option(BUILD_BENCHMARK "Build benchmark suite" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_WITH_AD "Build with AD" OFF)
