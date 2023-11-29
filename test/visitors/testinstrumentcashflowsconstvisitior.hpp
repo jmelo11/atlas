@@ -34,7 +34,7 @@ namespace TestInstrumentCashflowsConstVisitor {
         double spread                   = 0.0;
         InterestRateIndex<double> index = InterestRateIndex(Frequency::Semiannual);
         Frequency paymentFrequency      = Frequency::Semiannual;
-        Side side                       = Side::Recieve;
+        Side side                       = Side::Receive;
         size_t discountIdx              = 0;
         size_t indexIdx                 = 0;
     };

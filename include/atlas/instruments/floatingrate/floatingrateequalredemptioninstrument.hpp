@@ -25,14 +25,14 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, const Period& tenor, double notional, adouble spread,
-                                              const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+                                              const InterestRateIndex<adouble>& index, Side side = Side::Receive)
         : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread, side) {
             Schedule schedule        = MakeSchedule().from(startDate).to(endDate).withTenor(tenor);
             std::vector<Date> dates  = schedule.dates();
             adouble redemptionAmount = notional / (dates.size() - 1);
             std::vector<adouble> redemptions(dates.size() - 1, redemptionAmount);
 
-            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            auto invSide = side == Side::Receive ? Side::Pay : Side::Receive;
             this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
             double tmpNotional = notional;
             for (size_t i = 1; i < dates.size(); i++) {
@@ -54,7 +54,7 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                              const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+                                              const InterestRateIndex<adouble>& index, Side side = Side::Receive)
         : FloatingRateEqualRedemptionInstrument(startDate, endDate, index.tenor(), notional, spread, index, side){};
 
         /**
@@ -72,7 +72,7 @@ namespace Atlas {
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, const Period& tenor, double notional, adouble spread,
                                               const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                              Side side = Side::Recieve)
+                                              Side side = Side::Receive)
         : FloatingRateEqualRedemptionInstrument(startDate, endDate, tenor, notional, spread, index, side) {
             this->cashflows_.indexContextIdx(indexContextIdx);
             this->cashflows_.discountContextIdx(discountContextIdx);
@@ -92,7 +92,7 @@ namespace Atlas {
          */
         FloatingRateEqualRedemptionInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                               const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                              Side side = Side::Recieve)
+                                              Side side = Side::Receive)
         : FloatingRateEqualRedemptionInstrument(startDate, endDate, index.tenor(), notional, spread, index, discountContextIdx, indexContextIdx,
                                                 side){};
     };

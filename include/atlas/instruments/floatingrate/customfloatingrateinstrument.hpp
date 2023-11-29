@@ -23,13 +23,13 @@ namespace Atlas {
          * @param index interest rate index of the instrument
          */
         CustomFloatingRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions, adouble spread,
-                                     const InterestRateIndex<adouble>& index, Side side = Side::Recieve, const std::set<Date>& additionalDates = {})
+                                     const InterestRateIndex<adouble>& index, Side side = Side::Receive, const std::set<Date>& additionalDates = {})
         : FloatingRateInstrument<adouble>(disbursements.begin()->first, redemptions.begin()->first, 0, spread, side) {
             Date firstDisbursementDate = disbursements.begin()->first;
             Date firstRedemptionDate   = redemptions.begin()->first;
             if (firstDisbursementDate > firstRedemptionDate) { throw std::runtime_error("First redemption date is before first disbursement date"); }
 
-            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            auto invSide = side == Side::Receive ? Side::Pay : Side::Receive;
             // calculate implied notional & add cashflows
             double impliedNotional = 0.0;
             for (const auto& [date, amount] : disbursements) {
@@ -67,7 +67,7 @@ namespace Atlas {
          */
         CustomFloatingRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions, adouble spread,
                                      const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                     Side side = Side::Recieve, const std::set<Date> additionalDates = {})
+                                     Side side = Side::Receive, const std::set<Date> additionalDates = {})
         : CustomFloatingRateInstrument(disbursements, redemptions, spread, index, side) {
             this->cashflows_.discountContextIdx(discountContextIdx);
             this->cashflows_.indexContextIdx(indexContextIdx);

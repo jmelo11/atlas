@@ -24,9 +24,9 @@ namespace Atlas {
          * @param side side of the instrument
          */
         ZeroCouponFloatingRateInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
-                                         const InterestRateIndex<adouble>& index, Side side = Side::Recieve)
+                                         const InterestRateIndex<adouble>& index, Side side = Side::Receive)
         : FloatingRateInstrument<adouble>(startDate, endDate, notional, spread, side) {
-            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            auto invSide = side == Side::Receive ? Side::Pay : Side::Receive;
             this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
             this->cashflows_.addRedemption(Cashflow<adouble>(endDate, notional, side));
             this->cashflows_.addFloatingRateCoupon(FloatingRateCoupon<adouble>(startDate, endDate, notional, spread, index.rateDefinition(), side));
@@ -46,7 +46,7 @@ namespace Atlas {
          */
         ZeroCouponFloatingRateInstrument(const Date& startDate, const Date& endDate, double notional, adouble spread,
                                          const InterestRateIndex<adouble>& index, size_t discountContextIdx, size_t indexContextIdx,
-                                         Side side = Side::Recieve)
+                                         Side side = Side::Receive)
         : ZeroCouponFloatingRateInstrument(startDate, endDate, notional, spread, index, side) {
             this->cashflows_.indexContextIdx(indexContextIdx);
             this->cashflows_.discountContextIdx(discountContextIdx);

@@ -403,8 +403,8 @@ namespace Atlas {
      * @return Side
      */
     inline Side parseSide(const std::string& side) {
-        if (side == "Recieve") {
-            return Side::Recieve;
+        if (side == "Receive") {
+            return Side::Receive;
         } else if (side == "Pay") {
             return Side::Pay;
         } else {
@@ -419,8 +419,8 @@ namespace Atlas {
      * @return std::string
      */
     inline std::string parseSide(const Side& side) {
-        if (side == Side::Recieve) {
-            return "Recieve";
+        if (side == Side::Receive) {
+            return "Receive";
         } else if (side == Side::Pay) {
             return "Pay";
         } else {

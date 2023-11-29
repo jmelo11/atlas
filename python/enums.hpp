@@ -78,7 +78,7 @@ void py_enums(py::module& m) {
         .value("Years", TimeUnit::Years)
         .export_values();
 
-    py::enum_<Side>(m, "Side").value("Recieve", Side::Recieve).value("Pay", Side::Pay).export_values();
+    py::enum_<Side>(m, "Side").value("Receive", Side::Receive).value("Pay", Side::Pay).export_values();
 }
 
 #endif /* C9B676D2_7070_4A54_B98A_9F20D364C8C7 */

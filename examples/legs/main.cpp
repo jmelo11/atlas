@@ -7,7 +7,7 @@ int main() {
 
     Date startDate = Date(1, Month::January, 2019);
     Date endDate   = Date(1, Month::January, 2020);
-    Cashflow cf(endDate, 100.0, Side::Recieve);
+    Cashflow cf(endDate, 100.0, Side::Receive);
     leg.addRedemption(cf);
     leg.addDisbursement(cf);
 

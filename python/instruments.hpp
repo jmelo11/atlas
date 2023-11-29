@@ -37,37 +37,37 @@ void py_fixedrateinstruments(py::module& m) {
 
     py::class_<FixedRateBulletInstrument<NumType>, FixedRateInstrument<NumType>>(m, "FixedRateBulletInstrument")
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Recieve)
+             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("discountContextIdx"),
-             py::arg("side") = Side::Recieve);
+             py::arg("side") = Side::Receive);
 
     py::class_<FixedRateEqualRedemptionInstrument<NumType>, FixedRateInstrument<NumType>>(m, "FixedRateEqualRedemptionInstrument")
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Recieve)
+             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("discountContextIdx"),
-             py::arg("side") = Side::Recieve);
+             py::arg("side") = Side::Receive);
 
     py::class_<ZeroCouponFixedRateInstrument<NumType>, FixedRateInstrument<NumType>>(m, "ZeroCouponFixedRateInstrument")
         .def(py::init<const Date&, const Date&, double, const InterestRate<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Recieve)
+             py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, double, const InterestRate<NumType>&, size_t, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("notional"), py::arg("rate"), py::arg("discountContextIdx"), py::arg("side") = Side::Recieve);
+             py::arg("notional"), py::arg("rate"), py::arg("discountContextIdx"), py::arg("side") = Side::Receive);
 
     py::class_<EqualPaymentInstrument<NumType>, FixedRateInstrument<NumType>>(m, "EqualPaymentInstrument")
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Recieve)
+             py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, Frequency, double, const InterestRate<NumType>&, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("frequency"), py::arg("notional"), py::arg("rate"), py::arg("discountContextIdx"),
-             py::arg("side") = Side::Recieve)
+             py::arg("side") = Side::Receive)
         .def("withRate", &EqualPaymentInstrument<NumType>::withRate);
 
     py::class_<CustomFixedRateInstrument<NumType>, FixedRateInstrument<NumType>>(m, "CustomFixedRateInstrument")
         .def(py::init<const std::map<Date, double>&, const std::map<Date, double>&, const InterestRate<NumType>&, Side, const std::set<Date>&>(), py::arg("disbursements"),
-             py::arg("redemptions"), py::arg("rate"), py::arg("side") = Side::Recieve, py::arg("additionalCouponDates") = std::set<Date>())
+             py::arg("redemptions"), py::arg("rate"), py::arg("side") = Side::Receive, py::arg("additionalCouponDates") = std::set<Date>())
         .def(py::init<const std::map<Date, double>&, const std::map<Date, double>&, const InterestRate<NumType>&, size_t, Side, const std::set<Date>&>(), py::arg("disbursements"),
-             py::arg("redemptions"), py::arg("rate"), py::arg("discountContextIdx"), py::arg("side") = Side::Recieve,
+             py::arg("redemptions"), py::arg("rate"), py::arg("discountContextIdx"), py::arg("side") = Side::Receive,
              py::arg("additionalCouponDates") = std::set<Date>());
 };
 void py_floatingrateinstruments(py::module& m) {
@@ -85,34 +85,34 @@ void py_floatingrateinstruments(py::module& m) {
 
     py::class_<FloatingRateBulletInstrument<NumType>, FloatingRateInstrument<NumType>>(m, "FloatingRateBulletInstrument")
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Recieve)
+             py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("discountContextIdx"), py::arg("indexContextIdx"),
-             py::arg("side") = Side::Recieve);
+             py::arg("side") = Side::Receive);
 
     py::class_<FloatingRateEqualRedemptionInstrument<NumType>, FloatingRateInstrument<NumType>>(m, "FloatingRateEqualRedemptionInstrument")
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Recieve)
+             py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("discountContextIdx"), py::arg("indexContextIdx"),
-             py::arg("side") = Side::Recieve);
+             py::arg("side") = Side::Receive);
 
     py::class_<CustomFloatingRateInstrument<NumType>, FloatingRateInstrument<NumType>>(m, "CustomFloatingRateInstrument")
         .def(py::init<const std::map<Date, double>&, const std::map<Date, double>&, NumType, const InterestRateIndex<NumType>&, Side,
                       const std::set<Date>>(),
-             py::arg("disbursements"), py::arg("redempetions"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Recieve,
+             py::arg("disbursements"), py::arg("redempetions"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive,
              py::arg("additionalCouponDates") = std::set<Date>())
         .def(py::init<const std::map<Date, double>&, const std::map<Date, double>&, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side,
                       const std::set<Date>>(),
              py::arg("disbursements"), py::arg("redempetions"), py::arg("spread"), py::arg("index"), py::arg("discountContextIdx"),
-             py::arg("indexContextIdx"), py::arg("side") = Side::Recieve, py::arg("additionalCouponDates") = std::set<Date>());
+             py::arg("indexContextIdx"), py::arg("side") = Side::Receive, py::arg("additionalCouponDates") = std::set<Date>());
 
     py::class_<ZeroCouponFloatingRateInstrument<NumType>, FloatingRateInstrument<NumType>>(m, "ZeroCouponFloatingRateInstrument")
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
-             py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Recieve)
+             py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("discountContextIdx"), py::arg("indexContextIdx"),
-             py::arg("side") = Side::Recieve);
+             py::arg("side") = Side::Receive);
 };
 void py_instruments(py::module& m) {
     // instruments

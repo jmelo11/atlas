@@ -22,7 +22,7 @@ namespace Atlas {
        public:
         Instrument() = default;
 
-        Instrument(const Date& startDate, const Date& endDate, double notional = 0.0, Side side = Side::Recieve)
+        Instrument(const Date& startDate, const Date& endDate, double notional = 0.0, Side side = Side::Receive)
         : startDate_(startDate), endDate_(endDate), notional_(notional), side_(side) {}
 
         /**
@@ -57,7 +57,7 @@ namespace Atlas {
         Date startDate_  = Date();
         Date endDate_    = Date();
         double notional_ = 0.0;
-        Side side_       = Side::Recieve;
+        Side side_       = Side::Receive;
     };
 }  // namespace Atlas
 

@@ -29,7 +29,7 @@ namespace Atlas {
          * @param spread spread of the instrument
          * @param leg leg of the instrument
          */
-        FloatingRateInstrument(const Date& startDate, const Date& endDate, double notional = 0.0, adouble spread = 0.0, Side side = Side::Recieve,
+        FloatingRateInstrument(const Date& startDate, const Date& endDate, double notional = 0.0, adouble spread = 0.0, Side side = Side::Receive,
                                const Cashflows& cashflows = Cashflows())
         : Instrument<adouble>(startDate, endDate, notional, side), spread_(spread), cashflows_(cashflows){};
 

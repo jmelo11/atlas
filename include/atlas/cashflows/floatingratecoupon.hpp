@@ -26,7 +26,7 @@ namespace Atlas {
          * @param rateDef The rate definition of the coupon
          */
         FloatingRateCoupon(const Date& startDate, const Date& endDate, double notional, adouble spread, const RateDefinition& rateDef,
-                           Side side = Side::Recieve)
+                           Side side = Side::Receive)
         : Coupon<adouble>(startDate, endDate, notional, side), spread_(spread), rateDef_(rateDef){};
 
         /**

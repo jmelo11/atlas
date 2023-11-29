@@ -31,7 +31,7 @@ namespace Atlas {
          * @param notional notional of the instrument
          * @param leg leg of the instrument
          */
-        FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, Side side = Side::Recieve,
+        FixedRateInstrument(const Date& startDate, const Date& endDate, const InterestRate<adouble>& rate, Side side = Side::Receive,
                             double notional = 0.0, const Cashflows& cashflows = Cashflows())
         : Instrument<adouble>(startDate, endDate, notional, side), rate_(rate), cashflows_(cashflows){};
 

@@ -22,7 +22,7 @@ namespace Atlas {
          * @param side
          */
         CustomFixedRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions,
-                                  const InterestRate<adouble>& rate, Side side = Side::Recieve, const std::set<Date>& additionalDates = {})
+                                  const InterestRate<adouble>& rate, Side side = Side::Receive, const std::set<Date>& additionalDates = {})
         : FixedRateInstrument<adouble>(disbursements.begin()->first, redemptions.end()->first, rate, side) {
             // if there is a redemption on the first date, throw an error
             Date firstDisbursementDate = disbursements.begin()->first;
@@ -32,7 +32,7 @@ namespace Atlas {
             // calculate implied notional & add cashflows
             double impliedNotional = 0.0;
 
-            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            auto invSide = side == Side::Receive ? Side::Pay : Side::Receive;
             for (const auto& [date, amount] : disbursements) {
                 impliedNotional += amount;
                 this->cashflows_.addDisbursement(Cashflow<adouble>(date, amount, invSide));
@@ -64,7 +64,7 @@ namespace Atlas {
          * @param side
          */
         CustomFixedRateInstrument(const std::map<Date, double>& disbursements, const std::map<Date, double>& redemptions,
-                                  const InterestRate<adouble>& rate, size_t discountContextIdx, Side side = Side::Recieve,
+                                  const InterestRate<adouble>& rate, size_t discountContextIdx, Side side = Side::Receive,
                                   const std::set<Date>& additionalDates = {})
         : CustomFixedRateInstrument(disbursements, redemptions, rate, side) {
             this->cashflows_.discountContextIdx(discountContextIdx);

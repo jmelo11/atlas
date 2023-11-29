@@ -21,7 +21,7 @@ namespace PricingExample {
         Frequency paymentFrequency = Frequency::Semiannual;
         double notional            = 100;
         double r                   = 0.05;
-        Side side                  = Side::Recieve;
+        Side side                  = Side::Receive;
         InterestRate<double> rate  = InterestRate<double>(r, Actual360(), Compounding::Simple, Frequency::Annual);
 
         MarketStore<double> store                             = createStore(startDate);
@@ -66,7 +66,7 @@ namespace PricingExample {
         Frequency paymentFrequency = Frequency::Semiannual;
         double notional            = 100;
         double r                   = 0.05;
-        Side side                  = Side::Recieve;
+        Side side                  = Side::Receive;
         InterestRate<double> rate  = InterestRate<double>(r, Actual360(), Compounding::Simple, Frequency::Annual);
 
         MarketStore<double> store                             = createStore(startDate);

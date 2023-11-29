@@ -24,13 +24,13 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                                  Side side = Side::Recieve)
+                                  Side side = Side::Receive)
         : FixedRateInstrument<adouble>(startDate, endDate, rate, side, notional) {
     
             Schedule schedule       = MakeSchedule().from(startDate).to(endDate).withFrequency(freq);
             std::vector<Date> dates = schedule.dates();
 
-            auto invSide = side == Side::Recieve ? Side::Pay : Side::Recieve;
+            auto invSide = side == Side::Receive ? Side::Pay : Side::Receive;
             this->cashflows_.addDisbursement(Cashflow<adouble>(startDate, notional, invSide));
             this->cashflows_.addRedemption(Cashflow<adouble>(endDate, notional, side));
             for (size_t i = 1; i < dates.size(); i++) {
@@ -50,7 +50,7 @@ namespace Atlas {
          * @param side side of the instrument
          */
         FixedRateBulletInstrument(const Date& startDate, const Date& endDate, Frequency freq, double notional, const InterestRate<adouble>& rate,
-                                  size_t discountContextIdx, Side side = Side::Recieve)
+                                  size_t discountContextIdx, Side side = Side::Receive)
         : FixedRateBulletInstrument(startDate, endDate, freq, notional, rate, side) {
              this->cashflows_.discountContextIdx(discountContextIdx);
         };

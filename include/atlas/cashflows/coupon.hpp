@@ -23,7 +23,7 @@ namespace Atlas {
          * @param endDate The end date of the coupon
          * @param notional The notional amount of the coupon
          */
-        Coupon(const Date& startDate, const Date& endDate, double notional, Side side = Side::Recieve)
+        Coupon(const Date& startDate, const Date& endDate, double notional, Side side = Side::Receive)
         : Cashflow<adouble>(endDate, 0.0, side), startDate_(startDate), endDate_(endDate), notional_(notional){};
 
         /**

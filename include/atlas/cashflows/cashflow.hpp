@@ -34,7 +34,7 @@ namespace Atlas {
          * @param paymentDate The payment date of the cashflow
          * @param amount The amount of the cashflow
          */
-        Cashflow(const Date& paymentDate, adouble amount, Side side = Side::Recieve) : amount_(amount), paymentDate_(paymentDate), side_(side){};
+        Cashflow(const Date& paymentDate, adouble amount, Side side = Side::Receive) : amount_(amount), paymentDate_(paymentDate), side_(side){};
 
         /**
          * @brief Construct a new Cashflow object
@@ -152,7 +152,7 @@ namespace Atlas {
         Currency currency_         = Currency();
         bool applyCurrency_        = false;
         size_t discountContextIdx_ = SIZE_MAX;
-        Side side_                 = Side::Recieve;
+        Side side_                 = Side::Receive;
 
        private:
         inline void amount(adouble amount) { amount_ = amount; }
