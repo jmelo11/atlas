@@ -4,11 +4,12 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateequalredemptioninstrument.hpp>
 #include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
-#include <atlas/instruments/floatingrate/zerocouponfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingrateequalredemptioninstrument.hpp>
+#include <atlas/instruments/floatingrate/zerocouponfloatingrateinstrument.hpp>
 #include <atlas/visitors/basevisitor.hpp>
 
 namespace Atlas {
@@ -34,6 +35,12 @@ namespace Atlas {
         }
 
         void operator()(const EqualPaymentInstrument<adouble>& instrument) const override {
+            paymentProfile(instrument.cashflows().redemptions(), results_.redemptions);
+            paymentProfile(instrument.cashflows().disbursements(), results_.disbursements);
+            paymentProfile(instrument.cashflows().fixedRateCoupons(), results_.fixedRateCoupons);
+        }
+
+        void operator()(const FixedRateEqualRedemptionInstrument<adouble>& instrument) const override {
             paymentProfile(instrument.cashflows().redemptions(), results_.redemptions);
             paymentProfile(instrument.cashflows().disbursements(), results_.disbursements);
             paymentProfile(instrument.cashflows().fixedRateCoupons(), results_.fixedRateCoupons);

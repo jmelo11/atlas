@@ -58,7 +58,7 @@ void py_datetime(py::module& m) {
         .def("backwards", &MakeSchedule::backwards)
         .def("endOfMonth", &MakeSchedule::endOfMonth);
 
-    py::class_<Period>(m, "Period").def(py::init<int, TimeUnit>());
+    py::class_<Period>(m, "Period").def(py::init<int, TimeUnit>()).def(py::init<Frequency>());
 
     // dayCounters
     py::class_<DayCounter>(m, "DayCounter").def("__str__", &DayCounter::name);

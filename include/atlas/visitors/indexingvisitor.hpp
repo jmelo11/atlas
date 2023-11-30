@@ -5,6 +5,7 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateequalredemptioninstrument.hpp>
 #include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
@@ -55,6 +56,13 @@ namespace Atlas {
          * @param inst A FixedRateBulletInstrument.
          */
         void operator()(FixedRateBulletInstrument<adouble>& inst) override { indexCashflowStream(inst.cashflows()); }
+
+        /**
+         * @brief Indexes the cashflows of a FixedRateBulletInstrument.
+         *
+         * @param inst A FixedRateBulletInstrument.
+         */
+        void operator()(FixedRateEqualRedemptionInstrument<adouble>& inst) override { indexCashflowStream(inst.cashflows()); }
 
         /**
          * @brief Indexes the cashflows of a ZeroCouponFixedRateInstrument.

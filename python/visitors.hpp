@@ -31,6 +31,10 @@ namespace Aux {
 
         void operator()(FixedRateBulletInstrument<NumType>& inst) override { PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst); }
 
+        void operator()(FixedRateEqualRedemptionInstrument<NumType>& inst) override {
+            PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst);
+        }
+
         void operator()(ZeroCouponFixedRateInstrument<NumType>& inst) override {
             PYBIND11_OVERRIDE_PURE(void, BaseVisitor<NumType>, operator(), inst);
         }
@@ -68,6 +72,10 @@ namespace Aux {
             PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
 
+        void operator()(const FixedRateEqualRedemptionInstrument<NumType>& inst) const override {
+            PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
+        }
+
         void operator()(const ZeroCouponFixedRateInstrument<NumType>& inst) const override {
             PYBIND11_OVERRIDE_PURE(void, BaseConstVisitor<NumType>, operator(), inst);
         }
@@ -97,6 +105,7 @@ void py_visitors(py::module& m) {
         .def("__call__", py::overload_cast<CustomFixedRateInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
         .def("__call__", py::overload_cast<EqualPaymentInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
         .def("__call__", py::overload_cast<FixedRateBulletInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
+        .def("__call__", py::overload_cast<FixedRateEqualRedemptionInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
         .def("__call__", py::overload_cast<ZeroCouponFixedRateInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
         .def("__call__", py::overload_cast<CustomFloatingRateInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
         .def("__call__", py::overload_cast<FloatingRateBulletInstrument<NumType>&>(&BaseVisitor<NumType>::operator()))
@@ -106,6 +115,7 @@ void py_visitors(py::module& m) {
         .def("visit", [](BaseVisitor<NumType>& v, CustomFixedRateInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseVisitor<NumType>& v, EqualPaymentInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseVisitor<NumType>& v, FixedRateBulletInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseVisitor<NumType>& v, FixedRateEqualRedemptionInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseVisitor<NumType>& v, ZeroCouponFixedRateInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseVisitor<NumType>& v, CustomFloatingRateInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseVisitor<NumType>& v, FloatingRateBulletInstrument<NumType>& i) { v(i); })
@@ -116,6 +126,7 @@ void py_visitors(py::module& m) {
         .def("__call__", py::overload_cast<const CustomFixedRateInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
         .def("__call__", py::overload_cast<const EqualPaymentInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
         .def("__call__", py::overload_cast<const FixedRateBulletInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
+        .def("__call__", py::overload_cast<const FixedRateEqualRedemptionInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
         .def("__call__", py::overload_cast<const ZeroCouponFixedRateInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
         .def("__call__", py::overload_cast<const CustomFloatingRateInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
         .def("__call__", py::overload_cast<const FloatingRateBulletInstrument<NumType>&>(&BaseConstVisitor<NumType>::operator(), py::const_))
@@ -125,6 +136,7 @@ void py_visitors(py::module& m) {
         .def("visit", [](BaseConstVisitor<NumType>& v, const CustomFixedRateInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseConstVisitor<NumType>& v, const EqualPaymentInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseConstVisitor<NumType>& v, const FixedRateBulletInstrument<NumType>& i) { v(i); })
+        .def("visit", [](BaseConstVisitor<NumType>& v, const FixedRateEqualRedemptionInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseConstVisitor<NumType>& v, const ZeroCouponFixedRateInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseConstVisitor<NumType>& v, const CustomFloatingRateInstrument<NumType>& i) { v(i); })
         .def("visit", [](BaseConstVisitor<NumType>& v, const FloatingRateBulletInstrument<NumType>& i) { v(i); })

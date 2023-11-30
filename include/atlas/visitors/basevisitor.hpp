@@ -32,6 +32,9 @@ namespace Atlas {
     template <typename adouble>
     class ZeroCouponFloatingRateInstrument;
 
+    template <typename adouble>
+    class FixedRateEqualRedemptionInstrument;
+
     /**
      * @brief Instruments is a std::variant of all the instruments in Atlas. It is used to implement the visitor pattern for instruments.
      * @tparam adouble
@@ -40,7 +43,7 @@ namespace Atlas {
     using InstrumentVariant =
         std::variant<std::monostate, CustomFixedRateInstrument<adouble>, EqualPaymentInstrument<adouble>, FixedRateBulletInstrument<adouble>,
                      ZeroCouponFixedRateInstrument<adouble>, CustomFloatingRateInstrument<adouble>, FloatingRateBulletInstrument<adouble>,
-                     ZeroCouponFloatingRateInstrument<adouble>>;
+                     ZeroCouponFloatingRateInstrument<adouble>, FixedRateEqualRedemptionInstrument<adouble>>;
 
     /**
      * @defgroup Visitors Visitors
@@ -63,6 +66,7 @@ namespace Atlas {
         virtual void operator()(CustomFixedRateInstrument<adouble>& inst)             = 0;
         virtual void operator()(EqualPaymentInstrument<adouble>& inst)                = 0;
         virtual void operator()(FixedRateBulletInstrument<adouble>& inst)             = 0;
+        virtual void operator()(FixedRateEqualRedemptionInstrument<adouble>& inst)    = 0;
         virtual void operator()(ZeroCouponFixedRateInstrument<adouble>& inst)         = 0;
         virtual void operator()(CustomFloatingRateInstrument<adouble>& inst)          = 0;
         virtual void operator()(FloatingRateBulletInstrument<adouble>& inst)          = 0;
@@ -99,6 +103,7 @@ namespace Atlas {
         virtual void operator()(const CustomFixedRateInstrument<adouble>& inst) const             = 0;
         virtual void operator()(const EqualPaymentInstrument<adouble>& inst) const                = 0;
         virtual void operator()(const FixedRateBulletInstrument<adouble>& inst) const             = 0;
+        virtual void operator()(const FixedRateEqualRedemptionInstrument<adouble>& inst) const    = 0;
         virtual void operator()(const ZeroCouponFixedRateInstrument<adouble>& inst) const         = 0;
         virtual void operator()(const CustomFloatingRateInstrument<adouble>& inst) const          = 0;
         virtual void operator()(const FloatingRateBulletInstrument<adouble>& inst) const          = 0;

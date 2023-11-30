@@ -66,6 +66,8 @@ namespace Atlas {
 
         void operator()(const ZeroCouponFixedRateInstrument<adouble>& inst) const override { fixedInstSens(inst); }
 
+        void operator()(const FixedRateEqualRedemptionInstrument<adouble>& inst) const override { fixedInstSens(inst); }
+
         void operator()(const CustomFixedRateInstrument<adouble>& inst) const override { fixedInstSens(inst); }
 
         void operator()(const CustomFloatingRateInstrument<adouble>& inst) const override { floatingInstSens(inst); }

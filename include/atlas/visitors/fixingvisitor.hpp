@@ -5,6 +5,7 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateequalredemptioninstrument.hpp>
 #include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
@@ -50,6 +51,15 @@ namespace Atlas {
          */
         void operator()(EqualPaymentInstrument<adouble>& inst) override {
             this->template printLogs<FixingVisitor>(this, "EqualPaymentInstrument is not a floating rate instrument.");
+        };
+
+        /**
+         * @brief Since the instrument is not a floating rate instrument, the visitor only prints a message.
+         *
+         * @param inst FixedRateEqualRedemptionInstrument
+         */
+        void operator()(FixedRateEqualRedemptionInstrument<adouble>& inst) override {
+            this->template printLogs<FixingVisitor>(this, "FixedRateEqualRedemptionInstrument is not a floating rate instrument.");
         };
 
         /**

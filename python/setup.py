@@ -5,7 +5,7 @@ from pathlib import Path
 from sys import platform
 import os 
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 
 LIB_DIR = Path("/Users/josemelo/desktop/dev/builds")
 include_dirs = [str(LIB_DIR / 'include'), '/opt/homebrew/include']

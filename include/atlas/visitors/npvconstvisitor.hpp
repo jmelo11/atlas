@@ -5,6 +5,7 @@
 #include <atlas/instruments/fixedrate/customfixedrateinstrument.hpp>
 #include <atlas/instruments/fixedrate/equalpaymentinstrument.hpp>
 #include <atlas/instruments/fixedrate/fixedratebulletinstrument.hpp>
+#include <atlas/instruments/fixedrate/fixedrateequalredemptioninstrument.hpp>
 #include <atlas/instruments/fixedrate/zerocouponfixedrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/customfloatingrateinstrument.hpp>
 #include <atlas/instruments/floatingrate/floatingratebulletinstrument.hpp>
@@ -62,6 +63,13 @@ namespace Atlas {
          * @param inst FixedRateBulletInstrument
          */
         void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
+
+        /**
+         * @brief Calculate the net present value of a FixedRateEqualRedemptionInstrument.
+         *
+         * @param inst FixedRateEqualRedemptionInstrument
+         */
+        void operator()(const FixedRateEqualRedemptionInstrument<adouble>& inst) const override { cashflowsNPV(inst.cashflows()); };
 
         /**
          * @brief Calculate the net present value of a ZeroCouponFixedRateInstrument.

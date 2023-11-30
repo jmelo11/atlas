@@ -45,6 +45,13 @@ namespace Atlas {
         /**
          * @brief Calculates the par fixed rate of the instrument.
          *
+         * @param inst FixedRateEqualRedemptionInstrument
+         */
+        void operator()(const FixedRateEqualRedemptionInstrument<adouble>& inst) const override { evalFixedRateProd(inst); };
+
+        /**
+         * @brief Calculates the par fixed rate of the instrument.
+         *
          * @param inst EqualPaymentInstrument
          */
         void operator()(const FixedRateBulletInstrument<adouble>& inst) const override { evalFixedRateProd(inst); };

@@ -34,6 +34,12 @@ namespace Atlas {
             apply(instrument.cashflows().disbursements());
         }
 
+        void operator()(const FixedRateEqualRedemptionInstrument<adouble>& instrument) const override {
+            apply(instrument.cashflows().fixedRateCoupons());
+            apply(instrument.cashflows().redemptions());
+            apply(instrument.cashflows().disbursements());
+        }
+
         void operator()(const FixedRateBulletInstrument<adouble>& instrument) const override {
             apply(instrument.cashflows().fixedRateCoupons());
             apply(instrument.cashflows().redemptions());

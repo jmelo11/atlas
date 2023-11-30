@@ -88,8 +88,9 @@ void py_floatingrateinstruments(py::module& m) {
     py::class_<FloatingRateBulletInstrument<NumType>, FloatingRateInstrument<NumType>>(m, "FloatingRateBulletInstrument")
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
              py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive)
-        .def(py::init<const Date&, const Date&, const Period&, double, NumType, const InterestRateIndex<NumType>&, Side>(), py::arg("startDate"),
-             py::arg("endDate"), py::arg("tenor"), py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive)
+        .def(py::init<const Date&, const Date&, const Period&, double, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side>(),
+             py::arg("startDate"), py::arg("endDate"), py::arg("tenor"), py::arg("notional"), py::arg("spread"), py::arg("index"),
+             py::arg("discountContextIdx"), py::arg("indexContextIdx"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("discountContextIdx"), py::arg("indexContextIdx"),
              py::arg("side") = Side::Receive);
@@ -97,8 +98,9 @@ void py_floatingrateinstruments(py::module& m) {
     py::class_<FloatingRateEqualRedemptionInstrument<NumType>, FloatingRateInstrument<NumType>>(m, "FloatingRateEqualRedemptionInstrument")
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, Side>(), py::arg("startDate"), py::arg("endDate"),
              py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive)
-        .def(py::init<const Date&, const Date&, const Period&, double, NumType, const InterestRateIndex<NumType>&, Side>(), py::arg("startDate"),
-             py::arg("endDate"), py::arg("tenor"), py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("side") = Side::Receive)
+        .def(py::init<const Date&, const Date&, const Period&, double, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side>(),
+             py::arg("startDate"), py::arg("endDate"), py::arg("tenor"), py::arg("notional"), py::arg("spread"), py::arg("index"),
+             py::arg("discountContextIdx"), py::arg("indexContextIdx"), py::arg("side") = Side::Receive)
         .def(py::init<const Date&, const Date&, double, NumType, const InterestRateIndex<NumType>&, size_t, size_t, Side>(), py::arg("startDate"),
              py::arg("endDate"), py::arg("notional"), py::arg("spread"), py::arg("index"), py::arg("discountContextIdx"), py::arg("indexContextIdx"),
              py::arg("side") = Side::Receive);

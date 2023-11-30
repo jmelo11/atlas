@@ -55,6 +55,8 @@ namespace Atlas {
 
         void operator()(const EqualPaymentInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
+        void operator()(const FixedRateEqualRedemptionInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
+
         void operator()(const ZeroCouponFixedRateInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
 
         void operator()(const FloatingRateBulletInstrument<adouble>& inst) const override { zspread(inst.cashflows()); };
