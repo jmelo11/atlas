@@ -1,85 +1,91 @@
-# Atlas: Libreria Financiera
+# Atlas: Financial Library
 
-El objetivo de Atlas es convertirse en una alternativa real a las herramientas financieras existentes en el mercado, ofreciendo un mayor rendimiento, simplicidad y alcance.
+## Examples
 
-- Performance: En cuanto al rendimiento, hasta el día de hoy, la única alternativa utilizable en sistemas productivos es QuantLib, que cuenta con un sinfín de herramientas para valorizar diversos instrumentos. Sin embargo, es importante mencionar que QuantLib no está pensada a ser rápida (no cuenta con multithreading por defecto, por ejemplo), sino que se enfoca en la flexibilidad. Creemos que hay un espacio en el mercado donde Atlas puede diferenciarse al reducir el alcance de herramientas disponibles y enfocarse en la velocidad, construyéndose desde un inicio con ese objetivo.
+Main examples can be found in [C++](https://github.com/jmelo11/atlas/tree/main/examples/pricing) and [Python](https://github.com/jmelo11/atlas/blob/main/python/examples/pricingExample.ipynb)
 
-- Simplicidad: La simplicidad es otro aspecto clave de Atlas. Se busca tener una herramienta sencilla pero práctica, para que los usuarios puedan aprender a usarla fácilmente, y lo suficientemente flexible para implementar los instrumentos financieros más avanzados del mercado.
+## Description
 
-Algunas características técnicas que se buscan incorporar en Atlas son:
+Atlas aims to become a real alternative to existing financial tools on the market, offering greater performance, simplicity and scope.
 
-- Multithreading: contar con una estructura que permita utilizar la librería de forma thread-safe es crucial para poder sacarle el máximo de rendimiento.
+- Performance: In terms of performance, to date, the only usable alternative in productive systems is QuantLib, which has a myriad of tools for valuing various instruments. However, it is important to mention that QuantLib is not intended to be fast (it does not have multithreading by default, for example), but focuses on flexibility. We believe there is a space in the market where Atlas can differentiate itself by narrowing the scope of available tools and focusing on speed, building from the ground up with that goal in mind.
 
-- Diferenciación automática: AAD se ha convertido en un estándar para el cálculo de sensibilidades en el mundo financiero, habilitando la posibilidad de contar con riesgos de forma automática sin tener que recalcular todos nuestros instrumentos. Esta funcionalidad es crucial si, por ejemplo, se busca calcular XVAs u otras métricas.
+- Simplicity: Simplicity is another key aspect of Atlas. The aim is to have a simple but practical tool, so that users can learn to use it easily, and flexible enough to implement the most advanced financial instruments in the market.
 
-## Documentación
+Some of the technical features to be incorporated in Atlas are:
 
-Es posible encontrar la documentación disponible hasta hoy en <https://jmelo11.github.io/atlasdocs/>
+- Multithreading: having a structure that allows the library to be used in a thread-safe way is crucial in order to get the most out of it.
+
+- Automatic differentiation: AAD has become a standard for the calculation of sensitivities in the financial world, enabling the possibility of automatically calculating risks without having to recalculate all our instruments. This functionality is crucial if, for example, you are looking to calculate XVAs or other metrics.
+
+## Documentation
+
+You can find the documentation available until today at <https://jmelo11.github.io/atlasdocs/>.
 
 ## Roadmap
 
-### Generales
+### General
 
-- [x] Estructura básica de las clases (en desarrollo)
-- [x] Diferenciacion automatica
-- [x] Paralelización CPU
-- [x] Port a Python
-- [ ] Compresión de portafolio
-- [x] Transformación a moneda local
-- [x] Precisión monedas
-- [ ] Paralelización GPU (depende de factibilidad)
-- [ ] Customización instrumentos (incorporar parámetros QL)
+- [x] Basic class structure (under development)
+- [x] Automatic differentiation
+- [x] CPU Parallelisation
+- [x] Port to Python
+- [ ] Portfolio compression
+- [x] Transformation to local currency
+- [x] Currency precision
+- [ ] GPU Parallelisation (depends on feasibility)
+- [ ] Instrument customisation (incorporate QL parameters)
 
-### Funcionalidades
+### Functionalities
 
 - [x] NPV
-- [x] Sensibilidades (ej. Duracion)
-- [x] Tasas Par
+- [x] Sensitivities (e.g. Duration)
+- [x] Par Rates
 - [x] ZSpread
 
-### Instrumentos
+### Instruments
 
-- [x] Productos lineales
+- [x] Linear Products
   - [x] Loans
-    - [x] Loans tasa fija (bullet)
-    - [x] Loans tasa fija (cuotas iguales)
-    - [x] Loans tasa fija (perfil de pagos custom)
-    - [x] Loans tasa flotante (bullet)
-    - [x] Loans tasa flotante (perfil de pagos custom)
-    - [x] Loans tasa mixta
-  - [ ] Derivados
-    - [x] Forward
-    - [ ] Swaps vanilla
+    - [x] Fixed rate loans (bullet)
+    - [x] Fixed rate loans (equal instalments)
+    - [x] Fixed Rate Loans (custom payment profile)
+    - [x] Floating rate loans (bullet)
+    - [x] Loans floating rate (custom payment profile)
+    - [x] Mixed rate loans
+  - Derivatives
+    - [x] Forwards
+    - [ ] Vanilla swaps
     - [ ] Xccy
-  - [ ] OIS
-  - [ ] Renta Fija
-    - [ ] Instrumentos con convenciones de mercados
+  - OIS
+  - Fixed Income
+    - Instruments with market conventions
 
-- [ ] Productos no lineales
+- Non-linear products
 
-### Curvas
+### Curves
 
-- [x] Interpolación con soporte AD
-- [x] Curvas con soporte AD
-- [ ] Bootstrap con soporte AD
+- [x] Interpolation with AD support
+- [x] Curves with AD support
+- [ ] Bootstrap with AD support
 
-### Modelos
+### Models
 
-- [x] Generación de tasas en base a curvas estáticas
-- [ ] LGM para generación de trayectorias de mercado
+- [x] Generation of rates based on static curves
+- [ ] LGM for generation of market trajectories
 
-### Requisitos previos
+### Prerequisites
 
-Antes de compilar el proyecto, es necesario instalar las siguientes bibliotecas:
+Before compiling the project, you need to install the following libraries:
 
 - Boost: <https://www.boost.org/>
 - QuantLib: <https://github.com/lballabio/quantlib>
 
-El objetivo futuro es reemplazar estas dependencias por versiones internas del proyecto.
+The future goal is to replace these dependencies with internal versions of the project.
 
-#### Estructura de directorios recomendada
+#### Recommended directory structure
 
-Para facilitar el proceso de compilación, se sugiere organizar los directorios de la siguiente manera:
+To facilitate the compilation process, it is suggested to organise the directories as follows:
 
 - builds
   - release
@@ -88,16 +94,16 @@ Para facilitar el proceso de compilación, se sugiere organizar los directorios 
   - QuantLib
   - boost
 
-#### Compilación de QuantLib con CMake (Windows)
+#### Compiling QuantLib with CMake (Windows)
 
-1. Dentro del directorio libs/QuantLib, cree una carpeta llamada build.
-2. Abra una terminal y navegue hasta la carpeta build recién creada.
-3. Ejecute los siguientes comandos, reemplazando <path/to/installed/libs> y <your/boost/path> con las rutas apropiadas:
+1. Inside the libs/QuantLib directory, create a folder called build.
+2. Open a terminal and navigate to the newly created build folder.
+3. Run the following commands, replacing <path/to/installed/libs> and <your/boost/path> with the appropriate paths:
 
 ##### Debug
 
 ```cmd
-    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MDd /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDebugDLL"
+    cmake -S . -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF - DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MDdd /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDebugDLL" -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDebugDLL" -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDebugDLL"
 
     cmake --build . --target INSTALL --config <config>
 ```
@@ -105,36 +111,36 @@ Para facilitar el proceso de compilación, se sugiere organizar los directorios 
 ##### Release
 
 ```cmd
-    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MD /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
+    cmake -S . -B   . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_BENCHMARK=OFF -DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DQL_BUILD_EXAMPLES=OFF DQL_BUILD_EXAMPLES=OFF -DQL_BUILD_TEST_SUITE=OFF -DCMAKE_CXX_FLAGS="/MD /EHsc /MP" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -DQL_TAGGED_LAYOUT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
 
     cmake --build . --target INSTALL --config <config>
 ```
 
-Donde config puede ser Debug o Release, dependiendo de la configuración que desee compilar.
+Where config can be Debug or Release, depending on the configuration you want to compile.
 
-#### Instalación de Boost
+#### Boost Installation
 
-Boost incluye un instalador. Siga las instrucciones en <https://www.boost.org/doc/libs/1_82_0/more/getting_started/windows.html> para instalarlo en su sistema.
+Boost includes an installer. Follow the instructions at <https://www.boost.org/doc/libs/1_82_0/more/getting_started/windows.html> to install it on your system.
 
-#### Compilación de Atlas
+#### Atlas compilation
 
-1. Dentro del directorio del proyecto Atlas, cree una carpeta llamada build.
-2. Abra una terminal y navegue hasta la carpeta build recién creada.
-3. Ejecute los siguientes comandos, reemplazando ```path/to/installed/libds``` y ```your/boost/path``` con las rutas apropiadas:
+1. Inside the Atlas project directory, create a folder named build.
+2. Open a terminal and navigate to the newly created build folder.
+3. Run the following commands, replacing ```path/to/installed/libds``` and ```your/boost/path``` with the appropriate paths:
 
 ```cmd
-    cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+    cmake -S . -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
     cmake --build . --target install --config <config>
 ```
 
-cmake -S .. -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+cmake -S . -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
 
-#### Instalación modulo Python
+#### Python module installation
 
-En el caso de querer instalar el paquete desde este repositorio, es necesario configurar el archivo ```setup.py```. En este caso, sera necesario tambien contar con pybind11 instalado. Por consistencia se recomienda utilizar CMAKE para esto, ya que de esta forma funcionará el comando ```find_package```. Una vez instalada y seleccionada la opcion ```BUID_PYTHON=ON``` al configurar Atlas, bastara con:
+In case you want to install the package from this repository, you need to configure the ```setup.py``` file. In this case, it will also be necessary to have pybind11 installed. For consistency it is recommended to use CMAKE for this, as this way the ```find_package`` command will work. Once installed and the ````BUID_PYTHON=ON``` option is selected when configuring Atlas, you just need to:
 
-1. Ir con la terminal a la carpeta ```python```
-2. Ejectura el comando ```pip install .```
+1. Go with the terminal to the ```python``` folder.
+2. Execute the command ````pip install .````.
 
-Tambien es posible instalar el paquete estandar a travez de PYPI:
-```pip instal atlas-finance``` o ```pip instal atlas-finance-noad```
+It is also possible to install the standard package via PYPI:
+```pip install atlas-finance``` or ```pip install atlas-finance-noad```.
