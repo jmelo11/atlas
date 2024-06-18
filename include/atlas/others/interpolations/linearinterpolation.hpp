@@ -34,7 +34,7 @@ namespace Atlas {
 
             if (!extrapolate_) {
                 if (x < x_.front() || x > x_.back()) {
-                    throw std::out_of_range("Extrapolation is not enabled, and the provided value is outside the range.");
+                    throw std::out_of_range("Extrapolation (linear) is not enabled, and the provided value is outside the range.");
                 }
             }
 

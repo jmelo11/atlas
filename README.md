@@ -129,7 +129,7 @@ Boost includes an installer. Follow the instructions at <https://www.boost.org/d
 3. Run the following commands, replacing ```path/to/installed/libds``` and ```your/boost/path``` with the appropriate paths:
 
 ```cmd
-    cmake -S . -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>' -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
+    cmake -S . -B . -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH='<path/to/installed/libs>' -DBoost_INCLUDE_DIR='<your/boost/path>'
     cmake --build . --target install --config <config>
 ```
 

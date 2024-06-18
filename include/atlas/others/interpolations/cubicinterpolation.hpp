@@ -1,19 +1,19 @@
 #ifndef CD3CEF5A_A741_4348_87DD_2FAFE4AAF40E
 #define CD3CEF5A_A741_4348_87DD_2FAFE4AAF40E
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace Atlas {
     /**
      * @brief Cubic interpolation
-     * 
-     * @tparam T 
-     * @param x 
-     * @param x_ 
-     * @param y_ 
-     * @param extrapolate 
-     * @return T 
+     *
+     * @tparam T
+     * @param x
+     * @param x_
+     * @param y_
+     * @param extrapolate
+     * @return T
      */
     template <typename T>
     T cubicInterpolation(T x, const std::vector<T>& x_, const std::vector<T>& y_, bool extrapolate) {
@@ -23,8 +23,8 @@ namespace Atlas {
         size_t index = std::distance(x_.begin(), it);
 
         if (!extrapolate) {
-            if (index == 0 || index == x_.size()) {
-                throw std::out_of_range("Extrapolation is not enabled, and the provided value is outside the range.");
+            if (x < x_.front() || x > x_.back()) {
+                throw std::out_of_range("Extrapolation (cubic) is not enabled, and the provided value is outside the range.");
             }
         }
 

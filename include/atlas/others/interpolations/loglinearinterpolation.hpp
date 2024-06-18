@@ -32,8 +32,8 @@ namespace Atlas {
             size_t index = std::distance(x_.begin(), it);
 
             if (!extrapolate_) {
-                if (index == 0 || index == x_.size()) {
-                    throw std::out_of_range("Extrapolation is not enabled, and the provided value is outside the range.");
+                if (x < x_.front() || x > x_.back()) {
+                    throw std::out_of_range("Extrapolation (loglinear) is not enabled, and the provided value is outside the range.");
                 }
             }
 
